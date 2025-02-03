@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Category</title>
+    <link rel="stylesheet" href="/adminCSS/addCustomer.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Add Customer</h1>
+        <h2>Enter Customer Details</h2>
+        <form action="/add-customer" method="POST">
+            <!-- Customer Name -->
+            <label for="customerName">Customer Name</label>
+            <input type="text" id="customerName" name="customerName" placeholder="Enter full name" required>
+
+            <!-- Customer Email -->
+            <label for="customerEmail">Customer Email</label>
+            <input type="email" id="customerEmail" name="customerEmail" placeholder="Enter email address" required>
+
+            <!-- Customer Phone -->
+            <label for="customerPhone">Phone Number</label>
+            <input type="tel" id="customerPhone" name="customerPhone" placeholder="Enter phone number" required>
+
+            <!-- Customer Address -->
+            <label for="customerAddress">Address</label>
+            <textarea id="customerAddress" name="customerAddress" placeholder="Enter customer address" required></textarea>
+
+            <!-- Customer Password -->
+            <label for="customerPassword">Password</label>
+            <input type="password" id="customerPassword" name="customerPassword" placeholder="Enter a secure password" required>
+
+            <!-- Submit Button -->
+            <button type="submit">Add Customer</button>
+        </form>
+    </div>
+</body>
+</html>

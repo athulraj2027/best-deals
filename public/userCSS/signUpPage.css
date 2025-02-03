@@ -1,0 +1,40 @@
+.signup-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .signup-container h2 {
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .signup-container .form-control {
+    margin-bottom: 10px;
+  }
+
+  .error-message {
+    color: red;
+    font-size: 0.85em;
+    margin-top: -10px;
+    margin-bottom: 10px;
+  }
+
+  /* .btn {
+    background-color: #fa8232;
+    border: none;
+  } */
+/* 
+  .btn:hover {
+    background-color: #f97a1e;
+  } */
+
+  .signin-link {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.9em;
+  }

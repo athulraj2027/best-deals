@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>500 - Internal Server Error</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #333;
+    }
+    .container {
+      text-align: center;
+      max-width: 600px;
+      padding: 20px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      background-color: #fff;
+    }
+    .status-code {
+      font-size: 80px;
+      font-weight: bold;
+      color: #ff6b6b;
+    }
+    .message {
+      font-size: 24px;
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+    .description {
+      font-size: 16px;
+      color: #555;
+    }
+    a {
+      text-decoration: none;
+      color: #007bff;
+      font-weight: bold;
+      transition: color 0.3s ease;
+    }
+    a:hover {
+      color: #0056b3;
+    }
+    .home-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+    .home-button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="status-code">500</div>
+    <div class="message">Internal Server Error</div>
+    <div class="description">
+      Oops! Something went wrong on our end. Please try again later.
+    </div>
+    <button class="home-button" onclick="goHome()">Go to Homepage</button>
+  </div>
+
+  <script>
+    function goHome() {
+      window.location.href = "/admin/dashboard";
+    }
+  </script>
+</body>
+</html>

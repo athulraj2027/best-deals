@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shop</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/userCSS/partials/headerPartial.css" />
+    <link rel="stylesheet" href="/userCSS/partials/partials_css.css" />
+    <style>
+      body {
+        background-color: black;
+        color: white;
+      }
+      .filter-section {
+        background-color: #222;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+      .filter-section label {
+        color: #ddd;
+      }
+      .card {
+        width: 14rem;
+        margin: 10px auto;
+        background-color: #333;
+        color: white;
+        border: none;
+        border-radius: 8px;
+      }
+      .card img {
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+      }
+      .btn-primary {
+        background-color: #007bff;
+        border: none;
+      }
+      .btn-primary:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('./partials/headerPartial') %>
+    <div class="container my-5">
+      <h1 class="text-center mb-4">Shop</h1>
+
+      <div class="row">
+        <!-- Filter Section -->
+        <div class="col-md-3">
+          <div class="filter-section">
+            <form id="filterForm" method="GET" action="/shop">
+              <div class="mb-3">
+                <label for="category" class="form-label">Category</label>
+                <select class="form-select" id="category" name="category">
+                  <option value="">All Categories</option>
+                  <option value="electronics">Smart Phones</option>
+                  <option value="fashion">Laptops</option>
+                  <option value="home">Earbuds</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="brand" class="form-label">Brand</label>
+                <select class="form-select" id="brand" name="brand">
+                  <option value="">All Brands</option>
+                  <option value="apple">Apple</option>
+                  <option value="samsung">Samsung</option>
+                  <option value="nike">Nike</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="priceRange" class="form-label">Price Range</label>
+                <input
+                  type="number"
+                  class="form-control mb-2"
+                  id="minPrice"
+                  name="minPrice"
+                  placeholder="Min"
+                />
+                <input
+                  type="number"
+                  class="form-control"
+                  id="maxPrice"
+                  name="maxPrice"
+                  placeholder="Max"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="sort" class="form-label">Sort By</label>
+                <select class="form-select" id="sort" name="sort">
+                  <option value="">Default</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                  <option value="name-asc">Name: A-Z</option>
+                  <option value="name-desc">Name: Z-A</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary w-100">
+                Apply Filters
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Product Grid -->
+        <div class="col-md-9">
+          <div class="row">
+            <% products.forEach(product => { %>
+            <div class="col-6 col-sm-4 col-lg-3 mb-4">
+              <div class="card">
+                <img
+                  src="<%= product.imageUrl || 'https://via.placeholder.com/300x200' %>"
+                  class="card-img-top"
+                  alt="<%= product.name %>"
+                />
+                <div class="card-body">
+                  <h6 class="card-title text-truncate"><%= product.name %></h6>
+                  <p class="card-text">$<%= product.price.toFixed(2) %></p>
+                  <a href="/product/<%= product._id %>" class="btn btn-primary btn-sm"
+                    >View Details</a
+                  >
+                </div>
+              </div>
+            </div>
+            <% }) %>
+          </div>
+          <% if (products.length === 0) { %>
+          <p class="text-center">No products available at the moment.</p>
+          <% } %>
+        </div>
+      </div>
+    </div>
+    <%- include('./partials/footer') %>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

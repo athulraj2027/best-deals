@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Coupon</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="/adminCSS/addCoupon.css" />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1 class="text-center">Add Coupon</h1>
+      <form action="/admin/coupons/add" method="POST" class="mt-4">
+        <!-- Coupon Code -->
+        <div class="mb-3">
+          <label for="couponCode" class="form-label">Coupon Code</label>
+          <input
+            type="text"
+            id="couponCode"
+            name="code"
+            class="form-control"
+            placeholder="Enter coupon code"
+            required
+          />
+        </div>
+
+        <!-- Discount -->
+        <div class="mb-3">
+          <label for="discount" class="form-label">Discount (%)</label>
+          <input
+            type="number"
+            id="discount"
+            name="discount"
+            class="form-control"
+            placeholder="Enter discount percentage"
+            min="1"
+            max="100"
+            required
+          />
+        </div>
+
+        <!-- Description -->
+        <div class="mb-3">
+          <label for="description" class="form-label">Description</label>
+          <textarea
+            id="description"
+            name="description"
+            class="form-control"
+            rows="3"
+            placeholder="Enter a brief description"
+          ></textarea>
+        </div>
+
+        <!-- Expiry Date -->
+        <div class="mb-3">
+          <label for="expiryDate" class="form-label">Expiry Date</label>
+          <input
+            type="date"
+            id="expiryDate"
+            name="expirationDate"
+            class="form-control"
+            required
+          />
+        </div>
+
+        <!-- Status -->
+        <div class="mb-3">
+          <label for="status" class="form-label">Status</label>
+          <select id="status" name="status" class="form-select" required>
+            <option value="active" selected>Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="expired">Expired</option>
+          </select>
+        </div>
+
+        <!-- Maximum Usage Limit -->
+        <div class="mb-3">
+          <label for="usageLimit" class="form-label">Usage Limit</label>
+          <input
+            type="number"
+            id="usageLimit"
+            name="usageLimit"
+            class="form-control"
+            placeholder="Enter maximum usage limit"
+            min="1"
+          />
+        </div>
+
+        <!-- Coupon Type -->
+        <div class="mb-3">
+          <label for="couponType" class="form-label">Coupon Type</label>
+          <select id="couponType" name="couponType" class="form-select" required>
+            <option value="" disabled selected>Select type</option>
+            <option value="percentage">Percentage</option>
+            <option value="fixed">Fixed Amount</option>
+            <option value="free-shipping">Free Shipping</option>
+          </select>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary w-100">Add Coupon</button>
+      </form>
+    </div>
+  </body>
+</html>

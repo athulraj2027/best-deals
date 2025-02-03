@@ -1,0 +1,47 @@
+.admin-sidebar {
+    width: 100%;
+    max-width: 200px; /* Maximum width of the sidebar */
+    background-color: #191c1f; /* Dark background */
+    color: white;
+    height: 100vh; /* Full height of the viewport */
+    padding: 20px 10px;
+    position: fixed; /* Stick it to the left */
+    top: 0;
+    left: 0;
+    overflow-y: auto; /* Allow scrolling if content overflows */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Slight shadow for depth */
+}
+
+.admin-sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.admin-sidebar li {
+    margin-bottom: 15px;
+}
+
+.admin-sidebar a {
+    display: block;
+    padding: 10px 15px;
+    color: #ccc; /* Muted text color */
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.admin-sidebar a:hover {
+    background-color: #f57c00; /* Orange highlight */
+    color: white;
+}
+
+.admin-sidebar a.active {
+    background-color: #f57c00; /* Active link background */
+    color: white; /* Active link text color */
+}
+
+.admin-sidebar a.active:hover {
+    background-color: #d84c00; /* Darker orange on hover */
+}

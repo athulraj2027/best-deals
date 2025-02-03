@@ -1,0 +1,115 @@
+.top-nav {
+    border-bottom: 1px solid grey;
+}
+
+.searchbar {
+    height: 40px;
+    width: 400px;
+    border-radius: 40px;
+}
+
+.nav-list {
+    list-style-type: none;
+    gap: 10px;
+}
+
+.search-div {
+    position: relative;
+}
+
+.search-div button {
+    position: absolute;
+    right: 20px;
+    top: 5px;
+    background-color: white;
+    border: none;
+}
+
+.category-btn {
+    background: #fa8232;
+    border: none;
+    height: 40px;
+    width: 150px;
+    border-radius: 5px;
+
+}
+
+.left-div {
+    gap: 20px;
+}
+
+.left-div a {
+    text-decoration: none;
+    color: black;
+}
+
+.main-menu {
+    position: relative;
+}
+
+
+/* .submenu {
+    position: absolute;
+    background-color: #191c1f;
+    color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 20px black;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease-in-out;
+}
+.category-btn:hover .submenu {
+    opacity: 1;
+    visibility: inherit;
+    top: 100%;
+} */
+.submenu {
+    position: absolute;
+    background-color: #191c1f;
+    color: white;
+    width: 300px;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Proper shadow */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out; /* Smooth transition */
+    top: 100%; /* Ensure correct positioning */
+    left: 0; /* Adjust based on design needs */
+    z-index: 1000; /* Ensure visibility above other elements */
+}
+
+.main-menu:hover  .submenu {
+    opacity: 1;
+    visibility: visible; /* Correct value */
+   
+}
+
+
+.submenu ul li {
+    height: 50px;
+    
+    text-align: center;
+    padding: 20px;
+
+}
+
+.submenu ul li:hover {
+    border: 1px solid grey;
+    text-align: center;
+    padding: 10px;
+    background: white;
+    color: black;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+.profile{
+    right: 100%;
+    width: 200px;
+}
+
+

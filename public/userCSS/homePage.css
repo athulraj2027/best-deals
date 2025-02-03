@@ -1,0 +1,20 @@
+.features {
+    gap: 40px;
+    padding: 20px;
+    border: 1px dotted grey;
+    margin-top: 20px;
+    border-radius: 8px;
+}
+
+.main-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 8%;
+}
+
+.product {
+    flex-direction: column;
+    border: 1px solid grey;
+    max-width: 150px;
+}

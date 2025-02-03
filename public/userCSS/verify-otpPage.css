@@ -1,0 +1,66 @@
+body {
+    background-color: #f9f9f9;
+  }
+
+  .otp-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .otp-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .otp-input {
+    width: 40px;
+    height: 50px;
+    text-align: center;
+    font-size: 1.2em;
+    margin: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  .otp-input:focus {
+    outline: none;
+    border-color: #fa8232;
+    box-shadow: 0 0 5px rgba(250, 130, 50, 0.5);
+  }
+
+  .btn {
+    background-color: #fa8232;
+    border: none;
+    width: 100%;
+  }
+
+  .btn:hover {
+    background-color: #f97a1e;
+  }
+
+  .error-message {
+    color: red;
+    font-size: 0.85em;
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  .resend-link {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 0.9em;
+  }
+
+  .resend-link a {
+    color: #fa8232;
+    text-decoration: none;
+  }
+
+  .resend-link a:hover {
+    text-decoration: underline;
+  }

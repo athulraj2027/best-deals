@@ -1,0 +1,192 @@
+/* Resetting default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body Styling */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #ecf0f1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: #333;
+    padding: 20px;
+}
+
+/* Container Styling */
+.container {
+    background: #fff;
+    padding: 30px 40px;
+    width: 100%;
+    max-width: 800px;
+    border-radius: 12px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e1e1e1;
+    transition: transform 0.3s ease;
+}
+
+/* Title and Form Title Styling */
+h1 {
+    text-align: center;
+    font-size: 2.8rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 40px;
+}
+
+h2 {
+    font-size: 2rem;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+/* Form Styling */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Form Elements Styling */
+label {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #34495e;
+}
+
+/* Input, Select, and Textarea Styling */
+input, select, textarea {
+    padding: 12px;
+    font-size: 1.1rem;
+    margin-bottom: 18px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    color: #555;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+/* Focus effect on input fields */
+input:focus, select:focus, textarea:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 8px rgba(52, 152, 219, 0.5);
+}
+
+/* Textarea specific styling */
+textarea {
+    resize: vertical;
+    height: 180px;
+}
+
+/* Submit Button Styling */
+button {
+    background-color: #3498db;
+    color: #fff;
+    padding: 15px;
+    font-size: 1.3rem;
+    cursor: pointer;
+    border-radius: 8px;
+    border: none;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* Button Hover Effect */
+button:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+}
+
+/* Remove button for variants */
+button[type="button"] {
+    background-color: #e74c3c;
+    padding: 8px 16px;
+    font-size: 1rem;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 8px;
+    border: none;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* Remove button Hover Effect */
+button[type="button"]:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+}
+
+/* Input Field Style for File */
+input[type="file"] {
+    padding: 12px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
+    transition: background-color 0.3s ease;
+}
+
+input[type="file"]:hover {
+    background-color: #e0e0e0;
+}
+
+/* Variant Group Styling */
+.variant-group {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+
+/* Variants Title */
+#variants h3 {
+    font-size: 1.5rem;
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+/* Select Element Styling */
+select {
+    padding: 12px;
+    font-size: 1.1rem;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+}
+
+/* Responsive Design for Mobile */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+        width: 90%;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+    }
+
+    h2 {
+        font-size: 1.8rem;
+    }
+
+    input, select, textarea {
+        font-size: 1rem;
+    }
+
+    button {
+        font-size: 1.2rem;
+    }
+
+    .variant-group {
+        padding: 15px;
+    }
+
+    button[type="button"] {
+        font-size: 1.1rem;
+        padding: 6px 12px;
+    }
+}

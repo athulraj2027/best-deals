@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Product</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.10/dist/sweetalert2.min.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+      /* Resetting default styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* Body Styling */
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #8cb9c4;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        color: #333;
+        padding: 20px;
+      }
+
+      /* Container Styling */
+      .container {
+        background: #73bbd8;
+        padding: 30px 40px;
+        width: 100%;
+        max-width: 800px;
+        border-radius: 12px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e1e1e1;
+        transition: transform 0.3s ease;
+      }
+
+      /* Title and Form Title Styling */
+      h1 {
+        text-align: center;
+        font-size: 2.8rem;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 40px;
+      }
+
+      h2 {
+        font-size: 2rem;
+        color: #2c3e50;
+        margin-bottom: 20px;
+      }
+
+      /* Form Styling */
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      /* Form Elements Styling */
+      label {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #34495e;
+      }
+
+      /* Input, Select, and Textarea Styling */
+      input,
+      select,
+      textarea {
+        padding: 12px;
+        font-size: 1.1rem;
+        margin-bottom: 18px;
+        width: 50%;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        background-color: #f9f9f9;
+        color: #555;
+        outline: none;
+        transition: all 0.3s ease;
+      }
+
+      /* Focus effect on input fields */
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 8px rgba(52, 152, 219, 0.5);
+      }
+
+      /* Textarea specific styling */
+      textarea {
+        resize: vertical;
+        height: 180px;
+      }
+
+      /* Submit Button Styling */
+      button {
+        background-color: #3498db;
+        color: #fff;
+        padding: 15px;
+        font-size: 1.3rem;
+        cursor: pointer;
+        border-radius: 8px;
+        border: none;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+      }
+
+      /* Button Hover Effect */
+      button:hover {
+        background-color: #2980b9;
+        transform: translateY(-2px);
+      }
+
+      /* Remove button for variants */
+      button[type="button"] {
+        background-color: #e74c3c;
+        padding: 8px 16px;
+        font-size: 1rem;
+        color: #fff;
+        cursor: pointer;
+        border-radius: 8px;
+        border: none;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+      }
+
+      /* Remove button Hover Effect */
+      button[type="button"]:hover {
+        background-color: #c0392b;
+        transform: translateY(-2px);
+      }
+
+      /* Input Field Style for File */
+      input[type="file"] {
+        padding: 12px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        background-color: #f1f1f1;
+        border: 1px solid #ddd;
+        transition: background-color 0.3s ease;
+      }
+
+      input[type="file"]:hover {
+        background-color: #e0e0e0;
+      }
+
+      /* Variant Group Styling */
+      .variant-group {
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        margin-bottom: 20px;
+      }
+
+      /* Variants Title */
+      #variants h3 {
+        font-size: 1.5rem;
+        color: #2c3e50;
+        margin-bottom: 15px;
+      }
+
+      /* Select Element Styling */
+      select {
+        padding: 12px;
+        font-size: 1.1rem;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+      }
+
+      /* Responsive Design for Mobile */
+      @media (max-width: 768px) {
+        .container {
+          padding: 20px;
+          width: 90%;
+        }
+
+        h1 {
+          font-size: 2.5rem;
+        }
+
+        h2 {
+          font-size: 1.8rem;
+        }
+
+        input,
+        select,
+        textarea {
+          font-size: 1rem;
+        }
+
+        button {
+          font-size: 1.2rem;
+        }
+
+        .variant-group {
+          padding: 15px;
+        }
+
+        button[type="button"] {
+          font-size: 1.1rem;
+          padding: 6px 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <h2>Add Product</h2>
+      <form
+        id="addProductForm"
+        action="/admin/products/add"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+        <!-- Product Name -->
+        <label for="productName">Product Name:</label>
+        <input type="text" id="productName" name="productName" /><br />
+
+        <!-- Price -->
+        <label for="brand">Brand:</label>
+        <input type="text" id="brand" name="brand" /><br />
+
+        <!-- Product Image -->
+        <label for="productImage">Product Image:</label>
+        <input
+          type="file"
+          id="productImage"
+          name="productImage"
+          accept="image/*"
+        /><br />
+        <input
+          type="file"
+          id="productImage"
+          name="productImage"
+          accept="image/*"
+        /><br />
+        <input
+          type="file"
+          id="productImage"
+          name="productImage"
+          accept="image/*"
+        /><br />
+
+        <!-- Variants Section -->
+        <div id="variants">
+          <div class="variant-group">
+            <label for="color">Color:</label>
+            <select name="variants[0][color]">
+              <option value="" selected disabled>Select Color</option>
+              <option value="Red">Red</option>
+              <option value="Black">Black</option>
+              <option value="Blue">Blue</option></select
+            ><br />
+
+            <label for="size">Size:</label>
+            <select name="variants[0][size]">
+              <option value="" selected disabled>Select Size</option>
+              <option value="Small">Small</option>
+              <option value="Medium">Medium</option>
+              <option value="Large">Large</option></select
+            ><br />
+
+            <label for="variantPrice">Variant Price:</label>
+            <input
+              type="number"
+              name="variants[0][price]"
+              min="0.01"
+              step="0.01"
+            /><br />
+
+            <label for="quantity">Variant Quantity:</label>
+            <input type="number" name="variants[0][quantity]" min="1" /><br />
+
+            <label for="variantImage">Variant Image:</label>
+            <input
+              type="file"
+              name="variants[0][image]"
+              accept="image/*"
+            /><br />
+            <input
+              type="file"
+              name="variants[0][image]"
+              accept="image/*"
+            /><br />
+            <input
+              type="file"
+              name="variants[0][image]"
+              accept="image/*"
+            /><br />
+
+            <button type="button" onclick="removeVariant(this)">
+              Remove Variant
+            </button>
+          </div>
+        </div>
+
+        <!-- Add Variant Button -->
+        <button type="button" onclick="addVariant()">Add Variant</button>
+
+        <!-- Submit Button -->
+        <button type="submit">Submit Product</button>
+      </form>
+      <a href="/admin/products"
+        ><button style="color: white; background: red; margin: 30px">
+          Cancel
+        </button></a
+      >
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.10/dist/sweetalert2.all.min.js"></script>
+
+    <script>
+      // Add Variant Function
+      let variantCount = 1;
+      function addVariant() {
+        const variantGroup = document.createElement("div");
+        variantGroup.classList.add("variant-group");
+
+        variantGroup.innerHTML = `
+          <label for="color">Color:</label>
+          <select name="variants[${variantCount}][color]">
+            <option value="" selected disabled>Select Color</option>
+            <option value="Red">Red</option>
+            <option value="Black">Black</option>
+            <option value="Blue">Blue</option>
+          </select><br />
+
+          <label for="size">Size:</label>
+          <select name="variants[${variantCount}][size]">
+            <option value="" selected disabled>Select Size</option>
+            <option value="Small">Small</option>
+            <option value="Medium">Medium</option>
+            <option value="Large">Large</option>
+          </select><br />
+
+          <label for="variantPrice">Variant Price:</label>
+          <input type="number" name="variants[${variantCount}][price]" min="0.01" step="0.01" /><br />
+
+          <label for="quantity">Variant Quantity:</label>
+          <input type="number" name="variants[${variantCount}][quantity]" min="1" /><br />
+
+          <label for="variantImage">Variant Image:</label>
+          <input type="file" name="variants[${variantCount}][image]" accept="image/*" /><br />
+
+          <button type="button" onclick="removeVariant(this)">Remove Variant</button>
+        `;
+
+        document.getElementById("variants").appendChild(variantGroup);
+        variantCount++;
+      }
+
+      // Remove Variant Function
+      function removeVariant(button) {
+        button.parentElement.remove();
+      }
+
+      // Form Validation using jQuery
+      $(document).ready(function () {
+        $("#addProductForm").submit(function (e) {
+          e.preventDefault(); // Prevent form from submitting immediately
+
+          let valid = true;
+
+          // Validate Product Name
+          const productName = $("#productName").val().trim();
+          if (!productName) {
+            valid = false;
+            Swal.fire(
+              "Invalid Product Name",
+              "Product name cannot be empty.",
+              "error"
+            );
+          }
+
+          // Validate Price
+          const price = parseFloat($("#price").val());
+          if (price <= 0 || isNaN(price)) {
+            valid = false;
+            Swal.fire(
+              "Invalid Price",
+              "Price must be a positive number.",
+              "error"
+            );
+          }
+
+          // Validate Product Image
+          const productImage = $("#productImage")[0].files[0];
+          if (!productImage) {
+            valid = false;
+            Swal.fire(
+              "Invalid Product Image",
+              "Please upload a product image.",
+              "error"
+            );
+          }
+
+          // Validate Variants
+          $(".variant-group").each(function (index) {
+            // Validate Color
+            const color = $(this)
+              .find("select[name^='variants'][name$='[color]']")
+              .val();
+            if (!color) {
+              valid = false;
+              Swal.fire(
+                "Invalid Variant Color",
+                `Variant ${index + 1}: Color is required.`,
+                "error"
+              );
+              return false;
+            }
+
+            // Validate Size
+            const size = $(this)
+              .find("select[name^='variants'][name$='[size]']")
+              .val();
+            if (!size) {
+              valid = false;
+              Swal.fire(
+                "Invalid Variant Size",
+                `Variant ${index + 1}: Size is required.`,
+                "error"
+              );
+              return false;
+            }
+
+            // Validate Variant Price
+            const variantPrice = parseFloat(
+              $(this).find("input[name^='variants'][name$='[price]']").val()
+            );
+            if (variantPrice <= 0 || isNaN(variantPrice)) {
+              valid = false;
+              Swal.fire(
+                "Invalid Variant Price",
+                `Variant ${index + 1}: Price must be a positive number.`,
+                "error"
+              );
+              return false;
+            }
+
+            // Validate Variant Quantity
+            const variantQuantity = parseInt(
+              $(this).find("input[name^='variants'][name$='[quantity]']").val()
+            );
+            if (variantQuantity <= 0 || isNaN(variantQuantity)) {
+              valid = false;
+              Swal.fire(
+                "Invalid Variant Quantity",
+                `Variant ${index + 1}: Quantity must be a positive integer.`,
+                "error"
+              );
+              return false;
+            }
+
+            // Validate Variant Image
+            const variantImage = $(this).find(
+              "input[name^='variants'][name$='[image]']"
+            )[0].files[0];
+            if (!variantImage) {
+              valid = false;
+              Swal.fire(
+                "Invalid Variant Image",
+                `Variant ${index + 1}: Image is required.`,
+                "error"
+              );
+              return false;
+            }
+          });
+
+          if (valid) {
+            // Create a new FormData object to send the form data
+            const formData = new FormData(
+              document.getElementById("addProductForm")
+            );
+
+            // Send the form data using Fetch API
+            fetch("/submit", {
+              // Replace with your backend API endpoint
+              method: "POST",
+              body: formData,
+            })
+              .then((response) => response.json()) // assuming server returns JSON response
+              .then((data) => {
+                // Handle success
+                Swal.fire("Success", "Product added successfully!", "success");
+              })
+              .catch((error) => {
+                // Handle error
+                Swal.fire(
+                  "Error",
+                  "There was an issue submitting the product.",
+                  "error"
+                );
+              });
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

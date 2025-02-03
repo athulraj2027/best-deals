@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Category</title>
+    <link rel="stylesheet" href="/adminCSS/addCategories.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Add Category</h1>
+      <h2>Create a New Category</h2>
+      <form id="addCategoryForm" enctype="multipart/form-data">
+        <!-- Category Name -->
+        <label for="categoryName">Category Name</label>
+        <input
+          type="text"
+          id="categoryName"
+          name="name"
+          placeholder="Enter category name"
+         
+        />
+
+        <!-- Category Description -->
+        <label for="categoryDescription">Category Description</label>
+        <textarea
+          id="categoryDescription"
+          name="description"
+          placeholder="Enter category description"
+          
+        ></textarea>
+        <div class="mb-3">
+          <label for="status" class="form-label">Status</label>
+          <select id="status" name="status" class="form-control">
+            <option value="true">Listed</option>
+            <option value="false">Unlisted</option>
+          </select>
+        </div>
+
+        <!-- Category Image -->
+        <label for="categoryImage">Category Image</label>
+        <input type="file" id="CategoryImage" name="CategoryImage" accept="image/*" />
+
+        <!-- Submit Button -->
+        <button type="submit">Add Category</button>
+      </form>
+    </div>
+
+    <script>
+      document.getElementById('addCategoryForm').addEventListener('submit', function (e) {
+        e.preventDefault(); // Prevent default form submission
+
+        const formData = new FormData(this);
+
+        // Perform AJAX request
+        fetch('/admin/categories/add', {
+          method: 'POST',
+          body: formData,
+        })
+          .then(response => response.json()) // Assuming the backend returns JSON
+          .then(data => {
+            if (data.status ==='success') {
+              // Show success alert
+              Swal.fire({
+                icon: 'success',
+                title: 'Category Added Successfully',
+                message: data.message,
+              }).then(() => {
+                // Redirect to categories page
+                window.location.href = '/admin/categories';
+              });
+            } else {
+              // Show error alert
+              Swal.fire({
+                icon: 'error',
+                title:data.title ,
+                message: data.message,
+              });
+            }
+          })
+          .catch(error => {
+            // Show error if there's an issue with the request
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Something went wrong. Please try again.',
+            });
+          });
+      });
+    </script>
+  </body>
+</html>
