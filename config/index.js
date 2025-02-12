@@ -30,6 +30,7 @@ app.use(passport.session());
 app.use(cacheMiddleware);
 
 // --- Routes ---
+
 app.use(authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/", userRoutes);

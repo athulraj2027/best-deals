@@ -3,91 +3,704 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Add Category</title>
-    <link rel="stylesheet" href="/adminCSS/addCategories.css" />
+    <title>Add Category & Products</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+      :root {
+        --primary-color: #4361ee;
+        --secondary-color: #3f37c9;
+        --accent-color: #4895ef;
+        --success-color: #4cc9f0;
+        --text-color: #2b2d42;
+        --bg-color: #f8f9fa;
+        --card-bg: #ffffff;
+        --border-radius: 12px;
+        --transition: all 0.3s ease;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", system-ui, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        color: var(--text-color);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 800px;
+        background: var(--card-bg);
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+      }
+
+      .header p {
+        color: #6c757d;
+        font-size: 1.1rem;
+      }
+
+      .form-section {
+        background: var(--bg-color);
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 1.5rem;
+      }
+
+      .form-section h3 {
+        color: var(--secondary-color);
+        margin-bottom: 1.5rem;
+        font-size: 1.2rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-color);
+        font-weight: 500;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: var(--transition);
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        outline: none;
+      }
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      .file-upload {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .file-upload-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem;
+        background: #f8f9fa;
+        border: 2px dashed #ced4da;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .file-upload-label:hover {
+        background: #e9ecef;
+        border-color: var(--accent-color);
+      }
+
+      .file-upload-label svg {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 1rem;
+        color: var(--primary-color);
+      }
+
+      .file-upload input[type="file"] {
+        display: none;
+      }
+
+      .preview-container {
+        margin-top: 1rem;
+        display: none;
+        text-align: center;
+      }
+
+      .preview-container img {
+        max-width: 200px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .tags-input {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        min-height: 45px;
+      }
+
+      .tag {
+        background: var(--accent-color);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .tag button {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-size: 1.1rem;
+        padding: 0;
+        display: flex;
+        align-items: center;
+      }
+
+      .tags-input input {
+        border: none;
+        outline: none;
+        padding: 0.25rem;
+        flex: 1;
+        min-width: 120px;
+      }
+
+      .submit-btn {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        width: 100%;
+        margin-top: 1rem;
+      }
+
+      .submit-btn:hover {
+        background: var(--secondary-color);
+        transform: translateY(-2px);
+      }
+
+      .status-toggle {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.5rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+      }
+
+      .status-toggle label {
+        margin: 0;
+        cursor: pointer;
+      }
+
+      .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+      }
+
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.4s;
+        border-radius: 34px;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+
+      input:checked + .slider {
+        background-color: var(--success-color);
+      }
+
+      input:checked + .slider:before {
+        transform: translateX(26px);
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 1rem;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+      }
+    </style>
   </head>
   <body>
     <div class="container">
-      <h1>Add Category</h1>
-      <h2>Create a New Category</h2>
-      <form id="addCategoryForm" enctype="multipart/form-data">
-        <!-- Category Name -->
-        <label for="categoryName">Category Name</label>
-        <input
-          type="text"
-          id="categoryName"
-          name="name"
-          placeholder="Enter category name"
-         
-        />
+      <div class="header">
+        <h1>Add Category</h1>
+        <p>Create and manage your product categories</p>
+      </div>
 
-        <!-- Category Description -->
-        <label for="categoryDescription">Category Description</label>
-        <textarea
-          id="categoryDescription"
-          name="description"
-          placeholder="Enter category description"
-          
-        ></textarea>
-        <div class="mb-3">
-          <label for="status" class="form-label">Status</label>
-          <select id="status" name="status" class="form-control">
-            <option value="true">Listed</option>
-            <option value="false">Unlisted</option>
-          </select>
+      <form id="addCategoryForm" enctype="multipart/form-data">
+        <div class="form-section">
+          <h3>Basic Information</h3>
+          <div class="form-group">
+            <label for="categoryName">Category Name</label>
+            <input
+              type="text"
+              id="categoryName"
+              name="categoryName"
+              placeholder="Enter category name"
+            />
+          </div>
+
+          <!-- <div class="form-group">
+                    <label for="categoryDescription">Category Description</label>
+                    <textarea 
+                        id="categoryDescription" 
+                        name="description" 
+                        placeholder="Enter category description"
+                        
+                    ></textarea>
+                </div> -->
+
+          <div class="form-group">
+            <label>Category Status</label>
+            <div class="status-toggle">
+              <label class="toggle-switch">
+                <input type="checkbox" name="status" checked />
+                <span class="slider"></span>
+              </label>
+              <span id="statusText">Listed</span>
+            </div>
+          </div>
         </div>
 
-        <!-- Category Image -->
-        <label for="categoryImage">Category Image</label>
-        <input type="file" id="CategoryImage" name="CategoryImage" accept="image/*" />
+        <div class="form-section">
+          <h3>Media & Tags</h3>
+          <div class="form-group">
+            <label>Category Image</label>
+            <div class="file-upload">
+              <label class="file-upload-label" id="dropZone">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+                <span>Drag & drop an image or click to browse</span>
+                <input
+                  type="file"
+                  id="categoryImage"
+                  name="categoryImage"
+                  accept="image/*"
+                />
+              </label>
+              <div class="preview-container">
+                <img id="imagePreview" src="" alt="Preview" />
+              </div>
+            </div>
+          </div>
 
-        <!-- Submit Button -->
-        <button type="submit">Add Category</button>
+          <div class="form-group">
+            <label>Category Tags</label>
+            <div class="tags-input" id="tagsContainer">
+              <input
+                type="text"
+                placeholder="Add tags and press Enter"
+                id="tagInput"
+                name="categoryTags"
+              />
+            </div>
+            <input type="hidden" name="tags" id="tagsField" />
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn">Create Category</button>
+        
+      </form>
+      <form action="/admin/categories" method="get" >
+        <button style="color: white; background: red;width: 100px;height: 50px;border: none;border-radius: 10px;margin: 30px;">Cancel</button>
       </form>
     </div>
 
     <script>
-      document.getElementById('addCategoryForm').addEventListener('submit', function (e) {
-        e.preventDefault(); // Prevent default form submission
+      // Validation Rules Constants
+      const VALIDATION_RULES = {
+        categoryName: {
+          minLength: 3,
+          maxLength: 50,
+          // pattern: /^[a-zA-Z0-9\s-_]+$/
+        },
+        image: {
+          maxSize: 5 * 1024 * 1024, // 5MB
+          allowedTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+        },
+        tags: {
+          minTags: 1,
+          maxTags: 10,
+          minLength: 2,
+          maxLength: 20,
+        },
+      };
 
-        const formData = new FormData(this);
+      // Tags handling
+      const tagsContainer = document.getElementById("tagsContainer");
+      const tagInput = document.getElementById("tagInput");
+      const tagsField = document.getElementById("tagsField");
+      let tags = [];
 
-        // Perform AJAX request
-        fetch('/admin/categories/add', {
-          method: 'POST',
-          body: formData,
-        })
-          .then(response => response.json()) // Assuming the backend returns JSON
-          .then(data => {
-            if (data.status ==='success') {
-              // Show success alert
-              Swal.fire({
-                icon: 'success',
-                title: 'Category Added Successfully',
-                message: data.message,
-              }).then(() => {
-                // Redirect to categories page
-                window.location.href = '/admin/categories';
-              });
-            } else {
-              // Show error alert
-              Swal.fire({
-                icon: 'error',
-                title:data.title ,
-                message: data.message,
-              });
-            }
-          })
-          .catch(error => {
-            // Show error if there's an issue with the request
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'Something went wrong. Please try again.',
-            });
-          });
+      // Add validation attributes to form elements
+      document.getElementById("categoryName").setAttribute("required", "");
+      document
+        .getElementById("categoryName")
+        .setAttribute("minlength", VALIDATION_RULES.categoryName.minLength);
+      document
+        .getElementById("categoryName")
+        .setAttribute("maxlength", VALIDATION_RULES.categoryName.maxLength);
+      // document.getElementById('categoryName').setAttribute('pattern', VALIDATION_RULES.categoryName.pattern.source);
+
+      // Create error message elements
+      function createErrorElement(id) {
+        const errorDiv = document.createElement("div");
+        errorDiv.id = `${id}Error`;
+        errorDiv.className = "error-message";
+        errorDiv.style.color = "#dc3545";
+        errorDiv.style.fontSize = "0.875rem";
+        errorDiv.style.marginTop = "0.25rem";
+        errorDiv.style.display = "none";
+        return errorDiv;
+      }
+
+      // Add error elements after form fields
+      const formGroups = document.querySelectorAll(".form-group");
+      formGroups.forEach((group) => {
+        const input = group.querySelector(
+          'input:not([type="file"]):not([type="checkbox"]), textarea'
+        );
+        if (input) {
+          const errorElement = createErrorElement(input.id);
+          group.appendChild(errorElement);
+        }
       });
+
+      // Tags event handling
+      tagInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          const tag = tagInput.value.trim();
+
+          if (tag.length < VALIDATION_RULES.tags.minLength) {
+            Swal.fire({
+              icon: "error",
+              title: "Invalid Tag",
+              text: `Tag must be at least ${VALIDATION_RULES.tags.minLength} characters long`,
+            });
+            return;
+          }
+
+          if (tag.length > VALIDATION_RULES.tags.maxLength) {
+            Swal.fire({
+              icon: "error",
+              title: "Invalid Tag",
+              text: `Tag cannot exceed ${VALIDATION_RULES.tags.maxLength} characters`,
+            });
+            return;
+          }
+
+          if (tags.length >= VALIDATION_RULES.tags.maxTags) {
+            Swal.fire({
+              icon: "error",
+              title: "Too Many Tags",
+              text: `Cannot add more than ${VALIDATION_RULES.tags.maxTags} tags`,
+            });
+            return;
+          }
+
+          if (tag && !tags.includes(tag)) {
+            addTag(tag);
+            tagInput.value = "";
+          }
+        }
+      });
+
+      function addTag(text) {
+        tags.push(text);
+        const tag = document.createElement("div");
+        tag.className = "tag";
+        tag.innerHTML = `
+            ${text}
+            <button type="button" onclick="removeTag(this, '${text}')">&times;</button>
+        `;
+        tagsContainer.insertBefore(tag, tagInput);
+        updateTagsField();
+      }
+
+      function removeTag(button, text) {
+        tags = tags.filter((tag) => tag !== text);
+        button.parentElement.remove();
+        updateTagsField();
+      }
+
+      function updateTagsField() {
+        tagsField.value = JSON.stringify(tags);
+      }
+
+      // Image upload handling
+      const dropZone = document.getElementById("dropZone");
+      const imageInput = document.getElementById("categoryImage");
+      const imagePreview = document.getElementById("imagePreview");
+      const previewContainer = document.querySelector(".preview-container");
+
+      dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = "var(--accent-color)";
+        dropZone.style.background = "#e9ecef";
+      });
+
+      dropZone.addEventListener("dragleave", () => {
+        dropZone.style.borderColor = "#ced4da";
+        dropZone.style.background = "#f8f9fa";
+      });
+
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = "#ced4da";
+        dropZone.style.background = "#f8f9fa";
+
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith("image/")) {
+          handleImageUpload(file);
+        }
+      });
+
+      imageInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          handleImageUpload(file);
+        }
+      });
+
+      function handleImageUpload(file) {
+        if (!validateImage(file)) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          imagePreview.src = e.target.result;
+          previewContainer.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      }
+
+      // Validation functions
+      function validateCategoryName(name) {
+        const errorElement = document.getElementById("categoryNameError");
+
+        if (!name) {
+          showError(errorElement, "Category name is required");
+          return false;
+        }
+
+        if (name.length < VALIDATION_RULES.categoryName.minLength) {
+          showError(
+            errorElement,
+            `Category name must be at least ${VALIDATION_RULES.categoryName.minLength} characters`
+          );
+          return false;
+        }
+
+        if (name.length > VALIDATION_RULES.categoryName.maxLength) {
+          showError(
+            errorElement,
+            `Category name cannot exceed ${VALIDATION_RULES.categoryName.maxLength} characters`
+          );
+          return false;
+        }
+
+        // if (!VALIDATION_RULES.categoryName.pattern.test(name)) {
+        //     showError(errorElement, 'Category name can only contain letters, numbers, spaces, hyphens, and underscores');
+        //     return false;
+        // }
+
+        hideError(errorElement);
+        return true;
+      }
+
+      function validateImage(file) {
+        if (!file) return true; // Image is optional
+
+        if (file.size > VALIDATION_RULES.image.maxSize) {
+          Swal.fire({
+            icon: "error",
+            title: "Invalid File Size",
+            text: "Image size should not exceed 5MB",
+          });
+          return false;
+        }
+
+        if (!VALIDATION_RULES.image.allowedTypes.includes(file.type)) {
+          Swal.fire({
+            icon: "error",
+            title: "Invalid File Type",
+            text: "Please upload a valid image file (JPEG, PNG, WebP, or GIF)",
+          });
+          return false;
+        }
+
+        return true;
+      }
+
+      function validateTags() {
+        if (tags.length < VALIDATION_RULES.tags.minTags) {
+          Swal.fire({
+            icon: "error",
+            title: "Tags Required",
+            text: `Please add at least ${VALIDATION_RULES.tags.minTags} tag`,
+          });
+          return false;
+        }
+
+        if (tags.length > VALIDATION_RULES.tags.maxTags) {
+          Swal.fire({
+            icon: "error",
+            title: "Too Many Tags",
+            text: `Cannot add more than ${VALIDATION_RULES.tags.maxTags} tags`,
+          });
+          return false;
+        }
+
+        return true;
+      }
+
+      // Helper functions
+      function showError(element, message) {
+        element.textContent = message;
+        element.style.display = "block";
+      }
+
+      function hideError(element) {
+        element.style.display = "none";
+      }
+
+      // Status toggle handling
+      const statusToggle = document.querySelector('input[name="status"]');
+      const statusText = document.getElementById("statusText");
+
+      statusToggle.addEventListener("change", function () {
+        statusText.textContent = this.checked ? "Listed" : "Unlisted";
+        this.value = this.checked ? "listed" : "unlisted";
+      });
+      // Real-time validation
+      document
+        .getElementById("categoryName")
+        .addEventListener("input", function () {
+          validateCategoryName(this.value);
+        });
+
+      // Form submission
+      document
+        .getElementById("addCategoryForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          // Validate all fields
+          const nameValid = validateCategoryName(
+            document.getElementById("categoryName").value
+          );
+          const imageValid = validateImage(
+            document.getElementById("categoryImage").files[0]
+          );
+          const tagsValid = validateTags();
+
+          if (!nameValid || !imageValid || !tagsValid) {
+            return;
+          }
+
+          try {
+            const formData = new FormData(this);
+            const response = await fetch("/admin/categories/add", {
+              method: "POST",
+              body: formData,
+            });
+
+            const data = await response.json();
+
+            if (data.status === "success") {
+              await Swal.fire({
+                icon: "success",
+                title: "Success!",
+                text: "Category added successfully",
+                showConfirmButton: false,
+                timer: 1500,
+              });
+              window.location.href = "/admin/categories";
+            } else {
+              throw new Error(data.message || "Failed to add category");
+            }
+          } catch (error) {
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: error.message || "Something went wrong. Please try again.",
+            });
+          }
+        });
     </script>
   </body>
 </html>

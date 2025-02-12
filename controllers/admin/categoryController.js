@@ -3,11 +3,24 @@ const Category = require("../../models/Category");
 // --- Get categories page ---
 
 exports.getCategoriesPage = async (req, res) => {
-  const categories = await Category.find();
+  try {
+    const page = parseInt(req.query.page);
+    const limit = parseInt(req.query.limit);
+    const skip = (page - 1) * limit;
+    const categories = await Category.find().skip(skip).limit(limit);
 
-  res.render("adminPages/CategoryPages/adminCategories", {
-    categories,
-  });
+    const totalCategories = await Category.countDocuments();
+    const totalPages = Math.ceil(totalCategories / limit);
+
+    res.render("adminPages/CategoryPages/adminCategories", {
+      categories,
+      currentPage: page,
+      totalPages,
+      limit,
+    });
+  } catch (err) {
+    console.error("Category page get method error : ", err);
+  }
 };
 
 //--- Get add category page ---
@@ -27,30 +40,22 @@ exports.getEditCategoryPage = async (req, res) => {
 // --- Add category controller ---
 
 exports.addCategoryController = async (req, res) => {
-  const { name, description, status } = req.body;
-  const image = req.file;
+  console.log("Category controller working");
+  const { categoryName, status, categoryTags } = req.body;
+  console.log(req.body);
+
+  const categoryImage = req.file;
   try {
-    if (!name || !description || !status) {
-      return res.json({
-        status: "error",
-        title: "Empty columns found",
-        message: "Please fill all the columns",
-      });
-    }
-    if (!image) {
-      return res.json({
-        status: "error",
-        title: "Image not added",
-        message: "Please add image for the category",
-      });
-    }
-    imageUrl = `images/categories/${image.filename}`;
-    // const imgUrl = imageUrl.replace(/\\/g,'/')
+    const imageUrl = `/images/categories/${categoryImage.filename}`;
     console.log(imageUrl);
+    // const imgUrl = imageUrl.replace(/\\/g,'/')
+    // console.log(imageUrl);
+    const mappedStatus = status === "on" ? "listed" : "unlisted";
+    console.log(mappedStatus);
     const newCategory = new Category({
-      name,
-      description,
-      status,
+      name: categoryName,
+      status: mappedStatus,
+      categoryTags: typeof tags === "string" ? JSON.parse(tags) : [],
       imageUrl,
     });
 
@@ -77,7 +82,7 @@ exports.unlistCategory = async (req, res) => {
     const { id } = req.params;
     const category = await Category.findByIdAndUpdate(
       id,
-      { status: false },
+      { status: "unlisted" },
       { new: true }
     );
 
@@ -87,7 +92,7 @@ exports.unlistCategory = async (req, res) => {
       return res.status(404).json({ message: "Category not found." });
     }
 
-    res.redirect("/admin/categories"); // Redirect to the categories page
+    return res.status(200).redirect("/admin/categories"); // Redirect to the categories page
   } catch (error) {
     console.error(error);
     res
@@ -103,7 +108,7 @@ exports.listCategory = async (req, res) => {
     const { id } = req.params;
     const category = await Category.findByIdAndUpdate(
       id,
-      { status: true },
+      { status: "listed" },
       { new: true }
     );
 
@@ -120,4 +125,22 @@ exports.listCategory = async (req, res) => {
   }
 };
 
-// add edit category controller
+//  edit category controller
+
+exports.editCategory = async (req, res) => {
+  const categoryId = req.params.id;
+
+  try {
+    const category = await Category.findById(categoryId);
+    if (!category) {
+      return res.status(400).json({});
+    }
+
+    return res.status(201).json({
+      title: "Success",
+      message: "Category edited successfully",
+    });
+  } catch (err) {
+    console.error("Category editing error : ", err);
+  }
+};

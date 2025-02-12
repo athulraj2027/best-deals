@@ -1,5 +1,39 @@
 const Product = require("../../models/Product");
 const Category = require("../../models/Category");
+const cloudinary = require("../../config/cloudinary");
+const DatauriParser = require("datauri/parser")
+const mongoose = require('mongoose')
+const parser = new DatauriParser();
+
+const bufferToDataURI = (fileFormat, buffer) => {
+  parser.format(fileFormat, buffer);
+};
+
+const uploadToCloudinary = async (file) => {
+  try {
+    const fileFormat = file.mimetype.split("/")[1];
+    const { base64 } = bufferToDataURI(fileFormat, file.buffer);
+
+    const uploadResponse = await cloudinary.uploader.upload(
+      `data:image/${fileFormat};base64,${base64}`,
+      {
+        folder: "products",
+        resource_type: "auto",
+        transformation: [
+          { width: 800, height: 800, crop: "limit" },
+          { quality: "auto" },
+          { fetch_format: "auto" },
+        ],
+      }
+    );
+    return {
+      url: uploadResponse.secure_url,
+      publicId: uploadResponse.public_id,
+    };
+  } catch (err) {
+    throw new Error(`Failed to upload image : ${error.message}`);
+  }
+};
 
 // --- Get products page
 
@@ -26,60 +60,101 @@ exports.getEditProductPage = async (req, res) => {
 //--- Post add product controller ---
 
 exports.addProductController = async (req, res) => {
-  try {
-    const { name, description, price, stock, category, status } = req.body;
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-    if (!name || !description || !price || !stock || !category) {
+  try {
+    const { productName, brand, actualPrice, category } = req.body;
+
+    if (!productName || !brand || !actualPrice || !category) {
       return res.status(400).json({
         success: false,
         message: "All fields are required.",
       });
     }
 
-    const newProduct = new Product({
-      name,
-      description,
-      price,
-      stock,
-      category,
-      status,
-      images: [],
+    let primaryImageData = null;
+
+    if (req.files.primaryImage) {
+      primaryImageData = await uploadToCloudinary(req.files.primaryImage[0]);
+    }
+
+    const product = new Product({
+      name: req.body.productName,
+      brand: req.body.brand,
+      category: req.body.category,
+      primaryImage: primaryImageData
+        ? {
+            url: primaryImageData.url,
+            publicId: primaryImageData.publicId,
+          }
+        : null,
+      status: req.body.status === "true",
     });
 
-    const uploadDir = path.join(__dirname, "public/images/products");
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
+    await product.save();
 
-    if (req.files) {
-      const imageKeys = Object.keys(req.files);
-      imageKeys.forEach((key) => {
-        const file = req.files[key];
+    const variantPromises = [];
+    if (req.body.variants && Array.isArray(req.body.variants)) {
+      for (let i = 0; i < req.body.variants.length; i++) {
+        const variant = req.body.variants[i];
+        let variantImageData = null;
 
-        if (file && file.filename) {
-          const imagePath = path.join(uploadDir, file.filename);
-          newProduct.images.push(imagePath);
-        } else {
-          console.warn(`No valid file found for key: ${key}`);
+        if (req.files[`variants[${i}][image]`]) {
+          variantImageData = await uploadToCloudinary(
+            req.files[`variants[${i}][image]`][0]
+          );
         }
-      });
-    } else {
-      console.warn("No files uploaded.");
+        const newVariant = new Variant({
+          productId: product._id,
+          color: variant.color,
+          size: variant.size,
+          price: parseFloat(variant.price),
+          quantity: parseInt(variant.quantity),
+          image: variantImageData
+            ? {
+                url: variantImageData.url,
+                publicId: variantImageData.publicId,
+              }
+            : null,
+        });
+
+        variantPromises.push(newVariant.save({ session }));
+      }
     }
 
-    await newProduct.save();
+    await Promise.all(variantPromises);
+    await session.commitTransaction();
+
+    const completeProduct = await Product.findById(product._id).populate(
+      "variants"
+    );
 
     res.status(201).json({
-      success: true,
-      message: "Product added successfully.",
-      product: newProduct,
+      status: "success",
+      message: "Product Added successfully",
+      data: completeProduct,
     });
   } catch (err) {
-    console.error(err);
+    await session.abortTransaction();
+
+    // Clean up uploaded images if product creation fails
+    if (error.uploadedImages) {
+      for (const publicId of error.uploadedImages) {
+        try {
+          await cloudinary.uploader.destroy(publicId);
+        } catch (deleteError) {
+          console.error(`Failed to delete image: ${deleteError.message}`);
+        }
+      }
+    }
+
     res.status(500).json({
-      success: false,
-      message: "An error occurred while adding the product.",
+      status: "error",
+      message: error.message,
     });
+  } finally {
+    session.endSession();
   }
 };
 

@@ -7,17 +7,12 @@ exports.getHomePage = async (req, res) => {
     // const products = await Product.find({}).limit(5);
     // const categories = await Category.find().limit(5);
 
-    const [products, categories] = await Promise.all([
-      Product.find({})
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .select("name price images description"),
-      Category.find({}).limit(5).select("name image"),
-    ]);
+    const products = await Product.find({}).limit(5);
+    const categories = await Category.find().limit(5);
 
     const isLoggedIn = req.isAuthenticated();
 
-    console.log(isLoggedIn);
+    console.log(categories);
     return res.render("userPages/homePage", {
       products,
       categories,

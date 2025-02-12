@@ -65,7 +65,7 @@
       </div>
 
       <div class="products d-flex justify-content-around">
-        <% products.filter(function(product) { return product.status === true; }).forEach(function(product) { %> <!-- Filter products with status 'unlisted' -->
+        <% products.filter(function(product) { return product.status === 'listed'; }).forEach(function(product) { %> <!-- Filter products with status 'unlisted' -->
         <div class="product-card" style="background-color: #b538cd;">
           <div class="product-image">
             <img src="<%= product.imageUrls.length > 0 ? product.imageUrls[0] : 'path_to_default_image.jpg' %>" alt="Product Image" />
@@ -88,10 +88,11 @@
       </div>
       <h3 class="text-center">Shop with Categories</h3>
       <div class="categories-list-div d-flex">
-        <% categories.filter(category => category.status === true).forEach(category => { %>  <!-- Filter and then iterate -->
+        <% categories.filter(category => category.status === 'listed').forEach(category => { %>  <!-- Filter and then iterate -->
           <div class="category-card">
             <div class="category-image">
-              <img src="/<%= category.imageUrl %>" alt="<%= category.name %> Image" />
+              <img src="/<%= category.imageUrl ? category.imageUrl : 'path_to_default_image.jpg' %>" alt="<%= category.name %> Image" />
+
             </div>
             <div class="category-name"><%= category.name %></div>
           </div>
