@@ -1,8 +1,8 @@
 const Product = require("../../models/Product");
 const Category = require("../../models/Category");
 const cloudinary = require("../../config/cloudinary");
-const DatauriParser = require("datauri/parser")
-const mongoose = require('mongoose')
+const DatauriParser = require("datauri/parser");
+const mongoose = require("mongoose");
 const parser = new DatauriParser();
 
 const bufferToDataURI = (fileFormat, buffer) => {
@@ -59,102 +59,83 @@ exports.getEditProductPage = async (req, res) => {
 
 //--- Post add product controller ---
 
+// --- functions for saving images
+
+async function processImage(buffer) {
+  return sharp(buffer)
+    .resize(800, 800, {
+      // Resize to standard size
+      fit: "contain",
+      background: { r: 255, g: 255, b: 255, alpha: 1 },
+    })
+    .jpeg({ quality: 80 }) // Convert to JPEG with 80% quality
+    .toBuffer();
+}
+
+// Helper function to save image
+async function saveImage(buffer, variantIndex, imageIndex) {
+  const fileName = `variant-${variantIndex}-${imageIndex}-${Date.now()}.jpg`;
+  const filePath = path.join(__dirname, "../public/uploads", fileName);
+
+  await fs.writeFile(filePath, buffer);
+  return `/uploads/${fileName}`;
+}
+
 exports.addProductController = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
-    const { productName, brand, actualPrice, category } = req.body;
+    const { productName, brand, actualPrice, category, status, variants } =
+      req.body;
+      const parsedVariants = typeof variants === "string" ? JSON.parse(variants) : variants;
+      const processedVariants = [];
+    console.log(req.files);
 
-    if (!productName || !brand || !actualPrice || !category) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required.",
+    for (let i = 0; i < parsedVariants.length; i++) {
+      const variant = parsedVariants[i];
+      const variantImages = req.files.filter((file) => {
+        file.fieldname === `variants[${i}][images][]`;
+      });
+
+      const processedImages = [];
+
+      for (let j = 0; j < variantImages.length; j++) {
+        const processedBuffer = await processImage(variantImages[j].buffer);
+        const imageUrl = await saveImage(processedBuffer, i, j);
+        processedImages.push({
+          url: imageUrl,
+          order: j,
+        });
+      }
+      processedVariants.push({
+        color: variant.color,
+        size: variant.size,
+        price: parseFloat(variant.price),
+        quantity: parseInt(variant.quantity),
+        images: processedImages,
       });
     }
 
-    let primaryImageData = null;
-
-    if (req.files.primaryImage) {
-      primaryImageData = await uploadToCloudinary(req.files.primaryImage[0]);
-    }
-
     const product = new Product({
-      name: req.body.productName,
-      brand: req.body.brand,
-      category: req.body.category,
-      primaryImage: primaryImageData
-        ? {
-            url: primaryImageData.url,
-            publicId: primaryImageData.publicId,
-          }
-        : null,
-      status: req.body.status === "true",
+      name: productName,
+      brand,
+      actualPrice: parseFloat(actualPrice),
+      category,
+      status: status === "true",
+      variants: processedVariants,
     });
 
     await product.save();
 
-    const variantPromises = [];
-    if (req.body.variants && Array.isArray(req.body.variants)) {
-      for (let i = 0; i < req.body.variants.length; i++) {
-        const variant = req.body.variants[i];
-        let variantImageData = null;
-
-        if (req.files[`variants[${i}][image]`]) {
-          variantImageData = await uploadToCloudinary(
-            req.files[`variants[${i}][image]`][0]
-          );
-        }
-        const newVariant = new Variant({
-          productId: product._id,
-          color: variant.color,
-          size: variant.size,
-          price: parseFloat(variant.price),
-          quantity: parseInt(variant.quantity),
-          image: variantImageData
-            ? {
-                url: variantImageData.url,
-                publicId: variantImageData.publicId,
-              }
-            : null,
-        });
-
-        variantPromises.push(newVariant.save({ session }));
-      }
-    }
-
-    await Promise.all(variantPromises);
-    await session.commitTransaction();
-
-    const completeProduct = await Product.findById(product._id).populate(
-      "variants"
-    );
-
-    res.status(201).json({
-      status: "success",
-      message: "Product Added successfully",
-      data: completeProduct,
+    res.json({
+      success: true,
+      message: "Product added successfully",
+      productId: product._id,
     });
   } catch (err) {
-    await session.abortTransaction();
-
-    // Clean up uploaded images if product creation fails
-    if (error.uploadedImages) {
-      for (const publicId of error.uploadedImages) {
-        try {
-          await cloudinary.uploader.destroy(publicId);
-        } catch (deleteError) {
-          console.error(`Failed to delete image: ${deleteError.message}`);
-        }
-      }
-    }
-
+    console.error("Error in adding product : ", err);
     res.status(500).json({
-      status: "error",
-      message: error.message,
+      success: false,
+      // message: error.message || "Error adding product",
     });
-  } finally {
-    session.endSession();
   }
 };
 
@@ -250,6 +231,43 @@ exports.editProductController = async (req, res) => {
     return res.json({
       title: "Some error occured",
       message: "Some error occured in updating product.",
+    });
+  }
+};
+
+exports.getEditVariantController = async (req, res) => {
+  const productId = req.params.id;
+  // const variantId = req.params.variantId;
+  try {
+    console.log( productId);
+    if (!productId) {
+      return res.status(400).json({
+        title: "Invalid Request",
+        message: "Variant not found",
+      });
+    }
+    const product = await Product.findOne({ _id: productId });
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    if (!product.variants || !Array.isArray(product.variants)) {
+      return res
+        .status(404)
+        .json({ message: "No variants found for this product" });
+    }
+
+    return res
+      .status(200)
+      .render("adminPages/variantPage/adminEditVariantPage", {
+        product,
+        
+      });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      title: "Server error",
+      message: "Something went wrong",
     });
   }
 };

@@ -46,10 +46,9 @@ exports.addCategoryController = async (req, res) => {
 
   const categoryImage = req.file;
   try {
-    const imageUrl = `/images/categories/${categoryImage.filename}`;
+    const imageUrl = `images/categories/${categoryImage.filename}`;
     console.log(imageUrl);
-    // const imgUrl = imageUrl.replace(/\\/g,'/')
-    // console.log(imageUrl);
+
     const mappedStatus = status === "on" ? "listed" : "unlisted";
     console.log(mappedStatus);
     const newCategory = new Category({
@@ -135,6 +134,8 @@ exports.editCategory = async (req, res) => {
     if (!category) {
       return res.status(400).json({});
     }
+
+    
 
     return res.status(201).json({
       title: "Success",

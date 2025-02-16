@@ -120,7 +120,7 @@
                 />
                 <div class="card-body">
                   <h6 class="card-title text-truncate"><%= product.name %></h6>
-                  <p class="card-text">$<%= product.price.toFixed(2) %></p>
+                  <p class="card-text">$<%= product.actualPrice %></p>
                   <a href="/product/<%= product._id %>" class="btn btn-primary btn-sm"
                     >View Details</a
                   >

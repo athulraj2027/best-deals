@@ -1,28 +1,24 @@
 const express = require("express");
 const router = express.Router();
 const productsController = require("../../controllers/admin/productsController");
-const upload = require("../../middlewares/multerMiddleware");
-
-const uploadFields = [
-  { name: "primaryImage", maxCount: 1 },
-  { name: "variants[0][image]", maxCount: 1 },
-  { name: "variants[1][image]", maxCount: 1 },
-  { name: "variants[2][image]", maxCount: 1 },
-  { name: "variants[3][image]", maxCount: 1 },
-  { name: "variants[4][image]", maxCount: 1 },
-];
+const { uploadProductImages } = require("../../middlewares/multerMiddleware");
 
 router.route("/").get(productsController.getProductsPage);
 router
   .route("/add")
   .get(productsController.getAddProductPage)
-  .post( productsController.addProductController);
+  .post(uploadProductImages.any(), productsController.addProductController);
 
 router
   .route("/edit/:id")
   .get(productsController.getEditProductPage)
   .post(productsController.editProductController);
 
-router.route("/delete/:id").post();
+router.route("/:id/variants").get(productsController.getEditVariantController).post();
 
+router.route("/unlist/:id").post(productsController.unlistProduct);
+router.route("/list/:id").post(productsController.listProduct);
+router.route("/delete/:id").post();
 module.exports = router;
+
+// /admin/products/<%= product._id %>/variants/edit/<%= variant._id %>

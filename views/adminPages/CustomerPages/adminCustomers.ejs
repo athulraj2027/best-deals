@@ -10,6 +10,7 @@
       crossorigin="anonymous"
     />
     <link rel="stylesheet" href="/adminCSS/partials/menu.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <title>Dashboard</title>
   </head>
   <body>
@@ -28,7 +29,11 @@
           <div class="d-flex justify-content-between mb-3">
             <!-- Filter by Status -->
             <form action="/admin/coupons/filter" method="GET" class="d-inline">
-              <select name="status" class="form-select" onchange="this.form.submit()">
+              <select
+                name="status"
+                class="form-select"
+                onchange="this.form.submit()"
+              >
                 <option value="">Filter by Status</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
@@ -37,11 +42,19 @@
 
             <!-- Sort by Discount or CreatedAt -->
             <form action="/admin/coupons/sort" method="GET" class="d-inline">
-              <select name="sort" class="form-select" onchange="this.form.submit()">
+              <select
+                name="sort"
+                class="form-select"
+                onchange="this.form.submit()"
+              >
                 <option value="desc">Sort by Date (Newest first)</option>
                 <option value="asc">Sort by Date (Oldest first)</option>
-                <option value="asc_discount">Sort by Discount (Ascending)</option>
-                <option value="desc_discount">Sort by Discount (Descending)</option>
+                <option value="asc_discount">
+                  Sort by Discount (Ascending)
+                </option>
+                <option value="desc_discount">
+                  Sort by Discount (Descending)
+                </option>
               </select>
             </form>
 
@@ -52,9 +65,13 @@
                 name="query"
                 placeholder="Search by code"
                 class="form-control d-inline"
-                style="width: 200px;"
+                style="width: 200px"
               />
-              <button type="submit" class="btn btn-sm ms-2" style="background-color: #f57c00; color: white;">
+              <button
+                type="submit"
+                class="btn btn-sm ms-2"
+                style="background-color: #f57c00; color: white"
+              >
                 Search
               </button>
             </form>
@@ -63,7 +80,7 @@
           <div class="card border-light">
             <div class="card-body">
               <table class="table table-bordered table-hover">
-                <thead style="background-color: #f57c00; color: white;">
+                <thead style="background-color: #f57c00; color: white">
                   <tr class="text-center">
                     <th>#</th>
                     <th>Customer Name</th>
@@ -77,60 +94,74 @@
                 <tbody>
                   <!-- Loop through customers array passed from the server -->
                   <% customers.forEach((customer, index) => { %>
-                    <tr>
-                      <td><%= index + 1 %></td>
-                      <td><%= customer.name %></td>
-                      <td><%= customer.email %></td>
-                      <td><%= customer.phone %></td>
-                      <td><%= customer.joinedDate %></td>
-                      <td><%= customer.status %></td>
-                      <td class="text-center">
-                        <a href="/admin/customers/view/<%= customer._id %>" class="btn btn-sm text-white" style="background-color: #f57c00;">
-                          View
-                        </a>
+                  <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= customer.name %></td>
+                    <td><%= customer.email %></td>
+                    <td><%= customer.phone %></td>
+                    <td><%= customer.joinedDate %></td>
+                    <td><%= customer.status %></td>
+                    <td class="text-center">
+                      <a
+                        href="/admin/customers/view/<%= customer._id %>"
+                        class="btn btn-sm text-white"
+                        style="background-color: #f57c00"
+                      >
+                        View
+                      </a>
 
-                        <% if (customer.status) { %>
-                          <!-- Block Button -->
-                          <form action="/admin/customers/block/<%= customer._id %>" method="POST" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-danger">Block</button>
-                          </form>
-                        <% } else { %>
-                          <!-- Unblock Button -->
-                          <form action="/admin/customers/unblock/<%= customer._id %>" method="POST" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-success">Unblock</button>
-                          </form>
-                        <% } %>
-                      
-                        <% if (customer.isListed) { %>
-                          <!-- Unlist Button -->
-                          <form action="/admin/customers/unlist/<%= customer._id %>" method="POST" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-warning">Unlist</button>
-                          </form>
-                        <% } else { %>
-                          <!-- List Button -->
-                          <form action="/admin/customers/list/<%= customer._id %>" method="POST" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-success">List</button>
-                          </form>
-                        <% } %>
-                      
-                      </td>
-                    </tr>
+                      <% if (customer.isActive === true) { %>
+                      <!-- Block Button -->
+                      <form
+                        action="/admin/customers/block/<%= customer._id %>"
+                        method="POST"
+                        class="d-inline"
+                      >
+                        <button type="submit" class="btn btn-sm btn-danger block-btn">
+                          Block
+                        </button>
+                      </form>
+                      <% } else if(customer.isActive === false) { %>
+                      <!-- Unblock Button -->
+                      <form
+                        action="/admin/customers/unblock/<%= customer._id %>"
+                        method="POST"
+                        class="d-inline"
+                      >
+                        <button type="submit" class="btn btn-sm btn-success unblock-btn">
+                          Unblock
+                        </button>
+                      </form>
+                      <% } %>
+                    </td>
+                  </tr>
                   <% }) %>
                   <!-- If there are no customers -->
                   <% if (customers.length === 0) { %>
-                    <tr>
-                      <td colspan="7" class="text-center">No customers found</td>
-                    </tr>
+                  <tr>
+                    <td colspan="7" class="text-center">No customers found</td>
+                  </tr>
                   <% } %>
                 </tbody>
               </table>
               <div class="d-flex justify-content-center mt-4">
                 <% if (customers.hasPrevPage) { %>
-                  <a href="/admin/customers?page=<%= customers.prevPage %>" class="btn btn-sm btn-secondary">Previous</a>
+                <a
+                  href="/admin/customers?page=<%= customers.prevPage %>"
+                  class="btn btn-sm btn-secondary"
+                  >Previous</a
+                >
                 <% } %>
-                <span class="mx-2">Page <%= customers.page %> of <%= customers.totalPages %></span>
+                <span class="mx-2"
+                  >Page <%= customers.page %> of <%= customers.totalPages
+                  %></span
+                >
                 <% if (customers.hasNextPage) { %>
-                  <a href="/admin/customers?page=<%= customers.nextPage %>" class="btn btn-sm btn-secondary">Next</a>
+                <a
+                  href="/admin/customers?page=<%= customers.nextPage %>"
+                  class="btn btn-sm btn-secondary"
+                  >Next</a
+                >
                 <% } %>
               </div>
             </div>
@@ -138,6 +169,6 @@
         </div>
       </div>
     </div>
-
+    
   </body>
 </html>

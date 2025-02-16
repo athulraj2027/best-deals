@@ -22,9 +22,9 @@ exports.listingUsersController = async (req, res) => {
 
 exports.blockCustomer = async (req, res) => {
   try {
-    const customerId = req.params.customerId;
-    await User.findByIdAndUpdate(customerId, { status: false }); // Set status to false
-    res.redirect("/admin/customers");
+    const customerId = req.params.id;
+    await User.findByIdAndUpdate(customerId, { isActive: false }); // Set status to false
+    res.status(200).redirect("/admin/customers");
   } catch (err) {
     console.error("Error blocking customer:", err);
     res.status(500).send("Internal Server Error");
@@ -33,8 +33,8 @@ exports.blockCustomer = async (req, res) => {
 
 exports.unblockCustomer = async (req, res) => {
   try {
-    const customerId = req.params.customerId;
-    await User.findByIdAndUpdate(customerId, { status: true }); // Set status to true
+    const customerId = req.params.id;
+    await User.findByIdAndUpdate(customerId, { isActive: true }); // Set status to true
     res.redirect("/admin/customers");
   } catch (err) {
     console.error("Error unblocking customer:", err);
@@ -42,25 +42,25 @@ exports.unblockCustomer = async (req, res) => {
   }
 };
 
-exports.unlistCustomer = async (req, res) => {
-  try {
-    const customerId = req.params.customerId;
-    await User.findByIdAndUpdate(customerId, { isListed: false }); // Set isListed to false
-    res.redirect("/admin/customers");
-  } catch (err) {
-    console.error("Error unlisting customer:", err);
-    res.status(500).send("Internal Server Error");
-  }
-};
+// exports.unlistCustomer = async (req, res) => {
+//   try {
+//     const customerId = req.params.customerId;
+//     await User.findByIdAndUpdate(customerId, { isListed: false }); // Set isListed to false
+//     res.redirect("/admin/customers");
+//   } catch (err) {
+//     console.error("Error unlisting customer:", err);
+//     res.status(500).send("Internal Server Error");
+//   }
+// };
 
-exports.listCustomer = async (req, res) => {
-  try {
-    const customerId = req.params.customerId;
-    console.log(customerId);
-    await User.findByIdAndUpdate(customerId, { isListed: true }); // Set isListed to true
-    res.redirect("/admin/customers");
-  } catch (err) {
-    console.error("Error listing customer:", err);
-    res.status(500).send("Internal Server Error");
-  }
-};
+// exports.listCustomer = async (req, res) => {
+//   try {
+//     const customerId = req.params.customerId;
+//     console.log(customerId);
+//     await User.findByIdAndUpdate(customerId, { isListed: true }); // Set isListed to true
+//     res.redirect("/admin/customers");
+//   } catch (err) {
+//     console.error("Error listing customer:", err);
+//     res.status(500).send("Internal Server Error");
+//   }
+// };

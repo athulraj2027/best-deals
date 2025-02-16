@@ -1,6 +1,31 @@
 const mongoose = require("mongoose");
 
-// Product Schema
+const variantSchema = new mongoose.Schema({
+  color: {
+    type: String,
+    required: true,
+  },
+  size: {
+    type: String,
+    required: true,
+  },
+  price: {
+    type: Number,
+    required: true,
+  },
+  quantity: {
+    type: Number,
+    required: true,
+    min: 0,
+  },
+  images: [
+    {
+      type: String,
+      required: true,
+    },
+  ],
+});
+
 const productSchema = new mongoose.Schema(
   {
     name: {
@@ -13,92 +38,30 @@ const productSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    // price: {
-    //   type: Number,
-    //   required: true,
-    //   min: 0,
-    // // },
-    // category: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "Category", // Reference to the Category model
-    //   required: true,
-    // },
-
-    // stock: {
-    //   type: Number,
-    //   required: true,
-    //   min: 0,
-    // },
-
-    primaryImage: {
+    actualPrice: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    category: {
       type: String,
       required: true,
+      enum: ["men", "women", "kids"],
     },
-
-    // ratings: [
-    //   {
-    //     user: {
-    //       type: mongoose.Schema.Types.ObjectId,
-    //       ref: "User", // Reference to the User model who gave the rating
-    //       required: true,
-    //     },
-    //     rating: {
-    //       type: Number,
-    //       required: true,
-    //       min: 1,
-    //       max: 5,
-    //     },
-    //     comment: {
-    //       type: String,
-    //       trim: true,
-    //     },
-    //     createdAt: {
-    //       type: Date,
-    //       default: Date.now,
-    //     },
-    //   },
-    // ],
-
-    // status: {
-    //   type: Boolean,
-    //   required: true,
-    //   default: true,
-    // },
-
-    // discount: {
-    //   type: Number,
-    //   min: 0,
-    //   max: 100,
-    //   default: 0,
-    // },
-
-    actualPrice:{
-      type:Number,
-      required:true,
-      min:0,
-      default:0
-    },
-
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-
-    updatedAt: {
-      type: Date,
-      default: Date.now,
+    variants: [variantSchema],
+    status: {
+      type: Boolean,
+      default: true, // true for Listed, false for Unlisted
     },
   },
   {
-    timestamps: true, // Automatically adds createdAt and updatedAt fields
+    timestamps: true, // Adds createdAt and updatedAt fields automatically
   }
 );
 
-productSchema.virtual("variants", {
-  ref: "Variant",
-  localField: "_id",
-  foreignField: "productId",
-});
+// Create indexes for better search performance
+productSchema.index({ name: "text", brand: "text" });
 
-// Product model
-module.exports = mongoose.model("Product", productSchema);
+const Product = mongoose.model("Product", productSchema);
+
+module.exports = Product;
