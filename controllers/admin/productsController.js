@@ -4,7 +4,9 @@ const cloudinary = require("../../config/cloudinary");
 const DatauriParser = require("datauri/parser");
 const mongoose = require("mongoose");
 const parser = new DatauriParser();
-
+const sharp = require('sharp')
+const path = require('path')
+const fs = require('fs').promises
 const bufferToDataURI = (fileFormat, buffer) => {
   parser.format(fileFormat, buffer);
 };
@@ -75,14 +77,15 @@ async function processImage(buffer) {
 // Helper function to save image
 async function saveImage(buffer, variantIndex, imageIndex) {
   const fileName = `variant-${variantIndex}-${imageIndex}-${Date.now()}.jpg`;
-  const filePath = path.join(__dirname, "../public/uploads", fileName);
-
+  const filePath = path.join(__dirname, "../../public/images/products/", fileName);
+console.log('filepath : ',filePath)
   await fs.writeFile(filePath, buffer);
-  return `/uploads/${fileName}`;
+  return `/images/products/${fileName}`;
 }
 
 exports.addProductController = async (req, res) => {
   try {
+    console.log('Hi the addproductController is working')
     const { productName, brand, actualPrice, category, status, variants } =
       req.body;
       const parsedVariants = typeof variants === "string" ? JSON.parse(variants) : variants;
@@ -91,9 +94,9 @@ exports.addProductController = async (req, res) => {
 
     for (let i = 0; i < parsedVariants.length; i++) {
       const variant = parsedVariants[i];
-      const variantImages = req.files.filter((file) => {
-        file.fieldname === `variants[${i}][images][]`;
-      });
+      const variantImages = req.files.filter((file) => 
+        file.fieldname === `variants[${i}][images][]`
+      );
 
       const processedImages = [];
 
@@ -105,6 +108,8 @@ exports.addProductController = async (req, res) => {
           order: j,
         });
       }
+      console.log("processedImages : ", processedImages);
+      
       processedVariants.push({
         color: variant.color,
         size: variant.size,

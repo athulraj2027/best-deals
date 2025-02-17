@@ -20,8 +20,8 @@ const variantSchema = new mongoose.Schema({
   },
   images: [
     {
-      type: String,
-      required: true,
+      url: String, // Store image URL
+      order: Number, // Store the order of the image
     },
   ],
 });
