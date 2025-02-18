@@ -1,4 +1,3 @@
-<!-- views/edit-product.ejs -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -11,12 +10,120 @@
             margin-bottom: 15px;
             border-radius: 5px;
         }
+        .image-preview-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .image-preview-wrapper {
+            position: relative;
+            width: 150px;
+            height: 150px;
+        }
+        .image-preview {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .image-order {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .remove-image {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 2px 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .drag-drop-zone {
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 10px;
+            background: #f8f9fa;
+            cursor: pointer;
+        }
+        .drag-drop-zone.dragover {
+            background: #e9ecef;
+            border-color: #0d6efd;
+        }
+        .image-preview-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 10px;
+    }
+    
+    .existing-image-wrapper {
+        position: relative;
+        width: 150px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 5px;
+    }
+    
+    .image-preview {
+        width: 140px;
+        height: 140px;
+        object-fit: cover;
+        border-radius: 3px;
+    }
+    
+    .image-number {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 3px;
+        font-size: 12px;
+    }
+    
+    .delete-image {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 2px 8px;
+        font-size: 12px;
+    }
+
+    .new-image-preview-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .new-image-wrapper {
+        position: relative;
+        width: 150px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 5px;
+    }
     </style>
 </head>
 <body>
     <div class="container mt-5">
         <h2>Edit Product</h2>
-        <form action="/products/edit/<%= product._id %>" method="POST">
+        <form action="/products/edit/<%= product._id %>" method="POST" enctype="multipart/form-data">
+            <!-- Existing product fields -->
             <div class="mb-3">
                 <label class="form-label">Name</label>
                 <input type="text" class="form-control" name="name" value="<%= product.name %>" required>
@@ -51,27 +158,67 @@
 
             <div id="variants-container">
                 <h4>Variants</h4>
-                <% product.variants.forEach((variant, index) => { %>
-                    <div class="variant-container">
+                <% product.variants.forEach((variant, variantIndex) => { %>
+                    <div class="variant-container" data-variant-index="<%= variantIndex %>">
                         <div class="row">
                             <div class="col-md-3">
                                 <label class="form-label">Color</label>
-                                <input type="text" class="form-control" name="variants[color]" value="<%= variant.color %>" required>
+                                <input type="text" class="form-control" name="variants[<%= variantIndex %>][color]" value="<%= variant.color %>" required>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Size</label>
-                                <input type="text" class="form-control" name="variants[size]" value="<%= variant.size %>" required>
+                                <input type="text" class="form-control" name="variants[<%= variantIndex %>][size]" value="<%= variant.size %>" required>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Price</label>
-                                <input type="number" class="form-control" name="variants[price]" value="<%= variant.price %>" required>
+                                <input type="number" class="form-control" name="variants[<%= variantIndex %>][price]" value="<%= variant.price %>" required>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Quantity</label>
-                                <input type="number" class="form-control" name="variants[quantity]" value="<%= variant.quantity %>" required>
+                                <input type="number" class="form-control" name="variants[<%= variantIndex %>][quantity]" value="<%= variant.quantity %>" required>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-danger btn-sm mt-2 remove-variant">Remove Variant</button>
+                        
+                        <!-- Existing Images Section -->
+                        <div class="mt-3">
+                            <label class="form-label">Current Images</label>
+                            <div class="image-preview-container">
+                                <% if (variant.images && variant.images.length > 0) { %>
+                                    <% variant.images.forEach((image, imageIndex) => { %>
+                                        <div class="existing-image-wrapper">
+                                            <img src="<%= image.url %>" class="image-preview" alt="Variant image <%= imageIndex + 1 %>">
+                                            <span class="image-number">Image <%= imageIndex + 1 %></span>
+                                            <button type="button" class="btn btn-danger btn-sm delete-image" 
+                                                    data-variant-index="<%= variantIndex %>" 
+                                                    data-image-index="<%= imageIndex %>">
+                                                Remove
+                                            </button>
+                                            <!-- Hidden input to track existing images -->
+                                            <input type="hidden" 
+                                                   name="variants[<%= variantIndex %>][existingImages][<%= imageIndex %>]" 
+                                                   value="<%= image.url %>">
+                                        </div>
+                                    <% }); %>
+                                <% } else { %>
+                                    <p class="text-muted">No images uploaded yet</p>
+                                <% } %>
+                            </div>
+                        </div>
+            
+                        <!-- New Images Upload Section -->
+                        <div class="mt-3">
+                            <label class="form-label">Add New Images (Max 3 total)</label>
+                            <input type="file" 
+                                   class="form-control" 
+                                   name="variants[<%= variantIndex %>][newImages]" 
+                                   multiple 
+                                   accept="image/*"
+                                   data-variant-index="<%= variantIndex %>"
+                                   onchange="previewNewImages(this)">
+                            <div class="new-image-preview-container mt-2" id="newImagePreview-<%= variantIndex %>"></div>
+                        </div>
+            
+                        <button type="button" class="btn btn-danger btn-sm mt-3 remove-variant">Remove Variant</button>
                     </div>
                 <% }); %>
             </div>
@@ -85,38 +232,189 @@
     </div>
 
     <script>
+        // Initialize drag and drop for existing variants
+        document.querySelectorAll('.drag-drop-zone').forEach(initializeDragDrop);
+        
+        function initializeDragDrop(dropZone) {
+            const variantIndex = dropZone.id.split('-').pop();
+            const fileInput = document.getElementById(`file-input-${variantIndex}`);
+            
+            dropZone.addEventListener('click', () => fileInput.click());
+            
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+            
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('dragover');
+            });
+            
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                handleFiles(e.dataTransfer.files, variantIndex);
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files, variantIndex);
+            });
+        }
+
+        function handleFiles(files, variantIndex) {
+            const previewContainer = document.getElementById(`image-preview-${variantIndex}`);
+            const currentImages = previewContainer.querySelectorAll('.image-preview-wrapper').length;
+            
+            if (currentImages + files.length > 3) {
+                alert('Maximum 3 images allowed per variant');
+                return;
+            }
+
+            Array.from(files).forEach((file, index) => {
+                if (!file.type.startsWith('image/')) {
+                    alert('Please upload only images');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'image-preview-wrapper';
+                    wrapper.dataset.order = currentImages + index;
+                    
+                    wrapper.innerHTML = `
+                        <img src="${e.target.result}" class="image-preview" alt="Variant image">
+                        <span class="image-order">Image ${currentImages + index + 1}</span>
+                        <button type="button" class="remove-image" data-variant="${variantIndex}" data-image="${currentImages + index}">×</button>
+                        <input type="hidden" name="variants[${variantIndex}][images][${currentImages + index}][url]" value="${e.target.result}">
+                        <input type="hidden" name="variants[${variantIndex}][images][${currentImages + index}][order]" value="${currentImages + index}">
+                    `;
+                    
+                    previewContainer.appendChild(wrapper);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Add new variant functionality
         document.getElementById('add-variant').addEventListener('click', function() {
+            const variantIndex = document.querySelectorAll('.variant-container').length;
             const container = document.createElement('div');
             container.className = 'variant-container';
+            container.dataset.variantIndex = variantIndex;
+            
             container.innerHTML = `
                 <div class="row">
                     <div class="col-md-3">
                         <label class="form-label">Color</label>
-                        <input type="text" class="form-control" name="variants[color]" required>
+                        <input type="text" class="form-control" name="variants[${variantIndex}][color]" required>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Size</label>
-                        <input type="text" class="form-control" name="variants[size]" required>
+                        <input type="text" class="form-control" name="variants[${variantIndex}][size]" required>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Price</label>
-                        <input type="number" class="form-control" name="variants[price]" required>
+                        <input type="number" class="form-control" name="variants[${variantIndex}][price]" required>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Quantity</label>
-                        <input type="number" class="form-control" name="variants[quantity]" required>
+                        <input type="number" class="form-control" name="variants[${variantIndex}][quantity]" required>
                     </div>
                 </div>
+                
+                <div class="mt-3">
+                    <label class="form-label">Images (Max 3)</label>
+                    <div class="image-preview-container" id="image-preview-${variantIndex}"></div>
+                    <div class="drag-drop-zone" id="drop-zone-${variantIndex}">
+                        <p class="mb-0">Drag & drop images here or click to select</p>
+                        <input type="file" class="d-none" id="file-input-${variantIndex}" 
+                               accept="image/*" multiple data-variant="${variantIndex}">
+                    </div>
+                </div>
+                
                 <button type="button" class="btn btn-danger btn-sm mt-2 remove-variant">Remove Variant</button>
             `;
+            
             document.getElementById('variants-container').appendChild(container);
+            initializeDragDrop(container.querySelector('.drag-drop-zone'));
         });
 
+        // Remove variant
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('remove-variant')) {
                 e.target.closest('.variant-container').remove();
             }
+            if (e.target.classList.contains('remove-image')) {
+                e.target.closest('.image-preview-wrapper').remove();
+            }
         });
+        document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('delete-image')) {
+            if(confirm('Are you sure you want to remove this image?')) {
+                const wrapper = e.target.closest('.existing-image-wrapper');
+                const variantIndex = e.target.dataset.variantIndex;
+                const imageIndex = e.target.dataset.imageIndex;
+                
+                // Add hidden input to track deleted images
+                const deletedInput = document.createElement('input');
+                deletedInput.type = 'hidden';
+                deletedInput.name = `variants[${variantIndex}][deletedImages][]`;
+                deletedInput.value = wrapper.querySelector('input[type="hidden"]').value;
+                wrapper.closest('.variant-container').appendChild(deletedInput);
+                
+                wrapper.remove();
+            }
+        }
+    });
+    function previewNewImages(input) {
+        const variantIndex = input.dataset.variantIndex;
+        const previewContainer = document.getElementById(`newImagePreview-${variantIndex}`);
+        const existingImagesCount = input.closest('.variant-container')
+            .querySelectorAll('.existing-image-wrapper').length;
+
+        previewContainer.innerHTML = '';
+
+        if (input.files) {
+            if (existingImagesCount + input.files.length > 3) {
+                alert(`You can only have 3 images total. You currently have ${existingImagesCount} images.`);
+                input.value = '';
+                return;
+            }
+
+            Array.from(input.files).forEach((file, index) => {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'new-image-wrapper';
+                    wrapper.innerHTML = `
+                        <img src="${e.target.result}" class="image-preview" alt="New image preview">
+                        <span class="image-number">New Image ${index + 1}</span>
+                        <button type="button" class="btn btn-danger btn-sm delete-image" 
+                                onclick="removeNewImage(this, ${variantIndex})">
+                            Remove
+                        </button>
+                    `;
+                    previewContainer.appendChild(wrapper);
+                };
+
+                reader.readAsDataURL(file);
+            });
+        }
+    }
+
+    function removeNewImage(button, variantIndex) {
+        const wrapper = button.closest('.new-image-wrapper');
+        wrapper.remove();
+        
+        const fileInput = document.querySelector(`input[type="file"][data-variant-index="${variantIndex}"]`);
+        fileInput.value = '';
+    }
+
+    document.getElementById('add-variant').addEventListener('click', function() {
+        const variantIndex = document.querySelectorAll('.variant-container').length;
+    });
     </script>
 </body>
 </html>
