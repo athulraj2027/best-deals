@@ -4,9 +4,9 @@ const cloudinary = require("../../config/cloudinary");
 const DatauriParser = require("datauri/parser");
 const mongoose = require("mongoose");
 const parser = new DatauriParser();
-const sharp = require('sharp')
-const path = require('path')
-const fs = require('fs').promises
+const sharp = require("sharp");
+const path = require("path");
+const fs = require("fs").promises;
 const bufferToDataURI = (fileFormat, buffer) => {
   parser.format(fileFormat, buffer);
 };
@@ -77,25 +77,30 @@ async function processImage(buffer) {
 // Helper function to save image
 async function saveImage(buffer, variantIndex, imageIndex) {
   const fileName = `variant-${variantIndex}-${imageIndex}-${Date.now()}.jpg`;
-  const filePath = path.join(__dirname, "../../public/images/products/", fileName);
-console.log('filepath : ',filePath)
+  const filePath = path.join(
+    __dirname,
+    "../../public/images/products/",
+    fileName
+  );
+  console.log("filepath : ", filePath);
   await fs.writeFile(filePath, buffer);
   return `/images/products/${fileName}`;
 }
 
 exports.addProductController = async (req, res) => {
   try {
-    console.log('Hi the addproductController is working')
+    // console.log("Hi the addproductController is working");
     const { productName, brand, actualPrice, category, status, variants } =
       req.body;
-      const parsedVariants = typeof variants === "string" ? JSON.parse(variants) : variants;
-      const processedVariants = [];
+    const parsedVariants =
+      typeof variants === "string" ? JSON.parse(variants) : variants;
+    const processedVariants = [];
     console.log(req.files);
 
     for (let i = 0; i < parsedVariants.length; i++) {
       const variant = parsedVariants[i];
-      const variantImages = req.files.filter((file) => 
-        file.fieldname === `variants[${i}][images][]`
+      const variantImages = req.files.filter(
+        (file) => file.fieldname === `variants[${i}][images][]`
       );
 
       const processedImages = [];
@@ -109,7 +114,7 @@ exports.addProductController = async (req, res) => {
         });
       }
       console.log("processedImages : ", processedImages);
-      
+
       processedVariants.push({
         color: variant.color,
         size: variant.size,
@@ -206,30 +211,48 @@ exports.unlistProduct = async (req, res) => {
 
 exports.editProductController = async (req, res) => {
   const productId = req.params.id;
-  const { name, description, price, stock } = req.body;
-  console.log(req.body);
   try {
-    if (!name || !description || !price || !stock) {
-      return res.status(400).json({
-        title: "error",
-        text: "Please fill all columns",
-      });
+    const {
+      name,
+      brand,
+      actualPrice,
+      category,
+      status,
+      variants: variantsJson,
+      deletedImages,
+    } = req.body;
+
+    const variants = JSON.parse(variantsJson);
+
+    const existingProduct = await Product.findById(productId);
+    if (!existingProduct) {
+      return res.status(404).json({ message: "Product not found" });
     }
-    const product = await Product.findByIdAndUpdate(
-      productId,
-      { name, description, price, stock },
-      { new: true }
-    );
-    if (!product) {
-      return res.status(404).json({
-        status: "error",
-        message: "Product not found",
-      });
+    if (deletedImages) {
+      const deletedImagesList = Array.isArray(deletedImages)
+        ? deletedImages
+        : [deletedImages];
+      for (const imagePath of deleteImagesList) {
+        try {
+          const fullPath = path.join(process.cwd(), "public", imagePath);
+          await fs.unlink(fullPath);
+        } catch (err) {
+          console.error("Error deleting image : ", error);
+        }
+      }
     }
-    console.log("there is a product");
-    return res.status(200).json({
-      title: "success",
-      message: "Product updated successfully",
+    const processedVariants = variants.map((variant, variantImages) => {
+      const existingImages = variant.existingImages
+        ? Array.isArray(variant.existingImages)
+        : [variant.existingImages];
+      const newImages = req.files
+        .filter(
+          (file) => file.fieldname === `variants[${variantIndex}][newImages]`
+        )
+        .map((file, index) => ({
+          url: `/images/products/${file.filename}`,
+          order: existingImages.length + index,
+        }));
     });
   } catch (err) {
     console.log(err);
@@ -244,7 +267,7 @@ exports.getEditVariantController = async (req, res) => {
   const productId = req.params.id;
   // const variantId = req.params.variantId;
   try {
-    console.log( productId);
+    console.log(productId);
     if (!productId) {
       return res.status(400).json({
         title: "Invalid Request",
@@ -266,7 +289,6 @@ exports.getEditVariantController = async (req, res) => {
       .status(200)
       .render("adminPages/variantPage/adminEditVariantPage", {
         product,
-        
       });
   } catch (err) {
     console.log(err);

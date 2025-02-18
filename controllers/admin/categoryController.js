@@ -41,7 +41,7 @@ exports.getEditCategoryPage = async (req, res) => {
 
 exports.addCategoryController = async (req, res) => {
   console.log("Category controller working");
-  const { categoryName, status, categoryTags } = req.body;
+  const { categoryName, status } = req.body;
   console.log(req.body);
 
   const categoryImage = req.file;
@@ -128,16 +128,34 @@ exports.listCategory = async (req, res) => {
 
 exports.editCategory = async (req, res) => {
   const categoryId = req.params.id;
-
+  const { name, status } = req.body;
+  // console.log("edit category controller working");
+if(!name||!status){
+  return res.status(400).json({
+    title:"Error",
+    message:"Please fill all the fields"
+  })
+}
   try {
-    const category = await Category.findById(categoryId);
+    const category = await Category.findOne({_id:categoryId});
     if (!category) {
-      return res.status(400).json({});
+      console.log("no category found");
+      return res.status(400).json({
+        title: "error",
+        message: "No category found",
+      });
+    }
+    category.name = name;
+    category.status = status;
+    // category.tags = tags.split(','.map())
+
+    if (req.file) {
+      category.imageUrl = `images/categories/${req.file.filename}`;
     }
 
-    
+    await category.save();
 
-    return res.status(201).json({
+    return res.status(200).json({
       title: "Success",
       message: "Category edited successfully",
     });

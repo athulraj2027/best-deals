@@ -1,19 +1,6 @@
 const multer = require("multer");
 const path = require("path");
 const storage = multer.memoryStorage();
-// const upload = multer({
-//     storage:storage,
-//     limits:{
-//         fileSize:5*1024*1024
-//     },
-//     fileFilter:(req,file,cb)=>{
-//         if(file.mimetype.startsWith('image/')){
-//             cb(null,true)
-//         } else{
-//             cb(new Error('Not an image!! Please upload an image'),false)
-//         }
-//     }
-// })
 
 const categoryStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -38,7 +25,7 @@ const uploadCategoryImages = multer({
 }).single("categoryImage");
 
 const uploadProductImages =  multer({
-  storage: storage,
+  storage: productStorage,
   limits: {
       fileSize: 5 * 1024 * 1024, // 5MB limit
   },
@@ -51,6 +38,8 @@ const uploadProductImages =  multer({
       }
   }
 });
+
+
 module.exports = {
   uploadCategoryImages,
   uploadProductImages,

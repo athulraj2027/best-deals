@@ -14,6 +14,6 @@ router
 router
   .route("/edit/:id")
   .get(categoryController.getEditCategoryPage)
-  .post(categoryController.editCategory);
+  .post(uploadCategoryImages,categoryController.editCategory);
 
 module.exports = router;
