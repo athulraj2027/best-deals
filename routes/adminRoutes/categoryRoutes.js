@@ -6,6 +6,7 @@ const { uploadCategoryImages } = require("../../middlewares/multerMiddleware");
 router.route("/unlist/:id").post(categoryController.unlistCategory);
 router.route("/").get(categoryController.getCategoriesPage);
 router.route("/list/:id").post(categoryController.listCategory);
+
 router
   .route("/add")
   .get(categoryController.getAddCategoriesPage)
@@ -14,6 +15,6 @@ router
 router
   .route("/edit/:id")
   .get(categoryController.getEditCategoryPage)
-  .post(uploadCategoryImages,categoryController.editCategory);
+  .post(uploadCategoryImages, categoryController.editCategory);
 
 module.exports = router;

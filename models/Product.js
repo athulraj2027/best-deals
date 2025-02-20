@@ -44,9 +44,9 @@ const productSchema = new mongoose.Schema(
       min: 0,
     },
     category: {
-      type: String,
-      required: true,
-      enum: ["men", "women", "kids"],
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category',
+      required: true
     },
     variants: [variantSchema],
     status: {

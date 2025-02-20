@@ -64,21 +64,30 @@
         <p>ending soon</p>
       </div>
 
-      <div class="products d-flex justify-content-around">
-        <% products.filter(function(product) { return product.status === 'listed'; }).slice(0, 5).forEach(function(product) { %> <!-- Filter products with status 'unlisted' -->
-        <div class="product-card" style="background-color: #b538cd;">
-          <div class="product-image">
-            <img src="<%= product.imageUrls.length > 0 ? product.imageUrls[0] : 'path_to_default_image.jpg' %>" alt="Product Image" />
-          </div>
-          <div class="product-info">
-            <div class="product-name"><%= product.name %></div>
-            <div class="product-description">
-              $<%= product.price %>
+      <div class="products d-flex justify-content-around flex-wrap">
+        <% products.forEach(function(product) { %>
+          <div class="product-card" style="background-color: #b538cd; width: 220px; margin: 10px;">
+            <div class="product-image">
+              <img 
+                src="<%= product.imageUrl %>" 
+                alt="<%= product.name %>" 
+                onerror="this.src='/images/product-placeholder.jpg'"
+              />
             </div>
-            <a href="/product/<%= product._id %>" class="product-btn">Buy Now</a>
+            <div class="product-info">
+              <div class="product-name"><%= product.name %></div>
+              <div class="product-description">$<%= product.price.toFixed(2) %></div>
+              <div class="product-brand text-white-50 mb-2"><%= product.brand %></div>
+              <a href="/product/<%= product._id %>" class="product-btn">Buy Now</a>
+            </div>
           </div>
-        </div>
         <% }); %>
+      </div>
+      
+      
+      <div class="browse-products text-center text-decoration-none text-dark">
+        <a href="/shop">Browse all products</a>
+        <hr />
       </div>
       
 

@@ -12,9 +12,19 @@ router
 router
   .route("/edit/:id")
   .get(productsController.getEditProductPage)
-  .post(productsController.editProductController);
+  .post(
+    uploadProductImages.fields([
+      { name: "variants[0][newImages]", maxCount: 3 },
+      { name: "variants[1][newImages]", maxCount: 3 },
+      { name: "variants[2][newImages]", maxCount: 3 },
+    ]),
+    productsController.editProductController
+  );
 
-router.route("/:id/variants").get(productsController.getEditVariantController).post();
+router
+  .route("/:id/variants")
+  .get(productsController.getEditVariantController)
+  .post();
 
 router.route("/unlist/:id").post(productsController.unlistProduct);
 router.route("/list/:id").post(productsController.listProduct);
