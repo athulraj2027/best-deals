@@ -23,7 +23,11 @@
         <div class="col-md-10">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="text-dark">Categories</h1>
-            <a href="/admin/categories/add" class="btn text-white" style="background-color: #f57c00;">
+            <a
+              href="/admin/categories/add"
+              class="btn text-white"
+              style="background-color: #f57c00"
+            >
               Add Category
             </a>
           </div>
@@ -31,8 +35,16 @@
           <!-- Filter, Sort, and Search Options -->
           <div class="d-flex justify-content-between mb-3">
             <!-- Filter by Status -->
-            <form action="/admin/categories/filter" method="GET" class="d-inline">
-              <select name="status" class="form-select" onchange="this.form.submit()">
+            <form
+              action="/admin/categories/filter"
+              method="GET"
+              class="d-inline"
+            >
+              <select
+                name="status"
+                class="form-select"
+                onchange="this.form.submit()"
+              >
                 <option value="">Filter by Status</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
@@ -41,7 +53,11 @@
 
             <!-- Sort by CreatedAt -->
             <form action="/admin/categories/sort" method="GET" class="d-inline">
-              <select name="sort" class="form-select" onchange="this.form.submit()">
+              <select
+                name="sort"
+                class="form-select"
+                onchange="this.form.submit()"
+              >
                 <option value="desc">Sort by Date (Newest first)</option>
                 <option value="asc">Sort by Date (Oldest first)</option>
                 <option value="asc_name">Sort by Name (Ascending)</option>
@@ -50,15 +66,25 @@
             </form>
 
             <!-- Search by Name -->
-            <form action="/admin/categories/search" method="GET" class="d-inline">
+            <form
+              action="/admin/categories/search"
+              method="GET"
+              class="d-inline"
+            >
               <input
                 type="text"
                 name="query"
                 placeholder="Search by name"
                 class="form-control d-inline"
-                style="width: 200px;"
+                style="width: 200px"
               />
-              <button type="submit" class="btn btn-sm ms-2" style="background-color: #f57c00;color: white;">Search</button>
+              <button
+                type="submit"
+                class="btn btn-sm ms-2"
+                style="background-color: #f57c00; color: white"
+              >
+                Search
+              </button>
             </form>
           </div>
 
@@ -66,7 +92,7 @@
           <div class="card border-light">
             <div class="card-body">
               <table class="table table-bordered table-hover">
-                <thead style="background-color: #f57c00; color: white;">
+                <thead style="background-color: #f57c00; color: white">
                   <tr class="text-center">
                     <th>SI.No</th>
                     <th>Name</th>
@@ -77,29 +103,47 @@
                 </thead>
                 <tbody>
                   <% categories.forEach((category, index) => { %>
-                    <tr>
-                      <td><%= index + 1 %></td>
-                      <td><%= category.name %></td>
-                      <!-- Show 'Listed' for true and 'Inactive' for false -->
-                      <td><%= category.status  %></td>
-                      <td><%= new Date(category.createdAt).toLocaleDateString() %></td>
-                      <td class="text-center">
-                        <a href="/admin/categories/edit/<%= category._id %>" class="btn btn-sm text-white" style="background-color: #f57c00;">
-                          Edit
-                        </a>
-                        <% if (category.status=== 'listed' ) { %>
-                          <!-- Unlist Button -->
-                          <form action="/admin/categories/unlist/<%= category._id %>" method="POST" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-warning">Unlist</button>
-                          </form>
-                        <% } else { %>
-                          <!-- List Button -->
-                          <form action="/admin/categories/list/<%= category._id %>" method="POST" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-success">List</button>
-                          </form>
-                        <% } %>
-                      </td>
-                    </tr>
+                  <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= category.name %></td>
+                    <!-- Show 'Listed' for true and 'Inactive' for false -->
+                    <td><%= category.status %></td>
+                    <td>
+                      <%= new Date(category.createdAt).toLocaleDateString() %>
+                    </td>
+                    <td class="text-center">
+                      <a
+                        href="/admin/categories/edit/<%= category._id %>"
+                        class="btn btn-sm text-white"
+                        style="background-color: #f57c00"
+                      >
+                        Edit
+                      </a>
+                      <% if (category.status=== 'listed' ) { %>
+                      <!-- Unlist Button -->
+                      <form
+                        action="/admin/categories/unlist/<%= category._id %>"
+                        method="POST"
+                        class="d-inline"
+                      >
+                        <button type="submit" class="btn btn-sm btn-warning">
+                          Unlist
+                        </button>
+                      </form>
+                      <% } else { %>
+                      <!-- List Button -->
+                      <form
+                        action="/admin/categories/list/<%= category._id %>"
+                        method="POST"
+                        class="d-inline"
+                      >
+                        <button type="submit" class="btn btn-sm btn-success">
+                          List
+                        </button>
+                      </form>
+                      <% } %>
+                    </td>
+                  </tr>
                   <% }); %>
                 </tbody>
               </table>
@@ -110,20 +154,35 @@
     </div>
     <div class="pagination">
       <% if (currentPage > 1) { %>
-        <a href="/admin/categories?page=<%= currentPage - 1 %>&limit=<%= limit %>">Previous</a>
+      <a href="/admin/categories?page=<%= currentPage - 1 %>&limit=<%= limit %>"
+        >Previous</a
+      >
+      <% } %> <% for (let i = 1; i <= totalPages; i++) { %>
+      <a
+        href="/admin/categories?page=<%= i %>&limit=<%= limit %>"
+        class="<%= i === currentPage ? 'active' : '' %>"
+      >
+        <%= i %>
+      </a>
+      <% } %> <% if (currentPage < totalPages) { %>
+      <a href="/admin/categories?page=<%= currentPage + 1 %>&limit=<%= limit %>"
+        >Next</a
+      >
       <% } %>
-    
-      <% for (let i = 1; i <= totalPages; i++) { %>
-        <a
-          href="/admin/categories?page=<%= i %>&limit=<%= limit %>"
-          class="<%= i === currentPage ? 'active' : '' %>"
-        >
-          <%= i %>
-        </a>
+    </div>
+    <div class="pagination">
+      <% if (currentPage > 1) { %>
+      <a href="/admin/categories?page=<%= currentPage - 1 %>&limit=<%= limit %>"
+        >Previous</a
+      >
       <% } %>
-    
+
+      <span>Page <%= currentPage %> of <%= totalPages %></span>
+
       <% if (currentPage < totalPages) { %>
-        <a href="/admin/categories?page=<%= currentPage + 1 %>&limit=<%= limit %>">Next</a>
+      <a href="/admin/categories?page=<%= currentPage + 1 %>&limit=<%= limit %>"
+        >Next</a
+      >
       <% } %>
     </div>
   </body>

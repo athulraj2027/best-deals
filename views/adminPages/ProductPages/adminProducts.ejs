@@ -99,7 +99,7 @@
                     <td><%= product.name %></td>
                     <td><%= product.brand %></td>
                     <td>$<%= product.actualPrice.toFixed(2) %></td>
-                    <td><%= product.category %></td>
+                    <td><%= product.category.name %></td>
                     <td class="text-center">
                       <!-- Variants count with dropdown toggle -->
                       <div class="dropdown">
@@ -135,7 +135,6 @@
                       >
                         Edit
                       </a>
-                     
 
                       <% if (product.status) { %>
                       <form
@@ -171,6 +170,14 @@
           </div>
         </div>
       </div>
+    </div>
+    <div>
+      <% if (hasPrevPage) { %>
+      <a href="/admin/products?page=<%= prevPage %>&limit=10">Previous</a>
+      <% } %> Page <%= currentPage %> of <%= totalPages %> <% if (hasNextPage) {
+      %>
+      <a href="/admin/products?page=<%= nextPage %>&limit=10">Next</a>
+      <% } %>
     </div>
 
     <!-- Bootstrap JS and dependencies -->

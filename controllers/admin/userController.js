@@ -18,10 +18,25 @@ exports.viewUser = async (req, res) => {
 
 exports.viewUsersPage = async (req, res) => {
   try {
-    const customers = await User.find();
-    res
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 10; // Default to 10 users per page
+    const skip = (page - 1) * limit;
+
+    const customers = await User.find().skip(skip).limit(limit);
+    const totalCustomers = await User.countDocuments(); // Total users count
+    const totalPages = Math.ceil(totalCustomers / limit);
+
+    return res
       .status(statusCodes.SUCCESS)
-      .render("adminPages/CustomerPages/adminCustomers", { customers });
+      .render("adminPages/CustomerPages/adminCustomers", {
+        customers,
+        currentPage: page,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+        nextPage: page + 1,
+        prevPage: page - 1,
+      });
   } catch (error) {
     console.error(error);
     return res.status(statusCodes.SERVER_ERROR).redirect("/admin/dashboard");
@@ -32,7 +47,6 @@ exports.listingUsersController = async (req, res) => {
   const customerId = req.params.id;
   const customer = await User.findById(customerId);
   try {
-    
   } catch (err) {
     console.log(err);
     return res.status(statusCodes.SERVER_ERROR).redirect("/admin/dashboard");

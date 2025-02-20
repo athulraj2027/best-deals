@@ -42,11 +42,28 @@ const uploadToCloudinary = async (file) => {
 
 exports.getProductsPage = async (req, res) => {
   try {
-    const products = await Product.find();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const products = await Product.find()
+      .populate("category")
+      .skip(skip)
+      .limit(limit);
+
+    const totalProducts = await Product.countDocuments();
+    const totalPages = Math.ceil(totalProducts / limit);
+
     return res
       .status(statusCodes.SUCCESS)
       .render("adminPages/ProductPages/adminProducts", {
         products,
+        currentPage: page,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+        nextPage: page + 1,
+        prevPage: page - 1,
       });
   } catch (error) {
     console.log(error);

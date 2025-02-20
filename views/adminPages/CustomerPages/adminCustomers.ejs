@@ -117,7 +117,10 @@
                         method="POST"
                         class="d-inline"
                       >
-                        <button type="submit" class="btn btn-sm btn-danger block-btn">
+                        <button
+                          type="submit"
+                          class="btn btn-sm btn-danger block-btn"
+                        >
                           Block
                         </button>
                       </form>
@@ -128,7 +131,10 @@
                         method="POST"
                         class="d-inline"
                       >
-                        <button type="submit" class="btn btn-sm btn-success unblock-btn">
+                        <button
+                          type="submit"
+                          class="btn btn-sm btn-success unblock-btn"
+                        >
                           Unblock
                         </button>
                       </form>
@@ -169,6 +175,13 @@
         </div>
       </div>
     </div>
-    
+    <div>
+      <% if (hasPrevPage) { %>
+      <a href="/admin/customers?page=<%= prevPage %>&limit=10">Previous</a>
+      <% } %> Page <%= currentPage %> of <%= totalPages %> <% if (hasNextPage) {
+      %>
+      <a href="/admin/customers?page=<%= nextPage %>&limit=10">Next</a>
+      <% } %>
+    </div>
   </body>
 </html>
