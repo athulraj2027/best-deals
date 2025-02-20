@@ -4,19 +4,19 @@ const statusCodes = require("../../services/statusCodes");
 
 exports.getHomePage = async (req, res) => {
   try {
-    // Get products and transform them to include variant images and pricing
+    console.log(req.session.email);
+
     const rawProducts = await Product.find({ status: true })
       .sort({ createdAt: -1 })
       .limit(5);
 
-    // Transform products to make them easier to use in the template
     const products = rawProducts.map((product) => {
       const lowestPrice =
         product.variants.length > 0
           ? Math.min(...product.variants.map((v) => v.price))
           : product.actualPrice;
 
-      let imageUrl = "/images/default-product.jpg"; 
+      let imageUrl = "/images/default-product.jpg";
       for (const variant of product.variants) {
         if (variant.images && variant.images.length > 0) {
           imageUrl = variant.images[0].url;
@@ -42,7 +42,7 @@ exports.getHomePage = async (req, res) => {
       products,
       categories,
       isLoggedIn,
-      user: req.user || null,
+      userId: req.session.userId || null,
     });
   } catch (err) {
     console.log("Error in loading home page: ", err);

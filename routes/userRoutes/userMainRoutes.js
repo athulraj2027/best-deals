@@ -6,9 +6,13 @@ const signUpRoutes = require("./signUpRoutes");
 const verifyOtpRoutes = require("./verifyOtpRoutes");
 const productsRoutes = require("./productsRoutes");
 const shopRoutes = require("./shopRoutes");
-const sessionIsAuthenticated = require("../../middlewares/isAuthenticatedForLoginButton");
 const verifyOtpController = require("../../controllers/user/verifyOtpController");
-router.use(sessionIsAuthenticated);
+
+router.use((req, res, next) => {
+  res.locals.userId = req.session.userId || null;
+  next();
+});
+
 router.use("/signin", signInRoutes);
 router.use("/signup", signUpRoutes);
 router.use("/verify-otp", verifyOtpRoutes);

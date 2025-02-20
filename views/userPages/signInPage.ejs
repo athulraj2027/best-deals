@@ -28,9 +28,12 @@
             id="email"
             name="email"
             placeholder="Enter your email"
-            
           />
-          <small class="error-message" id="emailError" style="color: red"></small>
+          <small
+            class="error-message"
+            id="emailError"
+            style="color: red"
+          ></small>
         </div>
         <!-- Password Field -->
         <div class="mb-3">
@@ -41,17 +44,24 @@
             id="password"
             name="password"
             placeholder="Enter your password"
-            
           />
-          <small class="error-message" id="passwordError" style="color: red"></small>
+          <small
+            class="error-message"
+            id="passwordError"
+            style="color: red"
+          ></small>
         </div>
         <!-- Sign In Button -->
         <div class="d-grid">
           <button type="submit" class="btn btn-primary">Sign In</button>
         </div>
         <!-- Links -->
-        <a href="/forgot-password" class="forgot-password text-decoration-none">Forgot Password?</a>
-        <a href="/signup" class="signup-link text-decoration-none">Don't have an account? Sign Up</a>
+        <a href="/forgot-password" class="forgot-password text-decoration-none"
+          >Forgot Password?</a
+        >
+        <a href="/signup" class="signup-link text-decoration-none"
+          >Don't have an account? Sign Up</a
+        >
       </form>
     </div>
 
@@ -61,26 +71,26 @@
     <script>
       $(document).ready(function () {
         const form = $("#signin-form");
-    
+
         form.on("submit", function (e) {
           e.preventDefault(); // Prevent default form submission
-    
+
           const email = $("#email").val();
           const password = $("#password").val();
-    
+
           // Clear previous error messages
           $(".error-message").text("");
-    
+
           // AJAX request
           $.ajax({
             url: "/signin",
             type: "POST",
-            data: { email, password }, // You can also stringify the data if needed
-            dataType: "json", // Expecting a JSON response from the server
-    
+            data: { email, password },
+            dataType: "json",
+
             success: function (response) {
               console.log(response); // Log the response for debugging
-    
+
               if (response.status === "success") {
                 Swal.fire({
                   title: response.title,
@@ -91,14 +101,13 @@
                   window.location.href = "/"; // Redirect after successful login
                 });
               } else {
-                // Show validation errors in case of failure
                 Swal.fire({
                   title: response.title,
                   text: response.message,
                   icon: response.status, // 'error'
                   confirmButtonText: "OK",
                 });
-    
+
                 if (response.errors?.email) {
                   $("#emailError").text(response.errors.email);
                 }
@@ -107,12 +116,30 @@
                 }
               }
             },
-    
+
             error: function (xhr, status, error) {
-              console.error("AJAX Error:", status, error); // Log error for debugging
+              console.error("AJAX Error:", status, error);
+              console.log("Error Response JSON:", xhr.responseJSON);
+
+              let errorMessage =
+                "An unexpected error occurred. Please try again.";
+
+              if (xhr.responseJSON) {
+                errorMessage = xhr.responseJSON.message || errorMessage;
+
+                // Handle different error cases based on status code
+                if (xhr.status === 400) {
+                  errorMessage = "Invalid email or password.";
+                } else if (xhr.status === 403) {
+                  errorMessage = "You have been blocked by the admin.";
+                } else if (xhr.status === 500) {
+                  errorMessage = "Server error. Please try again later.";
+                }
+              }
+
               Swal.fire({
                 title: "Oops!",
-                text: "An unexpected error occurred. Please try again later.",
+                text: errorMessage,
                 icon: "error",
                 confirmButtonText: "OK",
               });
@@ -121,6 +148,5 @@
         });
       });
     </script>
-    
   </body>
 </html>

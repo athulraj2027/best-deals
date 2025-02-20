@@ -1,5 +1,6 @@
 const Admin = require("../../models/Admin");
 const statusCodes = require("../../services/statusCodes");
+const bcrypt = require('bcrypt')
 
 // --- Get controller ---
 

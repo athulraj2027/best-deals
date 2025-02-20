@@ -3,7 +3,6 @@ const statusCodes = require("../../services/statusCodes");
 
 exports.getProductViewPage = async (req, res) => {
   try {
-    const productId = req.productId;
     const product = await Product.findById(req.params.id).populate("category");
     if (!product) {
       return res.status(statusCodes.BAD_REQUEST).redirect("/");

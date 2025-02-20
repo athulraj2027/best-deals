@@ -281,8 +281,7 @@
               <div class="card h-100">
                 <div class="card-img-wrapper">
                   <img
-                    src="<%= product.imageUrl || 'https://via.placeholder.com/300x200' %>"
-                    src="<%= product.variants && product.variants.length > 0 && product.variants[0].images && product.variants[0].images.length > 0 ? product.variants[0].images[0].url : 'https://via.placeholder.com/400x400?text=No+Image' %>"
+                      src="<%= product.variants && product.variants.length > 0 && product.variants[0].images && product.variants[0].images.length > 0 ? product.variants[0].images[0].url : 'https://via.placeholder.com/400x400?text=No+Image' %>"
                     alt="<%= product.name %>"
                     class="card-img-top"
                   />

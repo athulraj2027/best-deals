@@ -2,16 +2,17 @@ const express = require("express");
 const router = express.Router();
 const productsController = require("../../controllers/admin/productsController");
 const { uploadProductImages } = require("../../middlewares/multerMiddleware");
+const guestMiddleware = require("../../middlewares/guestMiddleware");
 
-router.route("/").get(productsController.getProductsPage);
+router.route("/").get(guestMiddleware, productsController.getProductsPage);
 router
   .route("/add")
-  .get(productsController.getAddProductPage)
+  .get(guestMiddleware, productsController.getAddProductPage)
   .post(uploadProductImages.any(), productsController.addProductController);
 
 router
   .route("/edit/:id")
-  .get(productsController.getEditProductPage)
+  .get(guestMiddleware, productsController.getEditProductPage)
   .post(
     uploadProductImages.fields([
       { name: "variants[0][newImages]", maxCount: 3 },
@@ -23,7 +24,7 @@ router
 
 router
   .route("/:id/variants")
-  .get(productsController.getEditVariantController)
+  .get(guestMiddleware, productsController.getEditVariantController)
   .post();
 
 router.route("/unlist/:id").post(productsController.unlistProduct);

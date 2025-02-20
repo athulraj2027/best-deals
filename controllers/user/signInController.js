@@ -25,21 +25,21 @@ exports.signInController = async (req, res) => {
 
     const user = await User.findOne({ email });
 
+    if (!user) {
+      console.log("Invalid email");
+      return res.status(statusCodes.BAD_REQUEST).json({
+        status: "error",
+        title: "Invalid Credentials", 
+        message: "Invalid email or Password",
+      });
+    }
+
     if (user.isBlocked) {
       console.log("Blocked user trying to login");
       return res.status(statusCodes.FORBIDDEN).json({
         status: "error",
         title: "Entry restricted",
         message: "You have been blocked by admin",
-      });
-    }
-
-    if (!user) {
-      console.log("Invalid email");
-      return res.status(statusCodes.BAD_REQUEST).json({
-        status: "error",
-        title: "Invalid Credentials",
-        message: "Invalid email or Password",
       });
     }
 

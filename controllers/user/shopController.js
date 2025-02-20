@@ -5,6 +5,9 @@ const statusCodes = require("../../services/statusCodes");
 exports.getShopPage = async (req, res) => {
   const products = await Product.find();
   try {
+    if (!products) {
+      return res.status(statusCodes.BAD_REQUEST).redirect("/");
+    }
     res.render("userPages/shopPage", { products });
   } catch (err) {
     console.error(err);

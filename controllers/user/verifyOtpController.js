@@ -87,7 +87,7 @@ exports.resendOtp = async (req, res) => {
     const email = req.session.email;
 
     if (!email) {
-      return res.status(statu).json({ message: "Email not found in session." });
+      return res.status(statusCodes.BAD_REQUEST).json({ message: "Email not found in session." });
     }
     const otp = OtpServices.generateOTP();
     OtpServices.saveOTP(email, otp);
