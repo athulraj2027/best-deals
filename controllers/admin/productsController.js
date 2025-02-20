@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const parser = new DatauriParser();
 const sharp = require("sharp");
 const path = require("path");
+const statusCodes = require("../../services/statusCodes");
 const fs = require("fs").promises;
 const bufferToDataURI = (fileFormat, buffer) => {
   parser.format(fileFormat, buffer);
@@ -40,23 +41,46 @@ const uploadToCloudinary = async (file) => {
 // --- Get products page
 
 exports.getProductsPage = async (req, res) => {
-  const products = await Product.find();
-  res.render("adminPages/ProductPages/adminProducts", { products });
+  try {
+    const products = await Product.find();
+    return res
+      .status(statusCodes.SUCCESS)
+      .render("adminPages/ProductPages/adminProducts", {
+        products,
+      });
+  } catch (error) {
+    console.log(error);
+    return res.status(statusCodes.SERVER_ERROR).redirect("/admin/dashboard");
+  }
 };
 
 // --- Get add product page ---
 
 exports.getAddProductPage = async (req, res) => {
-  const categories = await Category.find();
-  res.render("adminPages/ProductPages/adminAddProduct", { categories });
+  try {
+    const categories = await Category.find();
+    res
+      .status(statusCodes.SUCCESS)
+      .render("adminPages/ProductPages/adminAddProduct", { categories });
+  } catch (error) {
+    console.log(error);
+    return res.status(statusCodes.SERVER_ERROR).redirect("/admin/dashboard");
+  }
 };
 
 // --- Get edit product page ---
 
 exports.getEditProductPage = async (req, res) => {
-  const productId = req.params.id;
-  const product = await Product.findOne({ _id: productId });
-  res.render("adminPages/ProductPages/adminEditProduct", { product });
+  try {
+    const productId = req.params.id;
+    const product = await Product.findOne({ _id: productId });
+    res
+      .status(statusCodes.SUCCESS)
+      .render("adminPages/ProductPages/adminEditProduct", { product });
+  } catch (error) {
+    console.error(error);
+    return res.status(statusCodes.SERVER_ERROR).redirect("/admin/products");
+  }
 };
 
 // --- functions for saving images
@@ -190,8 +214,6 @@ exports.addProductController = async (req, res) => {
 exports.listProduct = async (req, res) => {
   try {
     const { id } = req.params;
-
-    // Find the product by ID and update its status to active
     const product = await Product.findByIdAndUpdate(
       id,
       { status: true },
@@ -200,15 +222,15 @@ exports.listProduct = async (req, res) => {
 
     if (!product) {
       return res
-        .status(404)
+        .status(statusCodes.NOT_FOUND)
         .json({ success: false, message: "Product not found." });
     }
 
     // Redirect back to the product list page
-    res.redirect("/admin/products");
+    return res.status(statusCodes.SUCCESS).redirect("/admin/products");
   } catch (err) {
     console.error(err);
-    res.status(500).json({
+    return res.status(statusCodes.SERVER_ERROR).json({
       success: false,
       message: "An error occurred while listing the product.",
     });
@@ -220,8 +242,6 @@ exports.listProduct = async (req, res) => {
 exports.unlistProduct = async (req, res) => {
   try {
     const { id } = req.params;
-
-    // Find the product by ID and update its status to inactive
     const product = await Product.findByIdAndUpdate(
       id,
       { status: false },
@@ -230,13 +250,13 @@ exports.unlistProduct = async (req, res) => {
 
     if (!product) {
       return res
-        .status(404)
+        .status(statusCodes.NOT_FOUND)
         .json({ success: false, message: "Product not found." });
     }
-    res.redirect("/admin/products");
+    return res.redirect("/admin/products");
   } catch (err) {
     console.error(err);
-    res.status(500).json({
+    return res.status(statusCodes.SERVER_ERROR).json({
       success: false,
       message: "An error occurred while unlisting the product.",
     });
@@ -267,7 +287,7 @@ exports.editProductController = async (req, res) => {
 
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(400).json({
+      return res.status(statusCodes.NOT_FOUND).json({
         title: "Error",
         message: " Product not found",
       });
@@ -341,38 +361,41 @@ exports.editProductController = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
+    return res.status(statusCodes.SERVER_ERROR).redirect("/admin/products");
   }
 };
+
 exports.getEditVariantController = async (req, res) => {
   const productId = req.params.id;
-  // const variantId = req.params.variantId;
   try {
     console.log(productId);
     if (!productId) {
-      return res.status(400).json({
+      return res.status(statusCodes.NOT_FOUND).json({
         title: "Invalid Request",
         message: "Variant not found",
       });
     }
     const product = await Product.findOne({ _id: productId });
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res
+        .status(statusCodes.NOT_FOUND)
+        .json({ message: "Product not found" });
     }
 
     if (!product.variants || !Array.isArray(product.variants)) {
       return res
-        .status(404)
+        .status(statusCodes.BAD_REQUEST)
         .json({ message: "No variants found for this product" });
     }
 
     return res
-      .status(200)
+      .status(statusCodes.SUCCESS)
       .render("adminPages/variantPage/adminEditVariantPage", {
         product,
       });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({
+    return res.status(statusCodes.SERVER_ERROR).json({
       title: "Server error",
       message: "Something went wrong",
     });

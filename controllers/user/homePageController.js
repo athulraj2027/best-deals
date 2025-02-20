@@ -1,5 +1,6 @@
 const Product = require("../../models/Product");
 const Category = require("../../models/Category");
+const statusCodes = require("../../services/statusCodes");
 
 exports.getHomePage = async (req, res) => {
   try {
@@ -10,14 +11,12 @@ exports.getHomePage = async (req, res) => {
 
     // Transform products to make them easier to use in the template
     const products = rawProducts.map((product) => {
-      // Get the lowest price from all variants
       const lowestPrice =
         product.variants.length > 0
           ? Math.min(...product.variants.map((v) => v.price))
           : product.actualPrice;
 
-      // Get the first image from the first variant with images
-      let imageUrl = "/images/default-product.jpg"; // Default fallback image
+      let imageUrl = "/images/default-product.jpg"; 
       for (const variant of product.variants) {
         if (variant.images && variant.images.length > 0) {
           imageUrl = variant.images[0].url;
@@ -39,7 +38,7 @@ exports.getHomePage = async (req, res) => {
     const categories = await Category.find();
     const isLoggedIn = req.isAuthenticated();
 
-    return res.render("userPages/homePage", {
+    return res.status(statusCodes.SUCCESS).render("userPages/homePage", {
       products,
       categories,
       isLoggedIn,
@@ -47,6 +46,6 @@ exports.getHomePage = async (req, res) => {
     });
   } catch (err) {
     console.log("Error in loading home page: ", err);
-    return res.status(500).render("error");
+    return res.status(statusCodes.SERVER_ERROR).render("error");
   }
 };

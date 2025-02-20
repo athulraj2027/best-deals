@@ -1,22 +1,41 @@
 const User = require("../../models/User");
+const statusCodes = require("../../services/statusCodes");
 
 exports.viewUser = async (req, res) => {
-  const customerId = req.params.id;
-  const user = await User.findById(customerId);
-  return res.render("adminPages/CustomerPages/adminCustomerView", { user });
+  try {
+    const customerId = req.params.id;
+    const user = await User.findById(customerId);
+    return res
+      .status(statusCodes.SUCCESS)
+      .render("adminPages/CustomerPages/adminCustomerView", {
+        user,
+      });
+  } catch (error) {
+    console.error(error);
+    return res.status(statusCodes.SERVER_ERROR).redirect("/admin/users");
+  }
 };
 
 exports.viewUsersPage = async (req, res) => {
-  const customers = await User.find();
-  res.render("adminPages/CustomerPages/adminCustomers", { customers });
+  try {
+    const customers = await User.find();
+    res
+      .status(statusCodes.SUCCESS)
+      .render("adminPages/CustomerPages/adminCustomers", { customers });
+  } catch (error) {
+    console.error(error);
+    return res.status(statusCodes.SERVER_ERROR).redirect("/admin/dashboard");
+  }
 };
 
 exports.listingUsersController = async (req, res) => {
   const customerId = req.params.id;
   const customer = await User.findById(customerId);
   try {
+    
   } catch (err) {
     console.log(err);
+    return res.status(statusCodes.SERVER_ERROR).redirect("/admin/dashboard");
   }
 };
 

@@ -1,9 +1,15 @@
 const Admin = require("../../models/Admin");
+const statusCodes = require("../../services/statusCodes");
 
 // --- Get controller ---
 
 exports.getAdminLoginPage = (req, res) => {
-  res.render("adminPages/signInPage");
+  try {
+    res.render("adminPages/signInPage");
+  } catch (error) {
+    console.error(error);
+    return res.status(statusCodes.SERVER_ERROR);
+  }
 };
 
 // --- Post controller ---
@@ -12,7 +18,7 @@ exports.adminLoginController = async (req, res) => {
   const { email, password } = req.body;
   try {
     if (!email || !password) {
-      return res.status(400).json({
+      return res.status(statusCodes.BAD_REQUEST).json({
         status: "error",
         title: "Error",
         message: "Email and password required",
@@ -20,7 +26,7 @@ exports.adminLoginController = async (req, res) => {
     }
     const admin = await Admin.findOne({ email });
     if (!admin) {
-      return res.status(401).json({
+      return res.status(statusCodes.NOT_FOUND).json({
         status: "error",
         title: "Error",
         message: "Invalid password or email",
@@ -28,7 +34,7 @@ exports.adminLoginController = async (req, res) => {
     }
     const isPasswordValid = await bcrypt.compare(password, admin.password);
     if (!isPasswordValid) {
-      return res.status(401).json({
+      return res.status(statusCodes.BAD_REQUEST).json({
         status: "error",
         title: "Error",
         message: "Invalid password or email",
@@ -38,14 +44,14 @@ exports.adminLoginController = async (req, res) => {
 
     console.log(req.session);
     console.log("session created");
-    return res.status(200).json({
+    return res.status(statusCodes.SUCCESS).json({
       status: "success",
       title: "Validation Successful",
       message: "You are being logged in ",
     });
   } catch (err) {
     console.log(err);
-    res.status(50).json({
+    res.status(statusCodes.SERVER_ERROR).json({
       status: "error",
       title: "Validation error",
       message: "Something wrong occured",

@@ -1,7 +1,15 @@
-const Product = require('../../models/Product')
+const Product = require("../../models/Product");
+const statusCodes = require("../../services/statusCodes");
 // const Category= require('../../models/Category')
 
 exports.getShopPage = async (req, res) => {
   const products = await Product.find();
-  res.render("userPages/shopPage", { products });
+  try {
+    res.render("userPages/shopPage", { products });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(statusCodes.SERVER_ERROR)
+      .render("userPages/shopPage", { products });
+  }
 };
