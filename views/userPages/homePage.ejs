@@ -9,65 +9,423 @@
       integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
       crossorigin="anonymous"
     />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link rel="stylesheet" href="/userCSS/partials/headerPartial.css" />
     <link rel="stylesheet" href="/userCSS/partials/partials_css.css" />
     <link rel="stylesheet" href="/userCSS/full-width-product-card.css" />
     <link rel="stylesheet" href="/userCSS/homePage.css" />
     <link rel="stylesheet" href="/userCSS/category-card.css" />
     <link rel="stylesheet" href="/userCSS/product-card.css" />
-    <title>Home Page</title>
+    <style>
+      :root {
+        --primary-color: #9622ab;
+        --secondary-color: #6a1b9a;
+        --accent-color: #ff5252;
+        --light-bg: #f8f9fa;
+        --dark-text: #212529;
+        --light-text: #f8f9fa;
+      }
+      
+      body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f9f4fc;
+      }
+      
+      .hero-section {
+        background: linear-gradient(145deg, var(--primary-color), var(--secondary-color));
+        border-radius: 15px;
+        overflow: hidden;
+        margin: 20px 40px;
+        box-shadow: 0 10px 25px rgba(106, 27, 154, 0.2);
+        position: relative;
+      }
+      
+      .hero-text {
+        max-width: 500px;
+        z-index: 2;
+      }
+      
+      .hero-image img {
+        border-radius: 10px;
+        transform: rotate(-3deg);
+        transition: transform 0.3s ease;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      }
+      
+      .hero-image img:hover {
+        transform: rotate(0deg) scale(1.02);
+      }
+      
+      .btn-shop-now {
+        background-color: var(--accent-color);
+        border: none;
+        padding: 12px 30px;
+        border-radius: 30px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(255, 82, 82, 0.3);
+      }
+      
+      .btn-shop-now:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 7px 15px rgba(255, 82, 82, 0.4);
+        background-color: #ff3838;
+      }
+      
+      .features {
+        background: white;
+        margin: 40px 40px;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        color: var(--dark-text);
+      }
+      
+      .feature-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 15px;
+        transition: transform 0.2s;
+      }
+      
+      .feature-item:hover {
+        transform: translateY(-5px);
+      }
+      
+      .feature-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(145deg, #f0cbff, #d9a2ff);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        color: var(--primary-color);
+      }
+      
+      .product-heading {
+        display: flex;
+        align-items: baseline;
+        margin: 35px 40px 20px;
+        border-left: 5px solid var(--primary-color);
+        padding-left: 15px;
+      }
+      
+      .product-heading h4 {
+        font-weight: 700;
+        font-size: 24px;
+        margin-right: 15px;
+        color: var(--primary-color);
+      }
+      
+      .product-heading p {
+        color: var(--accent-color);
+        font-weight: 500;
+      }
+      
+      .products {
+        padding: 0 40px;
+      }
+      
+      .product-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        width: 220px;
+        margin: 10px;
+        border: 1px solid rgba(0,0,0,0.05);
+      }
+      
+      .product-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(106, 27, 154, 0.1);
+      }
+      
+      .product-image {
+        height: 180px;
+        overflow: hidden;
+        position: relative;
+      }
+      
+      .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+      }
+      
+      .product-card:hover .product-image img {
+        transform: scale(1.1);
+      }
+      
+      .product-info {
+        padding: 15px;
+      }
+      
+      .product-name {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: var(--dark-text);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        height: 48px;
+      }
+      
+      .product-price {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 5px;
+      }
+      
+      .product-brand {
+        font-size: 13px;
+        color: #6c757d;
+        margin-bottom: 10px;
+      }
+      
+      .product-btn {
+        display: block;
+        background: linear-gradient(145deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        text-decoration: none;
+        padding: 8px 0;
+        border-radius: 30px;
+        text-align: center;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+      
+      .product-btn:hover {
+        background: var(--accent-color);
+        color: white;
+      }
+      
+      .browse-products {
+        margin: 30px 0;
+      }
+      
+      .browse-products a {
+        color: var(--primary-color);
+        font-weight: 500;
+        text-decoration: none;
+        font-size: 18px;
+        transition: color 0.3s ease;
+        display: inline-block;
+        padding: 5px 20px;
+        border-radius: 30px;
+        background-color: rgba(150, 34, 171, 0.1);
+      }
+      
+      .browse-products a:hover {
+        color: var(--accent-color);
+        background-color: rgba(150, 34, 171, 0.15);
+      }
+      
+      .browse-products hr {
+        width: 200px;
+        margin: 20px auto;
+        border-color: rgba(106, 27, 154, 0.2);
+      }
+      
+      .categories-section h3 {
+        margin-bottom: 25px;
+        font-weight: 700;
+        color: var(--primary-color);
+        position: relative;
+        display: inline-block;
+      }
+      
+      .categories-section h3:after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 50px;
+        height: 3px;
+        background: var(--accent-color);
+      }
+      
+      .categories-list-div {
+        padding: 20px 40px;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+      
+      .category-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        width: 180px;
+        text-align: center;
+      }
+      
+      .category-card:hover {
+        transform: translateY(-7px);
+        box-shadow: 0 15px 30px rgba(106, 27, 154, 0.1);
+      }
+      
+      .category-image {
+        height: 150px;
+        overflow: hidden;
+      }
+      
+      .category-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+      }
+      
+      .category-card:hover .category-image img {
+        transform: scale(1.1);
+      }
+      
+      .category-name {
+        padding: 15px 10px;
+        font-weight: 600;
+        color: var(--dark-text);
+      }
+      
+      /* Countdown timer */
+      .countdown {
+        display: inline-flex;
+        margin-left: 20px;
+        background: rgba(255, 82, 82, 0.1);
+        padding: 5px 15px;
+        border-radius: 30px;
+      }
+      
+      .countdown-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 0 8px;
+      }
+      
+      .countdown-value {
+        font-weight: 700;
+        color: var(--accent-color);
+        font-size: 16px;
+      }
+      
+      .countdown-label {
+        font-size: 10px;
+        color: #6c757d;
+      }
+      
+      /* Badge */
+      .badge-sale {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: var(--accent-color);
+        color: white;
+        font-size: 12px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        z-index: 2;
+      }
+    </style>
+    <title>Tech Gadgets - Modern Shopping Experience</title>
   </head>
   <body>
     <!-- Include the header partial -->
     <%- include('./partials/headerPartial') %>
 
     <section class="main-body">
-      <div class="hero-section d-flex align-items-center justify-content-between  text-white p-5" style="background-color: #b538cd;border-radius: 10px;">
+      <div class="hero-section d-flex align-items-center justify-content-between text-white p-5">
         <!-- Text Content -->
         <div class="hero-text">
-          <h1 class="display-4 fw-bold">Level Up Your Shopping Experience</h1>
-          <p class="lead">Discover the ultimate gadgets and accessories that redefine entertainment.</p>
-          <button class="btn btn-success btn-lg mt-3">Shop Now</button>
+          <h1 class="display-4 fw-bold">Level Up Your Tech Game</h1>
+          <p class="lead mb-4">Discover premium gadgets and accessories with exclusive deals that redefine your digital lifestyle.</p>
+          <button class="btn btn-shop-now btn-lg">Shop Now <i class="fas fa-arrow-right ms-2"></i></button>
         </div>
       
         <!-- Image Content -->
         <div class="hero-image">
           <img 
             src="https://img.freepik.com/free-photo/top-view-set-gadgets-purple-neon-light-pink-background-laptop-keyboard-headphones-smartphone-with-black-screen-copyspace-your-advertising-tech-modern-gadgets_155003-25550.jpg?semt=ais_incoming" 
-            alt="Gaming Console" 
+            alt="Modern Tech Gadgets" 
             class="img-fluid rounded shadow" 
           />
         </div>
       </div>
       
-      <div class="container w-85 features d-flex justify-content-around text-white">
-        <div class="">
-          <h5>FAST DELIVERY</h5>
-          <P>Delivery within 24 hrs</P>
+      <div class="features d-flex justify-content-around">
+        <div class="feature-item">
+          <div class="feature-icon">
+            <i class="fas fa-truck-fast fa-lg"></i>
+          </div>
+          <div>
+            <h5 class="mb-0">FAST DELIVERY</h5>
+            <p class="mb-0 text-muted">Free shipping within 24hrs</p>
+          </div>
         </div>
-        <div class="">
-          <h5>24 HOURS RETURN</h5>
-          <P>100% money-back guarantee</P>
+        <div class="feature-item">
+          <div class="feature-icon">
+            <i class="fas fa-rotate-left fa-lg"></i>
+          </div>
+          <div>
+            <h5 class="mb-0">EASY RETURNS</h5>
+            <p class="mb-0 text-muted">100% money-back guarantee</p>
+          </div>
         </div>
-        <div class="">
-          <h5>SECURE PAYMENT</h5>
-          <P>Your money is safe</P>
+        <div class="feature-item">
+          <div class="feature-icon">
+            <i class="fas fa-lock fa-lg"></i>
+          </div>
+          <div>
+            <h5 class="mb-0">SECURE PAYMENT</h5>
+            <p class="mb-0 text-muted">Multiple payment options</p>
+          </div>
         </div>
-        <div class="">
-          <h5>CUSTOMER SUPPORT</h5>
-          <P>Available 24 hrs</P>
+        <div class="feature-item">
+          <div class="feature-icon">
+            <i class="fas fa-headset fa-lg"></i>
+          </div>
+          <div>
+            <h5 class="mb-0">24/7 SUPPORT</h5>
+            <p class="mb-0 text-muted">Dedicated customer service</p>
+          </div>
         </div>
       </div>
 
       <div class="product-heading">
-        <h4>BestDeals</h4>
-        <p>ending soon</p>
+        <h4>Flash Deals</h4>
+        <p>Ending in</p>
+        <div class="countdown">
+          <div class="countdown-item">
+            <span class="countdown-value">23</span>
+            <span class="countdown-label">HRS</span>
+          </div>
+          <div class="countdown-item">
+            <span class="countdown-value">45</span>
+            <span class="countdown-label">MIN</span>
+          </div>
+          <div class="countdown-item">
+            <span class="countdown-value">19</span>
+            <span class="countdown-label">SEC</span>
+          </div>
+        </div>
       </div>
 
       <div class="products d-flex justify-content-around flex-wrap">
-        <% products.forEach(function(product) { %>
-          <div class="product-card" style="background-color: #b538cd; width: 220px; margin: 10px;">
+        <% products.forEach(function(product, index) { %>
+          <div class="product-card">
             <div class="product-image">
+              <% if (index % 3 === 0) { %>
+                <span class="badge-sale">-25%</span>
+              <% } %>
               <img 
                 src="<%= product.imageUrl %>" 
                 alt="<%= product.name %>" 
@@ -76,45 +434,64 @@
             </div>
             <div class="product-info">
               <div class="product-name"><%= product.name %></div>
-              <div class="product-description">$<%= product.price.toFixed(2) %></div>
-              <div class="product-brand text-white-50 mb-2"><%= product.brand %></div>
-              <a href="/product/<%= product._id %>" class="product-btn">Buy Now</a>
+              <div class="product-price">$<%= product.price.toFixed(2) %></div>
+              <div class="product-brand"><%= product.brand %></div>
+              <a href="/product/<%= product._id %>" class="product-btn">
+                <i class="fas fa-shopping-cart me-2"></i> Buy Now
+              </a>
             </div>
           </div>
         <% }); %>
       </div>
       
-      
-      <div class="browse-products text-center text-decoration-none text-dark">
-        <a href="/shop">Browse all products</a>
+      <div class="browse-products text-center">
+        <a href="/shop"><i class="fas fa-th-large me-2"></i>Browse All Products</a>
         <hr />
       </div>
       
-
-      <div class="browse-products text-center text-decoration-none text-dark">
-        <a href="/shop" >Browse all products</a>
-        <hr />
-      </div>
-      <h3 class="text-center">Shop with Categories</h3>
-      <div class="categories-list-div d-flex">
-        <% categories.filter(category => category.status === 'listed').slice(0, 5).forEach(category => { %>  <!-- Filter and then iterate -->
-          <div class="category-card">
-            <div class="category-image">
-              <img src="/<%= category.imageUrl ? category.imageUrl : 'path_to_default_image.jpg' %>" alt="<%= category.name %> Image" />
-
+      <div class="categories-section text-center">
+        <h3>Shop by Categories</h3>
+        <div class="categories-list-div">
+          <% categories.filter(category => category.status === 'listed').slice(0, 5).forEach(category => { %>
+            <div class="category-card">
+              <div class="category-image">
+                <img src="/<%= category.imageUrl ? category.imageUrl : 'path_to_default_image.jpg' %>" alt="<%= category.name %> Image" />
+              </div>
+              <div class="category-name"><%= category.name %></div>
             </div>
-            <div class="category-name"><%= category.name %></div>
-          </div>
-        <% }); %>
+          <% }); %>
+        </div>
       </div>
-      
+    </section>
 
     <!-- Include the footer partial -->
     <%- include('./partials/footer') %>
+    
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      // Simple countdown script
+      function updateCountdown() {
+        const now = new Date();
+        let hours = 23 - now.getHours();
+        let minutes = 59 - now.getMinutes();
+        let seconds = 59 - now.getSeconds();
+        
+        if (hours < 10) hours = "0" + hours;
+        if (minutes < 10) minutes = "0" + minutes;
+        if (seconds < 10) seconds = "0" + seconds;
+        
+        document.querySelectorAll('.countdown-value')[0].textContent = hours;
+        document.querySelectorAll('.countdown-value')[1].textContent = minutes;
+        document.querySelectorAll('.countdown-value')[2].textContent = seconds;
+      }
+      
+      // Update the countdown every second
+      setInterval(updateCountdown, 1000);
+      updateCountdown();
+    </script>
   </body>
-  <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-    crossorigin="anonymous"
-  ></script>
 </html>
