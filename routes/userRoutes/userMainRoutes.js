@@ -22,4 +22,10 @@ router.use("/shop", shopRoutes);
 
 router.route("/").get(homePageController.getHomePage);
 
+router.route("/logout").post((req, res) => {
+  req.session.destroy();
+  res.clearCookie("auth_token");
+  res.redirect("/");
+});
+
 module.exports = router;

@@ -5,13 +5,24 @@ const authRoutes = require("./authRoutes");
 const categoryRoutes = require("./categoryRoutes");
 const productRoutes = require("./productRoutes");
 const usersRoutes = require("./usersRoute");
-const dashboardController = require('../../controllers/admin/dashboardController');
+const dashboardController = require("../../controllers/admin/dashboardController");
 const guestMiddleware = require("../../middlewares/guestMiddleware");
 
 router.use("/categories", categoryRoutes);
 router.use("/products", productRoutes);
 router.use("/customers", usersRoutes);
-router.use('/dashboard',guestMiddleware, dashboardController.getAdminDashboard)
+router.use(
+  "/dashboard",
+  guestMiddleware,
+  dashboardController.getAdminDashboard
+);
 router.use("/", authRoutes);
+
+router.post("/logout", (req, res) => {
+  console.log("hi");
+  req.session.destroy();
+  res.clearCookie("auth_token");
+  return res.redirect("/admin");
+});
 
 module.exports = router;

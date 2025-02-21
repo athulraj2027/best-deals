@@ -3,7 +3,6 @@
 <head>
     <title>Edit Product</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Add SweetAlert2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     
@@ -68,59 +67,72 @@
             border-color: #0d6efd;
         }
         .image-preview-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 15px;
-        margin-top: 10px;
-    }
-    
-    .existing-image-wrapper {
-        position: relative;
-        width: 150px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        padding: 5px;
-    }
-    
-    .image-preview {
-        width: 140px;
-        height: 140px;
-        object-fit: cover;
-        border-radius: 3px;
-    }
-    
-    .image-number {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        background: rgba(0, 0, 0, 0.7);
-        color: white;
-        padding: 2px 8px;
-        border-radius: 3px;
-        font-size: 12px;
-    }
-    
-    .delete-image {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        padding: 2px 8px;
-        font-size: 12px;
-    }
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .existing-image-wrapper {
+            position: relative;
+            width: 150px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 5px;
+        }
+        
+        .image-preview {
+            width: 140px;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 3px;
+        }
+        
+        .image-number {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        
+        .delete-image {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 2px 8px;
+            font-size: 12px;
+        }
 
-    .new-image-preview-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 15px;
-    }
+        .new-image-preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
 
-    .new-image-wrapper {
-        position: relative;
-        width: 150px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        padding: 5px;
-    }
+        .new-image-wrapper {
+            position: relative;
+            width: 150px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 5px;
+        }
+        
+        .image-upload-container {
+            margin-top: 15px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+        
+        .single-image-upload {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -146,9 +158,9 @@
             <div class="mb-3">
                 <label class="form-label">Category</label>
                 <select class="form-select" name="category" required>
-                    <option value="men" <%= product.category === 'men' ? 'selected' : '' %>>Men</option>
-                    <option value="women" <%= product.category === 'women' ? 'selected' : '' %>>Women</option>
-                    <option value="kids" <%= product.category === 'kids' ? 'selected' : '' %>>Kids</option>
+                    <% categories.forEach(category => { %>
+                        <option value="<%= category.name %>" <%= product.category === category.name ? 'selected' : '' %>><%= category.name %></option>
+                    <% }) %>
                 </select>
             </div>
 
@@ -183,7 +195,7 @@
                             </div>
                         </div>
                         
-                        <!-- Existing Images Section -->
+                        <!-- Existing Images Section with Replace Option -->
                         <div class="mt-3">
                             <label class="form-label">Current Images</label>
                             <div class="image-preview-container">
@@ -199,8 +211,11 @@
                                             </button>
                                             <!-- Hidden input to track existing images -->
                                             <input type="hidden" 
-                                                   name="variants[<%= variantIndex %>][existingImages][<%= imageIndex %>]" 
+                                                   name="variants[<%= variantIndex %>][existingImages][<%= imageIndex %>][url]" 
                                                    value="<%= image.url %>">
+                                            <input type="hidden" 
+                                                   name="variants[<%= variantIndex %>][existingImages][<%= imageIndex %>][position]" 
+                                                   value="<%= imageIndex %>">
                                         </div>
                                     <% }); %>
                                 <% } else { %>
@@ -209,17 +224,28 @@
                             </div>
                         </div>
             
-                        <!-- New Images Upload Section -->
-                        <div class="mt-3">
-                            <label class="form-label">Add New Images (Max 3 total)</label>
-                            <input type="file" 
-                                   class="form-control" 
-                                   name="variants[<%= variantIndex %>][newImages]" 
-                                   multiple 
-                                   accept="image/*"
-                                   data-variant-index="<%= variantIndex %>"
-                                   onchange="previewNewImages(this)">
-                            <div class="new-image-preview-container mt-2" id="newImagePreview-<%= variantIndex %>"></div>
+                        <!-- Individual Image Replacement Section -->
+                        <div class="image-upload-container">
+                            <h5>Replace Individual Images</h5>
+                            <% for (let i = 0; i < 3; i++) { %>
+                                <div class="single-image-upload">
+                                    <label class="form-label">Image Position <%= i+1 %></label>
+                                    <input type="file" 
+                                           class="form-control" 
+                                           name="variants[<%= variantIndex %>][replaceImage][<%= i %>]" 
+                                           accept="image/*"
+                                           data-variant-index="<%= variantIndex %>"
+                                           data-position="<%= i %>"
+                                           onchange="previewReplaceImage(this)">
+                                    <div class="mt-2" id="replacePreview-<%= variantIndex %>-<%= i %>">
+                                        <% if (variant.images && variant.images[i]) { %>
+                                            <p class="text-muted">Will replace: Image <%= i+1 %></p>
+                                        <% } else { %>
+                                            <p class="text-muted">Will add as new image</p>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            <% } %>
                         </div>
             
                         <button type="button" class="btn btn-danger btn-sm mt-3 remove-variant">Remove Variant</button>
@@ -235,6 +261,7 @@
         </form>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Initialize drag and drop for existing variants
         document.querySelectorAll('.drag-drop-zone').forEach(initializeDragDrop);
@@ -270,13 +297,21 @@
             const currentImages = previewContainer.querySelectorAll('.image-preview-wrapper').length;
             
             if (currentImages + files.length > 3) {
-                alert('Maximum 3 images allowed per variant');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Too many images',
+                    text: 'Maximum 3 images allowed per variant'
+                });
                 return;
             }
 
             Array.from(files).forEach((file, index) => {
                 if (!file.type.startsWith('image/')) {
-                    alert('Please upload only images');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid file type',
+                        text: 'Please upload only images'
+                    });
                     return;
                 }
 
@@ -347,78 +382,101 @@
         // Remove variant
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('remove-variant')) {
-                e.target.closest('.variant-container').remove();
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, remove it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        e.target.closest('.variant-container').remove();
+                    }
+                });
             }
             if (e.target.classList.contains('remove-image')) {
                 e.target.closest('.image-preview-wrapper').remove();
             }
         });
+        
+        // Delete existing image
         document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('delete-image')) {
-            if(confirm('Are you sure you want to remove this image?')) {
-                const wrapper = e.target.closest('.existing-image-wrapper');
-                const variantIndex = e.target.dataset.variantIndex;
-                const imageIndex = e.target.dataset.imageIndex;
-                
-                // Add hidden input to track deleted images
-                const deletedInput = document.createElement('input');
-                deletedInput.type = 'hidden';
-                deletedInput.name = `variants[${variantIndex}][deletedImages][]`;
-                deletedInput.value = wrapper.querySelector('input[type="hidden"]').value;
-                wrapper.closest('.variant-container').appendChild(deletedInput);
-                
-                wrapper.remove();
+            if (e.target.classList.contains('delete-image')) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to recover this image!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const wrapper = e.target.closest('.existing-image-wrapper');
+                        const variantIndex = e.target.dataset.variantIndex;
+                        const imageIndex = e.target.dataset.imageIndex;
+                        
+                        // Add hidden input to track deleted images
+                        const deletedInput = document.createElement('input');
+                        deletedInput.type = 'hidden';
+                        deletedInput.name = `variants[${variantIndex}][deletedImages][]`;
+                        deletedInput.value = wrapper.querySelector('input[name$="[url]"]').value;
+                        wrapper.closest('.variant-container').appendChild(deletedInput);
+                        
+                        wrapper.remove();
+                    }
+                });
             }
-        }
-    });
-    function previewNewImages(input) {
-        const variantIndex = input.dataset.variantIndex;
-        const previewContainer = document.getElementById(`newImagePreview-${variantIndex}`);
-        const existingImagesCount = input.closest('.variant-container')
-            .querySelectorAll('.existing-image-wrapper').length;
+        });
 
-        previewContainer.innerHTML = '';
-
-        if (input.files) {
-            if (existingImagesCount + input.files.length > 3) {
-                alert(`You can only have 3 images total. You currently have ${existingImagesCount} images.`);
-                input.value = '';
-                return;
-            }
-
-            Array.from(input.files).forEach((file, index) => {
+        // Preview replacement image
+        function previewReplaceImage(input) {
+            const variantIndex = input.dataset.variantIndex;
+            const position = input.dataset.position;
+            const previewDiv = document.getElementById(`replacePreview-${variantIndex}-${position}`);
+            
+            if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 
                 reader.onload = function(e) {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'new-image-wrapper';
-                    wrapper.innerHTML = `
-                        <img src="${e.target.result}" class="image-preview" alt="New image preview">
-                        <span class="image-number">New Image ${index + 1}</span>
-                        <button type="button" class="btn btn-danger btn-sm delete-image" 
-                                onclick="removeNewImage(this, ${variantIndex})">
-                            Remove
-                        </button>
+                    previewDiv.innerHTML = `
+                        <div class="mt-2 d-flex align-items-center">
+                            <img src="${e.target.result}" alt="Preview" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px;">
+                            <div class="ms-3">
+                                <p class="mb-0">New image selected</p>
+                                <button type="button" class="btn btn-sm btn-outline-danger mt-1" 
+                                        onclick="clearReplaceImage(${variantIndex}, ${position})">
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                        <input type="hidden" name="variants[${variantIndex}][replaceImagePosition][${position}]" value="${position}">
                     `;
-                    previewContainer.appendChild(wrapper);
                 };
-
-                reader.readAsDataURL(file);
-            });
+                
+                reader.readAsDataURL(input.files[0]);
+            }
         }
-    }
-
-    function removeNewImage(button, variantIndex) {
-        const wrapper = button.closest('.new-image-wrapper');
-        wrapper.remove();
         
-        const fileInput = document.querySelector(`input[type="file"][data-variant-index="${variantIndex}"]`);
-        fileInput.value = '';
-    }
-
-    document.getElementById('add-variant').addEventListener('click', function() {
-        const variantIndex = document.querySelectorAll('.variant-container').length;
-    });
+        // Clear replacement image
+        function clearReplaceImage(variantIndex, position) {
+            const input = document.querySelector(`input[name="variants[${variantIndex}][replaceImage][${position}]"]`);
+            const previewDiv = document.getElementById(`replacePreview-${variantIndex}-${position}`);
+            
+            input.value = '';
+            
+            // Reset preview div
+            const variantContainer = document.querySelector(`[data-variant-index="${variantIndex}"]`);
+            const existingImages = variantContainer.querySelectorAll('.existing-image-wrapper').length;
+            
+            if (position < existingImages) {
+                previewDiv.innerHTML = `<p class="text-muted">Will replace: Image ${Number(position) + 1}</p>`;
+            } else {
+                previewDiv.innerHTML = `<p class="text-muted">Will add as new image</p>`;
+            }
+        }
     </script>
     
 </body>

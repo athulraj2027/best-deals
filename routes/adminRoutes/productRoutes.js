@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const productsController = require("../../controllers/admin/productsController");
-const { uploadProductImages } = require("../../middlewares/multerMiddleware");
+const { uploadProductImages, productEditImageUpload } = require("../../middlewares/multerMiddleware");
 const guestMiddleware = require("../../middlewares/guestMiddleware");
 
 router.route("/").get(guestMiddleware, productsController.getProductsPage);
@@ -13,14 +13,7 @@ router
 router
   .route("/edit/:id")
   .get(guestMiddleware, productsController.getEditProductPage)
-  .post(
-    uploadProductImages.fields([
-      { name: "variants[0][newImages]", maxCount: 3 },
-      { name: "variants[1][newImages]", maxCount: 3 },
-      { name: "variants[2][newImages]", maxCount: 3 },
-    ]),
-    productsController.editProductController
-  );
+  .post(productEditImageUpload, productsController.editProductController);
 
 router
   .route("/:id/variants")

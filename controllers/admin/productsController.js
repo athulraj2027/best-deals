@@ -8,6 +8,7 @@ const sharp = require("sharp");
 const path = require("path");
 const statusCodes = require("../../services/statusCodes");
 const fs = require("fs").promises;
+
 const bufferToDataURI = (fileFormat, buffer) => {
   parser.format(fileFormat, buffer);
 };
@@ -90,10 +91,11 @@ exports.getAddProductPage = async (req, res) => {
 exports.getEditProductPage = async (req, res) => {
   try {
     const productId = req.params.id;
+    const categories = await Category.find()
     const product = await Product.findOne({ _id: productId });
     res
       .status(statusCodes.SUCCESS)
-      .render("adminPages/ProductPages/adminEditProduct", { product });
+      .render("adminPages/ProductPages/adminEditProduct", { product,categories });
   } catch (error) {
     console.error(error);
     return res.status(statusCodes.SERVER_ERROR).redirect("/admin/products");
@@ -281,21 +283,21 @@ exports.unlistProduct = async (req, res) => {
 };
 
 // --- Helper function for edit product ---
-
 async function deleteImageFile(imageUrl) {
   try {
+    console.log(imageUrl)
     if (!imageUrl) return;
+    const cleanedImageUrl = imageUrl.startsWith("/") ? imageUrl.substring(1) : imageUrl;
     const imagePath = path.join(
       __dirname,
-      "../../public/images/products",
-      new URL(imageUrl).pathname
+      "../../public",
+      cleanedImageUrl
     );
     await fs.unlink(imagePath);
   } catch (err) {
-    console.error(err);
+    console.error("Error deleting image file:", err);
   }
 }
-// --- Edit product controller ---
 
 exports.editProductController = async (req, res) => {
   try {
@@ -306,58 +308,111 @@ exports.editProductController = async (req, res) => {
     if (!product) {
       return res.status(statusCodes.NOT_FOUND).json({
         title: "Error",
-        message: " Product not found",
+        message: "Product not found",
       });
     }
+    
     const processedVariants = await Promise.all(
-      variants.map(async (variant, index) => {
+      variants.map(async (variant, variantIndex) => {
+        // Basic variant properties
         const processedVariant = {
           color: variant.color,
+          size: variant.size,
           price: variant.price,
           quantity: variant.quantity,
           images: [],
         };
 
-        const currentVariantImages = product.variants[index]?.images || [];
-        const keepImages = new Set();
-
+        // Get current images for this variant
+        const currentVariantImages = product.variants[variantIndex]?.images || [];
+        
+        // 1. Process existing images (tracked in hidden inputs)
         if (variant.existingImages) {
+          // Convert existingImages to array if it's not already
           const existingImages = Array.isArray(variant.existingImages)
-            ? variant.existingImages
+            ? Object.values(variant.existingImages)
             : [variant.existingImages];
-
-          existingImages.forEach((url) => {
-            keepImages.add(url);
-            processedVariant.images.push({ url });
+          
+          // Add each existing image that's being kept
+          existingImages.forEach((img) => {
+            if (img && img.url) {
+              processedVariant.images.push({
+                url: img.url,
+                position: parseInt(img.position || 0)
+              });
+            }
           });
         }
-        for (const images of currentVariantImages) {
-          if (!keepImages.has(image.url)) {
-            await deleteImageFile(image.url);
+        
+        // 2. Process deleted images
+        if (variant.deletedImages) {
+          const deletedImages = Array.isArray(variant.deletedImages)
+            ? variant.deletedImages
+            : [variant.deletedImages];
+            
+          // Delete image files for removed images
+          for (const imageUrl of deletedImages) {
+            await deleteImageFile(imageUrl);
           }
-        }
-
-        if (req.files && req.files[`variants[${index}][newImages]`]) {
-          const newImages = req.files[`variants[${index}][newImages]`];
-
-          const totalImages = processedVariant.images.length + newImages.length;
-          if (totalImages > 3) {
-            const excessImages = newImages.slice(
-              3 - processedVariant.images.length
-            );
-            for (const file of excessImages) {
-              await deleteImageFile(`/public/images/products/${file.filename}`);
+          
+          // Filter out deleted images from current ones
+          const deletedImageSet = new Set(deletedImages);
+          currentVariantImages.forEach(img => {
+            if (!deletedImageSet.has(img.url) && 
+                !processedVariant.images.some(existing => existing.url === img.url)) {
+              processedVariant.images.push(img);
             }
-            newImages.splice(3 - processedVariant.images.length);
-          }
-          const uploadedImages = newImages.map((file) => ({
-            url: `/public/images/products/${file.filename}`,
-          }));
-          processedVariant.images.push(...uploadedImages);
+          });
         }
+        
+        // 3. Process replacement images
+        for (let position = 0; position < 3; position++) {
+          const fileFieldName = `variants[${variantIndex}][replaceImage][${position}]`;
+          
+          if (req.files && req.files[fileFieldName]) {
+            const file = req.files[fileFieldName][0]; // Get the uploaded file
+            
+            // Generate the new image URL
+            const newImageUrl = `/images/products/${file.filename}`;
+            
+            // Check if we're replacing an existing image
+            const replacePosition = variant.replaceImagePosition && 
+                                   variant.replaceImagePosition[position] ? 
+                                   parseInt(variant.replaceImagePosition[position]) : 
+                                   position;
+            
+            // Find and remove the image being replaced at this position
+            const replacedImageIndex = processedVariant.images.findIndex(
+              img => img.position === replacePosition
+            );
+            
+            if (replacedImageIndex !== -1) {
+              // Delete the old image file
+              await deleteImageFile(processedVariant.images[replacedImageIndex].url);
+              // Replace with new image
+              processedVariant.images[replacedImageIndex] = {
+                url: newImageUrl,
+                position: replacePosition
+              };
+            } else {
+              // Add as new image
+              processedVariant.images.push({
+                url: newImageUrl,
+                position: replacePosition
+              });
+            }
+          }
+        }
+        
+        // Ensure we have at most 3 images, sorted by position
+        processedVariant.images = processedVariant.images
+          .sort((a, b) => (a.position || 0) - (b.position || 0))
+          .slice(0, 3);
+        
         return processedVariant;
       })
     );
+    const productCategory = await Category.find({category})
 
     const updatedProduct = await Product.findByIdAndUpdate(
       productId,
@@ -365,20 +420,23 @@ exports.editProductController = async (req, res) => {
         name,
         brand,
         actualPrice,
-        category,
+        productCategory,
         status: status === "true",
         variants: processedVariants,
       },
       { new: true }
     );
 
-    return res.status(201).json({
-      title: "success",
-      message: "Product added successfully",
+    return res.status(200).json({
+      title: "Success",
+      message: "Product updated successfully",
     });
   } catch (err) {
-    console.error(err);
-    return res.status(statusCodes.SERVER_ERROR).redirect("/admin/products");
+    console.error("Error updating product:", err);
+    return res.status(statusCodes.SERVER_ERROR).json({
+      title: "Error",
+      message: "An error occurred while updating the product"
+    });
   }
 };
 

@@ -39,8 +39,32 @@ const uploadProductImages =  multer({
   }
 });
 
+function generateFieldNames(maxVariants, maxPositions) {
+  const fields = [];
+  
+  for (let i = 0; i < maxVariants; i++) {
+    // Add fields for replacement images (for editing existing images)
+    for (let j = 0; j < maxPositions; j++) {
+      fields.push({ 
+        name: `variants[${i}][replaceImage][${j}]`, 
+        maxCount: 1 
+      });
+    }
+    
+    // For adding new images to existing variants
+    fields.push({ 
+      name: `variants[${i}][newImages]`, 
+      maxCount: 3 
+    });
+  }
+  
+  return fields;
+}
+
+const productEditImageUpload = uploadProductImages.fields(generateFieldNames(10, 3)); // Support up to 10 variants with 3 images each
 
 module.exports = {
   uploadCategoryImages,
   uploadProductImages,
+  productEditImageUpload
 };
