@@ -68,6 +68,14 @@ exports.addCategoryController = async (req, res) => {
 
     const mappedStatus = status === "on" ? "listed" : "unlisted";
     console.log(mappedStatus);
+
+    const existingCategory = await Category.find({ categoryName });
+    if (existingCategory) {
+      return res.status(statusCodes.BAD_REQUEST).json({
+        title: "error",
+        message: "Category already exists",
+      });
+    }
     const newCategory = new Category({
       name: categoryName,
       status: mappedStatus,

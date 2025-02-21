@@ -7,21 +7,21 @@ const PORT = process.env.PORT || 3000;
 
 // --- Local imports ---
 
-const userRoutes = require("../routes/userRoutes/userMainRoutes");
-const authRoutes = require("../routes/userRoutes/authRoutes");
-const adminRoutes = require("../routes/adminRoutes/adminMainRouter");
-const cacheMiddleware = require("../middlewares/cacheMiddleware");
-const passport = require("./passport");
-const connectDB = require("./db");
-const sessionMiddleware = require("./session");
+const userRoutes = require("./routes/userRoutes/userMainRoutes");
+const authRoutes = require("./routes/userRoutes/authRoutes");
+const adminRoutes = require("./routes/adminRoutes/adminMainRouter");
+const cacheMiddleware = require("./middlewares/cacheMiddleware");
+const passport = require("./config/passport");
+const connectDB = require("./config/db");
+const sessionMiddleware = require("./config/session");
 
 app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "../views"));
+app.set("views", path.join(__dirname, "views"));
 
 // --- Global middlewares ---
 
 connectDB();
-app.use(express.static(path.join(__dirname, "../public")));
+app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(sessionMiddleware);

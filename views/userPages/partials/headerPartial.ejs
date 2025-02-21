@@ -34,10 +34,7 @@
                 <li><a class="dropdown-item" href="/profile">My Profile</a></li>
                 <li><a class="dropdown-item" href="/orders">My Orders</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <form action="/logout" method="post">
-                  <li><button type="submit">Logout</button></li>
-                </form>
-                
+                <li><a href="#" class="dropdown-item logout-link">Logout</a></li>
               </ul>
             </div>
           <% } else { %>
@@ -53,3 +50,75 @@
   </div>
   <!-- Rest of the code remains the same -->
 </div>
+
+<!-- Add SweetAlert2 library -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Logout AJAX Implementation -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const logoutLink = document.querySelector('.logout-link');
+    
+    if (logoutLink) {
+      logoutLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        Swal.fire({
+          title: 'Ready to leave?',
+          text: 'Are you sure you want to logout?',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#9622ab',
+          cancelButtonColor: '#6c757d',
+          confirmButtonText: 'Yes, logout',
+          cancelButtonText: 'Cancel'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Show loading state
+            Swal.fire({
+              title: 'Logging out...',
+              allowOutsideClick: false,
+              didOpen: () => {
+                Swal.showLoading();
+              }
+            });
+            
+            fetch('/logout', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+              },
+              credentials: 'same-origin'
+            })
+            .then(response => {
+              if (response.ok) {
+                return response.json().catch(() => ({})); // Handle empty responses
+              }
+              throw new Error('Logout failed');
+            })
+            .then(() => {
+              Swal.fire({
+                title: 'Logged Out Successfully!',
+                text: 'You have been logged out from your account.',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+              }).then(() => {
+                window.location.href = '/';
+              });
+            })
+            .catch(error => {
+              console.error('Logout error:', error);
+              Swal.fire({
+                title: 'Oops!',
+                text: 'Something went wrong. Please try again.',
+                icon: 'error'
+              });
+            });
+          }
+        });
+      });
+    }
+  });
+</script>

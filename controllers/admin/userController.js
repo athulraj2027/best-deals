@@ -56,7 +56,7 @@ exports.listingUsersController = async (req, res) => {
 exports.blockCustomer = async (req, res) => {
   try {
     const customerId = req.params.id;
-    await User.findByIdAndUpdate(customerId, { isActive: false }); // Set status to false
+    await User.findByIdAndUpdate(customerId, { isBlocked: true }); // Set status to false
     res.status(200).redirect("/admin/customers");
   } catch (err) {
     console.error("Error blocking customer:", err);
@@ -67,7 +67,7 @@ exports.blockCustomer = async (req, res) => {
 exports.unblockCustomer = async (req, res) => {
   try {
     const customerId = req.params.id;
-    await User.findByIdAndUpdate(customerId, { isActive: true }); // Set status to true
+    await User.findByIdAndUpdate(customerId, { isBlocked: false }); // Set status to true
     res.redirect("/admin/customers");
   } catch (err) {
     console.error("Error unblocking customer:", err);

@@ -110,7 +110,7 @@
                         View
                       </a>
 
-                      <% if (customer.isActive === true) { %>
+                      <% if (customer.isBlocked === false) { %>
                       <!-- Block Button -->
                       <form
                         action="/admin/customers/block/<%= customer._id %>"
@@ -124,7 +124,7 @@
                           Block
                         </button>
                       </form>
-                      <% } else if(customer.isActive === false) { %>
+                      <% } else if(customer.isBlocked === true) { %>
                       <!-- Unblock Button -->
                       <form
                         action="/admin/customers/unblock/<%= customer._id %>"

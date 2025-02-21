@@ -5,7 +5,7 @@ const router = express.Router();
 
 router
   .route("/")
-  .get(userAuthMiddleware,signInController.getSignInPage)
+  .get(userAuthMiddleware, signInController.getSignInPage)
   .post(signInController.signInController);
 
 module.exports = router;

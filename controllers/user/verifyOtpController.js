@@ -22,7 +22,8 @@ exports.verifyOtpController = async (req, res) => {
   const name = req.session.name;
   const email = req.session.email;
   const password = req.session.password;
-
+  console.log(password);
+  console.log(otpInput)
   try {
     if (!email || !name || !password) {
       return res.status(statusCodes.BAD_REQUEST).json({
@@ -31,12 +32,13 @@ exports.verifyOtpController = async (req, res) => {
         message: "Credentials missing from session",
       });
     }
-    // console.log(password);
+    console.log(password);
     const isOtpValid = await OtpServices.verifyOTP(email, otpInput);
+    console.log(isOtpValid)
     if (isOtpValid) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      console.log(hashedPassword);
       try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        console.log(hashedPassword);
         const newUser = new User({
           name,
           email,
@@ -51,7 +53,7 @@ exports.verifyOtpController = async (req, res) => {
             return res.redirect("/");
           }
 
-          return res.json({
+          return res.status(200).json({
             status: "success",
             title: "Success",
             message: "OTP verification is successful",
@@ -66,7 +68,7 @@ exports.verifyOtpController = async (req, res) => {
         });
       }
     } else {
-      res.status(statusCodes.BAD_REQUEST).json({
+      res.status(statusCodes.SERVER_ERROR).json({
         status: "error",
         title: "Error",
         message: "You have entered invalid OTP. Please enter correct OTP",
@@ -87,7 +89,9 @@ exports.resendOtp = async (req, res) => {
     const email = req.session.email;
 
     if (!email) {
-      return res.status(statusCodes.BAD_REQUEST).json({ message: "Email not found in session." });
+      return res
+        .status(statusCodes.BAD_REQUEST)
+        .json({ message: "Email not found in session." });
     }
     const otp = OtpServices.generateOTP();
     OtpServices.saveOTP(email, otp);

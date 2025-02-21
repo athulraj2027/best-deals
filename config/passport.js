@@ -35,7 +35,6 @@ passport.use(
           console.log(
             "User exists with email but without Google login. Linking Google ID."
           );
-
           return done(null, existingUser);
         }
 
@@ -45,7 +44,6 @@ passport.use(
           email: profile.emails[0].value,
         });
         await newUser.save();
-
         done(null, newUser);
       } catch (err) {
         done(err);

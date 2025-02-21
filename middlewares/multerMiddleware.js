@@ -4,7 +4,7 @@ const storage = multer.memoryStorage();
 
 const categoryStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join("../public/images/categories/"));
+    cb(null, path.join("public/images/categories/"));
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);
@@ -13,7 +13,7 @@ const categoryStorage = multer.diskStorage({
 
 const productStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join("../public/images/products/"));
+    cb(null, path.join("public/images/products/"));
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);
