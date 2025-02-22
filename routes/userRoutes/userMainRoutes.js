@@ -8,7 +8,7 @@ const productsRoutes = require("./productsRoutes");
 const shopRoutes = require("./shopRoutes");
 const homePageRoutes = require("./homePageRoutes");
 const verifyOtpController = require("../../controllers/user/verifyOtpController");
-
+const verifyEmailRoutes = require("./verifyEmailRoutes");
 router.use((req, res, next) => {
   res.locals.userId = req.session.userId || null;
   next();
@@ -20,6 +20,7 @@ router.use("/verify-otp", verifyOtpRoutes);
 router.use("/product", productsRoutes);
 router.route("/resend-otp").post(verifyOtpController.resendOtp);
 router.use("/shop", shopRoutes);
+router.use("/verify-email", verifyEmailRoutes);
 
 router.route("/logout").post((req, res) => {
   req.session.destroy();
