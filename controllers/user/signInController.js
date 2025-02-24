@@ -76,7 +76,7 @@ exports.signInController = async (req, res) => {
     req.session.userId = user._id;
     req.session.email = email;
     req.session.isAuthenticated = true;
-
+console.log("req.session.userId: ",req.session.userId)
     req.session.save((err) => {
       if (err) {
         console.error("Session save error:", err);

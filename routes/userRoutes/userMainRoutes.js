@@ -7,8 +7,9 @@ const verifyOtpRoutes = require("./verifyOtpRoutes");
 const productsRoutes = require("./productsRoutes");
 const shopRoutes = require("./shopRoutes");
 const homePageRoutes = require("./homePageRoutes");
-const profileRoutes = require("./profileRoutes")
-const forgotPasswordRoutes = require("./forgotPasswordRoutes")
+const profileRoutes = require("./profileRoutes");
+const forgotPasswordRoutes = require("./forgotPasswordRoutes");
+const cartRoutes = require("./cartRoutes");
 
 const verifyOtpController = require("../../controllers/user/verifyOtpController");
 
@@ -24,14 +25,13 @@ router.use("/product", productsRoutes);
 router.route("/resend-otp").post(verifyOtpController.resendOtp);
 router.use("/shop", shopRoutes);
 router.use("/forgot-password", forgotPasswordRoutes);
-router.use("/profile",profileRoutes)
-
+router.use("/profile", profileRoutes);
+router.use("/cart", cartRoutes);
 router.route("/logout").post((req, res) => {
   req.session.destroy();
   res.clearCookie("auth_token");
   res.redirect("/");
 });
-
 router.use("/", homePageRoutes);
 
 module.exports = router;

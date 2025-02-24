@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Variant</title>
+    <link rel="stylesheet" href="/adminCSS/partials/menu.css" />
+
+    <style>
+      /* Add Variant Page Styles */
+
+      /* Main Container Styles */
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      /* Card Styles */
+      .card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+      }
+
+      .card-header {
+        background: #f8f9fa;
+        padding: 20px;
+        border-bottom: 1px solid #e9ecef;
+        border-radius: 8px 8px 0 0;
+      }
+
+      .card-header h2 {
+        margin: 0;
+        color: #333;
+        font-size: 24px;
+        font-weight: 600;
+      }
+
+      .card-body {
+        padding: 25px;
+      }
+
+      /* Form Styles */
+      .form-label {
+        font-weight: 500;
+        color: #444;
+        margin-bottom: 8px;
+        display: block;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 15px;
+        transition: border-color 0.2s;
+      }
+
+      .form-control:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+      }
+
+      .form-control::-webkit-outer-spin-button,
+      .form-control::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      .mb-3 {
+        margin-bottom: 20px;
+      }
+
+      /* Button Styles */
+      .btn {
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+      }
+
+      .btn-primary {
+        background-color: #007bff;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: #0056b3;
+      }
+
+      .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+        margin-left: 10px;
+      }
+
+      .btn-secondary:hover {
+        background-color: #545b62;
+      }
+
+      /* Alert Styles */
+      .alert {
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+      }
+
+      .alert-danger {
+        background-color: #fff2f2;
+        border: 1px solid #ffcdd2;
+        color: #d32f2f;
+      }
+
+      .alert-success {
+        background-color: #f1f8e9;
+        border: 1px solid #c5e1a5;
+        color: #33691e;
+      }
+
+      /* Table Styles */
+      .table-responsive {
+        overflow-x: auto;
+        margin-top: 20px;
+      }
+
+      .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+
+      .table th {
+        background-color: #f8f9fa;
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+        color: #444;
+        border-bottom: 2px solid #dee2e6;
+      }
+
+      .table td {
+        padding: 12px;
+        border-bottom: 1px solid #dee2e6;
+        vertical-align: middle;
+      }
+
+      .table img {
+        border-radius: 4px;
+        object-fit: cover;
+      }
+
+      /* File Input Styles */
+      input[type="file"] {
+        padding: 8px;
+      }
+
+      .text-muted {
+        color: #6c757d;
+        font-size: 14px;
+        margin-top: 5px;
+        display: block;
+      }
+
+      /* Responsive Styles */
+      @media (max-width: 768px) {
+        .container {
+          padding: 10px;
+        }
+
+        .card-header {
+          padding: 15px;
+        }
+
+        .card-body {
+          padding: 15px;
+        }
+
+        .table th,
+        .table td {
+          padding: 8px;
+        }
+
+        .btn {
+          width: 100%;
+          margin-bottom: 10px;
+        }
+
+        .btn-secondary {
+          margin-left: 0;
+        }
+      }
+
+      /* Loading State Styles */
+      .btn-loading {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+
+      /* Image Preview Styles */
+      .image-preview {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+
+      .image-preview img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 4px;
+        border: 2px solid #dee2e6;
+      }
+
+      /* Variant Count Badge */
+      .variant-count {
+        background: #e9ecef;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 14px;
+        color: #666;
+        margin-left: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- views/admin/add-variant.ejs -->
+
+    <div class="container mt-4">
+      <div class="row">
+        <div class="col-md-8 offset-md-2">
+          <div class="card">
+            <div class="card-header">
+              <h2>Add Variant for <%= product.name %></h2>
+            </div>
+            <div class="card-body">
+              <form
+                action="/admin/products/<%= product._id %>/add-variant"
+                method="POST"
+                enctype="multipart/form-data"
+              >
+                <div class="form-group">
+                    <label>Color</label>
+                    <select name="color" required>
+                        <option value="">Select Color</option>
+                        <option value="red">Red</option>
+                        <option value="blue">Blue</option>
+                        <option value="black">Black</option>
+                        <option value="white">White</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Size</label>
+                    <select name="size" required>
+                        <option value="">Select Size</option>
+                        <option value="65%">65% </option>
+                        <option value="75%">75%</option>
+                        <option value="Tenkeyless">Tenkeyless</option>
+                        <option value="Fullsize">Fullsize</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                  <label for="price" class="form-label">Price</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="price"
+                    name="price"
+                    min="0"
+                    step="0.01"
+                    required
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="quantity" class="form-label">Quantity</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="quantity"
+                    name="quantity"
+                    min="0"
+                    required
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="images" class="form-label">Images</label>
+                  <input
+                    type="file"
+                    class="form-control"
+                    id="images"
+                    name="images"
+                    multiple
+                    accept="image/*"
+                  />
+                  <small class="text-muted"
+                    >You can select multiple images. First image will be set as
+                    primary.</small
+                  >
+                </div>
+
+                <div class="mb-3">
+                  <button type="submit" class="btn btn-primary">
+                    Add Variant
+                  </button>
+                  <a
+                    href="/admin/products"
+                    class="btn btn-secondary ms-2"
+                    >Cancel</a
+                  >
+                </div>
+              </form>
+
+              <div class="mt-4">
+                <h4>Current Variants</h4>
+                <div class="table-responsive">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Color</th>
+                        <th>Size</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Images</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% product.variants.forEach(variant => { %>
+                      <tr>
+                        <td><%= variant.color %></td>
+                        <td><%= variant.size %></td>
+                        <td>$<%= variant.price.toFixed(2) %></td>
+                        <td><%= variant.quantity %></td>
+                        <td>
+                          <% if (variant.images && variant.images.length > 0) {
+                          %>
+                          <img
+                            src="<%= variant.images[0].url %>"
+                            alt="Variant image"
+                            style="width: 50px; height: 50px; object-fit: cover"
+                          />
+                          <% } else { %> No images <% } %>
+                        </td>
+                      </tr>
+                      <% }); %>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

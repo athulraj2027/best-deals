@@ -1,7 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const productsController = require("../../controllers/admin/productsController");
-const { uploadProductImages, productEditImageUpload } = require("../../middlewares/multerMiddleware");
+const {
+  uploadProductImages,
+  productEditImageUpload,
+} = require("../../middlewares/multerMiddleware");
 const guestMiddleware = require("../../middlewares/guestMiddleware");
 
 router.route("/").get(guestMiddleware, productsController.getProductsPage);
@@ -15,14 +18,12 @@ router
   .get(guestMiddleware, productsController.getEditProductPage)
   .post(productEditImageUpload, productsController.editProductController);
 
-router
-  .route("/:id/variants")
-  .get(guestMiddleware, productsController.getEditVariantController)
-  .post();
-
 router.route("/unlist/:id").post(productsController.unlistProduct);
 router.route("/list/:id").post(productsController.listProduct);
 router.route("/delete/:id").post();
+router
+  .route("/:id/add-variant")
+  .get(guestMiddleware, productsController.getAddVariantPage)
+  .post(uploadProductImages.any(), productsController.addVariantController);
+  
 module.exports = router;
-
-// /admin/products/<%= product._id %>/variants/edit/<%= variant._id %>

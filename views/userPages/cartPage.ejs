@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        .cart-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .product-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            margin-right: 20px;
+        }
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .summary {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+        .empty-cart {
+            text-align: center;
+            padding: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="cart-container">
+        <h1>Shopping Cart</h1>
+        
+        <% if (cart && cart.items && cart.items.length > 0) { %>
+            <div class="cart-items">
+                <% cart.items.forEach(item => { %>
+                    <div class="cart-item">
+                        <img src="<%= item.image %>" alt="<%= item.name %>" class="product-image">
+                        <div class="item-details">
+                            <h3><%= item.name %></h3>
+                            <p>Price: $<%= item.price.toFixed(2) %></p>
+                            
+                            <div class="quantity-controls">
+                                <form action="/cart/update" method="POST" style="display: inline;">
+                                    <input type="hidden" name="productId" value="<%= item.id %>">
+                                    <button type="submit" name="action" value="decrease" 
+                                            <%= item.quantity <= 1 ? 'disabled' : '' %>>
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <span class="quantity"><%= item.quantity %></span>
+                                    <button type="submit" name="action" value="increase">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </form>
+                                
+                                <form action="/cart/remove" method="POST" style="display: inline;">
+                                    <input type="hidden" name="productId" value="<%= item.id %>">
+                                    <button type="submit" class="remove-btn">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            
+                            <p>Subtotal: $<%= (item.price * item.quantity).toFixed(2) %></p>
+                        </div>
+                    </div>
+                <% }); %>
+                
+                <div class="summary">
+                    <h2>Order Summary</h2>
+                    <p>Subtotal: $<%= cart.subtotal.toFixed(2) %></p>
+                    <% if (cart.tax) { %>
+                        <p>Tax (<%=cart.taxRate%>%): $<%= cart.tax.toFixed(2) %></p>
+                    <% } %>
+                    <% if (cart.shipping) { %>
+                        <p>Shipping: $<%= cart.shipping.toFixed(2) %></p>
+                    <% } %>
+                    <h3>Total: $<%= cart.total.toFixed(2) %></h3>
+                    
+                    <form action="/checkout" method="POST">
+                        <button type="submit" class="checkout-btn">
+                            Proceed to Checkout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        <% } else { %>
+            <div class="empty-cart">
+                <i class="fas fa-shopping-cart" style="font-size: 48px; color: #ccc;"></i>
+                <h2>Your cart is empty</h2>
+                <p>Add some items to your cart to get started!</p>
+                <a href="/products" class="continue-shopping">Continue Shopping</a>
+            </div>
+        <% } %>
+    </div>
+
+    <script>
+        // Add any client-side functionality here
+        document.addEventListener('DOMContentLoaded', function() {
+            // Example: Add confirmation for remove item
+            const removeForms = document.querySelectorAll('form[action="/cart/remove"]');
+            removeForms.forEach(form => {
+                form.onsubmit = function(e) {
+                    return confirm('Are you sure you want to remove this item?');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

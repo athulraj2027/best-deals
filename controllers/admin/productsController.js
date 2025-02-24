@@ -154,13 +154,13 @@ exports.addProductController = async (req, res) => {
     // console.log("Hi the addproductController is working");
     const { productName, brand, actualPrice, category, status, variants } =
       req.body;
-      const existingProduct = await Product.find({productName})
-      if(existingProduct){
-        return res.status(statusCodes.BAD_REQUEST).json({
-          title:"error",
-          message:"Produt already exists"
-        })
-      }
+    const existingProduct = await Product.find({ productName });
+    if (existingProduct) {
+      return res.status(statusCodes.BAD_REQUEST).json({
+        title: "error",
+        message: "Produt already exists",
+      });
+    }
     if (mongoose.isValidObjectId(category)) {
       categoryId = category;
     } else {
@@ -490,5 +490,61 @@ exports.getEditVariantController = async (req, res) => {
       title: "Server error",
       message: "Something went wrong",
     });
+  }
+};
+
+exports.getAddVariantPage = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const product = await Product.findById(productId);
+    return res
+      .status(200)
+      .render("adminPages/ProductPages/adminAddVariantPage", { product });
+  } catch (err) {
+    console.error("Error in getting add variant page : ", err);
+    return res.status(500).redirect("/admin/products");
+  }
+};
+
+exports.addVariantController = async (req, res) => {
+  try {
+    const  productId  = req.params.id;
+    const { color, size, price, quantity } = req.body;
+
+    // Validate inputs
+    if (!color || !size || !price || !quantity) {
+      return res.status(400).redirect('/admin/products');
+    }
+
+    // Find the product
+    const product = await Product.findById(productId);
+    console.log(productId)
+    if (!product) {
+      return res.redirect("/products?error=Product not found");
+    }
+
+    // Process uploaded images
+    const images = req.files.map((file, index) => ({
+      url: `/uploads/${file.filename}`,
+      order: index,
+    }));
+
+    // Create new variant
+    const newVariant = {
+      color,
+      size,
+      price: Number(price),
+      quantity: Number(quantity),
+      images,
+    };
+
+    // Add variant to product
+    product.variants.push(newVariant);
+    await product.save();
+    console.log("New variant added");
+    return res.status(200).redirect(`/admin/products`);
+  } catch (error) {
+    console.error("Error adding variant:", error);
+    return res.redirect(`/admin/products`);
   }
 };

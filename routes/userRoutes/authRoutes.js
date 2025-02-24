@@ -9,10 +9,21 @@ router.get(
 
 router.get(
   "/auth/google/callback",
-  passport.authenticate("google", { failureRedirect: "/login" }),
+  passport.authenticate("google", { failureRedirect: "/signin" }),
   (req, res) => {
-    req.session.userId = req.user._id;
-    console.log(req.session.userId);
+    if(req.user){
+      req.session.userId = req.user._id;
+      req.session.email = req.session.email
+      
+      req.session.save((err)=>{
+        if(err){
+          console.log("Google session save error : ",err)
+          return res.redirect('/signin')
+        }
+        
+      })
+    }
+        console.log(req.session.email);
     return res.redirect("/");
   }
 );

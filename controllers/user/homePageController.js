@@ -4,7 +4,7 @@ const statusCodes = require("../../services/statusCodes");
 
 exports.getHomePage = async (req, res) => {
   try {
-    console.log(req.session.email);
+    console.log(req.session.userId);
 
     const rawProducts = await Product.find({ status: true })
       .sort({ createdAt: -1 })
