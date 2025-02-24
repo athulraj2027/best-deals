@@ -16,6 +16,7 @@ exports.getSignUpPage = (req, res) => {
 
 exports.signUpController = async (req, res) => {
   const { name, email, password, confirmPassword } = req.body;
+  console.log(req.body);
   try {
     if (!name || !email || !password || !confirmPassword) {
       console.log("Credentials missing");
@@ -23,19 +24,12 @@ exports.signUpController = async (req, res) => {
         status: "error",
         title: "Error",
         message: "Please fill all the columns",
-        errors: {
-          name: !name ? "Name is required" : null,
-          email: !email ? "Email is required" : null,
-          password: !password ? "Password is required" : null,
-          confirmPassword: !confirmPassword
-            ? "Confirm Password is required"
-            : null,
-        },
       });
     }
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne( {email} );
     if (existingUser) {
+      console.log("existing user");
       return res.status(statusCodes.BAD_REQUEST).json({
         status: "error",
         title: "Error",
@@ -58,8 +52,8 @@ exports.signUpController = async (req, res) => {
       });
     }
     const otp = otpServices.generateOTP();
-    otpServices.saveOTP(email, otp);
-    otpServices.sendOTP(email, otp);
+    await otpServices.saveOTP(email, otp);
+    await otpServices.sendOTP(email, otp);
 
     req.session.name = name;
     req.session.email = email;

@@ -176,14 +176,30 @@
         </div>
       </div>
     </div>
-    <div>
+    <div style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 20px; font-size: 16px; font-family: Arial, sans-serif;">
       <% if (hasPrevPage) { %>
-      <a href="/admin/products?page=<%= prevPage %>&limit=10">Previous</a>
-      <% } %> Page <%= currentPage %> of <%= totalPages %> <% if (hasNextPage) {
-      %>
-      <a href="/admin/products?page=<%= nextPage %>&limit=10">Next</a>
+      <a href="/admin/products?page=<%= prevPage %>&limit=10" 
+         style="padding: 8px 14px; background-color: #007bff; color: white; text-decoration: none; border-radius: 6px; transition: background 0.3s ease-in-out; font-weight: bold;"
+         onmouseover="this.style.backgroundColor='#0056b3'"
+         onmouseout="this.style.backgroundColor='#007bff'">
+        Previous
+      </a>
+      <% } %>
+    
+      <span style="font-weight: bold; color: #333;">
+        Page <%= currentPage %> of <%= totalPages %>
+      </span>
+    
+      <% if (hasNextPage) { %>
+      <a href="/admin/products?page=<%= nextPage %>&limit=10" 
+         style="padding: 8px 14px; background-color: #007bff; color: white; text-decoration: none; border-radius: 6px; transition: background 0.3s ease-in-out; font-weight: bold;"
+         onmouseover="this.style.backgroundColor='#0056b3'"
+         onmouseout="this.style.backgroundColor='#007bff'">
+        Next
+      </a>
       <% } %>
     </div>
+    
 
     <!-- Bootstrap JS and dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

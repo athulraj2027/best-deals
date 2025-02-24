@@ -150,22 +150,23 @@
                   <% } %>
                 </tbody>
               </table>
-              <div class="d-flex justify-content-center mt-4">
-                <% if (customers.hasPrevPage) { %>
+              <div style="text-align: center; margin: 20px 0; font-family: Arial, sans-serif;">
+                <% if (hasPrevPage) { %>
                 <a
-                  href="/admin/customers?page=<%= customers.prevPage %>"
-                  class="btn btn-sm btn-secondary"
+                  href="/admin/customers?page=<%= prevPage %>&limit=10"
+                  style="padding: 8px 15px; margin: 5px; border: 1px solid #007bff; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;"
                   >Previous</a
                 >
                 <% } %>
-                <span class="mx-2"
-                  >Page <%= customers.page %> of <%= customers.totalPages
-                  %></span
-                >
-                <% if (customers.hasNextPage) { %>
+              
+                <span style="padding: 8px 12px; font-size: 16px; font-weight: bold; color: #333;">
+                  Page <%= currentPage %> of <%= totalPages %>
+                </span>
+              
+                <% if (hasNextPage) { %>
                 <a
-                  href="/admin/customers?page=<%= customers.nextPage %>"
-                  class="btn btn-sm btn-secondary"
+                  href="/admin/customers?page=<%= nextPage %>&limit=10"
+                  style="padding: 8px 15px; margin: 5px; border: 1px solid #007bff; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;"
                   >Next</a
                 >
                 <% } %>
@@ -175,13 +176,7 @@
         </div>
       </div>
     </div>
-    <div>
-      <% if (hasPrevPage) { %>
-      <a href="/admin/customers?page=<%= prevPage %>&limit=10">Previous</a>
-      <% } %> Page <%= currentPage %> of <%= totalPages %> <% if (hasNextPage) {
-      %>
-      <a href="/admin/customers?page=<%= nextPage %>&limit=10">Next</a>
-      <% } %>
-    </div>
+  
+    
   </body>
 </html>

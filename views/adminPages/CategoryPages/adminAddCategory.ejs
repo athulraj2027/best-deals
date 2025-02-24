@@ -363,13 +363,24 @@
         </div>
 
         <button type="submit" class="submit-btn">Create Category</button>
-        
       </form>
-      <form action="/admin/categories" method="get" >
-        <button style="color: white; background: red;width: 100px;height: 50px;border: none;border-radius: 10px;margin: 30px;">Cancel</button>
+      <form id="addCategoryForm" action="/admin/categories" method="get">
+        <button
+          style="
+            color: white;
+            background: red;
+            width: 100px;
+            height: 50px;
+            border: none;
+            border-radius: 10px;
+            margin: 30px;
+          "
+        >
+          Cancel
+        </button>
       </form>
     </div>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
       // Validation Rules Constants
       const VALIDATION_RULES = {
@@ -644,53 +655,118 @@
         });
 
       // Form submission
-      document
-        .getElementById("addCategoryForm")
-        .addEventListener("submit", async function (e) {
+      $(document).ready(function () {
+        // Ensure DOM is loaded
+        $("#addCategoryForm").on("submit", function (e) {
+          // Use .on() for better practice
           e.preventDefault();
 
           // Validate all fields
-          const nameValid = validateCategoryName(
-            document.getElementById("categoryName").value
-          );
-          const imageValid = validateImage(
-            document.getElementById("categoryImage").files[0]
-          );
+          const nameValid = validateCategoryName($("#categoryName").val());
+          const imageValid = validateImage($("#categoryImage")[0].files[0]);
           const tagsValid = validateTags();
 
           if (!nameValid || !imageValid || !tagsValid) {
             return;
           }
 
-          try {
-            const formData = new FormData(this);
-            const response = await fetch("/admin/categories/add", {
-              method: "POST",
-              body: formData,
-            });
+          // Show loading state
+          Swal.fire({
+            title: "Adding Category...",
+            text: "Please wait while we process your request",
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            willOpen: () => {
+              Swal.showLoading();
+            },
+          });
 
-            const data = await response.json();
+          const formData = new FormData(this);
 
-            if (data.status === "success") {
-              await Swal.fire({
-                icon: "success",
-                title: "Success!",
-                text: "Category added successfully",
-                showConfirmButton: false,
-                timer: 1500,
+          $.ajax({
+            url: "/admin/categories/add",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+              if (response.status === "success") {
+                Swal.fire({
+                  icon: "success",
+                  title: "Success!",
+                  text: "Category added successfully",
+                  showConfirmButton: true,
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    window.location.href = "/admin/categories";
+                  }
+                });
+              } else {
+                Swal.fire({
+                  icon: "error",
+                  title: "Failed!",
+                  text: response.message || "Failed to add category",
+                  showConfirmButton: true,
+                });
+              }
+            },
+            error: function (xhr, status, error) {
+              console.error("AJAX Error:", status, error);
+              console.log("Response:", xhr.responseJSON);
+
+              let errorMessage =
+                "An unexpected error occurred. Please try again.";
+
+              switch (xhr.status) {
+                case 400:
+                  if (xhr.responseJSON?.error === "DUPLICATE_CATEGORY") {
+                    errorMessage = "A category with this name already exists.";
+                  } else if (xhr.responseJSON?.error === "INVALID_IMAGE") {
+                    errorMessage =
+                      "Please upload a valid image file (JPG, PNG, or WebP).";
+                  } else if (xhr.responseJSON?.error === "INVALID_TAGS") {
+                    errorMessage =
+                      "Please provide valid tags for the category.";
+                  } else {
+                    errorMessage = "Invalid data. Please check your inputs.";
+                  }
+                  break;
+                case 401:
+                  errorMessage = "Please login to continue.";
+                  break;
+                case 403:
+                  errorMessage = "You don't have permission to add categories.";
+                  break;
+                case 413:
+                  errorMessage =
+                    "Image file is too large. Maximum size is 5MB.";
+                  break;
+                case 415:
+                  errorMessage =
+                    "Unsupported image format. Please use JPG, PNG, or WebP.";
+                  break;
+                case 500:
+                  errorMessage = "Server error. Please try again later.";
+                  break;
+              }
+
+              if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMessage = xhr.responseJSON.message;
+              }
+
+              Swal.fire({
+                icon: "error",
+                title: "Error!",
+                text: errorMessage,
+                showConfirmButton: true,
               });
-              window.location.href = "/admin/categories";
-            } else {
-              throw new Error(data.message || "Failed to add category");
-            }
-          } catch (error) {
-            Swal.fire({
-              icon: "error",
-              title: "Error",
-              text: error.message || "Something went wrong. Please try again.",
-            });
-          }
+            },
+            complete: function () {
+              // Additional cleanup if needed
+            },
+          });
         });
+      });
     </script>
   </body>
 </html>

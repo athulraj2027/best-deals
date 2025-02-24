@@ -100,15 +100,27 @@
         <a href="/signin" class="signin-link"
           >Already have an account? Sign In</a
         >
-       
       </form>
       <a href="/auth/google">
-        <button style="background-color: #4285F4; color: white; padding: 10px 20px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer;">
-          <img src="https://img.icons8.com/color/16/000000/google-logo.png" alt="Google Logo" style="vertical-align: middle; margin-right: 8px;">
+        <button
+          style="
+            background-color: #4285f4;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+          "
+        >
+          <img
+            src="https://img.icons8.com/color/16/000000/google-logo.png"
+            alt="Google Logo"
+            style="vertical-align: middle; margin-right: 8px"
+          />
           Sign in with Google
         </button>
       </a>
-      
     </div>
     <%- include('./partials/footer')%>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -144,12 +156,14 @@
           $.ajax({
             url: "/signup",
             type: "POST",
-            data: {
+            contentType: "application/json", // Set content type
+            dataType: "json",
+            data: JSON.stringify({
               name: name,
               email: email,
               password: password,
               confirmPassword: confirmPassword,
-            },
+            }),
             success: function (response) {
               if (response.status === "success") {
                 // Trigger SweetAlert for success
@@ -158,9 +172,11 @@
                   text: response.message,
                   icon: response.status, // 'success'
                   confirmButtonText: "OK",
-                }).then(() => {
-                  form.off("submit").submit() // Submit form traditionally after validation
-                }).then(()=>window.location.href = '/verify-otp')
+                })
+                  .then(() => {
+                    form.off("submit").submit(); // Submit form traditionally after validation
+                  })
+                  .then(() => (window.location.href = "/verify-otp"));
               } else {
                 // Trigger SweetAlert for error
                 Swal.fire({
@@ -187,10 +203,10 @@
                 }
               }
             },
-            error: function () {
+            error: function (xhr) {
               Swal.fire({
                 title: "Oops!",
-                text: "An error occurred during validation. Please try again.",
+                text: xhr.responseJSON ? xhr.responseJSON.message :"An error occurred during validation. Please try again.",
                 icon: "error",
                 confirmButtonText: "OK",
               });

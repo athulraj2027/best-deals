@@ -24,47 +24,49 @@ const uploadCategoryImages = multer({
   storage: categoryStorage,
 }).single("categoryImage");
 
-const uploadProductImages =  multer({
+const uploadProductImages = multer({
   storage: productStorage,
   limits: {
-      fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 5 * 1024 * 1024, // 5MB limit
   },
   fileFilter: (req, file, cb) => {
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-      if (allowedTypes.includes(file.mimetype)) {
-          cb(null, true);
-      } else {
-          cb(new Error('Invalid file type. Only JPEG, PNG and WebP are allowed.'));
-      }
-  }
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Invalid file type. Only JPEG, PNG and WebP are allowed."));
+    }
+  },
 });
 
 function generateFieldNames(maxVariants, maxPositions) {
   const fields = [];
-  
+
   for (let i = 0; i < maxVariants; i++) {
     // Add fields for replacement images (for editing existing images)
     for (let j = 0; j < maxPositions; j++) {
-      fields.push({ 
-        name: `variants[${i}][replaceImage][${j}]`, 
-        maxCount: 1 
+      fields.push({
+        name: `variants[${i}][replaceImage][${j}]`,
+        maxCount: 1,
       });
     }
-    
+
     // For adding new images to existing variants
-    fields.push({ 
-      name: `variants[${i}][newImages]`, 
-      maxCount: 3 
+    fields.push({
+      name: `variants[${i}][newImages]`,
+      maxCount: 3,
     });
   }
-  
+
   return fields;
 }
 
-const productEditImageUpload = uploadProductImages.fields(generateFieldNames(10, 3)); // Support up to 10 variants with 3 images each
+const productEditImageUpload = uploadProductImages.fields(
+  generateFieldNames(10, 3)
+); // Support up to 10 variants with 3 images each
 
 module.exports = {
   uploadCategoryImages,
   uploadProductImages,
-  productEditImageUpload
+  productEditImageUpload,
 };

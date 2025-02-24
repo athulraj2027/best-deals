@@ -197,6 +197,22 @@
         color: var(--text-secondary);
         margin-bottom: 1rem;
       }
+      .pagination {
+        margin-top: 20px;
+        text-align: center;
+      }
+      .pagination a {
+        margin: 0 5px;
+        padding: 8px 12px;
+        text-decoration: none;
+        border: 1px solid #007bff;
+        color: #007bff;
+        border-radius: 5px;
+      }
+      .pagination a.active {
+        background-color: #007bff;
+        color: white;
+      }
     </style>
   </head>
   <body>
@@ -281,7 +297,7 @@
               <div class="card h-100">
                 <div class="card-img-wrapper">
                   <img
-                      src="<%= product.variants && product.variants.length > 0 && product.variants[0].images && product.variants[0].images.length > 0 ? product.variants[0].images[0].url : 'https://via.placeholder.com/400x400?text=No+Image' %>"
+                    src="<%= product.variants && product.variants.length > 0 && product.variants[0].images && product.variants[0].images.length > 0 ? product.variants[0].images[0].url : 'https://via.placeholder.com/400x400?text=No+Image' %>"
                     alt="<%= product.name %>"
                     class="card-img-top"
                   />
@@ -310,6 +326,20 @@
             </p>
           </div>
           <% } %>
+          <div class="pagination">
+            <% if (currentPage > 1) { %>
+            <a href="?page=<%= currentPage - 1 %>&limit=10">Previous</a>
+            <% } %> <% for (let i = 1; i <= totalPages; i++) { %>
+            <a
+              href="?page=<%= i %>&limit=10"
+              class="<%= i === currentPage ? 'active' : '' %>"
+            >
+              <%= i %>
+            </a>
+            <% } %> <% if (currentPage < totalPages) { %>
+            <a href="?page=<%= currentPage + 1 %>&limit=10">Next</a>
+            <% } %>
+          </div>
         </div>
       </div>
     </div>

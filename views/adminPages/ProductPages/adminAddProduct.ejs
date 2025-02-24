@@ -316,7 +316,7 @@
           <h3>Basic Information</h3>
           <div class="form-group">
             <label for="productName">Product Name</label>
-            <input type="text" id="productName" name="productName" required />
+            <input type="text" id="productName" name="name" required />
           </div>
 
           <div class="form-group">
@@ -341,11 +341,10 @@
             <select id="category" name="category" required>
               <option value="">Select Category</option>
               <% categories.forEach(category => { %>
-                <option value="<%= category.name %>"><%= category.name %></option>
+              <option value="<%= category.name %>"><%= category.name %></option>
               <% }) %>
             </select>
           </div>
-          
 
           <div class="form-group">
             <label for="status">Status</label>
@@ -387,21 +386,27 @@
     </div>
 
     <div class="cropper-modal" id="cropperModal">
-        <div class="cropper-container">
-            <div class="cropper-header">
-                <h3>Crop Image</h3>
-                <button type="button" class="btn-close" onclick="cancelCrop()">&times;</button>
-            </div>
-            <div class="cropper-content">
-                <div class="cropper-img-container">
-                    <img src="" alt="Crop preview" id="cropperImage">
-                </div>
-            </div>
-            <div class="cropper-controls">
-                <button type="button" class="btn btn-danger" onclick="cancelCrop()">Cancel</button>
-                <button type="button" class="btn btn-success" onclick="saveCrop()">Save Crop</button>
-            </div>
+      <div class="cropper-container">
+        <div class="cropper-header">
+          <h3>Crop Image</h3>
+          <button type="button" class="btn-close" onclick="cancelCrop()">
+            &times;
+          </button>
         </div>
+        <div class="cropper-content">
+          <div class="cropper-img-container">
+            <img src="" alt="Crop preview" id="cropperImage" />
+          </div>
+        </div>
+        <div class="cropper-controls">
+          <button type="button" class="btn btn-danger" onclick="cancelCrop()">
+            Cancel
+          </button>
+          <button type="button" class="btn btn-success" onclick="saveCrop()">
+            Save Crop
+          </button>
+        </div>
+      </div>
     </div>
 
     <script>
@@ -675,38 +680,94 @@
         placeholder.style.display = "flex";
         input.value = "";
       }
-      document
-        .getElementById("addProductForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
+      $("#addProductForm").submit(function (e) {
+        e.preventDefault();
 
-          try {
-            const formData = new FormData(e.target);
-            const response = await fetch("/admin/products/add", {
-              method: "POST",
-              body: formData,
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-              await Swal.fire({
+        // Show loading state
+        Swal.fire({
+          title: "Adding Product...",
+          text: "Please wait while we process your request",
+          allowOutsideClick: false,
+          showConfirmButton: false,
+          willOpen: () => {
+            Swal.showLoading();
+          },
+        });
+        const formData = new FormData(this);
+        $.ajax({
+          url: "/admin/products/add",
+          type: "POST",
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            if (response.success) {
+              Swal.fire({
                 icon: "success",
                 title: "Success!",
                 text: "Product added successfully",
+                showConfirmButton: true,
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  window.location.href = "/admin/products";
+                }
               });
-              window.location.href = "/admin/products";
             } else {
-              throw new Error(data.message || "Failed to add product");
+              Swal.fire({
+                icon: "error",
+                title: "Failed!",
+                text: response.message || "Failed to add product",
+                showConfirmButton: true,
+              });
             }
-          } catch (error) {
+          },
+          error: function (xhr, status, error) {
+            console.error("AJAX Error:", status, error);
+            console.log("Response:", xhr.responseJSON);
+
+            let errorMessage =
+              "An unexpected error occurred. Please try again.";
+
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+              errorMessage = xhr.responseJSON.message;
+            } else {
+              // Handle specific HTTP status codes
+              switch (xhr.status) {
+                case 400:
+                  errorMessage = "Invalid data or product already exists.";
+                  break;
+                case 401:
+                  errorMessage = "Please login to continue.";
+                  break;
+                case 403:
+                  errorMessage =
+                    "You don't have permission to perform this action.";
+                  break;
+                case 404:
+                  errorMessage = "Resource not found.";
+                  break;
+                case 413:
+                  errorMessage =
+                    "Files are too large. Please reduce image sizes.";
+                  break;
+                case 500:
+                  errorMessage = "Server error. Please try again later.";
+                  break;
+              }
+            }
+
             Swal.fire({
               icon: "error",
-              title: "Error",
-              text: error.message || "Failed to add product",
+              title: "Error!",
+              text: errorMessage,
+              showConfirmButton: true,
             });
-          }
-        }); 
+          },
+          complete: function () {
+            // Additional cleanup if needed
+          },
+        });
+      });
     </script>
   </body>
 </html>

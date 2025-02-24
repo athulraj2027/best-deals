@@ -152,38 +152,6 @@
         </div>
       </div>
     </div>
-    <div class="pagination">
-      <% if (currentPage > 1) { %>
-      <a href="/admin/categories?page=<%= currentPage - 1 %>&limit=<%= limit %>"
-        >Previous</a
-      >
-      <% } %> <% for (let i = 1; i <= totalPages; i++) { %>
-      <a
-        href="/admin/categories?page=<%= i %>&limit=<%= limit %>"
-        class="<%= i === currentPage ? 'active' : '' %>"
-      >
-        <%= i %>
-      </a>
-      <% } %> <% if (currentPage < totalPages) { %>
-      <a href="/admin/categories?page=<%= currentPage + 1 %>&limit=<%= limit %>"
-        >Next</a
-      >
-      <% } %>
-    </div>
-    <div class="pagination">
-      <% if (currentPage > 1) { %>
-      <a href="/admin/categories?page=<%= currentPage - 1 %>&limit=<%= limit %>"
-        >Previous</a
-      >
-      <% } %>
-
-      <span>Page <%= currentPage %> of <%= totalPages %></span>
-
-      <% if (currentPage < totalPages) { %>
-      <a href="/admin/categories?page=<%= currentPage + 1 %>&limit=<%= limit %>"
-        >Next</a
-      >
-      <% } %>
-    </div>
+    
   </body>
 </html>

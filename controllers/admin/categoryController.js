@@ -5,21 +5,31 @@ const statusCodes = require("../../services/statusCodes");
 
 exports.getCategoriesPage = async (req, res) => {
   try {
-    const page = parseInt(req.query.page);
-    const limit = parseInt(req.query.limit);
-    const skip = (page - 1) * limit;
+    const limit = parseInt(req.query.limit) || 10; // Default limit 10
+  const currentPage = parseInt(req.query.page) || 1;
+  const skip = (currentPage - 1) * limit;
+
+  
+    const totalCategories = await Category.countDocuments();
     const categories = await Category.find().skip(skip).limit(limit);
 
-    const totalCategories = await Category.countDocuments();
     const totalPages = Math.ceil(totalCategories / limit);
+    const hasPrevPage = currentPage > 1;
+    const hasNextPage = currentPage < totalPages;
+    const prevPage = currentPage - 1;
+    const nextPage = currentPage + 1;
 
     return res
       .status(statusCodes.SUCCESS)
       .render("adminPages/CategoryPages/adminCategories", {
         categories,
-        currentPage: page,
-        totalPages,
-        limit,
+      currentPage,
+      totalPages,
+      limit,
+      hasPrevPage,
+      hasNextPage,
+      prevPage,
+      nextPage,
       });
   } catch (err) {
     console.error("Category page get method error : ", err);
@@ -69,9 +79,10 @@ exports.addCategoryController = async (req, res) => {
     const mappedStatus = status === "on" ? "listed" : "unlisted";
     console.log(mappedStatus);
 
-    const existingCategory = await Category.find({ categoryName });
+    const existingCategory = await Category.findOne({name:categoryName });
     if (existingCategory) {
       return res.status(statusCodes.BAD_REQUEST).json({
+        status:'error',
         title: "error",
         message: "Category already exists",
       });

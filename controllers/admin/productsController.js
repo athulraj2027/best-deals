@@ -152,10 +152,11 @@ async function saveImage(buffer, variantIndex, imageIndex) {
 exports.addProductController = async (req, res) => {
   try {
     // console.log("Hi the addproductController is working");
-    const { productName, brand, actualPrice, category, status, variants } =
+    const { name, brand, actualPrice, category, status, variants } =
       req.body;
-    const existingProduct = await Product.find({ productName });
+    const existingProduct = await Product.findOne({ name});
     if (existingProduct) {
+      console.log(existingProduct)
       return res.status(statusCodes.BAD_REQUEST).json({
         title: "error",
         message: "Produt already exists",
@@ -214,7 +215,7 @@ exports.addProductController = async (req, res) => {
     }
 
     const product = new Product({
-      name: productName,
+      name,
       brand,
       actualPrice: parseFloat(actualPrice),
       category: categoryId,
@@ -444,6 +445,7 @@ exports.editProductController = async (req, res) => {
     );
 
     return res.status(200).json({
+      status: "success",
       title: "Success",
       message: "Product updated successfully",
     });
@@ -508,24 +510,24 @@ exports.getAddVariantPage = async (req, res) => {
 
 exports.addVariantController = async (req, res) => {
   try {
-    const  productId  = req.params.id;
+    const productId = req.params.id;
     const { color, size, price, quantity } = req.body;
 
     // Validate inputs
     if (!color || !size || !price || !quantity) {
-      return res.status(400).redirect('/admin/products');
+      return res.status(400).redirect("/admin/products");
     }
 
     // Find the product
     const product = await Product.findById(productId);
-    console.log(productId)
+    console.log(productId);
     if (!product) {
       return res.redirect("/products?error=Product not found");
     }
 
     // Process uploaded images
     const images = req.files.map((file, index) => ({
-      url: `/uploads/${file.filename}`,
+      url: `/images/products/${file.filename}`,
       order: index,
     }));
 
