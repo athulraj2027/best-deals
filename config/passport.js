@@ -23,7 +23,7 @@ passport.use(
         if (existingUser) {
           console.log("The user already exists");
           if (existingUser.isBlocked) {
-            return done(null, false, { message: 'BLOCKED_USER' });
+            return done(null, false, { message: "BLOCKED_USER" });
           }
           return done(null, existingUser);
         }

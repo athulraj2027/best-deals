@@ -265,7 +265,7 @@
         </form>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> -->
     <script>
         // Initialize drag and drop for existing variants
         document.querySelectorAll('.drag-drop-zone').forEach(initializeDragDrop);
@@ -470,8 +470,7 @@
             const previewDiv = document.getElementById(`replacePreview-${variantIndex}-${position}`);
             
             input.value = '';
-            
-            // Reset preview div
+         
             const variantContainer = document.querySelector(`[data-variant-index="${variantIndex}"]`);
             const existingImages = variantContainer.querySelectorAll('.existing-image-wrapper').length;
             
@@ -481,21 +480,11 @@
                 previewDiv.innerHTML = `<p class="text-muted">Will add as new image</p>`;
             }
         }
-   // Replace the form submission with AJAX
+ 
 document.getElementById('editProductForm').addEventListener('submit', async(e)=> {
     e.preventDefault();
     
-    // // Show processing dialog
-    // Swal.fire({
-    //     title: 'Saving...',
-    //     text: 'Updating product information',
-    //     allowOutsideClick: false,
-    //     didOpen: () => {
-    //         Swal.showLoading();
-    //     }
-    // });
 try{
-    // Create FormData object from the form
     const formData = new FormData(e.target);
     const response = await fetch('/admin/products/edit/<%= product._id %>',{
         method:"POST",
@@ -504,7 +493,7 @@ try{
 
     const data = await response.json()
 
-    if(data.success){
+    if(data.status==='success'){
         await  Swal.fire({
             title: 'Success!',
             text: 'Product has been updated successfully',
@@ -519,7 +508,6 @@ try{
     }
   }
     catch(error) {
-        // Show error message
         Swal.fire({
             title: 'Error!',
             text: 'There was a problem updating the product: ' + error.message,

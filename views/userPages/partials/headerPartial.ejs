@@ -1,19 +1,51 @@
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <div>
   <div
-    class="bg-dark text-center d-flex align-items-center justify-content-center m-0 w-100 text-white b top-nav"
+    style="
+      background-color: #212529;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      width: 100%;
+      color: white;
+      font-weight: bold;
+    "
   >
-    <p class="mt-0">Welcome to BestDeals online Ecommerce store</p>
+    <p style="margin-top: 0">Welcome to BestDeals online Ecommerce store</p>
   </div>
   <div
-    class="bg-dark text-center d-flex align-items-center justify-content-around m-0 w-100 text-white b p-3 nav"
+    style="
+      background-color: #212529;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      margin: 0;
+      width: 100%;
+      color: white;
+      font-weight: bold;
+      padding: 1rem;
+    "
   >
     <h4>
-      <a class="text-decoration-none text-white" href="/">BestDeals</a>
+      <a style="text-decoration: none; color: white" href="/">BestDeals</a>
     </h4>
-    <div class="search-div">
-      <form class="d-flex">
+    <div>
+      <form style="display: flex">
         <input
-          class="form-control me-2 searchbar"
+          style="
+            padding: 0.375rem 0.75rem;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #212529;
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+            margin-right: 0.5rem;
+          "
           type="search"
           placeholder="Search"
           aria-label="Search"
@@ -21,27 +53,131 @@
         <button><img src="/userCSS/icons/search.svg" alt="" /></button>
       </form>
     </div>
-    <ul class="text-decoration-none nav-list d-flex mr-10">
-      <li><img src="/userCSS/icons/cart.svg" alt="" /></li>
-      <li>
-        <div class="main-menu">
+    <ul
+      style="
+        text-decoration: none;
+        display: flex;
+        list-style-type: none;
+        margin-right: 2.5rem;
+        padding-left: 0;
+      "
+    >
+      <li style="margin-right: 1.5rem">
+        <img src="/userCSS/icons/cart.svg" alt="" />
+      </li>
+      <li style="margin-right: 1.5rem">
+        <div>
           <% if (userId) { %>
-            <div class="dropdown">
-              <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
-                <img src="/userCSS/icons/person.svg" alt="User" />
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="/profile">My Profile</a></li>
-                <li><a class="dropdown-item" href="/orders">My Orders</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a href="#" class="dropdown-item logout-link">Logout</a></li>
-              </ul>
-            </div>
-          <% } else { %>
-            <a href="/signin">
-              <img src="/userCSS/icons/person.svg" alt="Sign In" />
-              <span class="d-none d-md-inline ms-1">Sign In</span>
+          <div style="position: relative; display: inline-block">
+            <a
+              href="#"
+              style="color: white; text-decoration: none"
+              data-bs-toggle="dropdown"
+            >
+              <img src="/userCSS/icons/person.svg" alt="User" />
             </a>
+            <ul
+              style="
+                position: absolute;
+                z-index: 1000;
+                display: none;
+                min-width: 10rem;
+                padding: 0.5rem 0;
+                margin: 0;
+                font-size: 1rem;
+                color: #212529;
+                text-align: left;
+                list-style: none;
+                background-color: #fff;
+                background-clip: padding-box;
+                border: 1px solid rgba(0, 0, 0, 0.15);
+                border-radius: 0.25rem;
+              "
+            >
+              <li>
+                <a
+                  style="
+                    display: block;
+                    width: 100%;
+                    padding: 0.25rem 1rem;
+                    clear: both;
+                    font-weight: 400;
+                    color: #212529;
+                    text-align: inherit;
+                    text-decoration: none;
+                    white-space: nowrap;
+                    background-color: transparent;
+                    border: 0;
+                  "
+                  href="/profile"
+                  >My Profile</a
+                >
+              </li>
+              <li>
+                <a
+                  style="
+                    display: block;
+                    width: 100%;
+                    padding: 0.25rem 1rem;
+                    clear: both;
+                    font-weight: 400;
+                    color: #212529;
+                    text-align: inherit;
+                    text-decoration: none;
+                    white-space: nowrap;
+                    background-color: transparent;
+                    border: 0;
+                  "
+                  href="/orders"
+                  >My Orders</a
+                >
+              </li>
+              <li>
+                <hr
+                  style="
+                    height: 0;
+                    margin: 0.5rem 0;
+                    overflow: hidden;
+                    border-top: 1px solid #e9ecef;
+                  "
+                />
+              </li>
+              <li>
+                <a
+                  href="#"
+                  style="
+                    display: block;
+                    width: 100%;
+                    padding: 0.25rem 1rem;
+                    clear: both;
+                    font-weight: 400;
+                    color: #212529;
+                    text-align: inherit;
+                    text-decoration: none;
+                    white-space: nowrap;
+                    background-color: transparent;
+                    border: 0;
+                  "
+                  class="logout-link"
+                  >Logout</a
+                >
+              </li>
+            </ul>
+          </div>
+          <% } else { %>
+          <a href="/signin" style="color: white; text-decoration: none">
+            <img src="/userCSS/icons/person.svg" alt="Sign In" />
+            <span
+              style="
+                display: none;
+                margin-left: 0.25rem;
+                @media (min-width: 768px) {
+                  display: inline;
+                }
+              "
+              >Sign In</span
+            >
+          </a>
           <% } %>
         </div>
       </li>
@@ -56,66 +192,66 @@
 
 <!-- Logout AJAX Implementation -->
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const logoutLink = document.querySelector('.logout-link');
-    
+  document.addEventListener("DOMContentLoaded", function () {
+    const logoutLink = document.querySelector(".logout-link");
+
     if (logoutLink) {
-      logoutLink.addEventListener('click', function(e) {
+      logoutLink.addEventListener("click", function (e) {
         e.preventDefault();
-        
+
         Swal.fire({
-          title: 'Ready to leave?',
-          text: 'Are you sure you want to logout?',
-          icon: 'question',
+          title: "Ready to leave?",
+          text: "Are you sure you want to logout?",
+          icon: "question",
           showCancelButton: true,
-          confirmButtonColor: '#9622ab',
-          cancelButtonColor: '#6c757d',
-          confirmButtonText: 'Yes, logout',
-          cancelButtonText: 'Cancel'
+          confirmButtonColor: "#9622ab",
+          cancelButtonColor: "#6c757d",
+          confirmButtonText: "Yes, logout",
+          cancelButtonText: "Cancel",
         }).then((result) => {
           if (result.isConfirmed) {
             // Show loading state
             Swal.fire({
-              title: 'Logging out...',
+              title: "Logging out...",
               allowOutsideClick: false,
               didOpen: () => {
                 Swal.showLoading();
-              }
-            });
-            
-            fetch('/logout', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
               },
-              credentials: 'same-origin'
-            })
-            .then(response => {
-              if (response.ok) {
-                return response.json().catch(() => ({})); // Handle empty responses
-              }
-              throw new Error('Logout failed');
-            })
-            .then(() => {
-              Swal.fire({
-                title: 'Logged Out Successfully!',
-                text: 'You have been logged out from your account.',
-                icon: 'success',
-                timer: 1500,
-                showConfirmButton: false
-              }).then(() => {
-                window.location.href = '/';
-              });
-            })
-            .catch(error => {
-              console.error('Logout error:', error);
-              Swal.fire({
-                title: 'Oops!',
-                text: 'Something went wrong. Please try again.',
-                icon: 'error'
-              });
             });
+
+            fetch("/logout", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-Requested-With": "XMLHttpRequest",
+              },
+              credentials: "same-origin",
+            })
+              .then((response) => {
+                if (response.ok) {
+                  return response.json().catch(() => ({})); // Handle empty responses
+                }
+                throw new Error("Logout failed");
+              })
+              .then(() => {
+                Swal.fire({
+                  title: "Logged Out Successfully!",
+                  text: "You have been logged out from your account.",
+                  icon: "success",
+                  timer: 1500,
+                  showConfirmButton: false,
+                }).then(() => {
+                  window.location.href = "/";
+                });
+              })
+              .catch((error) => {
+                console.error("Logout error:", error);
+                Swal.fire({
+                  title: "Oops!",
+                  text: "Something went wrong. Please try again.",
+                  icon: "error",
+                });
+              });
           }
         });
       });
