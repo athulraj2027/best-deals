@@ -5,10 +5,19 @@ const statusCodes = require("../../services/statusCodes");
 exports.getHomePage = async (req, res) => {
   try {
     console.log(req.session.userId);
-
-    const rawProducts = await Product.find({ status: true })
-      .sort({ createdAt: -1 })
-      .limit(5);
+    const rawProducts = await Product.aggregate([
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'category',
+          foreignField: '_id',
+          as: 'category'
+        }
+      },
+      { $unwind: '$category' },
+      { $match: { 'category.status': 'listed' } }
+    ]);
+  
 
     const products = rawProducts.map((product) => {
       const lowestPrice =
@@ -35,7 +44,7 @@ exports.getHomePage = async (req, res) => {
       };
     });
 
-    const categories = await Category.find();
+    const categories = await Category.find({ status: "listed" });
     const isLoggedIn = req.isAuthenticated();
 
     return res.status(statusCodes.SUCCESS).render("userPages/homePage", {

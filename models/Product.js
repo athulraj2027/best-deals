@@ -33,6 +33,11 @@ const productSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    description: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     brand: {
       type: String,
       required: true,
@@ -45,8 +50,8 @@ const productSchema = new mongoose.Schema(
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Category',
-      required: true
+      ref: "Category",
+      required: true,
     },
     variants: [variantSchema],
     status: {

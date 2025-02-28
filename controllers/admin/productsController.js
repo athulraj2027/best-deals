@@ -13,31 +13,31 @@ const bufferToDataURI = (fileFormat, buffer) => {
   parser.format(fileFormat, buffer);
 };
 
-const uploadToCloudinary = async (file) => {
-  try {
-    const fileFormat = file.mimetype.split("/")[1];
-    const { base64 } = bufferToDataURI(fileFormat, file.buffer);
+// const uploadToCloudinary = async (file) => {
+//   try {
+//     const fileFormat = file.mimetype.split("/")[1];
+//     const { base64 } = bufferToDataURI(fileFormat, file.buffer);
 
-    const uploadResponse = await cloudinary.uploader.upload(
-      `data:image/${fileFormat};base64,${base64}`,
-      {
-        folder: "products",
-        resource_type: "auto",
-        transformation: [
-          { width: 800, height: 800, crop: "limit" },
-          { quality: "auto" },
-          { fetch_format: "auto" },
-        ],
-      }
-    );
-    return {
-      url: uploadResponse.secure_url,
-      publicId: uploadResponse.public_id,
-    };
-  } catch (err) {
-    throw new Error(`Failed to upload image : ${error.message}`);
-  }
-};
+//     const uploadResponse = await cloudinary.uploader.upload(
+//       `data:image/${fileFormat};base64,${base64}`,
+//       {
+//         folder: "products",
+//         resource_type: "auto",
+//         transformation: [
+//           { width: 800, height: 800, crop: "limit" },
+//           { quality: "auto" },
+//           { fetch_format: "auto" },
+//         ],
+//       }
+//     );
+//     return {
+//       url: uploadResponse.secure_url,
+//       publicId: uploadResponse.public_id,
+//     };
+//   } catch (err) {
+//     throw new Error(`Failed to upload image : ${error.message}`);
+//   }
+// };
 
 // --- Get products page
 
@@ -152,11 +152,18 @@ async function saveImage(buffer, variantIndex, imageIndex) {
 exports.addProductController = async (req, res) => {
   try {
     // console.log("Hi the addproductController is working");
-    const { name, brand, actualPrice, category, status, variants } =
-      req.body;
-    const existingProduct = await Product.findOne({ name});
+    const {
+      name,
+      description,
+      brand,
+      actualPrice,
+      category,
+      status,
+      variants,
+    } = req.body;
+    const existingProduct = await Product.findOne({ name });
     if (existingProduct) {
-      console.log(existingProduct)
+      console.log(existingProduct);
       return res.status(statusCodes.BAD_REQUEST).json({
         title: "error",
         message: "Produt already exists",
@@ -216,6 +223,7 @@ exports.addProductController = async (req, res) => {
 
     const product = new Product({
       name,
+      description,
       brand,
       actualPrice: parseFloat(actualPrice),
       category: categoryId,

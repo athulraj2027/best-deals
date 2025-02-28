@@ -55,8 +55,33 @@ exports.listingUsersController = async (req, res) => {
 
 exports.blockCustomer = async (req, res) => {
   try {
-    const customerId = req.params.id;
-    await User.findByIdAndUpdate(customerId, { isBlocked: true }); // Set status to false
+    const userId = req.params.id;
+    await User.findByIdAndUpdate(userId, { isBlocked: true }); // Set status to false
+
+    req.sessionStore.all((err, sessions) => {
+      if (err) {
+        console.error("Error fetching sessions:", err);
+        return res.status(500).json({ error: "Failed to fetch sessions" });
+      }
+
+      // Iterate through sessions and destroy the session of the blocked user
+      for (let sessionID in sessions) {
+        if (
+          sessions[sessionID].userId &&
+          sessions[sessionID].userId.toString() === userId
+        ) {
+          req.sessionStore.destroy(sessionID, (err) => {
+            if (err) {
+              console.error("Error destroying session:", err);
+            } else {
+              console.log(
+                `Session ${sessionID} destroyed for blocked user ${userId}`
+              );
+            }
+          });
+        }
+      }
+    });
     res.status(200).redirect("/admin/customers");
   } catch (err) {
     console.error("Error blocking customer:", err);

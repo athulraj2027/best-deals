@@ -1,10 +1,12 @@
 .top-nav {
     border-bottom: 1px solid grey;
 }
-body{
+
+body {
     background-color: #0b070f;
     /* color: white; */
 }
+
 .searchbar {
     height: 40px;
     width: 400px;
@@ -15,6 +17,14 @@ body{
     list-style-type: none;
     gap: 10px;
 }
+
+@media (max-width: 1000px) {
+    .hide-on-small {
+        display: none;
+    }
+}
+
+
 
 .search-div {
     position: relative;
@@ -74,25 +84,31 @@ body{
     width: 300px;
     padding: 20px;
     border-radius: 5px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Proper shadow */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    /* Proper shadow */
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out; /* Smooth transition */
-    top: 100%; /* Ensure correct positioning */
-    left: 0; /* Adjust based on design needs */
-    z-index: 1000; /* Ensure visibility above other elements */
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    /* Smooth transition */
+    top: 100%;
+    /* Ensure correct positioning */
+    left: 0;
+    /* Adjust based on design needs */
+    z-index: 1000;
+    /* Ensure visibility above other elements */
 }
 
-.main-menu:hover  .submenu {
+.main-menu:hover .submenu {
     opacity: 1;
-    visibility: visible; /* Correct value */
-   
+    visibility: visible;
+    /* Correct value */
+
 }
 
 
 .submenu ul li {
     height: 50px;
-    
+
     text-align: center;
     padding: 20px;
 
@@ -110,10 +126,13 @@ ul {
     list-style-type: none;
     padding: 0;
 }
-.profile{
+
+.profile {
     right: 100%;
     width: 200px;
 }
 
 
-.bottom-nav{border-bottom: 1px solid grey;}
+.bottom-nav {
+    border-bottom: 1px solid grey;
+}

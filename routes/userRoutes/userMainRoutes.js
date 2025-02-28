@@ -12,12 +12,14 @@ const forgotPasswordRoutes = require("./forgotPasswordRoutes");
 const cartRoutes = require("./cartRoutes");
 
 const verifyOtpController = require("../../controllers/user/verifyOtpController");
+const checkBlockedUserMiddleware = require("../../middlewares/checkBlockedUserMiddleware");
 
 router.use((req, res, next) => {
   res.locals.userId = req.session.userId || null;
   next();
 });
 
+router.use(checkBlockedUserMiddleware);
 router.use("/signin", signInRoutes);
 router.use("/signup", signUpRoutes);
 router.use("/verify-otp", verifyOtpRoutes);

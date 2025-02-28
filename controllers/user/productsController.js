@@ -8,6 +8,12 @@ exports.getProductViewPage = async (req, res) => {
       return res.status(statusCodes.BAD_REQUEST).redirect("/");
     }
 
+    if (product.status != true) {
+      return res.status(statusCodes.BAD_REQUEST).redirect("/");
+    }
+    if (product.category.status != "listed")
+      return res.status(500).redirect("/");
+
     const relatedProducts = await Product.find({
       category: product.category._id,
       _id: { $ne: product._id }, // exclude current product
