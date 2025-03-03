@@ -134,59 +134,7 @@
         <!-- Add Address Form -->
         <div class="form-container" id="addAddressForm">
           <h4 class="mb-3">Add New Address</h4>
-          <form id="newAddressForm" action="/profile/address/add-address">
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="fullName" class="form-label">Full Name</label>
-                <input type="text" class="form-control" id="fullName" />
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="phoneNumber" class="form-label">Phone Number</label>
-                <input type="tel" class="form-control" id="phoneNumber" />
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label for="addressLine1" class="form-label"
-                >Address Line 1</label
-              >
-              <input
-                type="text"
-                class="form-control"
-                id="addressLine1"
-                placeholder="Street address, P.O. box, company name"
-              />
-            </div>
-
-            <div class="mb-3">
-              <label for="addressLine2" class="form-label"
-                >Address Line 2</label
-              >
-              <input
-                type="text"
-                class="form-control"
-                id="addressLine2"
-                placeholder="Apartment, suite, unit, building, floor, etc."
-              />
-            </div>
-
-            <div class="row">
-              <div class="col-md-4 mb-3">
-                <label for="city" class="form-label">City</label>
-                <input type="text" class="form-control" id="city" />
-              </div>
-              <div class="col-md-4 mb-3">
-                <label for="state" class="form-label">State/Province</label>
-                <input type="text" class="form-control" id="state" />
-              </div>
-              <div class="col-md-4 mb-3">
-                <label for="zipCode" class="form-label"
-                  >ZIP / Postal Code</label
-                >
-                <input type="text" class="form-control" id="zipCode" />
-              </div>
-            </div>
-
+          <form id="addressForm" action="/profile/address/add" method="post">
             <div class="mb-3">
               <label class="form-label">Address Type</label>
               <div class="d-flex">
@@ -194,9 +142,9 @@
                   <input
                     class="form-check-input"
                     type="radio"
-                    name="addressType"
+                    name="type"
                     id="homeType"
-                    value="home"
+                    value="Home"
                     checked
                   />
                   <label class="form-check-label" for="homeType">Home</label>
@@ -205,9 +153,9 @@
                   <input
                     class="form-check-input"
                     type="radio"
-                    name="addressType"
+                    name="type"
                     id="workType"
-                    value="work"
+                    value="Work"
                   />
                   <label class="form-check-label" for="workType">Work</label>
                 </div>
@@ -215,24 +163,56 @@
                   <input
                     class="form-check-input"
                     type="radio"
-                    name="addressType"
+                    name="type"
                     id="otherType"
-                    value="other"
+                    value="Other"
                   />
                   <label class="form-check-label" for="otherType">Other</label>
                 </div>
               </div>
             </div>
 
-            <div class="mb-3 form-check">
-              <input
-                type="checkbox"
-                class="form-check-input"
-                id="defaultAddress"
-              />
-              <label class="form-check-label" for="defaultAddress"
-                >Set as default address</label
+            <div class="mb-3">
+              <label for="streetAddress" class="form-label"
+                >Street Address</label
               >
+              <input
+                type="text"
+                class="form-control"
+                id="streetAddress"
+                name="streetAddress"
+                placeholder="Street address, P.O. box, company name"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="city" class="form-label">City</label>
+              <input type="text" class="form-control" id="city" name="city" />
+            </div>
+
+            <div class="mb-3">
+              <label for="state" class="form-label">State</label>
+              <input type="text" class="form-control" id="state" name="state" />
+            </div>
+
+            <div class="mb-3">
+              <label for="zipCode" class="form-label">ZIP Code</label>
+              <input
+                type="text"
+                class="form-control"
+                id="zipCode"
+                name="zipCode"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="country" class="form-label">Country</label>
+              <input
+                type="text"
+                class="form-control"
+                id="country"
+                name="country"
+              />
             </div>
 
             <div class="d-flex">
@@ -246,169 +226,12 @@
           </form>
         </div>
 
-        <!-- Edit Address Form (Initially Hidden) -->
-        <div class="form-container" id="editAddressForm">
-          <h4 class="mb-3">Edit Address</h4>
-          <form id="updateAddressForm">
-            <input type="hidden" id="editAddressId" />
-            <!-- Same form fields as add address but with different IDs -->
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="editFullName" class="form-label">Full Name</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="editFullName"
-                  required
-                />
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="editPhoneNumber" class="form-label"
-                  >Phone Number</label
-                >
-                <input
-                  type="tel"
-                  class="form-control"
-                  id="editPhoneNumber"
-                  required
-                />
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label for="editAddressLine1" class="form-label"
-                >Address Line 1</label
-              >
-              <input
-                type="text"
-                class="form-control"
-                id="editAddressLine1"
-                placeholder="Street address, P.O. box, company name"
-                required
-              />
-            </div>
-
-            <div class="mb-3">
-              <label for="editAddressLine2" class="form-label"
-                >Address Line 2</label
-              >
-              <input
-                type="text"
-                class="form-control"
-                id="editAddressLine2"
-                placeholder="Apartment, suite, unit, building, floor, etc."
-              />
-            </div>
-
-            <div class="row">
-              <div class="col-md-4 mb-3">
-                <label for="editCity" class="form-label">City</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="editCity"
-                  required
-                />
-              </div>
-              <div class="col-md-4 mb-3">
-                <label for="editState" class="form-label">State/Province</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="editState"
-                  required
-                />
-              </div>
-              <div class="col-md-4 mb-3">
-                <label for="editZipCode" class="form-label"
-                  >ZIP / Postal Code</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  id="editZipCode"
-                  required
-                />
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Address Type</label>
-              <div class="d-flex">
-                <div class="form-check me-3">
-                  <input
-                    class="form-check-input"
-                    type="radio"
-                    name="editAddressType"
-                    id="editHomeType"
-                    value="home"
-                  />
-                  <label class="form-check-label" for="editHomeType"
-                    >Home</label
-                  >
-                </div>
-                <div class="form-check me-3">
-                  <input
-                    class="form-check-input"
-                    type="radio"
-                    name="editAddressType"
-                    id="editWorkType"
-                    value="work"
-                  />
-                  <label class="form-check-label" for="editWorkType"
-                    >Work</label
-                  >
-                </div>
-                <div class="form-check">
-                  <input
-                    class="form-check-input"
-                    type="radio"
-                    name="editAddressType"
-                    id="editOtherType"
-                    value="other"
-                  />
-                  <label class="form-check-label" for="editOtherType"
-                    >Other</label
-                  >
-                </div>
-              </div>
-            </div>
-
-            <div class="mb-3 form-check">
-              <input
-                type="checkbox"
-                class="form-check-input"
-                id="editDefaultAddress"
-              />
-              <label class="form-check-label" for="editDefaultAddress"
-                >Set as default address</label
-              >
-            </div>
-
-            <div class="d-flex">
-              <button type="submit" class="btn btn-success me-2">
-                Update Address
-              </button>
-              <button
-                type="button"
-                class="btn btn-secondary"
-                id="cancelEditBtn"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-
         <!-- Address List -->
         <div id="addressList">
           <% if (addresses && addresses.length > 0) { %> <%
           addresses.forEach((address, index) => { %>
           <div class="address-card">
-            <% if (address.isDefault) { %>
-            <span class="address-type default-address">Default</span>
-            <% } %>
-            <span class="address-type <%= address.type.toLowerCase() %>-address"
+            <span class="address-type "
               ><%= address.type %></span
             >
             <div class="address-actions">
@@ -425,12 +248,12 @@
                 <i class="fas fa-trash"></i>
               </button>
             </div>
-            <h5><%= userName %></h5>
             <p>
-              <%= address.streetAddress %><br /><%= address.city %>, <%=
-              address.state %> <%= address.zipCode %>
+              <%= address.streetAddress %><br />
+              <%= address.city %>, <%= address.state %> <%= address.zipCode
+              %><br />
+              <%= address.country %>
             </p>
-            <p>Phone: <%= phoneNumber %></p>
           </div>
           <% }); %> <% } else { %>
           <div class="no-address-message">
@@ -527,180 +350,87 @@
       });
     </script>
     <script>
-      // Wait for DOM to be fully loaded
-      document.addEventListener("DOMContentLoaded", function () {
-        const addressForm = document.getElementById("newAddressForm");
-        const cancelButton = document.getElementById("cancelAddBtn");
+      // Helper function to get CSRF token from meta tag
+      function getCSRFToken() {
+        const metaTag = document.querySelector('meta[name="csrf-token"]');
+        return metaTag ? metaTag.getAttribute("content") : "";
+      }
+    </script>
 
-        // Handle cancel button click
-        cancelButton.addEventListener("click", function () {
-          // Reset form
-          addressForm.reset();
+    <script>
+      $(document).ready(function () {
+        $("#addressForm").on("submit", function (e) {
+          e.preventDefault();
 
-          // Show cancellation message
+          // Collect form data
+          const addressData = {
+            type: $('input[name="type"]:checked').val(),
+            streetAddress: $("#streetAddress").val(),
+            city: $("#city").val(),
+            state: $("#state").val(),
+            zipCode: $("#zipCode").val(),
+            country: $("#country").val(),
+            // userId will be handled server-side
+          };
+
+          // Show loading state
           Swal.fire({
-            title: "Cancelled",
-            text: "Address form has been reset",
-            icon: "info",
-            confirmButtonColor: "#3085d6",
-          });
-        });
-
-        // Handle form submission
-        addressForm.addEventListener("submit", function (event) {
-          // Prevent default form submission
-          event.preventDefault();
-
-          // Validate form
-          if (validateForm()) {
-            // Collect form data
-            const formData = new FormData(addressForm);
-            const formObject = {};
-
-            // Convert FormData to object
-            formData.forEach((value, key) => {
-              formObject[key] = value;
-            });
-
-            // Additional fields that need to be gathered manually (not using name attributes)
-            formObject.fullName = document.getElementById("fullName").value;
-            formObject.phoneNumber =
-              document.getElementById("phoneNumber").value;
-            formObject.addressLine1 =
-              document.getElementById("addressLine1").value;
-            formObject.addressLine2 =
-              document.getElementById("addressLine2").value;
-            formObject.city = document.getElementById("city").value;
-            formObject.state = document.getElementById("state").value;
-            formObject.zipCode = document.getElementById("zipCode").value;
-            formObject.defaultAddress =
-              document.getElementById("defaultAddress").checked;
-
-            // Submit form data via AJAX
-            submitFormData(formObject);
-          }
-        });
-
-        // Form validation function
-        function validateForm() {
-          // Reset previous error styling
-          const inputs = addressForm.querySelectorAll(
-            'input[type="text"], input[type="tel"]'
-          );
-          inputs.forEach((input) => {
-            input.classList.remove("is-invalid");
-          });
-
-          let isValid = true;
-
-          // Required fields validation
-          const requiredFields = [
-            "fullName",
-            "phoneNumber",
-            "addressLine1",
-            "city",
-            "state",
-            "zipCode",
-          ];
-          requiredFields.forEach((fieldId) => {
-            const field = document.getElementById(fieldId);
-            if (!field.value.trim()) {
-              field.classList.add("is-invalid");
-              isValid = false;
-            }
-          });
-
-          // Phone number format validation
-          const phoneField = document.getElementById("phoneNumber");
-          const phoneRegex = /^[\d\s\+\-\(\)]{10,15}$/;
-          if (
-            phoneField.value.trim() &&
-            !phoneRegex.test(phoneField.value.trim())
-          ) {
-            phoneField.classList.add("is-invalid");
-            isValid = false;
-          }
-
-          // ZIP code format validation
-          const zipField = document.getElementById("zipCode");
-          const zipRegex = /^[\d\s\-]{5,10}$/;
-          if (zipField.value.trim() && !zipRegex.test(zipField.value.trim())) {
-            zipField.classList.add("is-invalid");
-            isValid = false;
-          }
-
-          // Display validation error message if form is invalid
-          if (!isValid) {
-            Swal.fire({
-              title: "Validation Error",
-              text: "Please check the highlighted fields and try again",
-              icon: "error",
-              confirmButtonColor: "#d33",
-            });
-          }
-
-          return isValid;
-        }
-
-        // Function to submit form data via AJAX
-        function submitFormData(formData) {
-          // Show loading indicator
-          Swal.fire({
-            title: "Saving",
-            text: "Please wait while we save your address...",
+            title: "Saving...",
+            text: "Please wait while we save your address",
             allowOutsideClick: false,
             didOpen: () => {
               Swal.showLoading();
             },
           });
 
-          // Get the form action URL
-          const formActionUrl = addressForm.getAttribute("action");
-
-          // AJAX request
-          fetch(formActionUrl, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-CSRF-TOKEN": getCSRFToken(),
-            },
-            body: JSON.stringify(formData),
-          })
-            .then((response) => {
-              if (!response.ok) {
-                throw new Error("Network response was not ok");
+          // Send AJAX request
+          $.ajax({
+            url: "/profile/address/add",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(addressData),
+            success: function (response) {
+              if (response.status === "success") {
+                Swal.fire({
+                  icon: "success",
+                  title: "Success!",
+                  text: "Your address has been saved successfully",
+                  confirmButtonColor: "#28a745",
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    // Optionally reload or redirect
+                    window.location.reload();
+                  }
+                });
+              } else {
+                Swal.fire({
+                  icon: "error",
+                  title: "Error",
+                  text: response.message,
+                });
               }
-              return response.json();
-            })
-            .then((data) => {
-              Swal.fire({
-                title: "Success!",
-                text: "Your address has been saved successfully",
-                icon: "success",
-                confirmButtonColor: "#28a745",
-              }).then((result) => {
-                if (result.isConfirmed) {
-                  addressForm.reset();
-                }
-              });
-            })
-            .catch((error) => {
-              // Handle error
+            },
+            error: function (xhr, status, error) {
+              // Error handling
               console.error("Error:", error);
-              Swal.fire({
-                title: "Error",
-                text: "There was a problem saving your address. Please try again.",
-                icon: "error",
-                confirmButtonColor: "#d33",
-              });
-            });
-        }
+              let errorMessage = "Failed to save address. Please try again.";
 
-        // Helper function to get CSRF token from meta tag
-        function getCSRFToken() {
-          const metaTag = document.querySelector('meta[name="csrf-token"]');
-          return metaTag ? metaTag.getAttribute("content") : "";
-        }
+              // Try to get more specific error from response if available
+              if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMessage = xhr.responseJSON.message;
+              }
+
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: errorMessage,
+                confirmButtonColor: "#dc3545",
+              });
+            },
+          });
+        });
+
+        // Cancel button handler
       });
     </script>
   </body>

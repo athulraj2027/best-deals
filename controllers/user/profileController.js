@@ -1,5 +1,6 @@
 const User = require("../../models/User");
 const Address = require("../../models/Address");
+const mongoose = require("mongoose");
 
 exports.getUserProfilePage = async (req, res) => {
   try {
@@ -22,11 +23,34 @@ exports.getUserAddressPage = async (req, res) => {
         message: "No userId found",
       });
     }
-    const addresses = await Address.find({ userId });
 
+    const addresses = await User.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(userId) }, // Ensure only the current user's data is fetched
+      },
+      {
+        $lookup: {
+          from: "addresses",
+          localField: "_id",
+          foreignField: "userId",
+          as: "userAddresses",
+        },
+      },
+      {
+        $project: { _id: 0, userAddresses: 1 }, // Remove user info, keep only addresses
+      },
+    ]);
+    const userAddresses =
+      addresses.length > 0 ? addresses[0].userAddresses : [];
+
+    console.log("User Addresses:", userAddresses);
+
+    // console.log(addresses);
     return res
       .status(200)
-      .render("userPages/profilePages/addressPage", { addresses });
+      .render("userPages/profilePages/addressPage", {
+        addresses: userAddresses,
+      });
   } catch (err) {
     console.log(err);
   }
@@ -35,22 +59,36 @@ exports.getUserAddressPage = async (req, res) => {
 exports.addAddressController = async (req, res) => {
   const userId = req.session.userId;
 
-  const { street, city, state, zipCode, country } = req.body;
+  const { type, streetAddress, city, state, zipCode, country } = req.body;
   try {
-    if (!street || !city || !state || !zipCode || !country) {
+    console.log(type, streetAddress, city, state, zipCode, country);
+    if (!type || !streetAddress || !city || !state || !zipCode || !country) {
       return res.status(400).json({
         status: "error",
         title: "Error",
         message: "Please fill all the fields",
       });
     }
-    await User.findByIdAndUpdate(
+
+    const newAddress = new Address({
       userId,
-      {
-        $push: { address: { street, city, state, zipCode, country } },
-      },
-      { new: true }
-    );
+      type,
+      streetAddress,
+      city,
+      state,
+      zipCode,
+      country,
+    });
+
+    await newAddress.save();
+
+    if (!newAddress) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "User not found or something wrong in adding address",
+      });
+    }
 
     return res.status(200).json({
       status: "success",
