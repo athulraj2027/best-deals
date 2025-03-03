@@ -31,24 +31,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       // required: true,
     },
-    address: {
-      street: {
-        type: String,
-        trim: true,
-      },
-      city: {
-        type: String,
-        trim: true,
-      },
-      postalCode: {
-        type: String,
-        trim: true,
-      },
-      country: {
-        type: String,
-        trim: true,
-      },
-    },
+    address: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "Address", required: true },
+    ],
     createdAt: {
       type: Date,
       default: Date.now,
