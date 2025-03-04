@@ -1,34 +1,27 @@
 // models/Cart.js
 const mongoose = require("mongoose");
 
-// Cart Item Schema
-const CartItemSchema = new mongoose.Schema({
-  product: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Product",
-    required: true,
-  },
-  quantity: {
-    type: Number,
-    required: true,
-    min: [1, "Quantity can not be less than 1."],
-    default: 1,
-  },
-  price: {
-    type: Number,
-    required: true,
-  },
-  subtotal: {
-    type: Number,
-    default: function () {
-      return this.price * this.quantity;
+const CartItemSchema = new mongoose.Schema(
+  {
+    productId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+      required: true,
     },
+    variantId: { type: mongoose.Schema.Types.ObjectId, required: true },
+    name: { type: String, required: true },
+    color: { type: String, required: true },
+    size: { type: String, required: true },
+    price: { type: Number, required: true },
+    quantity: { type: Number, required: true, min: 1 },
+    image: { type: String, required: true },
   },
-});
+  { timestamps: true }
+);
 
 // Cart Schema
 const CartSchema = new mongoose.Schema({
-  user: {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,

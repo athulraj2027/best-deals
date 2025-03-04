@@ -8,5 +8,5 @@ router
   .get(userGuestMiddleware, profileController.getUserAddressPage);
 
 router.route("/add").post(profileController.addAddressController);
-
+router.route("/delete/:id").post(profileController.deleteAddressController);
 module.exports = router;

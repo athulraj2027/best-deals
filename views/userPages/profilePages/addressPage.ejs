@@ -15,6 +15,13 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+    <link
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+      rel="stylesheet"
+    />
+    <!-- Add CSRF token meta tag if needed -->
+    <!-- <meta name="csrf-token" content="your-csrf-token-here"> -->
+
     <link rel="stylesheet" href="/userCSS/partials/headerPartial.css" />
     <link rel="stylesheet" href="/userCSS/partials/partials_css.css" />
     <style>
@@ -134,7 +141,7 @@
         <!-- Add Address Form -->
         <div class="form-container" id="addAddressForm">
           <h4 class="mb-3">Add New Address</h4>
-          <form id="addressForm" action="/profile/address/add" method="post">
+          <form id="addressForm">
             <div class="mb-3">
               <label class="form-label">Address Type</label>
               <div class="d-flex">
@@ -187,12 +194,24 @@
 
             <div class="mb-3">
               <label for="city" class="form-label">City</label>
-              <input type="text" class="form-control" id="city" name="city" />
+              <input
+                type="text"
+                class="form-control"
+                id="city"
+                name="city"
+                required
+              />
             </div>
 
             <div class="mb-3">
               <label for="state" class="form-label">State</label>
-              <input type="text" class="form-control" id="state" name="state" />
+              <input
+                type="text"
+                class="form-control"
+                id="state"
+                name="state"
+                required
+              />
             </div>
 
             <div class="mb-3">
@@ -231,22 +250,30 @@
           <% if (addresses && addresses.length > 0) { %> <%
           addresses.forEach((address, index) => { %>
           <div class="address-card">
-            <span class="address-type "
+            <span class="address-type <%= address.type.toLowerCase() %>-address"
               ><%= address.type %></span
             >
             <div class="address-actions">
-              <button
-                class="btn btn-sm btn-outline-info me-1 edit-address-btn"
-                data-address-id="<%= address._id %>"
+              <a
+                href="/profile/address/edit/<%= address._id %>"
+                class="btn btn-sm btn-outline-info me-1"
               >
                 <i class="fas fa-edit"></i>
-              </button>
+              </a>
               <button
                 class="btn btn-sm btn-outline-danger delete-address-btn"
                 data-address-id="<%= address._id %>"
               >
                 <i class="fas fa-trash"></i>
               </button>
+              <form
+                action="/profile/address/delete/<%= address._id %>"
+                method="post"
+                style="display: none"
+                id="delete-form-<%= address._id %>"
+              >
+                <!-- Add CSRF token if needed -->
+              </form>
             </div>
             <p>
               <%= address.streetAddress %><br />
@@ -266,171 +293,104 @@
     <%- include('../partials/footer') %>
 
     <!-- Required Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        // DOM Elements
-        const showAddFormBtn = document.getElementById("showAddFormBtn");
-        const addAddressForm = document.getElementById("addAddressForm");
-        const editAddressForm = document.getElementById("editAddressForm");
-        const cancelAddBtn = document.getElementById("cancelAddBtn");
-        const cancelEditBtn = document.getElementById("cancelEditBtn");
-        const newAddressForm = document.getElementById("newAddressForm");
-        const updateAddressForm = document.getElementById("updateAddressForm");
-        const editAddressBtns = document.querySelectorAll(".edit-address-btn");
-        const deleteAddressBtns = document.querySelectorAll(
-          ".delete-address-btn"
-        );
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-        // Sample addresses for demo (in a real app, these would come from your database)
-
-        // Show add address form
-        showAddFormBtn.addEventListener("click", function () {
-          addAddressForm.style.display = "block";
-          editAddressForm.style.display = "none";
-        });
-
-        // Cancel add address
-        cancelAddBtn.addEventListener("click", function () {
-          addAddressForm.style.display = "none";
-          newAddressForm.reset();
-        });
-
-        // Cancel edit address
-        cancelEditBtn.addEventListener("click", function () {
-          editAddressForm.style.display = "none";
-          updateAddressForm.reset();
-        });
-
-        // Handle add address form submission
-
-        // Handle edit buttons
-        editAddressBtns.forEach((btn) => {
-          btn.addEventListener("click", function () {
-            const addressId = this.getAttribute("data-address-id");
-            // In a real app, you would fetch the address data from your server
-            const addressToEdit = addresses.find(
-              (addr) => addr.id === parseInt(addressId)
-            );
-
-            if (addressToEdit) {
-              // Populate the edit form
-              document.getElementById("editAddressId").value = addressToEdit.id;
-              document.getElementById("editFullName").value =
-                addressToEdit.fullName;
-              document.getElementById("editPhoneNumber").value =
-                addressToEdit.phoneNumber;
-              document.getElementById("editAddressLine1").value =
-                addressToEdit.addressLine1;
-              document.getElementById("editAddressLine2").value =
-                addressToEdit.addressLine2;
-              document.getElementById("editCity").value = addressToEdit.city;
-              document.getElementById("editState").value = addressToEdit.state;
-              document.getElementById("editZipCode").value =
-                addressToEdit.zipCode;
-
-              // Set the address type radio button
-              document.getElementById(
-                `edit${
-                  addressToEdit.type.charAt(0).toUpperCase() +
-                  addressToEdit.type.slice(1)
-                }Type`
-              ).checked = true;
-
-              // Set default checkbox
-              document.getElementById("editDefaultAddress").checked =
-                addressToEdit.isDefault;
-
-              // Show the edit form
-              editAddressForm.style.display = "block";
-              addAddressForm.style.display = "none";
-            }
-          });
-        });
-      });
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
       // Helper function to get CSRF token from meta tag
       function getCSRFToken() {
         const metaTag = document.querySelector('meta[name="csrf-token"]');
         return metaTag ? metaTag.getAttribute("content") : "";
       }
-    </script>
 
-    <script>
-      $(document).ready(function () {
-        $("#addressForm").on("submit", function (e) {
-          e.preventDefault();
+      document.addEventListener("DOMContentLoaded", function () {
+        // DOM Elements
+        const showAddFormBtn = document.getElementById("showAddFormBtn");
+        const addAddressForm = document.getElementById("addAddressForm");
+        const cancelAddBtn = document.getElementById("cancelAddBtn");
+        const deleteAddressBtns = document.querySelectorAll(
+          ".delete-address-btn"
+        );
 
-          // Collect form data
-          const addressData = {
-            type: $('input[name="type"]:checked').val(),
-            streetAddress: $("#streetAddress").val(),
-            city: $("#city").val(),
-            state: $("#state").val(),
-            zipCode: $("#zipCode").val(),
-            country: $("#country").val(),
-            // userId will be handled server-side
-          };
-
-          // Show loading state
-          Swal.fire({
-            title: "Saving...",
-            text: "Please wait while we save your address",
-            allowOutsideClick: false,
-            didOpen: () => {
-              Swal.showLoading();
-            },
-          });
-
-          // Send AJAX request
-          $.ajax({
-            url: "/profile/address/add",
-            type: "POST",
-            contentType: "application/json",
-            data: JSON.stringify(addressData),
-            success: function (response) {
-              if (response.status === "success") {
-                Swal.fire({
-                  icon: "success",
-                  title: "Success!",
-                  text: "Your address has been saved successfully",
-                  confirmButtonColor: "#28a745",
-                }).then((result) => {
-                  if (result.isConfirmed) {
-                    // Optionally reload or redirect
-                    window.location.reload();
-                  }
-                });
-              } else {
-                Swal.fire({
-                  icon: "error",
-                  title: "Error",
-                  text: response.message,
-                });
-              }
-            },
-            error: function (xhr, status, error) {
-              // Error handling
-              console.error("Error:", error);
-              let errorMessage = "Failed to save address. Please try again.";
-
-              // Try to get more specific error from response if available
-              if (xhr.responseJSON && xhr.responseJSON.message) {
-                errorMessage = xhr.responseJSON.message;
-              }
-
-              Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: errorMessage,
-                confirmButtonColor: "#dc3545",
-              });
-            },
-          });
+        // Show add address form
+        showAddFormBtn.addEventListener("click", function () {
+          addAddressForm.style.display = "block";
         });
 
-        // Cancel button handler
+        // Cancel add address
+        cancelAddBtn.addEventListener("click", function () {
+          addAddressForm.style.display = "none";
+          document.getElementById("addressForm").reset();
+        });
+
+        // Address form submission
+        const addressForm = document.getElementById("addressForm");
+        if (addressForm) {
+          addressForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            // Get CSRF token if needed
+            const csrfToken = getCSRFToken();
+
+            // Collect form data
+            const formData = new FormData(this);
+            const addressData = {};
+
+            for (const [key, value] of formData.entries()) {
+              addressData[key] = value;
+            }
+
+            // Show loading state
+            Swal.fire({
+              title: "Saving...",
+              text: "Please wait while we save your address",
+              allowOutsideClick: false,
+              didOpen: () => {
+                Swal.showLoading();
+              },
+            });
+
+            // Fetch API instead of jQuery ajax
+            fetch("/profile/address/add", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "CSRF-Token": csrfToken, // Include if needed
+              },
+              body: JSON.stringify(addressData),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.status === "success") {
+                  Swal.fire({
+                    icon: "success",
+                    title: "Success!",
+                    text: "Your address has been saved successfully",
+                    confirmButtonColor: "#28a745",
+                  }).then((result) => {
+                    if (result.isConfirmed) {
+                      window.location.reload();
+                    }
+                  });
+                } else {
+                  Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: data.message || "Something went wrong",
+                  });
+                }
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+                Swal.fire({
+                  icon: "error",
+                  title: "Oops...",
+                  text: "Failed to save address. Please try again.",
+                  confirmButtonColor: "#dc3545",
+                });
+              });
+          });
+        }
       });
     </script>
   </body>

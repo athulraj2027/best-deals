@@ -3,5 +3,5 @@ const router = express.Router();
 
 const cartController = require("../../controllers/user/cartController");
 
-router.route("/").get().post();
+router.route("/").get(cartController.getCartPage);
 module.exports = router;

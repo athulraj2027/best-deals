@@ -43,14 +43,9 @@ exports.getUserAddressPage = async (req, res) => {
     const userAddresses =
       addresses.length > 0 ? addresses[0].userAddresses : [];
 
-    console.log("User Addresses:", userAddresses);
-
-    // console.log(addresses);
-    return res
-      .status(200)
-      .render("userPages/profilePages/addressPage", {
-        addresses: userAddresses,
-      });
+    return res.status(200).render("userPages/profilePages/addressPage", {
+      addresses: userAddresses,
+    });
   } catch (err) {
     console.log(err);
   }
@@ -63,12 +58,28 @@ exports.addAddressController = async (req, res) => {
   try {
     console.log(type, streetAddress, city, state, zipCode, country);
     if (!type || !streetAddress || !city || !state || !zipCode || !country) {
+      console.log("every field is not available");
       return res.status(400).json({
         status: "error",
         title: "Error",
         message: "Please fill all the fields",
       });
     }
+    console.log("all fields are there ");
+    if (type === "Home") {
+      const homeAddress = await Address.findOne({ userId, type: "Home" });
+      if (homeAddress) {
+        console.log("there is already a home address");
+
+        return res.status(400).json({
+          status: "error",
+          title: "Error",
+          message: "Home address already exists",
+        });
+      }
+    }
+
+    console.log("saving the new address");
 
     const newAddress = new Address({
       userId,
@@ -153,3 +164,39 @@ exports.editProfileController = async (req, res) => {
     });
   }
 };
+
+exports.deleteAddressController = async (req, res) => {
+  const addressId = req.params.id;
+  try {
+    if (!addressId) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Some credentials missing",
+      });
+    }
+
+    const deleteAddress = await Address.findByIdAndDelete({ _id: addressId });
+    if (!deleteAddress) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Error in finding address before deleting",
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      title: "Success",
+      message: "Product deleted successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      status: "error",
+      title: "Error",
+      message: "Something went wrong in deleting address",
+    });
+  }
+};
+

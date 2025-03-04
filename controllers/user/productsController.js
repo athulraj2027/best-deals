@@ -1,4 +1,7 @@
 const Product = require("../../models/Product");
+const User = require("../../models/User");
+const Cart = require("../../models/Cart");
+const Wishlist = require("../../models/Wishlist");
 const statusCodes = require("../../services/statusCodes");
 
 exports.getProductViewPage = async (req, res) => {
@@ -27,5 +30,74 @@ exports.getProductViewPage = async (req, res) => {
   } catch (err) {
     console.error("Error fetching product details:", err);
     res.status(statusCodes.SERVER_ERROR).redirect("/");
+  }
+};
+
+exports.addtoWishlistController = async (req, res) => {
+  const userId = req.session.userId;
+  try {
+    if (!userId) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Please log in to add to wishlist",
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      status: "error",
+      title: "Error",
+      message: "Something went wrong ",
+    });
+  }
+};
+
+exports.addtoCartController = async (req, res) => {
+  const userId = req.session.userId;
+  const cartItem = req.body;
+  try {
+    if (!userId) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Please log in to add to wishlist",
+      });
+    }
+    if (!cartItem) {
+      return res.status(404).json({
+        status: "error",
+        title: "Error",
+        message: "Error in request body",
+      });
+    }
+    let cart = await Cart.findOne({ userId });
+    if (!cart) {
+      cart = new Cart({ userId, items: [] });
+    }
+    const existingItem = await cart.items.find(
+      (item) => item.variantId.toString() === cartItem.variantId
+    );
+
+    if (existingItem) {
+      existingItem.quantity += cartItem.quantity;
+    } else {
+      cart.items.push(cartItem);
+    }
+
+    await cart.save();
+
+    return res.status(200).json({
+      status: "success",
+      title: "Success",
+      message: "Added to cart",
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      status: "error",
+      title: "Error",
+      message: "Something went wrong ",
+    });
   }
 };

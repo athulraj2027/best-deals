@@ -570,6 +570,14 @@
               >
                 <i class="fas fa-shopping-cart"></i> Add to Cart
               </button>
+              <button 
+                id="wishlist-btn" 
+                class="btn add-to-cart-btn"
+                style="height: 50px;width: 300px;"
+                
+              >
+                <i class="fas "></i>Wishlist
+              </button>
             </div>           
           </div>
         </div>
@@ -907,7 +915,7 @@ function addToCart() {
   };
   
   // Add to cart logic - this would typically involve an API call or local storage update
-  fetch('/api/cart/add', {
+  fetch(`/product/cart/add/${selectedVariant._id}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -916,7 +924,7 @@ function addToCart() {
   })
   .then(response => response.json())
   .then(data => {
-    if (data.success) {
+    if (data.status==="success") {
       Swal.fire({
         icon: 'success',
         title: 'Added to Cart!',
@@ -927,7 +935,7 @@ function addToCart() {
         cancelButtonText: 'Continue Shopping'
       }).then((result) => {
         if (result.isConfirmed) {
-          window.location.href = '/cart';
+          window.location.href = '/shop';
         }
       });
       

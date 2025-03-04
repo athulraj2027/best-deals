@@ -1,95 +1,100 @@
 <div class="sidebar-container">
-    <div class="account-sidebar">
-      <ul class="sidebar-menu">
-        <li class="sidebar-item">
-          <a href="/profile" class="sidebar-link">
-            <i class="fas fa-user-circle me-2"></i>Profile
-          </a>
-        </li>
-        <li class="sidebar-item">
-          <a href="/profile/address" class="sidebar-link">
-            <i class="fas fa-map-marker-alt me-2"></i>Addresses
-          </a>
-        </li>
-        <li class="sidebar-item">
-          <a href="/profile/orders" class="sidebar-link">
-            <i class="fas fa-shopping-bag me-2"></i>Orders
-          </a>
-        </li>
-        <li class="sidebar-item">
-          <a href="/profile/wallet" class="sidebar-link">
-            <i class="fas fa-wallet me-2"></i>Wallet
-          </a>
-        </li>
-        <li class="sidebar-item">
-          <a href="/profile/wishlist" class="sidebar-link">
-            <i class="fas fa-heart me-2"></i>Wishlist
-          </a>
-        </li>
-        <li class="sidebar-item">
-          <a href="/profile/cart" class="sidebar-link">
-            <i class="fas fa-shopping-cart me-2"></i>Cart
-          </a>
-        </li>
-        <li class="sidebar-item">
-          <a href="/profile/passwords" class="sidebar-link">
-            <i class="fas fa-key me-2"></i>Password
-          </a>
-        </li>
-      </ul>
-    </div>
+  <div class="account-sidebar">
+    <ul class="sidebar-menu">
+      <li class="sidebar-item">
+        <a href="/profile" class="sidebar-link">
+          <i class="fas fa-user-circle me-2"></i>Profile
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="/profile/address" class="sidebar-link">
+          <i class="fas fa-map-marker-alt me-2"></i>Addresses
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="/profile/orders" class="sidebar-link">
+          <i class="fas fa-shopping-bag me-2"></i>Orders
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="/profile/wallet" class="sidebar-link">
+          <i class="fas fa-wallet me-2"></i>Wallet
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="/profile/wishlist" class="sidebar-link">
+          <i class="fas fa-heart me-2"></i>Wishlist
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="/profile/cart" class="sidebar-link">
+          <i class="fas fa-shopping-cart me-2"></i>Cart
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="/profile/password" class="sidebar-link">
+          <i class="fas fa-key me-2"></i>Reset Password
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="/profile/reviews" class="sidebar-link">
+          <i class="fas me-2"></i>My Reviews
+        </a>
+      </li>
+    </ul>
   </div>
-  
-  <style>
+</div>
+
+<style>
+  .sidebar-container {
+    width: 100%;
+    max-width: 250px;
+    padding: 20px 0;
+    margin: 20px;
+  }
+
+  .account-sidebar {
+    background-color: #2d3540;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .sidebar-menu {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .sidebar-item {
+    margin-bottom: 8px;
+  }
+
+  .sidebar-link {
+    display: block;
+    padding: 12px 15px;
+    color: #e0e0e0;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .sidebar-link:hover {
+    background-color: #3a4653;
+    color: #ffffff;
+  }
+
+  .sidebar-link.active {
+    background-color: #4a7bff;
+    color: #ffffff;
+  }
+
+  /* Optional: Add responsive behavior for mobile */
+  @media (max-width: 768px) {
     .sidebar-container {
-      width: 100%;
-      max-width: 250px;
-      padding: 20px 0;
-      margin: 20px;
+      max-width: 100%;
+      margin-bottom: 20px;
     }
-    
-    .account-sidebar {
-      background-color: #2d3540;
-      border-radius: 8px;
-      padding: 15px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    }
-    
-    .sidebar-menu {
-      list-style-type: none;
-      padding: 0;
-      margin: 0;
-    }
-    
-    .sidebar-item {
-      margin-bottom: 8px;
-    }
-    
-    .sidebar-link {
-      display: block;
-      padding: 12px 15px;
-      color: #e0e0e0;
-      text-decoration: none;
-      border-radius: 6px;
-      font-weight: 500;
-      transition: all 0.3s ease;
-    }
-    
-    .sidebar-link:hover {
-      background-color: #3a4653;
-      color: #ffffff;
-    }
-    
-    .sidebar-link.active {
-      background-color: #4a7bff;
-      color: #ffffff;
-    }
-    
-    /* Optional: Add responsive behavior for mobile */
-    @media (max-width: 768px) {
-      .sidebar-container {
-        max-width: 100%;
-        margin-bottom: 20px;
-      }
-    }
-  </style>
+  }
+</style>
