@@ -35,6 +35,7 @@ exports.getProductViewPage = async (req, res) => {
 
 exports.addtoWishlistController = async (req, res) => {
   const userId = req.session.userId;
+  const wishlistItem = req.body;
   try {
     if (!userId) {
       return res.status(400).json({
@@ -43,6 +44,33 @@ exports.addtoWishlistController = async (req, res) => {
         message: "Please log in to add to wishlist",
       });
     }
+    if (!wishlistItem) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Error in request body of wishlist item",
+      });
+    }
+    let wishlist = await Wishlist.findOne({ userId });
+    if (!wishlist) {
+      wishlist = new Wishlist({ userId, items: [] });
+    }
+    const existingItem = await wishlist.items.find(
+      (item) => item.variantId.toString() === wishlistItem.variantId
+    );
+    if (existingItem) {
+      existingItem.quantity += wishlistItem.quantity;
+    } else {
+      wishlist.items.push(wishlistItem);
+    }
+
+    await wishlist.save();
+
+    return res.status(200).json({
+      status: "success",
+      title: "Success",
+      message: "Added to cart",
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({

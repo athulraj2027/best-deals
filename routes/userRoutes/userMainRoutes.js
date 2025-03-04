@@ -10,6 +10,7 @@ const homePageRoutes = require("./homePageRoutes");
 const profileRoutes = require("./profileRoutes");
 const forgotPasswordRoutes = require("./forgotPasswordRoutes");
 const cartRoutes = require("./cartRoutes");
+const wishlistRoutes = require("./wishlistRoutes");
 
 const verifyOtpController = require("../../controllers/user/verifyOtpController");
 const checkBlockedUserMiddleware = require("../../middlewares/checkBlockedUserMiddleware");
@@ -29,6 +30,7 @@ router.use("/shop", shopRoutes);
 router.use("/forgot-password", forgotPasswordRoutes);
 router.use("/profile", profileRoutes);
 router.use("/cart", cartRoutes);
+router.use("/wishlist", wishlistRoutes);
 router.route("/logout").post((req, res) => {
   req.session.destroy();
   res.clearCookie("auth_token");

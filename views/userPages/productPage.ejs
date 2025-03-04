@@ -574,7 +574,9 @@
                 id="wishlist-btn" 
                 class="btn add-to-cart-btn"
                 style="height: 50px;width: 300px;"
-                
+                <%= !product.variants || !product.variants.length || !product.variants[0] || product.variants[0].quantity <= 0 ? 'disabled' : '' %>
+                onclick="addToWishlist()"
+            
               >
                 <i class="fas "></i>Wishlist
               </button>
@@ -935,7 +937,7 @@ function addToCart() {
         cancelButtonText: 'Continue Shopping'
       }).then((result) => {
         if (result.isConfirmed) {
-          window.location.href = '/shop';
+          window.location.href = '/cart';
         }
       });
       
@@ -946,6 +948,70 @@ function addToCart() {
         icon: 'error',
         title: 'Error',
         text: data.message || 'There was a problem adding the item to your cart'
+      });
+    }
+  })
+  .catch(error => {
+    console.error('Error adding to cart:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'There was a problem connecting to the server. Please try again.'
+    });
+  });
+}
+
+function addToWishlist(){
+  if (!selectedVariant || selectedVariant.quantity < currentQuantity) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: 'This product is out of stock or the requested quantity exceeds available stock',
+    });
+    return;
+  }
+
+  const wishListItem = {
+    productId: product._id,
+    variantId: selectedVariant._id,
+    name: product.name,
+    color: selectedColor,
+    size: selectedSize,
+    price: selectedVariant.price,
+    image: selectedVariant.images && selectedVariant.images.length > 0 ? 
+    selectedVariant.images[0].url : 'https://via.placeholder.com/100x100?text=No+Image'
+ 
+  }
+  fetch(`/product/wishlist/add/${selectedVariant._id}`,{
+    method:'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(wishListItem)
+  }).then(response => response.json())
+  .then(data => {
+    if (data.status==="success") {
+      Swal.fire({
+        icon: 'success',
+        title: 'Added to Cart!',
+        text: `${currentQuantity} x ${product.name} (${selectedColor}, ${selectedSize}) added to your wishlist`,
+        showConfirmButton: true,
+        confirmButtonText: 'View Wishlist',
+        showCancelButton: true,
+        cancelButtonText: 'Continue Shopping'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '/wishlist';
+        }
+      });
+      
+      // Update cart count in the header
+      // updateCartCount(data.cartCount);
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: data.message || 'There was a problem adding the item to your wishlist'
       });
     }
   })
