@@ -52,7 +52,9 @@
           placeholder="Search"
           aria-label="Search"
         />
-        <button class="hide-on-small"><img src="/userCSS/icons/search.svg" alt="" /></button>
+        <button class="hide-on-small">
+          <img src="/userCSS/icons/search.svg" alt="" />
+        </button>
       </form>
     </div>
     <ul
@@ -78,41 +80,35 @@
             /> -->
             <a
               href="/profile"
-              style="
-                color: white;
-                text-decoration: none;
-                padding: 6px 12px;
-              "
+              style="color: white; text-decoration: none; padding: 6px 12px"
               >Profile</a
             >
             <a
               href="#"
               class="logout-link"
-              style="
-                color: white;
-                text-decoration: none;
-                padding: 6px 12px;
-              "
+              style="color: white; text-decoration: none; padding: 6px 12px"
               >Logout</a
             >
             <a
               href="/cart"
               class="cart-link"
-              style="
-                color: white;
-                text-decoration: none;
-                padding: 6px 12px;
-              "
+              style="color: white; text-decoration: none; padding: 6px 12px"
               >Cart</a
+            >
+            <a
+              href="/wishlist"
+              class="cart-link"
+              style="color: white; text-decoration: none; padding: 6px 12px"
+              >Wish List</a
             >
           </div>
           <% } else { %>
           <div style="display: flex; align-items: center; gap: 10px">
-            <img
+            <!-- <img
               src="/userCSS/icons/person.svg"
               alt="User"
               style="vertical-align: middle"
-            />
+            /> -->
             <a
               href="/signin"
               style="
@@ -135,9 +131,14 @@
             >
           </div>
           <% } %>
+          <a
+            href="/shop"
+            class="cart-link"
+            style="color: white; text-decoration: none; padding: 6px 12px"
+            >Shop</a
+          >
         </div>
       </li>
-      <li><img src="/userCSS/icons/suit-heart-fill.svg" alt="" /></li>
     </ul>
   </div>
   <!-- Rest of the code remains the same -->
