@@ -120,7 +120,6 @@
                       <th>Email</th>
                       <th>Phone</th>
                       <th>Joined Date</th>
-                      <th>Status</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
@@ -142,7 +141,6 @@
                         <%= customer.createdAt.toLocaleString('en-US', { 
                         year: 'numeric', month: 'short', day: 'numeric' }) %>
                       </td>
-                      <td><%= customer.isActive %></td>
                       <td class="text-center">
                         <div class="btn-group">
                           <a

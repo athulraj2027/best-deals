@@ -546,7 +546,7 @@
               <div class="d-flex align-items-center">
                 <div class="quantity-selector me-4">
                   <button onclick="decrementQuantity()"><i class="fas fa-minus"></i></button>
-                  <input type="number" id="quantity" value="1" min="1" max="<%= product.variants && product.variants.length > 0 ? product.variants[0].quantity || 0 : 0 %>" readonly>
+                  <input type="number" id="quantity" value="1" min="1" max="5" readonly>
                   <button onclick="incrementQuantity()"><i class="fas fa-plus"></i></button>
                 </div>
                 <span id="stock-info">

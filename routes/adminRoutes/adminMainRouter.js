@@ -20,7 +20,7 @@ router.use("/", authRoutes);
 
 router.post("/logout", (req, res) => {
   console.log("hi");
-  req.session.destroy();
+  delete req.session.adminEmail;
   res.clearCookie("auth_token");
   return res.redirect("/admin");
 });

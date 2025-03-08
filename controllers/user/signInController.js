@@ -76,6 +76,7 @@ exports.signInController = async (req, res) => {
     req.session.userId = user._id;
     req.session.email = email;
     req.session.isAuthenticated = true;
+  await User.findByIdAndUpdate(user._id,{status:true})
 console.log("req.session.userId: ",req.session.userId)
     req.session.save((err) => {
       if (err) {
@@ -87,6 +88,7 @@ console.log("req.session.userId: ",req.session.userId)
         });
       }
       console.log("Session created successfully for user:", email);
+      
       return res.status(statusCodes.SUCCESS).json({
         status: "success",
         title: "Login Successful",

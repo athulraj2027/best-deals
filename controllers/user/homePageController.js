@@ -8,16 +8,16 @@ exports.getHomePage = async (req, res) => {
     const rawProducts = await Product.aggregate([
       {
         $lookup: {
-          from: 'categories',
-          localField: 'category',
-          foreignField: '_id',
-          as: 'category'
-        }
+          from: "categories",
+          localField: "category",
+          foreignField: "_id",
+          as: "category",
+        },
       },
-      { $unwind: '$category' },
-      { $match: { 'category.status': 'listed' } }
+      { $unwind: "$category" },
+      { $match: { "category.status": "listed" } },
+      { $match: { status: true } },
     ]);
-  
 
     const products = rawProducts.map((product) => {
       const lowestPrice =

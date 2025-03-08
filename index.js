@@ -13,7 +13,7 @@ const adminRoutes = require("./routes/adminRoutes/adminMainRouter");
 const cacheMiddleware = require("./middlewares/cacheMiddleware");
 const passport = require("./config/passport");
 const connectDB = require("./config/db");
-const sessionMiddleware = require("./config/session");
+const {userSessionMiddleware,adminSessionMiddleware} = require("./config/session");
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -24,7 +24,8 @@ connectDB();
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(sessionMiddleware);
+app.use('/admin',adminSessionMiddleware);
+app.use('/',userSessionMiddleware)
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(cacheMiddleware);

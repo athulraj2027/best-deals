@@ -1,5 +1,5 @@
 module.exports = (req, res, next) => {
-  if (!req.session.email) {
+  if (!req.session.adminEmail) {
     return res.redirect("/admin");
   }
   next();

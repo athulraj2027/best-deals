@@ -23,7 +23,9 @@ passport.use(
         if (existingUser) {
           console.log("The user already exists");
           if (existingUser.isBlocked) {
+            console.log('Blocked user trying to login')
             return done(null, false, { message: "BLOCKED_USER" });
+
           }
           return done(null, existingUser);
         }
@@ -80,6 +82,7 @@ passport.deserializeUser(async (sessionUser, done) => {
 
     // Add the authentication status to the user object
     user.isAuthenticated = sessionUser.isAuthenticated;
+    await User.findByIdAndUpdate(sessionUser._id,{isActive: true})
     done(null, user);
   } catch (err) {
     console.error("Deserialize error:", err);

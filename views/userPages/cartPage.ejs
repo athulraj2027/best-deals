@@ -64,6 +64,7 @@
                           action="/cart/update-quantity"
                           method="POST"
                           class="flex items-center"
+                          
                         >
                           <input
                             type="hidden"
@@ -90,6 +91,7 @@
                             name="quantity"
                             value="<%= item.quantity %>"
                             min="1"
+                            max="5"
                             class="w-12 h-8 text-center border-t border-b border-gray-200"
                             readonly
                           />

@@ -41,7 +41,7 @@ exports.adminLoginController = async (req, res) => {
         message: "Invalid password or email",
       });
     }
-    req.session.email = email;
+    req.session.adminEmail = email;
 
     console.log(req.session);
     console.log("session created");
