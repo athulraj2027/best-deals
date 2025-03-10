@@ -124,9 +124,9 @@
         color: var(--accent-color);
         font-weight: 600;
       }
-
-      /* .range-slider {
-        -webkit-appearance: none;
+/* 
+      .range-slider {
+        .-webkit-appearance: none;
         width: 100%;
         height: 5px;
         background: #333;
@@ -521,7 +521,7 @@
                 </div>
                 
                 <!-- Ratings Filter -->
-                <div class="mb-4">
+                <!-- <div class="mb-4">
                   <label class="form-label">Rating</label>
                   <div class="rating-filter d-flex align-items-center gap-2 mb-2">
                     <input type="checkbox" class="form-check-input" id="rating4plus" name="rating" value="4">
@@ -544,8 +544,8 @@
                       <i class="far fa-star text-warning"></i>
                       & Up
                     </label>
-                  </div>
-                </div>
+                  </div> -->
+                <!-- </div> -->
                 
                 <!-- Availability Filter -->
                 <div class="mb-4">
@@ -801,6 +801,72 @@
         filterCollapse.addEventListener('hidden.bs.collapse', function () {
           filterToggle.innerHTML = '<i class="fas fa-sliders-h"></i> Show Filters';
         });
+      });
+    </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Handle category chip selection
+        const categoryChips = document.querySelectorAll('.filter-chip');
+        const categoryInput = document.getElementById('categoryInput');
+        
+        // Set initial state based on URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoryParam = urlParams.get('category');
+        if (categoryParam) {
+          categoryChips.forEach(chip => {
+            if (chip.dataset.value === categoryParam) {
+              chip.classList.add('active');
+            } else {
+              chip.classList.remove('active');
+            }
+          });
+          categoryInput.value = categoryParam;
+        }
+        
+        categoryChips.forEach(chip => {
+          chip.addEventListener('click', function() {
+            categoryChips.forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            categoryInput.value = this.dataset.value;
+          });
+        });
+        
+        // Handle price range slider
+        const priceSlider = document.getElementById('priceRange');
+        const minPriceDisplay = document.getElementById('minPriceDisplay');
+        const maxPriceDisplay = document.getElementById('maxPriceDisplay');
+        const minPriceInput = document.getElementById('minPrice');
+        const maxPriceInput = document.getElementById('maxPrice');
+        
+        // Set initial state from URL params
+        const minPriceParam = urlParams.get('minPrice');
+        const maxPriceParam = urlParams.get('maxPrice');
+        if (minPriceParam) minPriceInput.value = minPriceParam;
+        if (maxPriceParam) {
+          maxPriceInput.value = maxPriceParam;
+          priceSlider.value = maxPriceParam;
+          maxPriceDisplay.textContent = '$' + maxPriceParam;
+        }
+        
+        priceSlider.addEventListener('input', function() {
+          maxPriceInput.value = this.value;
+          maxPriceDisplay.textContent = '$' + this.value;
+        });
+        
+        // Set other form elements based on URL params
+        const brandSelect = document.getElementById('brand');
+        const brandParam = urlParams.get('brand');
+        if (brandParam) brandSelect.value = brandParam;
+        
+        const inStockCheck = document.getElementById('inStock');
+        inStockCheck.checked = urlParams.get('inStock') !== 'false';
+        
+        const dealsCheck = document.getElementById('deals');
+        dealsCheck.checked = urlParams.get('deals') === 'true';
+        
+        const sortSelect = document.getElementById('sort');
+        const sortParam = urlParams.get('sort');
+        if (sortParam) sortSelect.value = sortParam;
       });
     </script>
   </body>

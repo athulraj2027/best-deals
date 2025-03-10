@@ -19,13 +19,12 @@ exports.getShopPage = async (req, res) => {
       },
       { $unwind: "$category" },
       { $match: { "category.status": "listed" } },
-      {$match: {'status':true}}
+      { $match: { status: true } },
     ]);
 
     const totalProducts = await Product.countDocuments();
-    console.log(totalProducts)
+    console.log(totalProducts);
     const categories = await Category.find({ status: "listed" });
-
 
     const totalPages = Math.ceil(totalProducts / limit);
 

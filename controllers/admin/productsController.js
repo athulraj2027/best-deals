@@ -47,7 +47,13 @@ exports.getProductsPage = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const products = await Product.find()
+    const categories = await Category.find({ status: "listed" });
+    if(req.query){
+      if(req.query.category){
+        let products = await Product.aggregate([$])
+      }
+    }
+    let products = await Product.find()
       .populate("category")
       .skip(skip)
       .limit(limit);
@@ -59,6 +65,7 @@ exports.getProductsPage = async (req, res) => {
       .status(statusCodes.SUCCESS)
       .render("adminPages/ProductPages/adminProducts", {
         products,
+        categories,
         currentPage: page,
         totalPages,
         hasNextPage: page < totalPages,
