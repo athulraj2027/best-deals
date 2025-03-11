@@ -200,3 +200,56 @@ exports.deleteAddressController = async (req, res) => {
   }
 };
 
+exports.getEditAddressPage = async (req, res) => {
+  try {
+    const addressId = req.params.id;
+    const address = await Address.findById(addressId);
+
+    return res
+      .status(200)
+      .render("userPages/profilePages/editAddressPage", { address });
+  } catch (err) {
+    console.error("Error in loading edit address Page : ", err);
+    return res.status(500).json({
+      status: "error",
+      title: "Error",
+      message: "Something went wrong",
+    });
+  }
+};
+
+exports.editAddressController = async (req, res) => {
+  try {
+    const { type, streetAddress, city, state, zipCode, country } = req.body;
+    const addressId = req.params.id;
+
+    const updatedAddress = await Address.findByIdAndUpdate(
+      addressId,
+      {
+        type,
+        streetAddress,
+        country,
+        state,
+        zipCode,
+        city,
+      },
+      { new: true }
+    );
+    if (!updatedAddress) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "There is something wrong in the field data",
+      });
+    }
+
+    await updatedAddress.save();
+    return res.status(200).json({
+      status: "success",
+      title: "Success",
+      message: "Address have been successfully updated",
+    });
+  } catch (err) {
+    console.error("Error in editing user address : ", err);
+  }
+};

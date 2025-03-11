@@ -7,6 +7,12 @@ router
   .route("/")
   .get(userGuestMiddleware, profileController.getUserAddressPage);
 
+router
+  .route("/edit/:id")
+  .get(userGuestMiddleware, profileController.getEditAddressPage)
+  .post(profileController.editAddressController);
+
 router.route("/add").post(profileController.addAddressController);
 router.route("/delete/:id").post(profileController.deleteAddressController);
+
 module.exports = router;

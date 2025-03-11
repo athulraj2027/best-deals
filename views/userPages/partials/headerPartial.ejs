@@ -72,7 +72,14 @@
       <li style="margin-right: 1.5rem">
         <div style="display: flex; align-items: center; gap: 12px">
           <% if (userId) { %>
-          <div style="display: flex; align-items: center; gap: 10px">
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              flex-wrap: wrap;
+              justify-content: end;
+            "
+          >
             <!-- <img
               src="/userCSS/icons/person.svg"
               alt="User"
@@ -100,6 +107,12 @@
               class="cart-link"
               style="color: white; text-decoration: none; padding: 6px 12px"
               >Wish List</a
+            >
+            <a
+              href="/shop?category=all"
+              class="cart-link"
+              style="color: white; text-decoration: none; padding: 6px 12px"
+              >Shop</a
             >
           </div>
           <% } else { %>
@@ -131,12 +144,6 @@
             >
           </div>
           <% } %>
-          <a
-            href="/shop?category=all"
-            class="cart-link"
-            style="color: white; text-decoration: none; padding: 6px 12px"
-            >Shop</a
-          >
         </div>
       </li>
     </ul>
