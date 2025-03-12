@@ -61,10 +61,9 @@
                     <div class="mt-4 sm:mt-0">
                       <div class="flex items-center">
                         <form
-                          action="/cart/update-quantity"
+                          action="/cart/quantity-update/<%= item._id%>"
                           method="POST"
                           class="flex items-center"
-                          
                         >
                           <input
                             type="hidden"
@@ -107,7 +106,7 @@
                         </form>
 
                         <form
-                          action="/cart/remove-item"
+                          action="/cart/delete-item/<%= item._id %>"
                           method="POST"
                           class="ml-4"
                         >
@@ -145,7 +144,7 @@
                 <i class="fas fa-arrow-left mr-2"></i>Continue Shopping
               </a>
 
-              <form action="/cart/clear" method="POST">
+              <form action="/cart/clear/<%= cart._id %>" method="POST">
                 <button type="submit" class="text-red-600 hover:text-red-800">
                   <i class="fas fa-times mr-2"></i>Clear Cart
                 </button>
@@ -168,7 +167,7 @@
               </div>
 
               <div class="flex justify-between">
-                <span class="text-gray-600">Tax (10%)</span>
+                <span class="text-gray-600">Tax </span>
                 <span>$<%= cart.tax.toFixed(2) %></span>
               </div>
 
@@ -185,7 +184,7 @@
               </div>
 
               <a
-                href="/checkout"
+                href="/checkout/<%= cart._id %>"
                 class="block w-full bg-blue-600 text-white text-center py-3 rounded-md font-medium mt-6 hover:bg-blue-700"
               >
                 Proceed to Checkout
@@ -204,7 +203,7 @@
           Looks like you haven't added any items to your cart yet.
         </p>
         <a
-          href="/products"
+          href="/shop"
           class="inline-block bg-blue-600 text-white py-3 px-6 rounded-md font-medium hover:bg-blue-700"
         >
           Start Shopping

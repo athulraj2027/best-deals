@@ -80,6 +80,13 @@ CartSchema.pre("save", function (next) {
 
 // Instance methods
 CartSchema.methods = {
+  calculateSubtotal() {
+    this.subtotal = this.items.reduce((sum, item) => {
+      return sum + item.price * item.quantity;
+    }, 0);
+    return this.subtotal;
+  },
+
   // Add item to cart
   async addItem(productId, quantity = 1) {
     try {
