@@ -21,13 +21,16 @@
 
         <!-- Main content -->
         <div class="col-md-10">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="text-dark">Orders</h1>
+          </div>
           <div class="filter-section">
             <div
               class="d-flex justify-content-between align-items-center filter-controls gap-3 flex-wrap"
             >
               <!-- Filter by Status -->
               <form
-                action="/admin/categories/filter"
+                action="/admin/orders/filter"
                 method="GET"
                 class="flex-grow-1"
               >
@@ -49,7 +52,7 @@
 
               <!-- Sort by CreatedAt -->
               <form
-                action="/admin/categories/sort"
+                action="/admin/orders/sort"
                 method="GET"
                 class="flex-grow-1"
               >
@@ -71,10 +74,6 @@
               </form>
             </div>
           </div>
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="text-dark">Orders</h1>
-          </div>
-
           <!-- Orders Table -->
           <div class="card border-light">
             <div class="card-body">
@@ -84,41 +83,89 @@
                     <th>#</th>
                     <th>Order ID</th>
                     <th>Customer</th>
-                    <th>Order Date</th>
+                    <th>Payment Method</th>
                     <th>Status</th>
-                    <th>Total</th>
+                    <th>Payment Status</th>
+                    <th>Order Date</th>
                     <th>Actions</th>
+                    <th>Change Delivery Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <!-- Example row -->
+                  <% if (orders && orders.length > 0) { %> <%
+                  orders.forEach((order, index) => { %>
                   <tr>
-                    <td>1</td>
-                    <td>ORD12345</td>
-                    <td>John Doe</td>
-                    <td>2025-01-05</td>
-                    <td>Completed</td>
-                    <td>$150.00</td>
+                    <td class="text-center"><%= index + 1 %></td>
+                    <td><%= order._id %></td>
+                    <td><%= order.userId.name %></td>
+                    <td><%= order.paymentMethod %></td>
                     <td class="text-center">
-                      <a
-                        href="/admin/orders/view/1"
-                        class="btn btn-sm text-white"
-                        style="background-color: #f57c00"
+                      <span
+                        class="badge <%= getStatusBadgeClass(order.status) %>"
                       >
-                        View
-                      </a>
+                        <%= order.status %>
+                      </span>
+                    </td>
+                    <td class="text-center">
+                      <span
+                        class="badge <%= getPaymentStatusBadgeClass(order.payment_status) %>"
+                      >
+                        <%= order.payment_status %>
+                      </span>
+                    </td>
+                    <td><%= new Date(order.orderDate).toLocaleString() %></td>
+                    <td class="text-center order-actions">
+                      <% if (order.status !== 'cancelled' && order.status !==
+                      'delivered') { %>
                       <form
-                        action="/admin/orders/delete/1"
+                        action="/admin/orders/cancel/<%= order._id %>"
                         method="POST"
                         class="d-inline"
                       >
                         <button type="submit" class="btn btn-sm btn-danger">
-                          Delete
+                          Cancel
                         </button>
+                      </form>
+                      <% } %>
+                    </td>
+                    <td>
+                      <form
+                        action="/admin/orders/update-status/<%= order._id %>"
+                        method="POST"
+                        class="d-inline"
+                      >
+                        <div class="input-group input-group-sm">
+                          <select
+                            name="status"
+                            class="form-select form-select-sm"
+                            aria-label="Change status"
+                            value="<%= order.status %>"
+                          >
+                            <option value="pending" class="text-warning">
+                              Pending
+                            </option>
+                            <option value="processing" class="text-info">
+                              Processing
+                            </option>
+                            <option value="delivered" class="text-success">
+                              Delivered
+                            </option>
+                            <option value="cancelled" class="text-danger">
+                              Cancelled
+                            </option>
+                          </select>
+                          <button class="btn btn-sm btn-primary" type="submit">
+                            Update
+                          </button>
+                        </div>
                       </form>
                     </td>
                   </tr>
-                  <!-- Additional rows dynamically rendered -->
+                  <% }); %> <% } else { %>
+                  <tr>
+                    <td colspan="8" class="text-center">No orders found.</td>
+                  </tr>
+                  <% } %>
                 </tbody>
               </table>
             </div>
