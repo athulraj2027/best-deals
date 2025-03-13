@@ -7,10 +7,12 @@ const productRoutes = require("./productRoutes");
 const usersRoutes = require("./usersRoute");
 const dashboardController = require("../../controllers/admin/dashboardController");
 const guestMiddleware = require("../../middlewares/guestMiddleware");
+const orderRoutes = require("./orderRoutes");
 
 router.use("/categories", categoryRoutes);
 router.use("/products", productRoutes);
 router.use("/customers", usersRoutes);
+router.use("/orders", orderRoutes);
 router.use(
   "/dashboard",
   guestMiddleware,
