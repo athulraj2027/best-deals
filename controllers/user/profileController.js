@@ -1,5 +1,6 @@
 const User = require("../../models/User");
 const Address = require("../../models/Address");
+const Order = require("../../models/Order");
 const mongoose = require("mongoose");
 
 exports.getUserProfilePage = async (req, res) => {
@@ -78,7 +79,48 @@ exports.addAddressController = async (req, res) => {
         });
       }
     }
+    const stateRegex = /^[A-Za-z\s]{2,50}$/;
+    const countryRegex = /^[A-Za-z\s]{2,60}$/;
+    const cityRegex = /^[A-Za-z\s]{2,50}$/;
+    const zipCodeRegex = /^\d{6}$/;
+    const streetAddressRegex = /^[A-Za-z0-9\s,.#-]{5,100}$/;
 
+    if (!stateRegex.test(state)) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Invalid format for state name",
+      });
+    }
+    if (!countryRegex.test(country)) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Invalid format for country name",
+      });
+    }
+    if (!cityRegex.test(city)) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Invalid format for city name",
+      });
+    }
+    if (!zipCodeRegex.test(zipCode)) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Invalid format for Zip Code",
+      });
+    }
+
+    if (!streetAddressRegex.test(streetAddress)) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Invalid format for street address",
+      });
+    }
     console.log("saving the new address");
 
     const newAddress = new Address({
@@ -221,7 +263,99 @@ exports.getEditAddressPage = async (req, res) => {
 exports.editAddressController = async (req, res) => {
   try {
     const { type, streetAddress, city, state, zipCode, country } = req.body;
+    if (!type) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Please add an address type",
+      });
+    }
+    if (!streetAddress) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Please enter street address",
+      });
+    }
+    if (!city) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Please enter a city",
+      });
+    }
+    if (!state) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Please enter a state",
+      });
+    }
+    if (!zipCode) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Please enter zipCode",
+      });
+    }
+    if (!country) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Please enter your country",
+      });
+    }
     const addressId = req.params.id;
+    if (!addressId) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Address id not found",
+      });
+    }
+
+    const stateRegex = /^[A-Za-z\s]{2,50}$/;
+    const countryRegex = /^[A-Za-z\s]{2,60}$/;
+    const cityRegex = /^[A-Za-z\s]{2,50}$/;
+    const zipCodeRegex = /^\d{6}$/;
+    const streetAddressRegex = /^[A-Za-z0-9\s,.#-]{5,100}$/;
+
+    if (!stateRegex.test(state)) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Invalid format for state name",
+      });
+    }
+    if (!countryRegex.test(country)) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Invalid format for country name",
+      });
+    }
+    if (!cityRegex.test(city)) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Invalid format for city name",
+      });
+    }
+    if (!zipCodeRegex.test(zipCode)) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Invalid format for Zip Code",
+      });
+    }
+
+    if (!streetAddressRegex.test(streetAddress)) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Invalid format for street address",
+      });
+    }
 
     const updatedAddress = await Address.findByIdAndUpdate(
       addressId,
@@ -251,5 +385,27 @@ exports.editAddressController = async (req, res) => {
     });
   } catch (err) {
     console.error("Error in editing user address : ", err);
+  }
+};
+
+exports.getOrdersPage = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+
+    const orders = await Order.find({ userId });
+    if (!orders) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Couldn't find your orders",
+      });
+    }
+
+    return res
+      .status(200)
+      .render("userPages/profilePages/orderPage", { orders });
+  } catch (err) {
+    console.error(err);
+    return res.status;
   }
 };

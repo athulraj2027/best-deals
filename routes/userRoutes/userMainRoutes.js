@@ -51,7 +51,6 @@ router.route("/logout").post(async (req, res) => {
   }
 });
 
-
 router.use("/", homePageRoutes);
 
 module.exports = router;

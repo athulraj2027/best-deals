@@ -7,6 +7,10 @@ const addressRoutes = require("./addressRoutes");
 router.use("/address", addressRoutes);
 
 router
+  .route("/orders")
+  .get(userGuestMiddleware, profileController.getOrdersPage);
+
+router
   .route("/")
   .get(userGuestMiddleware, profileController.getUserProfilePage)
   .patch(profileController.editProfileController);

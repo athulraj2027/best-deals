@@ -9,6 +9,10 @@
       integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
       crossorigin="anonymous"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
     <link rel="stylesheet" href="/adminCSS/partials/menu.css" />
     <title>Dashboard</title>
   </head>
@@ -44,8 +48,11 @@
                     onchange="this.form.submit()"
                   >
                     <option value="">Filter by Status</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
+                    <option value="pending">Pending</option>
+                    <option value="processing">Processing</option>
+                    <option value="pending">Cancelled</option>
+                    <option value="delivered">Delivered</option>
+                   
                   </select>
                 </div>
               </form>
@@ -65,6 +72,7 @@
                     class="form-select"
                     onchange="this.form.submit()"
                   >
+                  <option value="">Sort</option>
                     <option value="desc">Newest first</option>
                     <option value="asc">Oldest first</option>
                     <option value="asc_name">Name (A-Z)</option>
@@ -129,34 +137,27 @@
                       <% } %>
                     </td>
                     <td>
-                      <form
-                        action="/admin/orders/update-status/<%= order._id %>"
-                        method="POST"
-                        class="d-inline"
-                      >
+                      <form action="/admin/orders/update-status/<%= order._id %>" method="POST" class="d-inline">
                         <div class="input-group input-group-sm">
                           <select
                             name="status"
                             class="form-select form-select-sm"
                             aria-label="Change status"
-                            value="<%= order.status %>"
+                            onchange="this.form.submit()"
                           >
-                            <option value="pending" class="text-warning">
+                            <option value="pending" class="text-warning" <%= order.status === 'pending' ? 'selected' : '' %>>
                               Pending
                             </option>
-                            <option value="processing" class="text-info">
+                            <option value="processing" class="text-info" <%= order.status === 'processing' ? 'selected' : '' %>>
                               Processing
                             </option>
-                            <option value="delivered" class="text-success">
+                            <option value="delivered" class="text-success" <%= order.status === 'delivered' ? 'selected' : '' %>>
                               Delivered
                             </option>
-                            <option value="cancelled" class="text-danger">
+                            <option value="cancelled" class="text-danger" <%= order.status === 'cancelled' ? 'selected' : '' %>>
                               Cancelled
                             </option>
                           </select>
-                          <button class="btn btn-sm btn-primary" type="submit">
-                            Update
-                          </button>
                         </div>
                       </form>
                     </td>
