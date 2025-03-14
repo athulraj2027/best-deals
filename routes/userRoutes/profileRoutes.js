@@ -9,7 +9,11 @@ router.use("/address", addressRoutes);
 router
   .route("/orders")
   .get(userGuestMiddleware, profileController.getOrdersPage);
-
+  
+router
+  .route("/orders/cancel/:id")
+  .post(profileController.cancelOrderController);
+  
 router
   .route("/")
   .get(userGuestMiddleware, profileController.getUserProfilePage)

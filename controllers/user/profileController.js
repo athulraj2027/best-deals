@@ -2,6 +2,7 @@ const User = require("../../models/User");
 const Address = require("../../models/Address");
 const Order = require("../../models/Order");
 const mongoose = require("mongoose");
+const Product = require("../../models/Product");
 
 exports.getUserProfilePage = async (req, res) => {
   try {
@@ -407,5 +408,78 @@ exports.getOrdersPage = async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status;
+  }
+};
+
+exports.cancelOrderController = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Order not found",
+      });
+    }
+
+    if (order.userId.toString() !== req.session.userId.toString()) {
+      return res.status(403).json({
+        status: "error",
+        title: "error",
+        message: "You are not authorized to cancel the order",
+      });
+    }
+
+    if (order.status === "delivered" || order.status === "cancelled") {
+      return res.status(400).json({
+        status: "error",
+        title: "error",
+        message: "Order cannot be cancelled",
+      });
+    }
+
+    const items = order.items;
+    for (const item of items) {
+      const updatedProduct = await Product.findOneAndUpdate(
+        {
+          _id: item.productId,
+          "variants._id": item.variantId,
+        },
+        {
+          $inc: { "variants.$.quantity": +item.quantity },
+        },
+        { new: true }
+      );
+      if (!updatedProduct) {
+        return res.status(400).json({
+          status: "error",
+          title: "Error",
+          message: `Error updating stock for product ${item.name}`,
+        });
+      }
+    }
+
+    order.status = "cancelled";
+
+    if (order.payment_status === "paid") {
+      order.payment_status = "refunded";
+    }
+
+    await order.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Order cancelled successfully",
+      order,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      status: "error",
+      title: "Error",
+      message: "Something went wrong",
+    });
   }
 };

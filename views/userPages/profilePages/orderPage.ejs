@@ -40,104 +40,116 @@
         object-fit: cover;
         margin-right: 20px;
       }
+      .orders-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      .orders-table th,
+      .orders-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+      .orders-table th {
+        background-color: #f2f2f2;
+        color: #333;
+      }
+      .status {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-weight: bold;
+      }
+      .status-processing {
+        background-color: #fff3cd;
+        color: #856404;
+      }
+      .status-shipped {
+        background-color: #d1ecf1;
+        color: #0c5460;
+      }
+      .status-delivered {
+        background-color: #d4edda;
+        color: #155724;
+      }
+      .status-cancelled {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+      .no-orders {
+        text-align: center;
+        padding: 40px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        margin-top: 20px;
+        color: #6c757d;
+      }
     </style>
   </head>
   <body>
     <%- include('../partials/headerPartial') %>
-    <div class="container d-flex m-0">
+    <div class="container d-flex m-0" style="gap: 40px">
       <div class="m-35"><%- include('./partial') %></div>
-      <div class="container orders-container" id="ordersContainer">
-        <div class="orders-header">
-          <div>
-            <h2>Orders</h2>
-          </div>
-          <div class="filter-controls">
-            <select class="form-select" id="orderStatusFilter">
-              <option value="all">All Orders</option>
-              <option value="pending">Pending</option>
-              <option value="processing">Processing</option>
-              <option value="shipped">Shipped</option>
-              <option value="delivered">Delivered</option>
-              <option value="canceled">Canceled</option>
-            </select>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-12">
-            <table class="table table-hover">
-              <thead>
-                <tr>
-                  <th>Order ID</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                  <th>Payment Status</th>
-                  <th>Payment Method</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="ordersTableBody">
-                <% if (orders && orders.length > 0) { %> <% orders.forEach(order
-                => { %>
-                <tr>
-                  <td><%= order.id %></td>
-                  <td><%= new Date(order.orderDate).toLocaleDateString() %></td>
-                  <td>
-                    <span
-                      class="badge bg-<%= getStatusBadgeClass(order.status) %>"
-                    >
-                      <%= order.status %>
-                    </span>
-                  </td>
-                  <td>
-                    <span
-                      class="badge bg-<%= getPaymentStatusBadgeClass(order.payment_status) %>"
-                    >
-                      <%= order.payment_status %>
-                    </span>
-                  </td>
-                  <td><%= order.paymentMethod %></td>
-                  <td>
-                    <a
-                      href="/orders/<%= order.id %>"
-                      class="btn btn-sm btn-outline-primary"
-                      >View Details</a
-                    >
-                  </td>
-                </tr>
-                <% }); %> <% } else { %>
-                <tr>
-                  <td colspan="6" class="text-center">No orders found</td>
-                </tr>
+      <div class="container">
+        <h1>Your Orders</h1>
+
+        <% if (orders && orders.length > 0) { %>
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>Ordered Products</th>
+              <th>Date</th>
+              <th>Products</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% orders.forEach(order => { %>
+            <tr>
+              <td>#<%= order._id %></td>
+              <td><%= new Date(order.orderDate).toLocaleDateString() %></td>
+              <td>
+                <% if (order.items && order.items.length > 0) { %> <%=
+                order.items.length %> item<%= order.items.length > 1 ? 's' : ''
+                %> <% } else { %> No items <% } %>
+              </td>
+              <td>
+                $<%= order.items.reduce((sum, item) => sum + (item.price *
+                item.quantity), 0).toFixed(2) %>
+              </td>
+              <td>
+                <span class="status status-<%= order.status %>">
+                  <%= order.status.charAt(0).toUpperCase() +
+                  order.status.slice(1) %>
+                </span>
+              </td>
+
+              <td>
+                <% if(order.status !== 'cancelled'){ %>
+                <form
+                  action="/profile/orders/cancel/<%= order._id %>"
+                  method="post"
+                  class="order-cancel-form"
+                >
+                  <button type="submit" class="cancel-btn">Cancel Order</button>
+                </form>
                 <% } %>
-              </tbody>
-            </table>
-          </div>
+              </td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+        <% } else { %>
+        <div class="no-orders">
+          <i class="fas fa-shopping-bag fa-3x mb-3"></i>
+          <h3>You don't have any orders yet.</h3>
+          <p>Once you place an order, it will appear here.</p>
+          <a href="/products" class="btn btn-primary mt-3">Start Shopping</a>
         </div>
-        <div class="row mt-4">
-          <div class="col-12">
-            <nav aria-label="Orders pagination">
-              <ul class="pagination justify-content-center">
-                <li class="page-item disabled">
-                  <a
-                    class="page-link"
-                    href="#"
-                    tabindex="-1"
-                    aria-disabled="true"
-                    >Previous</a
-                  >
-                </li>
-                <li class="page-item active">
-                  <a class="page-link" href="#">1</a>
-                </li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item">
-                  <a class="page-link" href="#">Next</a>
-                </li>
-              </ul>
-            </nav>
-          </div>
-        </div>
+        <% } %>
       </div>
     </div>
     <%-include('../partials/footer') %>
@@ -145,7 +157,58 @@
     <!-- Required Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+      $(document).ready(function () {
+        // Use a class instead of ID for multiple forms
+        $(".order-cancel-form").on("submit", function (e) {
+          e.preventDefault();
+
+          // Get the form that was submitted
+          const form = $(this);
+
+          // Get the order ID from the form's action attribute
+          const formAction = form.attr("action");
+
+          $.ajax({
+            url: formAction,
+            type: "POST",
+            success: function (response) {
+              console.log(response); // Log the response for debugging
+              if (response.status === "success") {
+                Swal.fire({
+                  title: response.title,
+                  text: response.message,
+                  icon: response.status, // 'success'
+                  confirmButtonText: "OK",
+                }).then(() => {
+                  window.location.reload; // Redirect after successful cancellation
+                });
+              } else {
+                Swal.fire({
+                  title: response.title,
+                  text: response.message,
+                  icon: response.status, // 'error'
+                  confirmButtonText: "OK",
+                });
+              }
+            },
+            error: function (xhr, status, error) {
+              console.error("AJAX Error:", status, error);
+              console.log("Error Response JSON:", xhr.responseJSON);
+
+              Swal.fire({
+                title: "Oops!",
+                text:
+                  xhr.responseJSON?.message ||
+                  "An error occurred while cancelling your order.",
+                icon: "error",
+                confirmButtonText: "OK",
+              });
+            },
+          });
+        });
+      });
+    </script>
   </body>
 </html>

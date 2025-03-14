@@ -112,14 +112,32 @@ exports.placeOrderController = async (req, res) => {
         message: "AddressId not found",
       });
     }
+    const cart = await Cart.findById(cartId);
+    if (!cart) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "No cart found ",
+      });
+    }
+
+    const orderItems = cart.items.map((item) => ({
+      productId: item.productId._id,
+      variantId: item.variantId,
+      name: item.name,
+      color: item.color,
+      size: item.size,
+      price: item.price,
+      quantity: item.quantity,
+      image: item.image,
+    }));
 
     const order = new Order({
       userId,
       amount,
-      cartId,
       amount,
       paymentMethod,
-      items,
+      items: orderItems,
       addressId,
       status: "pending",
     });
@@ -155,14 +173,6 @@ exports.placeOrderController = async (req, res) => {
 
     await order.save();
 
-    const cart = await Cart.findById(cartId);
-    if (!cart) {
-      return res.status(400).json({
-        status: "error",
-        title: "Error",
-        message: "No cart found ",
-      });
-    }
     cart.items = [];
 
     await cart.save();
