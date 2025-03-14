@@ -560,6 +560,9 @@
     </div>
 
     <%- include('./partials/footer')%>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         // Payment method tabs
@@ -642,18 +645,34 @@
             .then((response) => response.json())
             .then((data) => {
               if (data.status === "success") {
-                // Handle success - redirect to order confirmation
-                window.location.href = `/`;
+                Swal.fire({
+                  icon: "success",
+                  title: "Success",
+                  status: "success",
+                  text: data.message,
+                  confirmButtonText: "OK",
+                }).then(() => {
+                  window.location.href = `/shop`;
+                });
               } else {
-                // Handle error
-                alert(data.message || "Error placing order. Please try again.");
+                Swal.fire({
+                  icon: "error",
+                  title: "Error",
+                  status: "error",
+                  text: data.message,
+                  confirmButtonText: "OK",
+                });
               }
             })
             .catch((error) => {
               console.error("Error:", error);
-              alert(
-                "There was an error processing your order. Please try again."
-              );
+              Swal.fire({
+                icon: "error",
+                title: "Error",
+                status: "error",
+                text: data.message,
+                confirmButtonText: "OK",
+              });
             });
         });
 

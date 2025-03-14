@@ -2,6 +2,7 @@ const User = require("../../models/User");
 const Cart = require("../../models/Cart");
 const Address = require("../../models/Address");
 const Order = require("../../models/Order");
+const Product = require("../../models/Product");
 
 exports.getCheckoutPage = async (req, res) => {
   try {
@@ -57,14 +58,15 @@ exports.placeOrderController = async (req, res) => {
     const cartId = req.params.id;
 
     const { amount, paymentMethod, items, addressId } = req.body;
+    console.log(items);
 
-    // if (!amount || !paymentMethod || !items || !selectedAddressId) {
-    //   return res.status(400).json({
-    //     status: "error",
-    //     title: "Error",
-    //     message: "Credentials not complete",
-    //   });
-    // }
+    if (!amount || !paymentMethod || !items || !addressId) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Credentials not complete",
+      });
+    }
     if (!cartId) {
       return res.status(400).json({
         status: "error",
@@ -122,6 +124,27 @@ exports.placeOrderController = async (req, res) => {
       status: "pending",
     });
 
+    for (const item of items) {
+      const updatedProduct = await Product.findOneAndUpdate(
+        {
+          _id: item.productId,
+          "variants._id": item.variantId,
+        },
+        {
+          $inc: { "variants.$.quantity": -item.quantity },
+        },
+        { new: true }
+      );
+
+      if (!updatedProduct) {
+        return res.status(400).json({
+          status: "error",
+          title: "Error",
+          message: `Error updating stock for product ${item.name}`,
+        });
+      }
+    }
+
     if (!order) {
       return res.status(400).json({
         status: "error",
@@ -131,7 +154,7 @@ exports.placeOrderController = async (req, res) => {
     }
 
     await order.save();
-    
+
     const cart = await Cart.findById(cartId);
     if (!cart) {
       return res.status(400).json({

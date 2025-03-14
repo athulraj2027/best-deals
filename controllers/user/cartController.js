@@ -31,7 +31,7 @@ exports.updateQuantityController = async (req, res) => {
     }
 
     const { productId, variantId, quantity, action } = req.body;
-    if (!productId || !variantId || !quantity || !action) {
+    if (!productId || !variantId || !action) {
       return res.status(400).json({
         status: "error",
         title: "Error",
@@ -47,6 +47,7 @@ exports.updateQuantityController = async (req, res) => {
         message: "Cart not found",
       });
     }
+
     const cartItem = cart.items.find((item) => {
       return (
         item._id.toString() === itemId &&
@@ -54,7 +55,7 @@ exports.updateQuantityController = async (req, res) => {
         item.variantId.toString() === variantId
       );
     });
-    console.log(cartItem);
+
     if (!cartItem) {
       return res.status(400).json({
         status: "error",
@@ -64,33 +65,44 @@ exports.updateQuantityController = async (req, res) => {
     }
 
     if (action === "increase") {
-      if (cartItem.quantity === 5) {
-        return res.status(400).json({
-          status: "error",
-          title: "Error",
-          message: "You have reached maximum limit",
-        });
-      }
       cartItem.quantity = Math.min(parseInt(cartItem.quantity) + 1, 5);
     } else if (action === "decrease") {
-      if (cartItem.quantity === 1) {
-        return res.status(400).json({
-          status: "error",
-          title: "Error",
-          message: "You have reached minimum limit",
-        });
-      }
       cartItem.quantity = Math.max(parseInt(cartItem.quantity) - 1, 1);
     } else {
       // Direct quantity update (if needed)
       cartItem.quantity = Math.max(1, Math.min(parseInt(quantity), 5));
     }
+
     await cart.calculateSubtotal();
     await cart.save();
 
+    // For AJAX requests, return JSON response
+    if (req.xhr || req.headers["x-requested-with"] === "XMLHttpRequest") {
+      return res.status(200).json({
+        status: "success",
+        title: "Success",
+        message: "Quantity updated successfully",
+        subtotal: cart.subtotal,
+        itemPrice: cartItem.price * cartItem.quantity,
+        quantity: cartItem.quantity,
+      });
+    }
+
+    // For regular form submissions, redirect to cart page
     return res.status(200).redirect("/cart");
   } catch (err) {
     console.error(err);
+
+    // For AJAX requests, return JSON error
+    if (req.xhr || req.headers["x-requested-with"] === "XMLHttpRequest") {
+      return res.status(500).json({
+        status: "error",
+        title: "Error",
+        message: "Server error",
+      });
+    }
+
+    // For regular form submissions, redirect with error
     return res.status(500).json({
       status: "error",
       title: "Error",
