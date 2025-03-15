@@ -34,7 +34,7 @@
             >
               <!-- Filter by Status -->
               <form
-                action="/admin/orders/filter"
+                action="/admin/orders"
                 method="GET"
                 class="flex-grow-1"
               >
@@ -42,24 +42,20 @@
                   <span class="input-group-text bg-white">
                     <i class="fas fa-filter text-secondary"></i>
                   </span>
-                  <select
-                    name="status"
-                    class="form-select"
-                    onchange="this.form.submit()"
-                  >
-                    <option value="">Filter by Status</option>
-                    <option value="pending">Pending</option>
-                    <option value="processing">Processing</option>
-                    <option value="pending">Cancelled</option>
-                    <option value="delivered">Delivered</option>
-                   
-                  </select>
+                  <select name="status" class="form-select" onchange="this.form.submit()">
+                    <option value="" <%= !selectedStatus ? 'selected' : '' %>>Filter by Status</option>
+                    <option value="pending" <%= selectedStatus === 'pending' ? 'selected' : '' %>>Pending</option>
+                    <option value="processing" <%= selectedStatus === 'processing' ? 'selected' : '' %>>Processing</option>
+                    <option value="cancelled" <%= selectedStatus === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+                    <option value="delivered" <%= selectedStatus === 'delivered' ? 'selected' : '' %>>Delivered</option>
+                </select>
+                
                 </div>
               </form>
 
               <!-- Sort by CreatedAt -->
               <form
-                action="/admin/orders/sort"
+                action="/admin/orders"
                 method="GET"
                 class="flex-grow-1"
               >
@@ -67,17 +63,12 @@
                   <span class="input-group-text bg-white">
                     <i class="fas fa-sort text-secondary"></i>
                   </span>
-                  <select
-                    name="sort"
-                    class="form-select"
-                    onchange="this.form.submit()"
-                  >
-                  <option value="">Sort</option>
-                    <option value="desc">Newest first</option>
-                    <option value="asc">Oldest first</option>
-                    <option value="asc_name">Name (A-Z)</option>
-                    <option value="desc_name">Name (Z-A)</option>
-                  </select>
+                  <select name="sort" class="form-select" onchange="this.form.submit()">
+                    <option value="" <%= !selectedSort ? 'selected' : '' %>>Sort</option>
+                    <option value="desc" <%= selectedSort === 'desc' ? 'selected' : '' %>>Newest first</option>
+                    <option value="asc" <%= selectedSort === 'asc' ? 'selected' : '' %>>Oldest first</option>
+                </select>
+                
                 </div>
               </form>
             </div>
@@ -95,7 +86,7 @@
                     <th>Status</th>
                     <th>Payment Status</th>
                     <th>Order Date</th>
-                    <th>Actions</th>
+                    <!-- <th>Actions</th> -->
                     <th>Change Delivery Status</th>
                   </tr>
                 </thead>
@@ -122,7 +113,7 @@
                       </span>
                     </td>
                     <td><%= new Date(order.orderDate).toLocaleString() %></td>
-                    <td class="text-center order-actions">
+                    <!-- <td class="text-center order-actions">
                       <% if (order.status !== 'cancelled' && order.status !==
                       'delivered') { %>
                       <form
@@ -135,7 +126,7 @@
                         </button>
                       </form>
                       <% } %>
-                    </td>
+                    </td> -->
                     <td>
                       <form action="/admin/orders/update-status/<%= order._id %>" method="POST" class="d-inline">
                         <div class="input-group input-group-sm">
@@ -174,5 +165,152 @@
         </div>
       </div>
     </div>
+    <!-- Include SweetAlert2 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+   document.addEventListener('DOMContentLoaded', function() {
+  // Handle status update forms
+  const statusForms = document.querySelectorAll('form[action^="/admin/orders/update-status/"]');
+  
+  statusForms.forEach(form => {
+    const selectElement = form.querySelector('select[name="status"]');
+    const originalValue = selectElement.value;
+    
+    // Store original value
+    selectElement.dataset.originalValue = originalValue;
+    
+    // Remove any existing onchange handlers
+    selectElement.onchange = null;
+    
+    // Add new change handler
+    selectElement.addEventListener('change', function(e) {
+      e.preventDefault();
+      
+      const newStatus = this.value;
+      const originalValue = this.dataset.originalValue;
+      
+      // Show confirmation
+      Swal.fire({
+        title: 'Update Status',
+        text: `Change order status to ${newStatus}?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, update it',
+        cancelButtonText: 'Cancel'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // User confirmed, proceed with AJAX
+          
+          // Show loading indicator
+          Swal.fire({
+            title: 'Updating...',
+            text: 'Please wait',
+            allowOutsideClick: false,
+            didOpen: () => {
+              Swal.showLoading();
+            },
+            showConfirmButton: false
+          });
+          
+          // Send AJAX request with JSON data
+          $.ajax({
+            url: form.action,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ status: newStatus }),
+            success: function(response) {
+              // Update was successful
+              Swal.fire({
+                title: 'Success!',
+                text: 'Status updated successfully',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+              }).then(() => {
+                // Update the storage value and reload
+                selectElement.dataset.originalValue = newStatus;
+                window.location.reload();
+              });
+            },
+            error: function(xhr, status, error) {
+              console.error('Error:', error);
+              // Show error message
+              Swal.fire({
+                title: 'Error',
+                text: 'Failed to update the status',
+                icon: 'error'
+              });
+              // Revert selection
+              selectElement.value = originalValue;
+            }
+          });
+        } else {
+          // User cancelled, revert selection
+          this.value = originalValue;
+        }
+      });
+    });
+  });
+  
+  // Handle cancel order buttons
+  const cancelForms = document.querySelectorAll('form[action^="/admin/orders/cancel/"]');
+  
+  cancelForms.forEach(form => {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      Swal.fire({
+        title: 'Cancel Order',
+        text: 'Are you sure you want to cancel this order?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, cancel it',
+        cancelButtonText: 'No, keep it'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Show loading
+          Swal.fire({
+            title: 'Processing...',
+            text: 'Cancelling order...',
+            allowOutsideClick: false,
+            didOpen: () => {
+              Swal.showLoading();
+            },
+            showConfirmButton: false
+          });
+          
+          // AJAX for cancel
+          $.ajax({
+            url: form.action,
+            type: 'POST',
+            success: function(response) {
+              Swal.fire({
+                title: 'Success!',
+                text: 'Order cancelled successfully',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+              }).then(() => {
+                window.location.reload();
+              });
+            },
+            error: function(xhr, status, error) {
+              console.error('Error:', error);
+              Swal.fire({
+                title: 'Error',
+                text: 'Failed to cancel the order',
+                icon: 'error'
+              });
+            }
+          });
+        }
+      });
+    });
+  });
+});
+    </script>
   </body>
 </html>

@@ -3,6 +3,7 @@ const statusCodes = require("../../services/statusCodes");
 
 exports.viewUser = async (req, res) => {
   try {
+    
     const customerId = req.params.id;
     const user = await User.findById(customerId);
     return res
@@ -18,11 +19,29 @@ exports.viewUser = async (req, res) => {
 
 exports.viewUsersPage = async (req, res) => {
   try {
+    const { sort } = req.query;
+    let sortOption = {};
+
+    switch (sort) {
+      case "desc":
+        sortOption = { createdAt: -1 };
+        break;
+      case "asc":
+        sortOption = { createdAt: 1 };
+        break;
+      case "name_desc":
+        sortOption = { name: -1 };
+        break;
+      case "name_asc":
+        sortOption = { name: 1 };
+        break;
+    }
+    
     const page = parseInt(req.query.page) || 1; // Default to page 1
     const limit = parseInt(req.query.limit) || 10; // Default to 10 users per page
     const skip = (page - 1) * limit;
 
-    const customers = await User.find().skip(skip).limit(limit);
+    const customers = await User.find().sort(sortOption).skip(skip).limit(limit);
     const totalCustomers = await User.countDocuments(); // Total users count
     const totalPages = Math.ceil(totalCustomers / limit);
 
@@ -31,6 +50,7 @@ exports.viewUsersPage = async (req, res) => {
       .render("adminPages/CustomerPages/adminCustomers", {
         customers,
         currentPage: page,
+        selectedSort : sort,
         totalPages,
         hasNextPage: page < totalPages,
         hasPrevPage: page > 1,

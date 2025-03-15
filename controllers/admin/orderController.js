@@ -1,6 +1,10 @@
 const Order = require("../../models/Order");
+const mongoose = require("mongoose");
 
 exports.getOrdersPage = async (req, res) => {
+  let { status, sort } = req.query;
+  let filter = {};
+  let sortOption = {};
   try {
     // Helper functions
 
@@ -34,11 +38,24 @@ exports.getOrdersPage = async (req, res) => {
       }
     };
 
-    const orders = await Order.find();
+    if (status && status !== "") {
+      filter.status = status;
+    }
+    switch (sort) {
+      case "desc":
+        sortOption = { createdAt: 1 };
+        break;
+      case "asc":
+        sortOption = { createdAt: -1 };
+        break;
+    }
+    const orders = await Order.find(filter).sort(sort);
 
-    return res
-      .status(200)
-      .render("adminPages/OrderPages/adminOrders", { orders });
+    return res.status(200).render("adminPages/OrderPages/adminOrders", {
+      orders,
+      selectedStatus: status,
+      selectedSort: sort,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({
@@ -51,11 +68,25 @@ exports.getOrdersPage = async (req, res) => {
 
 exports.changeStatusController = async (req, res) => {
   try {
-    const orderId = req.params.orderId;
-    const status = req.body;
+    const params = req.params.id;
+    const orderId = new mongoose.Types.ObjectId(params);
+
+    // Make sure status is being received correctly
+    const status = req.body.status;
+    console.log("Request body:", req.body);
+    console.log("Status to set:", status);
+
+    if (!status) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Status value is missing",
+      });
+    }
+
     const updatedOrder = await Order.findByIdAndUpdate(
-      { _id: orderId },
-      { status },
+      orderId,
+      { status: status },
       { new: true }
     );
 

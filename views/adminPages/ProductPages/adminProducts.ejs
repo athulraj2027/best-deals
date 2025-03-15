@@ -163,7 +163,7 @@
               >
               <select name="category" class="form-select" onchange="this.form.submit()">
                 <option value="">Filter by Category</option>
-                <option value="all">All</option>
+                <option value="all" <%= selectedCategory === 'all' ? 'selected' : '' %>>All</option>
                 <% categories.forEach(category => { %>
                     <option value="<%= category._id %>"><%= category.name %></option>
                 <% }); %>
@@ -173,25 +173,20 @@
 
               <!-- Sort Options -->
               <form action="/admin/products" method="GET" class="me-2">
-                <select
-                  name="sort"
-                  class="form-select"
-                  onchange="this.form.submit()"
-                >
-                  <option value="newest">Sort by Date (Newest first)</option>
-                  <option value="oldest">Sort by Date (Oldest first)</option>
-                  <option value="price_high">
-                    Sort by Price (High to Low)
-                  </option>
-                  <option value="price_low">Sort by Price (Low to High)</option>
-                </select>
+                <select name="sort" class="form-select" onchange="this.form.submit()">
+                  <option value="">Sort By</option>
+                  <option value="price_low" <%= selectedSort === 'price_low' ? 'selected' : '' %>>Price (Low to High)</option>
+                  <option value="price_high" <%= selectedSort === 'price_high' ? 'selected' : '' %>>Price (High to Low)</option>
+                  <option value="oldest" <%= selectedSort === 'oldest' ? 'selected' : '' %>>Oldest</option>
+                  <option value="newest" <%= selectedSort === 'newest' ? 'selected' : '' %>>Newest</option>
+              </select>
               </form>
             </div>
           </div>
 
           <div class="col-lg-4">
             <!-- Search by Product Name or Brand -->
-            <form
+            <!-- <form
               action="/admin/products"
               method="GET"
               class="d-flex search-container"
@@ -209,7 +204,7 @@
               >
                 <i class="fas fa-search"></i>
               </button>
-            </form>
+            </form> -->
           </div>
         </div>
 

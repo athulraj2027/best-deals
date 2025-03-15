@@ -43,18 +43,38 @@ const bufferToDataURI = (fileFormat, buffer) => {
 
 exports.getProductsPage = async (req, res) => {
   try {
+    const { category, sort } = req.query;
+    let filter = {};
+    let sortOption = {};
+
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
     const categories = await Category.find({ status: "listed" });
-    if(req.query){
-      if(req.query.category){
-        let products = await Product.aggregate([$])
-      }
+
+    if (category && category !== "all") {
+      filter.category = category;
     }
-    let products = await Product.find()
+
+    switch (sort) {
+      case "newest":
+        sortOption = { createdAt: -1 };
+        break;
+      case "oldest":
+        sortOption = { createdAt: 1 };
+        break;
+      case "price_high":
+        sortOption = { actualPrice: -1 };
+        break;
+      case "price_low":
+        sortOption = { actualPrice: 1 };
+        break;
+    }
+
+    let products = await Product.find(filter)
       .populate("category")
+      .sort(sortOption)
       .skip(skip)
       .limit(limit);
 
@@ -66,6 +86,8 @@ exports.getProductsPage = async (req, res) => {
       .render("adminPages/ProductPages/adminProducts", {
         products,
         categories,
+        selectedCategory: category,
+        selectedSort:sort,
         currentPage: page,
         totalPages,
         hasNextPage: page < totalPages,

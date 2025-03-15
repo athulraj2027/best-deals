@@ -5,13 +5,28 @@ const statusCodes = require("../../services/statusCodes");
 
 exports.getCategoriesPage = async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 10; // Default limit 10
-  const currentPage = parseInt(req.query.page) || 1;
-  const skip = (currentPage - 1) * limit;
+    const { status, sort } = req.query;
 
-  
+    let filter = {};
+    let sortOption = {};
+
+    if (status && status !== "") {
+      filter.status = status;
+    }
+    switch (sort) {
+      case "desc":
+        sortOption = { createdAt: -1 };
+        break;
+      case "asc":
+        sortOption = { createdAt: 1 };
+        break;
+    }
+    const limit = parseInt(req.query.limit) || 10; // Default limit 10
+    const currentPage = parseInt(req.query.page) || 1;
+    const skip = (currentPage - 1) * limit;
+
     const totalCategories = await Category.countDocuments();
-    const categories = await Category.find().skip(skip).limit(limit);
+    const categories = await Category.find(filter).sort(sortOption).skip(skip).limit(limit);
 
     const totalPages = Math.ceil(totalCategories / limit);
     const hasPrevPage = currentPage > 1;
@@ -23,13 +38,15 @@ exports.getCategoriesPage = async (req, res) => {
       .status(statusCodes.SUCCESS)
       .render("adminPages/CategoryPages/adminCategories", {
         categories,
-      currentPage,
-      totalPages,
-      limit,
-      hasPrevPage,
-      hasNextPage,
-      prevPage,
-      nextPage,
+        currentPage,
+        totalPages,
+        selectedStatus: status,
+        selectedSort: sort,
+        limit,
+        hasPrevPage,
+        hasNextPage,
+        prevPage,
+        nextPage,
       });
   } catch (err) {
     console.error("Category page get method error : ", err);
@@ -79,10 +96,10 @@ exports.addCategoryController = async (req, res) => {
     const mappedStatus = status === "on" ? "listed" : "unlisted";
     console.log(mappedStatus);
 
-    const existingCategory = await Category.findOne({name:categoryName });
+    const existingCategory = await Category.findOne({ name: categoryName });
     if (existingCategory) {
       return res.status(statusCodes.BAD_REQUEST).json({
-        status:'error',
+        status: "error",
         title: "error",
         message: "Category already exists",
       });
