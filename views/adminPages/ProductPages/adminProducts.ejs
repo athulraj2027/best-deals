@@ -6,100 +6,114 @@
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
     />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="/adminCSS/partials/menu.css" />
     <title>Products</title>
     <style>
       :root {
+        --primary-color: #f57c00;
+        --primary-hover: #e65100;
+        --light-bg: #fff9f0;
+        --text-dark: #333;
         --sidebar-width: 250px;
         --sidebar-collapsed-width: 70px;
-        --primary-color: #f57c00;
       }
-
+      
       body {
+        background-color: #f8f9fa;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         overflow-x: hidden;
-        /* font-family: 'Poppins', sans-serif; */
       }
-
+      
+      /* Main layout structure */
+      .main-content-wrapper {
+        display: flex;
+        width: 100%;
+        min-height: 100vh;
+      }
+      
+      /* Main content area that adjusts with sidebar */
       .main-content {
+        flex: 1;
+        padding: 20px;
         margin-left: var(--sidebar-width);
         transition: margin-left 0.3s ease;
         width: calc(100% - var(--sidebar-width));
-        padding: 20px;
       }
-
-      body.sidebar-collapsed .main-content {
-        margin-left: var(--sidebar-collapsed-width);
-        width: calc(100% - var(--sidebar-collapsed-width));
+      
+      .page-title {
+        font-weight: 600;
+        color: var(--text-dark);
+        border-left: 5px solid var(--primary-color);
+        padding-left: 15px;
       }
-
-      body.sidebar-hidden .main-content {
-        margin-left: 0;
-        width: 100%;
+      
+      .btn-primary-custom {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+        transition: all 0.3s;
       }
-
-      .product-actions .btn {
-        margin-bottom: 5px;
+      
+      .btn-primary-custom:hover {
+        background-color: var(--primary-hover);
+        border-color: var(--primary-hover);
       }
-
-      @media (max-width: 992px) {
-        .search-container {
-          margin-top: 10px;
-        }
-
-        .filter-sort-container {
-          flex-direction: column;
-        }
-
-        .filter-sort-container > form {
-          margin-bottom: 10px;
-          width: 100%;
-        }
+      
+      .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
       }
-
-      @media (max-width: 768px) {
-        .main-content {
-          margin-left: var(--sidebar-collapsed-width);
-          width: calc(100% - var(--sidebar-collapsed-width));
-        }
-
-        body.sidebar-expanded .main-content {
-          margin-left: var(--sidebar-width);
-          width: calc(100% - var(--sidebar-width));
-        }
+      
+      .table-header {
+        background-color: var(--primary-color);
+        color: white;
       }
-
-      @media (max-width: 576px) {
-        .main-content {
-          margin-left: 0;
-          width: 100%;
-          padding: 15px;
-        }
-
-        body.sidebar-expanded .main-content {
-          margin-left: var(--sidebar-width);
-          width: calc(100% - var(--sidebar-width));
-        }
-
-        .action-buttons-container {
-          flex-direction: column;
-          align-items: flex-start !important;
-        }
-
-        .action-buttons-container .btn {
-          margin-top: 10px;
-          width: 100%;
-        }
-
-        .table-responsive {
-          font-size: 14px;
-        }
+      
+      .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+        max-height: 70vh;
       }
-
+      
+      .form-control, .form-select {
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+      }
+      
+      .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(245, 124, 0, 0.25);
+      }
+      
+      .filter-section {
+        background-color: var(--light-bg);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+      
+      .status-badge {
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      
+      .status-listed {
+        background-color: #e7f5ea;
+        color: #198754;
+      }
+      
+      .status-unlisted {
+        background-color: #fff3cd;
+        color: #664d03;
+      }
+      
       .pagination-container {
         display: flex;
         justify-content: center;
@@ -108,201 +122,219 @@
         margin: 20px 0;
         font-size: 16px;
       }
-
+      
       .pagination-button {
         padding: 8px 14px;
-        background-color: #007bff;
+        background-color: var(--primary-color);
         color: white;
         text-decoration: none;
         border-radius: 6px;
-        transition: background 0.3s ease-in-out;
+        transition: all 0.3s;
         font-weight: bold;
       }
-
+      
       .pagination-button:hover {
-        background-color: #0056b3;
+        background-color: var(--primary-hover);
         color: white;
         text-decoration: none;
       }
-
+      
       .page-info {
         font-weight: bold;
-        color: #333;
+        color: var(--text-dark);
+      }
+      
+      /* Responsive adjustments */
+      @media (max-width: 992px) {
+        .filter-controls {
+          flex-direction: column;
+          gap: 10px;
+        }
+        
+        .filter-controls > form {
+          width: 100%;
+        }
+      }
+      
+      @media (max-width: 768px) {
+        .main-content {
+          margin-left: var(--sidebar-collapsed-width);
+          width: calc(100% - var(--sidebar-collapsed-width));
+        }
+        
+        body.sidebar-hidden .main-content {
+          margin-left: 0;
+          width: 100%;
+        }
+        
+        .action-buttons {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+          align-items: stretch;
+        }
+        
+        .action-buttons form, 
+        .action-buttons a {
+          width: 100%;
+        }
+      }
+      
+      @media (max-width: 576px) {
+        .main-content {
+          margin-left: 0;
+          width: 100%;
+        }
+        
+        body.sidebar-expanded .main-content {
+          margin-left: var(--sidebar-width);
+          width: calc(100% - var(--sidebar-width));
+        }
       }
     </style>
   </head>
   <body>
-    <!-- Include the sidebar partial with EJS -->
-    <%- include('../partials/menu') %>
-
-    <!-- Main content area -->
-    <div class="main-content">
-      <div class="container-fluid p-0">
-        <div
-          class="d-flex justify-content-between align-items-center mb-4 action-buttons-container"
-        >
-          <h1 class="text-dark">Products</h1>
-          <a
-            href="/admin/products/add"
-            class="btn text-white"
-            style="background-color: var(--primary-color)"
-          >
-            Add Product
+    <div class="main-content-wrapper">
+      <!-- Include sidebar partial -->
+      <%- include('../partials/menu') %>
+      
+      <!-- Main content area -->
+      <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+          <h1 class="page-title mb-3 mb-md-0">Products</h1>
+          <a href="/admin/products/add" class="btn btn-primary-custom">
+            <i class="fas fa-plus me-2"></i>Add Product
           </a>
         </div>
 
         <!-- Filter, Sort, and Search Options -->
-        <div class="row mb-3">
-          <div class="col-lg-8">
-            <div class="d-flex flex-wrap filter-sort-container">
-              <!-- Filter by Category -->
-              <form
-                action="/admin/products"
-                method="GET"
-                class="me-2 mb-2 mb-md-0"
-              >
-              <select name="category" class="form-select" onchange="this.form.submit()">
-                <option value="">Filter by Category</option>
-                <option value="all" <%= selectedCategory === 'all' ? 'selected' : '' %>>All</option>
-                <% categories.forEach(category => { %>
-                    <option value="<%= category._id %>"><%= category.name %></option>
-                <% }); %>
-            </select>
-            
-              </form>
+        <div class="filter-section">
+          <div class="d-flex justify-content-between align-items-center filter-controls gap-3 flex-wrap">
+            <!-- Filter by Category -->
+            <form action="/admin/products" method="GET" class="flex-grow-1">
+              <div class="input-group">
+                <span class="input-group-text bg-white">
+                  <i class="fas fa-filter text-secondary"></i>
+                </span>
+                <select name="category" class="form-select" onchange="this.form.submit()">
+                  <option value="">Filter by Category</option>
+                  <option value="all" <%= selectedCategory === 'all' ? 'selected' : '' %>>All</option>
+                  <% categories.forEach(category => { %>
+                    <option value="<%= category._id %>" <%= selectedCategory === category._id.toString() ? 'selected' : '' %>><%= category.name %></option>
+                  <% }); %>
+                </select>
+              </div>
+            </form>
 
-              <!-- Sort Options -->
-              <form action="/admin/products" method="GET" class="me-2">
+            <!-- Sort Options -->
+            <form action="/admin/products" method="GET" class="flex-grow-1">
+              <div class="input-group">
+                <span class="input-group-text bg-white">
+                  <i class="fas fa-sort text-secondary"></i>
+                </span>
                 <select name="sort" class="form-select" onchange="this.form.submit()">
                   <option value="">Sort By</option>
                   <option value="price_low" <%= selectedSort === 'price_low' ? 'selected' : '' %>>Price (Low to High)</option>
                   <option value="price_high" <%= selectedSort === 'price_high' ? 'selected' : '' %>>Price (High to Low)</option>
                   <option value="oldest" <%= selectedSort === 'oldest' ? 'selected' : '' %>>Oldest</option>
                   <option value="newest" <%= selectedSort === 'newest' ? 'selected' : '' %>>Newest</option>
-              </select>
-              </form>
-            </div>
-          </div>
+                </select>
+              </div>
+            </form>
 
-          <div class="col-lg-4">
-            <!-- Search by Product Name or Brand -->
-            <!-- <form
-              action="/admin/products"
-              method="GET"
-              class="d-flex search-container"
-            >
-              <input
-                type="text"
-                name="query"
-                placeholder="Search by name or brand"
-                class="form-control me-2"
-              />
-              <button
-                type="submit"
-                class="btn"
-                style="background-color: var(--primary-color); color: white"
-              >
-                <i class="fas fa-search"></i>
-              </button>
+            <!-- Search by Name -->
+            <!-- <form action="/admin/products" method="GET" class="flex-grow-1">
+              <div class="input-group">
+                <input type="text" name="query" placeholder="Search by name or brand" class="form-control" />
+                <button type="submit" class="btn btn-primary-custom">
+                  <i class="fas fa-search"></i>
+                </button>
+              </div>
             </form> -->
           </div>
         </div>
 
-        <div class="card border-light">
-          <div class="card-body">
+        <!-- Products Table -->
+        <div class="card border-0">
+          <div class="card-body p-0">
             <div class="table-responsive">
-              <table class="table table-bordered table-hover">
-                <thead
-                  style="background-color: var(--primary-color); color: white"
-                >
+              <table class="table table-hover m-0">
+                <thead class="table-header">
                   <tr class="text-center">
-                    <th>#</th>
-                    <th>Product Name</th>
-                    <th>Brand</th>
-                    <th>Base Price</th>
-                    <th>Category</th>
-                    <th>Variants</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th class="py-3">SI.No</th>
+                    <th class="py-3">Product Name</th>
+                    <th class="py-3">Brand</th>
+                    <th class="py-3">Base Price</th>
+                    <th class="py-3">Category</th>
+                    <th class="py-3">Variants</th>
+                    <th class="py-3">Status</th>
+                    <th class="py-3">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <% if (products && products.length > 0) { %> <%
-                  products.forEach((product, index) => { %>
-                  <tr>
-                    <td class="text-center"><%= index + 1 %></td>
-                    <td><%= product.name %></td>
-                    <td><%= product.brand %></td>
-                    <td>$<%= product.actualPrice.toFixed(2) %></td>
-                    <td><%= product.category.name %></td>
-                    <td class="text-center">
-                      <!-- Variants count with dropdown toggle -->
-                      <div class="dropdown">
-                        <button
-                          class="btn btn-sm btn-secondary dropdown-toggle"
-                          type="button"
-                          data-bs-toggle="dropdown"
-                        >
-                          <%= product.variants.length %> Variants
-                        </button>
-                        <ul class="dropdown-menu">
-                          <% product.variants.forEach(variant => { %>
-                          <li class="dropdown-item">
-                            <%= variant.color %> - <%= variant.size %>
-                            <br />
-                            Price: $<%= variant.price.toFixed(2) %>
-                            <br />
-                            Stock: <%= variant.quantity %>
-                          </li>
-                          <% }); %>
-                        </ul>
-                      </div>
-                    </td>
-                    <td class="text-center">
-                      <%= product.status ? 'Listed' : 'Unlisted' %>
-                    </td>
-                    <td class="text-center product-actions">
-                      <a
-                        href="/admin/products/edit/<%= product._id %>"
-                        class="btn btn-sm text-white mb-1"
-                        style="background-color: var(--primary-color)"
-                      >
-                        Edit
-                      </a>
-                      <a
-                        href="/admin/products/<%= product._id %>/add-variant"
-                        class="btn btn-sm text-white mb-1"
-                        style="background-color: var(--primary-color)"
-                      >
-                        Add Variant
-                      </a>
-                      <% if (product.status) { %>
-                      <form
-                        action="/admin/products/unlist/<%= product._id %>"
-                        method="POST"
-                        class="d-inline"
-                      >
-                        <button type="submit" class="btn btn-sm btn-warning">
-                          Unlist
-                        </button>
-                      </form>
-                      <% } else { %>
-                      <form
-                        action="/admin/products/list/<%= product._id %>"
-                        method="POST"
-                        class="d-inline"
-                      >
-                        <button type="submit" class="btn btn-sm btn-success">
-                          List
-                        </button>
-                      </form>
-                      <% } %>
-                    </td>
-                  </tr>
-                  <% }); %> <% } else { %>
-                  <tr>
-                    <td colspan="8" class="text-center">No products found.</td>
-                  </tr>
+                  <% if (products && products.length > 0) { %>
+                    <% products.forEach((product, index) => { %>
+                      <tr>
+                        <td class="text-center"><%= index + 1 %></td>
+                        <td><%= product.name %></td>
+                        <td><%= product.brand %></td>
+                        <td class="text-center">$<%= product.actualPrice.toFixed(2) %></td>
+                        <td class="text-center"><%= product.category.name %></td>
+                        <td class="text-center">
+                          <!-- Variants count with dropdown toggle -->
+                          <div class="dropdown">
+                            <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                              <%= product.variants.length %> Variants
+                            </button>
+                            <ul class="dropdown-menu">
+                              <% product.variants.forEach(variant => { %>
+                                <li class="dropdown-item">
+                                  <%= variant.color %> - <%= variant.size %>
+                                  <br />
+                                  Price: $<%= variant.price.toFixed(2) %>
+                                  <br />
+                                  Stock: <%= variant.quantity %>
+                                </li>
+                              <% }); %>
+                            </ul>
+                          </div>
+                        </td>
+                        <td class="text-center">
+                          <span class="status-badge <%= product.status ? 'status-listed' : 'status-unlisted' %>">
+                            <%= product.status ? 'Active' : 'Inactive' %>
+                          </span>
+                        </td>
+                        <td>
+                          <div class="d-flex justify-content-center gap-2 action-buttons">
+                            <a href="/admin/products/edit/<%= product._id %>" class="btn btn-sm btn-primary-custom">
+                              <i class="fas fa-edit me-1"></i> Edit
+                            </a>
+                            <a href="/admin/products/<%= product._id %>/add-variant" class="btn btn-sm btn-primary-custom">
+                              <i class="fas fa-plus me-1"></i> Variant
+                            </a>
+                            <% if (product.status) { %>
+                              <!-- Unlist Button -->
+                              <form action="/admin/products/unlist/<%= product._id %>" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-warning w-100">
+                                  <i class="fas fa-eye-slash me-1"></i> Unlist
+                                </button>
+                              </form>
+                            <% } else { %>
+                              <!-- List Button -->
+                              <form action="/admin/products/list/<%= product._id %>" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-success w-100">
+                                  <i class="fas fa-eye me-1"></i> List
+                                </button>
+                              </form>
+                            <% } %>
+                          </div>
+                        </td>
+                      </tr>
+                    <% }); %>
+                  <% } else { %>
+                    <tr>
+                      <td colspan="8" class="text-center">No products found.</td>
+                    </tr>
                   <% } %>
                 </tbody>
               </table>
@@ -313,12 +345,9 @@
         <!-- Pagination section -->
         <div class="pagination-container">
           <% if (hasPrevPage) { %>
-          <a
-            href="/admin/products?page=<%= prevPage %>&limit=10"
-            class="pagination-button"
-          >
-            Previous
-          </a>
+            <a href="/admin/products?page=<%= prevPage %>&limit=10" class="pagination-button">
+              <i class="fas fa-chevron-left me-2"></i>Previous
+            </a>
           <% } %>
 
           <span class="page-info">
@@ -326,86 +355,14 @@
           </span>
 
           <% if (hasNextPage) { %>
-          <a
-            href="/admin/products?page=<%= nextPage %>&limit=10"
-            class="pagination-button"
-          >
-            Next
-          </a>
+            <a href="/admin/products?page=<%= nextPage %>&limit=10" class="pagination-button">
+              Next<i class="fas fa-chevron-right ms-2"></i>
+            </a>
           <% } %>
         </div>
       </div>
     </div>
-
-    <!-- Bootstrap JS and dependencies -->
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        // Get the sidebar toggle button
-        const sidebarToggle = document.getElementById("sidebarToggle");
-        const mobileToggle = document.querySelector(".mobile-menu-toggle");
-
-        // Function to toggle sidebar
-        function toggleSidebar() {
-          document.body.classList.toggle("sidebar-expanded");
-
-          if (window.innerWidth <= 576) {
-            // For mobile view
-            if (document.body.classList.contains("sidebar-expanded")) {
-              document.body.classList.remove("sidebar-hidden");
-            }
-          } else if (window.innerWidth <= 768) {
-            // For tablet view
-            document.body.classList.toggle("sidebar-collapsed");
-          }
-        }
-
-        // Add click event to sidebar toggle
-        if (sidebarToggle) {
-          sidebarToggle.addEventListener("click", toggleSidebar);
-        }
-
-        // Add click event to mobile toggle if it exists
-        if (mobileToggle) {
-          mobileToggle.addEventListener("click", toggleSidebar);
-        } else {
-          // Create mobile toggle if it doesn't exist
-          const mobileToggle = document.createElement("button");
-          mobileToggle.className = "mobile-menu-toggle d-sm-none";
-          mobileToggle.innerHTML = "<span></span><span></span><span></span>";
-          document.body.appendChild(mobileToggle);
-          mobileToggle.addEventListener("click", toggleSidebar);
-        }
-
-        // Handle resize events to reset menu state
-        window.addEventListener("resize", function () {
-          const width = window.innerWidth;
-
-          if (width > 768) {
-            // Desktop view
-            document.body.classList.remove("sidebar-expanded");
-            document.body.classList.remove("sidebar-collapsed");
-            document.body.classList.remove("sidebar-hidden");
-          } else if (width > 576 && width <= 768) {
-            // Tablet view - collapsed by default
-            document.body.classList.add("sidebar-collapsed");
-            document.body.classList.remove("sidebar-expanded");
-
-            if (document.body.classList.contains("sidebar-hidden")) {
-              document.body.classList.remove("sidebar-hidden");
-            }
-          } else {
-            // Mobile view - hidden by default
-            document.body.classList.add("sidebar-hidden");
-            if (!document.body.classList.contains("sidebar-expanded")) {
-              document.body.classList.remove("sidebar-collapsed");
-            }
-          }
-        });
-
-        // Trigger resize event on load to set initial state
-        window.dispatchEvent(new Event("resize"));
-      });
-    </script>
   </body>
 </html>

@@ -2,7 +2,6 @@ const Category = require("../../models/Category");
 const statusCodes = require("../../services/statusCodes");
 
 // --- Get categories page ---
-
 exports.getCategoriesPage = async (req, res) => {
   try {
     const { status, sort } = req.query;

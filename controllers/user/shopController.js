@@ -5,7 +5,6 @@ const mongoose = require("mongoose");
 
 exports.getShopPage = async (req, res) => {
   try {
-    // Get filter parameters from query string
     const {
       category,
       brand,
@@ -17,11 +16,11 @@ exports.getShopPage = async (req, res) => {
       page = 1,
       limit = 10,
     } = req.query;
-
+const filter = {}
+const sortOption = {}
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
     const skip = (pageNum - 1) * limitNum;
-
     const matchConditions = [{ "category.status": "listed" }, { status: true }];
 
     if (category) {

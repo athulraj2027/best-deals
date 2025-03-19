@@ -874,8 +874,8 @@ function incrementQuantity() {
   const quantityInput = document.getElementById('quantity');
   if (!quantityInput) return;
   
-  const maxQuantity = parseInt(quantityInput.max) || 0;
-  if (currentQuantity < maxQuantity) {
+  // const maxQuantity = parseInt(quantityInput.max) || 0;
+  if (currentQuantity < 5) {
     currentQuantity++;
     quantityInput.value = currentQuantity;
   }

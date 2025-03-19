@@ -1,4 +1,3 @@
-const { genSalt } = require("bcrypt");
 const Admin = require("../models/Admin");
 
 module.exports = async (req, res, next) => {

@@ -1,193 +1,692 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Edit Category</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Add SweetAlert2 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-    <style>
-        .preview-image {
-            max-width: 200px;
-            max-height: 200px;
-            object-fit: cover;
-            margin-top: 10px;
-        }
-        .image-preview-container {
-            position: relative;
-            display: inline-block;
-        }
-        .remove-image {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(255, 0, 0, 0.7);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-    <%- include('../partials/menu') %>
-    <div class="container mt-5">
-        <div class="row">
-            <div class="col-md-8 offset-md-2">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>Edit Category</h2>
-                    </div>
-                    <div class="card-body">
-                        <form id="categoryForm" action="/admin/categories/update/<%= category._id %>" method="POST" enctype="multipart/form-data">
-                            <div class="mb-3">
-                                <label for="name" class="form-label">Category Name</label>
-                                <input type="text" class="form-control" id="name" name="name" value="<%= category.name %>" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="status" class="form-label">Status</label>
-                                <select class="form-select" id="status" name="status">
-                                    <option value="listed" <%= category.status === 'listed' ? 'selected' : '' %>>Listed</option>
-                                    <option value="unlisted" <%= category.status === 'unlisted' ? 'selected' : '' %>>Unlisted</option>
-                                </select>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="tags" class="form-label">Tags (comma-separated)</label>
-                                <input type="text" class="form-control" id="tags" name="tags" value="<%= category.tags.join(', ') %>">
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="image" class="form-label">Category Image</label>
-                                <input type="file" class="form-control" id="image" name="categoryImage" accept="image/*" onchange="previewImage(this);">
-                                
-                                <div class="image-preview-container">
-                                    <img id="imagePreview" src="<%= category.imageUrl %>" class="preview-image" alt="Category image">
-                                    <button type="button" class="remove-image" onclick="confirmRemoveImage()">×</button>
-                                </div>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary">Update Category</button>
-                            <button type="button" class="btn btn-secondary ms-2" onclick="confirmCancel()">Cancel</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+    <style>
+      :root {
+        --primary-color: #4361ee;
+        --secondary-color: #3f37c9;
+        --accent-color: #4895ef;
+        --success-color: #4cc9f0;
+        --text-color: #2b2d42;
+        --bg-color: #f8f9fa;
+        --card-bg: #ffffff;
+        --border-radius: 12px;
+        --transition: all 0.3s ease;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", system-ui, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        color: var(--text-color);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 800px;
+        background: var(--card-bg);
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+      }
+
+      .header p {
+        color: #6c757d;
+        font-size: 1.1rem;
+      }
+
+      .form-section {
+        background: var(--bg-color);
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 1.5rem;
+      }
+
+      .form-section h3 {
+        color: var(--secondary-color);
+        margin-bottom: 1.5rem;
+        font-size: 1.2rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-color);
+        font-weight: 500;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: var(--transition);
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        outline: none;
+      }
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      .file-upload {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .file-upload-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem;
+        background: #f8f9fa;
+        border: 2px dashed #ced4da;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .file-upload-label:hover {
+        background: #e9ecef;
+        border-color: var(--accent-color);
+      }
+
+      .file-upload-label svg {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 1rem;
+        color: var(--primary-color);
+      }
+
+      .file-upload input[type="file"] {
+        display: none;
+      }
+
+      .preview-container {
+        margin-top: 1rem;
+        display: block;
+        text-align: center;
+        position: relative;
+      }
+
+      .preview-container img {
+        max-width: 200px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .remove-image {
+        position: absolute;
+        top: 5px;
+        right: calc(50% - 110px);
+        background: rgba(255, 0, 0, 0.7);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        font-size: 1.2rem;
+        transition: var(--transition);
+      }
+
+      .remove-image:hover {
+        background: rgba(255, 0, 0, 0.9);
+        transform: scale(1.1);
+      }
+
+      .submit-btn {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        width: 100%;
+        margin-top: 1rem;
+      }
+
+      .submit-btn:hover {
+        background: var(--secondary-color);
+        transform: translateY(-2px);
+      }
+
+      .cancel-btn {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        width: 100%;
+        margin-top: 1rem;
+        max-width: 150px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .cancel-btn:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+      }
+
+      .status-toggle {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.5rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+      }
+
+      .status-toggle label {
+        margin: 0;
+        cursor: pointer;
+      }
+
+      .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+      }
+
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.4s;
+        border-radius: 34px;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+
+      input:checked + .slider {
+        background-color: var(--success-color);
+      }
+
+      input:checked + .slider:before {
+        transform: translateX(26px);
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 1rem;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('../partials/menu') %>
+    <div class="container">
+      <div class="header">
+        <h1>Edit Category</h1>
+        <p>Update your product category details</p>
+      </div>
+
+      <form id="editCategoryForm" enctype="multipart/form-data">
+        <div class="form-section">
+          <h3>Basic Information</h3>
+          <div class="form-group">
+            <label for="categoryName">Category Name</label>
+            <input
+              type="text"
+              id="categoryName"
+              name="categoryName"
+              placeholder="Enter category name"
+              value="<%= category.name %>"
+              required
+            />
+            <div
+              id="categoryNameError"
+              class="error-message"
+              style="
+                color: #dc3545;
+                font-size: 0.875rem;
+                margin-top: 0.25rem;
+                display: none;
+              "
+            ></div>
+          </div>
+
+          <div class="form-group">
+            <label>Category Status</label>
+            <div class="status-toggle">
+              <label class="toggle-switch">
+                <input type="checkbox" name="status" id="statusToggle" <%=
+                category.status === 'listed' ? 'checked' : '' %> />
+                <span class="slider"></span>
+              </label>
+              <span id="statusText"
+                ><%= category.status === 'listed' ? 'Listed' : 'Unlisted'
+                %></span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Media</h3>
+          <div class="form-group">
+            <label>Category Image</label>
+            <div class="file-upload">
+              <label class="file-upload-label" id="dropZone">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+                <span>Drag & drop a new image or click to browse</span>
+                <input
+                  type="file"
+                  id="categoryImage"
+                  name="categoryImage"
+                  accept="image/*"
+                />
+              </label>
+              <div class="preview-container">
+                <img
+                  id="imagePreview"
+                  src="<%= category.imageUrl %>"
+                  alt="Category Preview"
+                />
+                <button type="button" class="remove-image" id="removeImageBtn">
+                  &times;
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn">Update Category</button>
+      </form>
+      <form action="/admin/categories" method="get">
+        <button type="submit" class="cancel-btn">Cancel</button>
+      </form>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        // Handle form submission
-        document.getElementById('categoryForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const formData = new FormData(this)
-            try {
-                const result = await Swal.fire({
-                    title: 'Update Category',
-                    text: 'Are you sure you want to update this category?',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, update it!',
-                    cancelButtonText: 'No, cancel',
-                    reverseButtons: true
-                });
+      // Validation Rules Constants
+      const VALIDATION_RULES = {
+        categoryName: {
+          minLength: 3,
+          maxLength: 50,
+        },
+        image: {
+          maxSize: 5 * 1024 * 1024, // 5MB
+          allowedTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+        },
+      };
 
-                if (result.isConfirmed) {
-                  const categoryId = "<%= category._id %>";
-const response = await fetch(`/admin/categories/edit/${categoryId}`, {
-    method: 'POST', // Or 'PUT' if updating
-    body: formData
-});
+      // Create error message elements
+      function createErrorElement(id) {
+        const errorDiv = document.createElement("div");
+        errorDiv.id = `${id}Error`;
+        errorDiv.className = "error-message";
+        errorDiv.style.color = "#dc3545";
+        errorDiv.style.fontSize = "0.875rem";
+        errorDiv.style.marginTop = "0.25rem";
+        errorDiv.style.display = "none";
+        return errorDiv;
+      }
 
-                    if (response.ok) {
-                        await Swal.fire({
-                            title: 'Success!',
-                            text: 'Category has been updated successfully',
-                            icon: 'success'
-                        });
-                        window.location.href = '/admin/categories';
-                    } else {
-                      console.log(response.message)
-                      await Swal.fire({
-                        title:"Error!", 
-                        text: response.message|| " Failed to edit category",
-                        icon: "error"
-                      })
-                      return
-                       
-                       
-                    }
-                }
-            } catch (error) {
-                Swal.fire({
-                    title: 'Error!',
-                    text: error.message || 'Something went wrong while updating the category',
-                    icon: 'error'
-                });
-            }
+      // Image upload handling
+      const dropZone = document.getElementById("dropZone");
+      const imageInput = document.getElementById("categoryImage");
+      const imagePreview = document.getElementById("imagePreview");
+      const previewContainer = document.querySelector(".preview-container");
+      const removeImageBtn = document.getElementById("removeImageBtn");
+
+      // Store original image URL for reset
+      const originalImageUrl = imagePreview.src;
+      let imageRemoved = false;
+
+      dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = "var(--accent-color)";
+        dropZone.style.background = "#e9ecef";
+      });
+
+      dropZone.addEventListener("dragleave", () => {
+        dropZone.style.borderColor = "#ced4da";
+        dropZone.style.background = "#f8f9fa";
+      });
+
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = "#ced4da";
+        dropZone.style.background = "#f8f9fa";
+
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith("image/")) {
+          handleImageUpload(file);
+        }
+      });
+
+      imageInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          handleImageUpload(file);
+        }
+      });
+
+      function handleImageUpload(file) {
+        if (!validateImage(file)) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          imagePreview.src = e.target.result;
+          previewContainer.style.display = "block";
+          imageRemoved = false;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      removeImageBtn.addEventListener("click", confirmRemoveImage);
+
+      function confirmRemoveImage() {
+        Swal.fire({
+          title: "Remove Image",
+          text: "Are you sure you want to remove this image?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Yes, remove it!",
+          cancelButtonText: "No, keep it",
+          reverseButtons: true,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            imagePreview.src = ""; // Clear the image
+            imageInput.value = "";
+            previewContainer.style.display = "none";
+            imageRemoved = true;
+
+            // Add hidden input to signal image removal
+            const hiddenInput = document.createElement("input");
+            hiddenInput.type = "hidden";
+            hiddenInput.name = "removeImage";
+            hiddenInput.value = "true";
+            document
+              .getElementById("editCategoryForm")
+              .appendChild(hiddenInput);
+
+            Swal.fire("Removed!", "The image has been removed.", "success");
+          }
+        });
+      }
+
+      // Validation functions
+      function validateCategoryName(name) {
+        const errorElement = document.getElementById("categoryNameError");
+
+        if (!name) {
+          showError(errorElement, "Category name is required");
+          return false;
+        }
+
+        if (name.length < VALIDATION_RULES.categoryName.minLength) {
+          showError(
+            errorElement,
+            `Category name must be at least ${VALIDATION_RULES.categoryName.minLength} characters`
+          );
+          return false;
+        }
+
+        if (name.length > VALIDATION_RULES.categoryName.maxLength) {
+          showError(
+            errorElement,
+            `Category name cannot exceed ${VALIDATION_RULES.categoryName.maxLength} characters`
+          );
+          return false;
+        }
+
+        hideError(errorElement);
+        return true;
+      }
+
+      function validateImage(file) {
+        if (!file) return true; // Image is optional
+
+        if (file.size > VALIDATION_RULES.image.maxSize) {
+          Swal.fire({
+            icon: "error",
+            title: "Invalid File Size",
+            text: "Image size should not exceed 5MB",
+          });
+          return false;
+        }
+
+        if (!VALIDATION_RULES.image.allowedTypes.includes(file.type)) {
+          Swal.fire({
+            icon: "error",
+            title: "Invalid File Type",
+            text: "Please upload a valid image file (JPEG, PNG, WebP, or GIF)",
+          });
+          return false;
+        }
+
+        return true;
+      }
+
+      // Helper functions
+      function showError(element, message) {
+        element.textContent = message;
+        element.style.display = "block";
+      }
+
+      function hideError(element) {
+        element.style.display = "none";
+      }
+
+      // Status toggle handling
+      const statusToggle = document.getElementById("statusToggle");
+      const statusText = document.getElementById("statusText");
+
+      statusToggle.addEventListener("change", function () {
+        statusText.textContent = this.checked ? "Listed" : "Unlisted";
+        this.value = this.checked ? "listed" : "unlisted";
+      });
+
+      // Real-time validation
+      document
+        .getElementById("categoryName")
+        .addEventListener("input", function () {
+          validateCategoryName(this.value);
         });
 
-        function previewImage(input) {
-            const preview = document.getElementById('imagePreview');
-            const file = input.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
+      // Form submission
+      $(document).ready(function () {
+        $("#editCategoryForm").on("submit", function (e) {
+          e.preventDefault();
+
+          // Validate all fields
+          const nameValid = validateCategoryName($("#categoryName").val());
+          const imageValid = validateImage($("#categoryImage")[0].files[0]);
+
+          if (!nameValid || !imageValid) {
+            return;
+          }
+
+          // Show loading state
+          Swal.fire({
+            title: "Updating Category...",
+            text: "Please wait while we process your request",
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            willOpen: () => {
+              Swal.showLoading();
+            },
+          });
+
+          const formData = new FormData(this);
+          // Add the category name (in case the field name is different)
+          formData.set("name", $("#categoryName").val());
+
+          // Make sure status is included properly
+          formData.set("status", statusToggle.checked ? "listed" : "unlisted");
+
+          // Add remove image flag if needed
+          if (imageRemoved) {
+            formData.append("removeImage", "true");
+          }
+
+          $.ajax({
+            url: "/admin/categories/edit/<%= category._id %>",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+              if (response.status === "success") {
+                Swal.fire({
+                  icon: "success",
+                  title: "Success!",
+                  text: "Category updated successfully",
+                  showConfirmButton: true,
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    window.location.href = "/admin/categories";
+                  }
+                });
+              } else {
+                Swal.fire({
+                  icon: "error",
+                  title: "Failed!",
+                  text: response.message || "Failed to update category",
+                  showConfirmButton: true,
+                });
+              }
+            },
+            error: function (xhr, status, error) {
+              console.error("AJAX Error:", status, error);
+              console.log("Response:", xhr.responseJSON);
+
+              let errorMessage =
+                "An unexpected error occurred. Please try again.";
+
+              if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMessage = xhr.responseJSON.message;
+              } else {
+                switch (xhr.status) {
+                  case 400:
+                    errorMessage = "Invalid data. Please check your inputs.";
+                    break;
+                  case 401:
+                    errorMessage = "Please login to continue.";
+                    break;
+                  case 403:
+                    errorMessage =
+                      "You don't have permission to edit categories.";
+                    break;
+                  case 404:
+                    errorMessage = "Category not found.";
+                    break;
+                  case 413:
+                    errorMessage =
+                      "Image file is too large. Maximum size is 5MB.";
+                    break;
+                  case 415:
+                    errorMessage =
+                      "Unsupported image format. Please use JPG, PNG, or WebP.";
+                    break;
+                  case 500:
+                    errorMessage = "Server error. Please try again later.";
+                    break;
                 }
-                reader.readAsDataURL(file);
-            }
-        }
+              }
 
-        async function confirmRemoveImage() {
-            const result = await Swal.fire({
-                title: 'Remove Image',
-                text: 'Are you sure you want to remove this image?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, remove it!',
-                cancelButtonText: 'No, keep it',
-                reverseButtons: true
-            });
-
-            if (result.isConfirmed) {
-                const preview = document.getElementById('imagePreview');
-                const fileInput = document.getElementById('image');
-                preview.src = '<%= category.imageUrl %>'; // Reset to original image
-                fileInput.value = ''; // Clear file input
-                
-                Swal.fire(
-                    'Removed!',
-                    'The image has been removed.',
-                    'success'
-                );
-            }
-        }
-
-        async function confirmCancel() {
-            const result = await Swal.fire({
-                title: 'Cancel Editing',
-                text: 'Are you sure you want to cancel? Any unsaved changes will be lost.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, leave page',
-                cancelButtonText: 'No, stay here',
-                reverseButtons: true
-            });
-
-            if (result.isConfirmed) {
-                window.location.href = '/admin/categories';
-            }
-        }
+              Swal.fire({
+                icon: "error",
+                title: "Error!",
+                text: errorMessage,
+                showConfirmButton: true,
+              });
+            },
+          });
+        });
+      });
     </script>
-</body>
+  </body>
 </html>

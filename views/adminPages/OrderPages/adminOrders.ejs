@@ -14,149 +14,323 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
     <link rel="stylesheet" href="/adminCSS/partials/menu.css" />
-    <title>Dashboard</title>
+    <title>Orders</title>
+    <style>
+      :root {
+        --primary-color: #f57c00;
+        --primary-hover: #e65100;
+        --light-bg: #fff9f0;
+        --text-dark: #333;
+        --sidebar-width: 250px;
+        --sidebar-collapsed-width: 70px;
+      }
+      
+      body {
+        background-color: #f8f9fa;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        overflow-x: hidden;
+      }
+      
+      /* Main layout structure */
+      .main-content-wrapper {
+        display: flex;
+        width: 100%;
+        min-height: 100vh;
+      }
+      
+      /* Main content area that adjusts with sidebar */
+      .main-content {
+        flex: 1;
+        padding: 20px;
+        margin-left: var(--sidebar-width);
+        transition: margin-left 0.3s ease;
+        width: calc(100% - var(--sidebar-width));
+      }
+      
+      .page-title {
+        font-weight: 600;
+        color: var(--text-dark);
+        border-left: 5px solid var(--primary-color);
+        padding-left: 15px;
+      }
+      
+      .btn-primary-custom {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+        transition: all 0.3s;
+      }
+      
+      .btn-primary-custom:hover {
+        background-color: var(--primary-hover);
+        border-color: var(--primary-hover);
+      }
+      
+      .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        border: none;
+      }
+      
+      .table-header {
+        background-color: var(--primary-color);
+        color: white;
+      }
+      
+      .table-responsive {
+        max-height: 70vh;
+        overflow-y: auto;
+        border-radius: 8px;
+      }
+      
+      .table-responsive thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background-color: var(--primary-color);
+        color: white;
+      }
+      
+      .form-control, .form-select {
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+      }
+      
+      .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(245, 124, 0, 0.25);
+      }
+      
+      .filter-section {
+        background-color: var(--light-bg);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+      
+      /* Custom status badges */
+      .status-badge {
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      
+      .status-pending {
+        background-color: #fff3cd;
+        color: #664d03;
+      }
+      
+      .status-processing {
+        background-color: #cff4fc;
+        color: #055160;
+      }
+      
+      .status-delivered {
+        background-color: #d1e7dd;
+        color: #0f5132;
+      }
+      
+      .status-cancelled {
+        background-color: #f8d7da;
+        color: #842029;
+      }
+      
+      .payment-badge {
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      
+      .payment-pending {
+        background-color: #fff3cd;
+        color: #664d03;
+      }
+      
+      .payment-completed {
+        background-color: #d1e7dd;
+        color: #0f5132;
+      }
+      
+      .payment-failed {
+        background-color: #f8d7da;
+        color: #842029;
+      }
+      
+      /* Custom scrollbar styling */
+      .table-responsive::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      
+      .table-responsive::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+      }
+      
+      .table-responsive::-webkit-scrollbar-thumb {
+        background: var(--primary-color);
+        border-radius: 4px;
+      }
+      
+      .table-responsive::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-hover);
+      }
+      
+      /* Responsive adjustments */
+      @media (max-width: 992px) {
+        .filter-controls {
+          flex-direction: column;
+          gap: 10px;
+        }
+        
+        .filter-controls > form {
+          width: 100%;
+        }
+      }
+      
+      @media (max-width: 768px) {
+        .main-content {
+          margin-left: var(--sidebar-collapsed-width);
+          width: calc(100% - var(--sidebar-collapsed-width));
+        }
+        
+        body.sidebar-hidden .main-content {
+          margin-left: 0;
+          width: 100%;
+        }
+      }
+      
+      @media (max-width: 576px) {
+        .main-content {
+          margin-left: 0;
+          width: 100%;
+        }
+        
+        body.sidebar-expanded .main-content {
+          margin-left: var(--sidebar-width);
+          width: calc(100% - var(--sidebar-width));
+        }
+      }
+    </style>
   </head>
   <body>
-    <%- include('../partials/menu')%>
-    <div class="container-fluid mt-4">
-      <div class="row">
-        <!-- Gap for left menu -->
-        <div class="col-md-2"></div>
-
-        <!-- Main content -->
-        <div class="col-md-10">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="text-dark">Orders</h1>
-          </div>
-          <div class="filter-section">
-            <div
-              class="d-flex justify-content-between align-items-center filter-controls gap-3 flex-wrap"
-            >
-              <!-- Filter by Status -->
-              <form
-                action="/admin/orders"
-                method="GET"
-                class="flex-grow-1"
-              >
-                <div class="input-group">
-                  <span class="input-group-text bg-white">
-                    <i class="fas fa-filter text-secondary"></i>
-                  </span>
-                  <select name="status" class="form-select" onchange="this.form.submit()">
-                    <option value="" <%= !selectedStatus ? 'selected' : '' %>>Filter by Status</option>
-                    <option value="pending" <%= selectedStatus === 'pending' ? 'selected' : '' %>>Pending</option>
-                    <option value="processing" <%= selectedStatus === 'processing' ? 'selected' : '' %>>Processing</option>
-                    <option value="cancelled" <%= selectedStatus === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
-                    <option value="delivered" <%= selectedStatus === 'delivered' ? 'selected' : '' %>>Delivered</option>
+    <div class="main-content-wrapper">
+      <!-- Include sidebar partial -->
+      <%- include('../partials/menu')%>
+      
+      <!-- Main content area -->
+      <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+          <h1 class="page-title mb-3 mb-md-0">Orders</h1>
+        </div>
+        
+        <!-- Filter, Sort Options -->
+        <div class="filter-section">
+          <div class="d-flex justify-content-between align-items-center filter-controls gap-3 flex-wrap">
+            <!-- Filter by Status -->
+            <form action="/admin/orders" method="GET" class="flex-grow-1">
+              <div class="input-group">
+                <span class="input-group-text bg-white">
+                  <i class="fas fa-filter text-secondary"></i>
+                </span>
+                <select name="status" class="form-select" onchange="this.form.submit()">
+                  <option value="" <%= !selectedStatus ? 'selected' : '' %>>Filter by Status</option>
+                  <option value="pending" <%= selectedStatus === 'pending' ? 'selected' : '' %>>Pending</option>
+                  <option value="processing" <%= selectedStatus === 'processing' ? 'selected' : '' %>>Processing</option>
+                  <option value="cancelled" <%= selectedStatus === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+                  <option value="delivered" <%= selectedStatus === 'delivered' ? 'selected' : '' %>>Delivered</option>
                 </select>
-                
-                </div>
-              </form>
+              </div>
+            </form>
 
-              <!-- Sort by CreatedAt -->
-              <form
-                action="/admin/orders"
-                method="GET"
-                class="flex-grow-1"
-              >
-                <div class="input-group">
-                  <span class="input-group-text bg-white">
-                    <i class="fas fa-sort text-secondary"></i>
-                  </span>
-                  <select name="sort" class="form-select" onchange="this.form.submit()">
-                    <option value="" <%= !selectedSort ? 'selected' : '' %>>Sort</option>
-                    <option value="desc" <%= selectedSort === 'desc' ? 'selected' : '' %>>Newest first</option>
-                    <option value="asc" <%= selectedSort === 'asc' ? 'selected' : '' %>>Oldest first</option>
+            <!-- Sort by CreatedAt -->
+            <form action="/admin/orders" method="GET" class="flex-grow-1">
+              <div class="input-group">
+                <span class="input-group-text bg-white">
+                  <i class="fas fa-sort text-secondary"></i>
+                </span>
+                <select name="sort" class="form-select" onchange="this.form.submit()">
+                  <option value="" <%= !selectedSort ? 'selected' : '' %>>Sort</option>
+                  <option value="desc" <%= selectedSort === 'desc' ? 'selected' : '' %>>Newest first</option>
+                  <option value="asc" <%= selectedSort === 'asc' ? 'selected' : '' %>>Oldest first</option>
                 </select>
-                
-                </div>
-              </form>
-            </div>
+              </div>
+            </form>
           </div>
-          <!-- Orders Table -->
-          <div class="card border-light">
-            <div class="card-body">
-              <table class="table table-bordered table-hover">
-                <thead style="background-color: #f57c00; color: white">
+        </div>
+        
+        <!-- Orders Table -->
+        <div class="card">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover m-0">
+                <thead class="table-header">
                   <tr class="text-center">
-                    <th>#</th>
-                    <th>Order ID</th>
-                    <th>Customer</th>
-                    <th>Payment Method</th>
-                    <th>Status</th>
-                    <th>Payment Status</th>
-                    <th>Order Date</th>
-                    <!-- <th>Actions</th> -->
-                    <th>Change Delivery Status</th>
+                    <th class="py-3">#</th>
+                    <th class="py-3">Order ID</th>
+                    <th class="py-3">Customer</th>
+                    <th class="py-3">Payment Method</th>
+                    <th class="py-3">Status</th>
+                    <th class="py-3">Payment Status</th>
+                    <th class="py-3">Order Date</th>
+                    <th class="py-3">Change Delivery Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <% if (orders && orders.length > 0) { %> <%
-                  orders.forEach((order, index) => { %>
-                  <tr>
-                    <td class="text-center"><%= index + 1 %></td>
-                    <td><%= order._id %></td>
-                    <td><%= order.userId.name %></td>
-                    <td><%= order.paymentMethod %></td>
-                    <td class="text-center">
-                      <span
-                        class="badge <%= getStatusBadgeClass(order.status) %>"
-                      >
-                        <%= order.status %>
-                      </span>
-                    </td>
-                    <td class="text-center">
-                      <span
-                        class="badge <%= getPaymentStatusBadgeClass(order.payment_status) %>"
-                      >
-                        <%= order.payment_status %>
-                      </span>
-                    </td>
-                    <td><%= new Date(order.orderDate).toLocaleString() %></td>
-                    <!-- <td class="text-center order-actions">
-                      <% if (order.status !== 'cancelled' && order.status !==
-                      'delivered') { %>
-                      <form
-                        action="/admin/orders/cancel/<%= order._id %>"
-                        method="POST"
-                        class="d-inline"
-                      >
-                        <button type="submit" class="btn btn-sm btn-danger">
-                          Cancel
-                        </button>
-                      </form>
-                      <% } %>
-                    </td> -->
-                    <td>
-                      <form action="/admin/orders/update-status/<%= order._id %>" method="POST" class="d-inline">
-                        <div class="input-group input-group-sm">
-                          <select
-                            name="status"
-                            class="form-select form-select-sm"
-                            aria-label="Change status"
-                            onchange="this.form.submit()"
-                          >
-                            <option value="pending" class="text-warning" <%= order.status === 'pending' ? 'selected' : '' %>>
-                              Pending
-                            </option>
-                            <option value="processing" class="text-info" <%= order.status === 'processing' ? 'selected' : '' %>>
-                              Processing
-                            </option>
-                            <option value="delivered" class="text-success" <%= order.status === 'delivered' ? 'selected' : '' %>>
-                              Delivered
-                            </option>
-                            <option value="cancelled" class="text-danger" <%= order.status === 'cancelled' ? 'selected' : '' %>>
-                              Cancelled
-                            </option>
-                          </select>
-                        </div>
-                      </form>
-                    </td>
-                  </tr>
-                  <% }); %> <% } else { %>
-                  <tr>
-                    <td colspan="8" class="text-center">No orders found.</td>
-                  </tr>
+                  <% if (orders && orders.length > 0) { %>
+                    <% orders.forEach((order, index) => { %>
+                      <tr>
+                        <td class="text-center"><%= index + 1 %></td>
+                        <td><%= order._id %></td>
+                        <td><%= order.userId.name %></td>
+                        <td class="text-center"><%= order.paymentMethod %></td>
+                        <td class="text-center">
+                          <span class="status-badge status-<%= order.status.toLowerCase() %>">
+                            <%= order.status %>
+                          </span>
+                        </td>
+                        <td class="text-center">
+                          <span class="payment-badge payment-<%= order.payment_status.toLowerCase() %>">
+                            <%= order.payment_status %>
+                          </span>
+                        </td>
+                        <td class="text-center"><%= new Date(order.orderDate).toLocaleString() %></td>
+                        <td>
+                          <form action="/admin/orders/update-status/<%= order._id %>" method="POST" class="d-inline">
+                            <div class="input-group input-group-sm">
+                              <select
+                                name="status"
+                                class="form-select form-select-sm"
+                                aria-label="Change status"
+                              >
+                                <option value="pending" <%= order.status === 'pending' ? 'selected' : '' %>>
+                                  Pending
+                                </option>
+                                <option value="processing" <%= order.status === 'processing' ? 'selected' : '' %>>
+                                  Processing
+                                </option>
+                                <option value="delivered" <%= order.status === 'delivered' ? 'selected' : '' %>>
+                                  Delivered
+                                </option>
+                                <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>
+                                  Cancelled
+                                </option>
+                              </select>
+                              <button type="button" class="btn btn-sm btn-primary-custom update-status-btn">
+                                <i class="fas fa-check"></i>
+                              </button>
+                            </div>
+                          </form>
+                        </td>
+                      </tr>
+                    <% }); %>
+                  <% } else { %>
+                    <tr>
+                      <td colspan="8" class="text-center">No orders found.</td>
+                    </tr>
                   <% } %>
                 </tbody>
               </table>
@@ -165,152 +339,78 @@
         </div>
       </div>
     </div>
-    <!-- Include SweetAlert2 -->
+    
+    <!-- Include necessary scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-   document.addEventListener('DOMContentLoaded', function() {
-  // Handle status update forms
-  const statusForms = document.querySelectorAll('form[action^="/admin/orders/update-status/"]');
-  
-  statusForms.forEach(form => {
-    const selectElement = form.querySelector('select[name="status"]');
-    const originalValue = selectElement.value;
-    
-    // Store original value
-    selectElement.dataset.originalValue = originalValue;
-    
-    // Remove any existing onchange handlers
-    selectElement.onchange = null;
-    
-    // Add new change handler
-    selectElement.addEventListener('change', function(e) {
-      e.preventDefault();
+    document.addEventListener('DOMContentLoaded', function() {
+      // Update status button click handler
+      const updateButtons = document.querySelectorAll('.update-status-btn');
       
-      const newStatus = this.value;
-      const originalValue = this.dataset.originalValue;
-      
-      // Show confirmation
-      Swal.fire({
-        title: 'Update Status',
-        text: `Change order status to ${newStatus}?`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, update it',
-        cancelButtonText: 'Cancel'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          // User confirmed, proceed with AJAX
+      updateButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const form = this.closest('form');
+          const selectElement = form.querySelector('select[name="status"]');
+          const newStatus = selectElement.value;
           
-          // Show loading indicator
+          // Show confirmation
           Swal.fire({
-            title: 'Updating...',
-            text: 'Please wait',
-            allowOutsideClick: false,
-            didOpen: () => {
-              Swal.showLoading();
-            },
-            showConfirmButton: false
-          });
-          
-          // Send AJAX request with JSON data
-          $.ajax({
-            url: form.action,
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ status: newStatus }),
-            success: function(response) {
-              // Update was successful
+            title: 'Update Status',
+            text: `Change order status to ${newStatus}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, update it',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#f57c00'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // Show loading indicator
               Swal.fire({
-                title: 'Success!',
-                text: 'Status updated successfully',
-                icon: 'success',
-                timer: 2000,
+                title: 'Updating...',
+                text: 'Please wait',
+                allowOutsideClick: false,
+                didOpen: () => {
+                  Swal.showLoading();
+                },
                 showConfirmButton: false
-              }).then(() => {
-                // Update the storage value and reload
-                selectElement.dataset.originalValue = newStatus;
-                window.location.reload();
               });
-            },
-            error: function(xhr, status, error) {
-              console.error('Error:', error);
-              // Show error message
-              Swal.fire({
-                title: 'Error',
-                text: 'Failed to update the status',
-                icon: 'error'
-              });
-              // Revert selection
-              selectElement.value = originalValue;
-            }
-          });
-        } else {
-          // User cancelled, revert selection
-          this.value = originalValue;
-        }
-      });
-    });
-  });
-  
-  // Handle cancel order buttons
-  const cancelForms = document.querySelectorAll('form[action^="/admin/orders/cancel/"]');
-  
-  cancelForms.forEach(form => {
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      Swal.fire({
-        title: 'Cancel Order',
-        text: 'Are you sure you want to cancel this order?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, cancel it',
-        cancelButtonText: 'No, keep it'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          // Show loading
-          Swal.fire({
-            title: 'Processing...',
-            text: 'Cancelling order...',
-            allowOutsideClick: false,
-            didOpen: () => {
-              Swal.showLoading();
-            },
-            showConfirmButton: false
-          });
-          
-          // AJAX for cancel
-          $.ajax({
-            url: form.action,
-            type: 'POST',
-            success: function(response) {
-              Swal.fire({
-                title: 'Success!',
-                text: 'Order cancelled successfully',
-                icon: 'success',
-                timer: 2000,
-                showConfirmButton: false
-              }).then(() => {
-                window.location.reload();
-              });
-            },
-            error: function(xhr, status, error) {
-              console.error('Error:', error);
-              Swal.fire({
-                title: 'Error',
-                text: 'Failed to cancel the order',
-                icon: 'error'
+              
+              // Send AJAX request with JSON data
+              $.ajax({
+                url: form.action,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ status: newStatus }),
+                success: function(response) {
+                  // Update was successful
+                  Swal.fire({
+                    title: 'Success!',
+                    text: 'Status updated successfully',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                  }).then(() => {
+                    window.location.reload();
+                  });
+                },
+                error: function(xhr, status, error) {
+                  console.error('Error:', error);
+                  // Show error message
+                  Swal.fire({
+                    title: 'Error',
+                    text: 'Failed to update the status',
+                    icon: 'error'
+                  });
+                }
               });
             }
           });
-        }
+        });
       });
     });
-  });
-});
     </script>
   </body>
 </html>

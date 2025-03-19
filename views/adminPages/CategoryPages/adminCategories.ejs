@@ -187,9 +187,10 @@
                 </span>
                 <select name="status" class="form-select" onchange="this.form.submit()">
                   <option value="">Filter by Status</option>
-                  <option value="listed">Active</option>
-                  <option value="unlisted">Inactive</option>
-                </select>
+                  <option value="listed" <%= selectedStatus === 'listed' ? 'selected' : '' %>>Active</option>
+                  <option value="unlisted" <%= selectedStatus === 'unlisted' ? 'selected' : '' %>>Inactive</option>
+              </select>
+              
               </div>
             </form>
 

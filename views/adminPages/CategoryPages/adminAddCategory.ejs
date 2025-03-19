@@ -155,45 +155,6 @@
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       }
 
-      .tags-input {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        padding: 0.5rem;
-        border: 2px solid #e9ecef;
-        border-radius: 8px;
-        min-height: 45px;
-      }
-
-      .tag {
-        background: var(--accent-color);
-        color: white;
-        padding: 0.25rem 0.75rem;
-        border-radius: 16px;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .tag button {
-        background: none;
-        border: none;
-        color: white;
-        cursor: pointer;
-        font-size: 1.1rem;
-        padding: 0;
-        display: flex;
-        align-items: center;
-      }
-
-      .tags-input input {
-        border: none;
-        outline: none;
-        padding: 0.25rem;
-        flex: 1;
-        min-width: 120px;
-      }
-
       .submit-btn {
         background: var(--primary-color);
         color: white;
@@ -317,7 +278,7 @@
         </div>
 
         <div class="form-section">
-          <h3>Media & Tags</h3>
+          <h3>Media</h3>
           <div class="form-group">
             <label>Category Image</label>
             <div class="file-upload">
@@ -347,19 +308,6 @@
                 <img id="imagePreview" src="" alt="Preview" />
               </div>
             </div>
-          </div>
-
-          <div class="form-group">
-            <label>Category Tags</label>
-            <div class="tags-input" id="tagsContainer">
-              <input
-                type="text"
-                placeholder="Add tags and press Enter"
-                id="tagInput"
-                name="categoryTags"
-              />
-            </div>
-            <input type="hidden" name="tags" id="tagsField" />
           </div>
         </div>
 
@@ -394,19 +342,7 @@
           maxSize: 5 * 1024 * 1024, // 5MB
           allowedTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
         },
-        tags: {
-          minTags: 1,
-          maxTags: 10,
-          minLength: 2,
-          maxLength: 20,
-        },
       };
-
-      // Tags handling
-      const tagsContainer = document.getElementById("tagsContainer");
-      const tagInput = document.getElementById("tagInput");
-      const tagsField = document.getElementById("tagsField");
-      let tags = [];
 
       // Add validation attributes to form elements
       document.getElementById("categoryName").setAttribute("required", "");
@@ -441,68 +377,6 @@
           group.appendChild(errorElement);
         }
       });
-
-      // Tags event handling
-      tagInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          const tag = tagInput.value.trim();
-
-          if (tag.length < VALIDATION_RULES.tags.minLength) {
-            Swal.fire({
-              icon: "error",
-              title: "Invalid Tag",
-              text: `Tag must be at least ${VALIDATION_RULES.tags.minLength} characters long`,
-            });
-            return;
-          }
-
-          if (tag.length > VALIDATION_RULES.tags.maxLength) {
-            Swal.fire({
-              icon: "error",
-              title: "Invalid Tag",
-              text: `Tag cannot exceed ${VALIDATION_RULES.tags.maxLength} characters`,
-            });
-            return;
-          }
-
-          if (tags.length >= VALIDATION_RULES.tags.maxTags) {
-            Swal.fire({
-              icon: "error",
-              title: "Too Many Tags",
-              text: `Cannot add more than ${VALIDATION_RULES.tags.maxTags} tags`,
-            });
-            return;
-          }
-
-          if (tag && !tags.includes(tag)) {
-            addTag(tag);
-            tagInput.value = "";
-          }
-        }
-      });
-
-      function addTag(text) {
-        tags.push(text);
-        const tag = document.createElement("div");
-        tag.className = "tag";
-        tag.innerHTML = `
-            ${text}
-            <button type="button" onclick="removeTag(this, '${text}')">&times;</button>
-        `;
-        tagsContainer.insertBefore(tag, tagInput);
-        updateTagsField();
-      }
-
-      function removeTag(button, text) {
-        tags = tags.filter((tag) => tag !== text);
-        button.parentElement.remove();
-        updateTagsField();
-      }
-
-      function updateTagsField() {
-        tagsField.value = JSON.stringify(tags);
-      }
 
       // Image upload handling
       const dropZone = document.getElementById("dropZone");
@@ -608,28 +482,6 @@
         return true;
       }
 
-      function validateTags() {
-        if (tags.length < VALIDATION_RULES.tags.minTags) {
-          Swal.fire({
-            icon: "error",
-            title: "Tags Required",
-            text: `Please add at least ${VALIDATION_RULES.tags.minTags} tag`,
-          });
-          return false;
-        }
-
-        if (tags.length > VALIDATION_RULES.tags.maxTags) {
-          Swal.fire({
-            icon: "error",
-            title: "Too Many Tags",
-            text: `Cannot add more than ${VALIDATION_RULES.tags.maxTags} tags`,
-          });
-          return false;
-        }
-
-        return true;
-      }
-
       // Helper functions
       function showError(element, message) {
         element.textContent = message;
@@ -648,6 +500,7 @@
         statusText.textContent = this.checked ? "Listed" : "Unlisted";
         this.value = this.checked ? "listed" : "unlisted";
       });
+
       // Real-time validation
       document
         .getElementById("categoryName")
@@ -665,9 +518,8 @@
           // Validate all fields
           const nameValid = validateCategoryName($("#categoryName").val());
           const imageValid = validateImage($("#categoryImage")[0].files[0]);
-          const tagsValid = validateTags();
 
-          if (!nameValid || !imageValid || !tagsValid) {
+          if (!nameValid || !imageValid) {
             return;
           }
 
@@ -725,9 +577,6 @@
                   } else if (xhr.responseJSON?.error === "INVALID_IMAGE") {
                     errorMessage =
                       "Please upload a valid image file (JPG, PNG, or WebP).";
-                  } else if (xhr.responseJSON?.error === "INVALID_TAGS") {
-                    errorMessage =
-                      "Please provide valid tags for the category.";
                   } else {
                     errorMessage = "Invalid data. Please check your inputs.";
                   }

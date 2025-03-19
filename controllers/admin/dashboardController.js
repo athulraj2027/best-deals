@@ -1,3 +1,3 @@
 exports.getAdminDashboard = (req, res) => {
-  res.render("adminPages/adminDashboard");
+  return res.render("adminPages/adminDashboard");
 };
