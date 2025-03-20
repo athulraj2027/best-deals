@@ -8,16 +8,19 @@ const usersRoutes = require("./usersRoute");
 const dashboardController = require("../../controllers/admin/dashboardController");
 const guestMiddleware = require("../../middlewares/guestMiddleware");
 const orderRoutes = require("./orderRoutes");
+const couponRoutes = require('./couponRoutes')
 
 router.use("/categories", categoryRoutes);
 router.use("/products", productRoutes);
 router.use("/customers", usersRoutes);
 router.use("/orders", orderRoutes);
+router.use('/coupons',couponRoutes)
 router.use(
   "/dashboard",
   guestMiddleware,
   dashboardController.getAdminDashboard
 );
+
 router.use("/", authRoutes);
 
 router.post("/logout", (req, res) => {

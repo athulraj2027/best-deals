@@ -31,12 +31,7 @@
         <!-- Cart Items -->
         <div class="lg:w-2/3">
           <div class="bg-white rounded-lg shadow-md p-6 mb-4">
-            <h2 class="text-xl font-semibold mb-4">
-              Cart Items (<span id="item-count"
-                ><%= cart.getItemCount() %></span
-              >
-              items)
-            </h2>
+            <h2 class="text-xl font-semibold mb-4">Cart Items</h2>
 
             <div class="divide-y divide-gray-200">
               <% cart.items.forEach(item => { %>
@@ -278,10 +273,14 @@
                 },
                 error: function (xhr, status, error) {
                   console.error("AJAX Error:", status, error);
+                  console.log("Error Response JSON:", xhr.responseJSON);
+
                   Swal.fire({
                     icon: "error",
                     title: "Oops...",
-                    text: "Failed to clear cart. Please try again.",
+                    text:
+                      xhr.responseJSON?.message ||
+                      "Failed to cancel order. Please try again.",
                     confirmButtonColor: "#dc3545",
                   });
                 },

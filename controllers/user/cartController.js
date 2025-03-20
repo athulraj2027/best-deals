@@ -180,20 +180,19 @@ exports.deleteItemController = async (req, res) => {
 
 exports.clearCartController = async (req, res) => {
   console.log(req.params.id);
-
   try {
-    const { cartId } = req.params.id;
-    // if (!cartId) {
-    //   return res.status(400).json({
-    //     status: "error",
-    //     title: "Error",
-    //     message: "Cart Id not found",
-    //   });
-    // }
+    const cartId = req.params.id;
+    console.log("Cart Id : ", cartId);
 
-    const cart = await Cart.findOne({
-      cartId: req.session.cartId,
-    });
+    if (!cartId) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "No cart Id found",
+      });
+    }
+
+    const cart = await Cart.findOne({ _id: cartId });
     if (!cart) {
       return res.status(400).json({
         status: "error",

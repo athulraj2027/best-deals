@@ -3,6 +3,7 @@ const Address = require("../../models/Address");
 const Order = require("../../models/Order");
 const mongoose = require("mongoose");
 const Product = require("../../models/Product");
+const bcrypt = require("bcrypt");
 
 exports.getUserProfilePage = async (req, res) => {
   try {
@@ -476,6 +477,83 @@ exports.cancelOrderController = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
+    return res.status(500).json({
+      status: "error",
+      title: "Error",
+      message: "Something went wrong",
+    });
+  }
+};
+
+exports.getResetPasswordController = async (req, res) => {
+  try {
+    console.log("sessionId : ", req.session.userId);
+
+    const user = await User.findById(req.session.userId);
+    if (!user) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "User not found",
+      });
+    }
+    return res.status(200).render("userPages/profilePages/passwordPage");
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      status: "error",
+      title: "Error",
+      message: "Something went wrong",
+    });
+  }
+};
+
+exports.resetPasswordController = async (req, res) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    const user = await User.findOne({ _id: req.session.userId });
+
+    if (!user) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "No user found",
+      });
+    }
+
+    const isPasswordValid = bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+    if (!isPasswordValid) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Incorrect Current Password",
+      });
+    }
+
+    const newUserPassword = await bcrypt.hash(newPassword, 10);
+    if (!newUserPassword) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Couldn't hash password",
+      });
+    }
+    
+    user.password = newUserPassword;
+    await user.save();
+
+    return res.status(200).json({
+      status: "success",
+      title: "Success",
+      message: "Password updated successfully",
+    });
+
+  } catch (error) {
+
+    console.error(error);
     return res.status(500).json({
       status: "error",
       title: "Error",

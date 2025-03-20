@@ -1,39 +1,77 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const couponSchema = new mongoose.Schema({
+const couponSchema = new Schema({
   code: {
     type: String,
     required: true,
     unique: true,
-    trim: true, // Removes whitespace
+    uppercase: true,
+    trim: true
   },
-  discount: {
-    type: Number, // Percentage or flat value
+  description: {
+    type: String,
+    required: true
+  },
+  discountType: {
+    type: String,
+    enum: ['percentage', 'fixed'],
+    required: true
+  },
+  discountValue: {
+    type: Number,
     required: true,
-    min: 0,
+    min: 0
   },
-  expirationDate: {
+  minPurchase: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  startDate: {
     type: Date,
-    // required: true,
+    default: Date.now
   },
-  isActive: {
+  expiryDate: {
+    type: Date,
+    required: true
+  },
+  active: {
     type: Boolean,
-    default: true,
+    default: true
+  },
+  usageLimit: {
+    type: Number,
+    default: null
+  },
+  usageCount: {
+    type: Number,
+    default: 0
   },
   createdAt: {
     type: Date,
-    default: Date.now,
+    default: Date.now
   },
   updatedAt: {
     type: Date,
-    default: Date.now,
-  },
+    default: Date.now
+  }
+}, { timestamps: true });
+
+// Virtual property to determine coupon status
+couponSchema.virtual('status').get(function() {
+  const now = new Date();
+  
+  if (!this.active) return 'inactive';
+  if (now > this.expiryDate) return 'expired';
+  if (now < this.startDate) return 'upcoming';
+  return 'active';
 });
 
-// Pre-save hook to update `updatedAt` field
-couponSchema.pre("save", function (next) {
-  this.updatedAt = Date.now();
-  next();
-});
+// Index for faster searches
+// couponSchema.index({ code: 1 });
+couponSchema.index({ active: 1 });
+couponSchema.index({ expiryDate: 1 });
+couponSchema.index({ createdAt: 1 });
 
-module.exports = mongoose.model("Coupon", couponSchema);
+module.exports = mongoose.model('Coupon', couponSchema);
