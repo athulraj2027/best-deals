@@ -1060,6 +1060,57 @@
               Swal.showLoading();
             }
           });
+          
+    // Create FormData object
+    const formData = new FormData(editProductForm);
+    const formObject = {};
+
+formData.forEach((value, key) => {
+  formObject[key] = value;
+});
+
+formObject.active = statusToggle.checked;
+
+    
+    fetch('/admin/products/edit/<%= product._id %>', {
+      method: 'POST', headers: {
+    'Content-Type': 'application/json'
+  },
+      body: JSON.stringify(formObject)
+    })
+    .then(data=>data.json())
+    .then(data => {
+      if(data.status==='success'){
+        Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: data.message || 'Product updated successfully',
+        confirmButtonText: 'OK'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '/admin/products';
+        }
+      });
+      }
+      else{
+        Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: data.message || 'Product updation failed',
+        confirmButtonText: 'OK'
+      }
+        )}
+      
+    })
+    .catch(error => {
+      // Handle error
+      console.error('Error:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to update Product. Please try again later.'
+      });
+    });
         }
       });
     </script>

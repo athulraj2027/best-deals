@@ -1,4 +1,5 @@
 const Coupon = require("../../models/Coupon");
+
 exports.getCouponsPage = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -104,7 +105,6 @@ exports.getAddCouponPage = async (req, res) => {
 
 exports.addCouponController = async (req, res) => {
   try {
-    console.log("request body : ", req.body);
     const {
       code,
       description,
@@ -117,12 +117,185 @@ exports.addCouponController = async (req, res) => {
       active,
     } = req.body;
 
-    if(discountType ==='percentage'){
-
-    }else{
-        
+    const existingCoupon = await Coupon.findOne({ code: code.toUpperCase() });
+    if (existingCoupon) {
+      return res.status(409).json({
+        status: "error",
+        title: "Error",
+        message: "Coupon code already exists",
+      });
     }
+
+    const currentDate = new Date();
+    const parsedStartDate = startDate ? new Date(startDate) : currentDate;
+    const parsedExpiryDate = new Date(expiryDate);
+
+    const newCoupon = new Coupon({
+      code: code.toUpperCase(),
+      description,
+      discountType,
+      discountValue: Number(discountValue),
+      minPurchase: minPurchase ? Number(minPurchase) : 0,
+      startDate: parsedStartDate,
+      expiryDate: parsedExpiryDate,
+      usageLimit: usageLimit ? Number(usageLimit) : null,
+      active: active !== undefined ? active : true,
+    });
+
+    await newCoupon.save();
+
+    res.status(201).json({
+      status: "success",
+      title: "Success",
+      message: "Coupon created successfully",
+    });
   } catch (error) {
-    console.error(error);
+    console.error("Error creating coupon:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to create coupon",
+      error: error.message,
+    });
+  }
+};
+
+exports.getEditCouponPage = async (req, res) => {
+  try {
+    const coupon = await Coupon.findOne({ _id: req.params.id });
+    return res
+      .status(200)
+      .render("adminPages/CouponPages/adminEditCoupon", { coupon });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      status: "error",
+      title: "Error",
+      message: "Something went wrong",
+    });
+  }
+};
+
+exports.editCouponController = async (req, res) => {
+  try {
+    const {
+      code,
+      discountType,
+      discountValue,
+      minPurchase,
+      description,
+      startDate,
+      expiryDate,
+      active,
+      usageLimit,
+    } = req.body;
+
+    const editedCoupon = await Coupon.findByIdAndUpdate(
+      req.params.id,
+      {
+        code,
+        discountType,
+        discountValue,
+        minPurchase,
+        description,
+        startDate,
+        expiryDate,
+        active,
+        usageLimit,
+      },
+      { new: true }
+    );
+    if (!editedCoupon) {
+      return res.status(404).json({
+        status: "error",
+        title: "Error",
+        message: "Coupon couldn't update",
+      });
+    }
+    await editedCoupon.save();
+
+    return res.status(200).json({
+      status: "success",
+      title: "Success",
+      message: "Coupon edited Successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      status: "error",
+      title: "Error",
+      message: "Something went wrong",
+    });
+  }
+};
+
+exports.deActivateCouponController = async (req, res) => {
+  try {
+    console.log(req.params.id);
+    const deActivatedCoupon = await Coupon.findByIdAndUpdate(
+      req.params.id,
+      {
+        active: false,
+      },
+      { new: true }
+    );
+    // if (!deActivatedCoupon) {
+    //   return res.status(400).json({
+    //     status: "error",
+    //     title: "Error",
+    //     message: "Couldn't deactivate Coupon",
+    //   });
+    // }
+
+    // return res.status(200).json({
+    //   status: "success",
+    //   message: "Coupon deactivated Successfully",
+    //   title: "Success",
+    // });
+    
+    return res.status(200).redirect("/admin/coupons");
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      status: "error",
+      title: "Server Error",
+      message: "Something went wrong",
+    });
+  }
+};
+
+exports.activateCouponController = async (req, res) => {
+  try {
+    console.log(req.params.id);
+    const ActivatedCoupon = await Coupon.findByIdAndUpdate(
+      req.params.id,
+      {
+        active: true,
+      },
+      { new: true }
+    );
+    // if (!ActivatedCoupon) {
+    //   return res.status(400).json({
+    //     status: "error",
+    //     title: "Error",
+    //     message: "Couldn't deactivate Coupon",
+    //   });
+    // }
+
+    // return res.status(200).json({
+    //   status: "success",
+    //   message: "Coupon Activated Successfully",
+    //   title: "Success",
+    // });
+
+    return res.status(200).redirect("/admin/coupons");
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      status: "error",
+      title: "Server Error",
+      message: "Something went wrong",
+    });
   }
 };
