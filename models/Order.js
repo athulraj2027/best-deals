@@ -28,6 +28,11 @@ const orderSchema = new mongoose.Schema({
     enum: ["pending", "processing", "delivered", "cancelled"],
     default: "pending",
   },
+  grantTotal: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
   payment_status: {
     type: String,
     enum: ["pending", "paid", "refunded", "failed"],

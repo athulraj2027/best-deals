@@ -1,4 +1,6 @@
 const Coupon = require("../../models/Coupon");
+const Category = require("../../models/Category");
+const Product = require("../../models/Product");
 
 exports.getCouponsPage = async (req, res) => {
   try {
@@ -97,7 +99,12 @@ exports.getCouponsPage = async (req, res) => {
 
 exports.getAddCouponPage = async (req, res) => {
   try {
-    return res.status(200).render("adminPages/CouponPages/adminAddCoupon");
+    const categories = await Category.find().sort("name");
+    const products = await Product.find().sort("name");
+    return res.status(200).render("adminPages/CouponPages/adminAddCoupon", {
+      categories,
+      products,
+    });
   } catch (error) {
     console.log(error);
   }
@@ -115,8 +122,11 @@ exports.addCouponController = async (req, res) => {
       expiryDate,
       usageLimit,
       active,
+      appliedProducts,
+      appliedCategories,
     } = req.body;
-
+    
+    console.log(appliedProducts);
     const existingCoupon = await Coupon.findOne({ code: code.toUpperCase() });
     if (existingCoupon) {
       return res.status(409).json({
@@ -133,6 +143,8 @@ exports.addCouponController = async (req, res) => {
     const newCoupon = new Coupon({
       code: code.toUpperCase(),
       description,
+      appliedCategories,
+      appliedProducts,
       discountType,
       discountValue: Number(discountValue),
       minPurchase: minPurchase ? Number(minPurchase) : 0,
@@ -251,9 +263,8 @@ exports.deActivateCouponController = async (req, res) => {
     //   message: "Coupon deactivated Successfully",
     //   title: "Success",
     // });
-    
-    return res.status(200).redirect("/admin/coupons");
 
+    return res.status(200).redirect("/admin/coupons");
   } catch (err) {
     console.error(err);
     return res.status(500).json({
@@ -289,7 +300,6 @@ exports.activateCouponController = async (req, res) => {
     // });
 
     return res.status(200).redirect("/admin/coupons");
-
   } catch (err) {
     console.error(err);
     return res.status(500).json({

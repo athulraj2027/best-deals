@@ -61,7 +61,7 @@ const CartSchema = new mongoose.Schema({
 // Pre-save middleware to calculate totals
 CartSchema.pre("save", function (next) {
   // Calculate subtotal
-  this.subtotal = this.items.reduce((acc, item) => acc + item.subtotal, 0);
+  this.subtotal = this.items.reduce((acc, item) => acc + item.price, 0);
 
   // Calculate tax (example: 10%)
   this.tax = this.subtotal * 0.1;

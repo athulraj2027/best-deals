@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// Schema for individual wishlist items
+// Wishlist Item Schema (represents individual items in the wishlist)
 const WishlistItemSchema = new Schema({
   productId: {
     type: Schema.Types.ObjectId,
@@ -10,7 +10,7 @@ const WishlistItemSchema = new Schema({
   },
   variantId: {
     type: Schema.Types.ObjectId,
-    ref: 'Variant',
+    ref: 'Variant', // Assuming you have a Variant model
     required: true
   },
   name: {
@@ -19,11 +19,11 @@ const WishlistItemSchema = new Schema({
   },
   color: {
     type: String,
-    default: null
+    required: true
   },
   size: {
     type: String,
-    default: null
+    required: true
   },
   price: {
     type: Number,
@@ -31,7 +31,7 @@ const WishlistItemSchema = new Schema({
   },
   image: {
     type: String,
-    default: 'https://via.placeholder.com/100x100?text=No+Image'
+    required: true
   },
   addedAt: {
     type: Date,
@@ -39,13 +39,12 @@ const WishlistItemSchema = new Schema({
   }
 });
 
-// Main wishlist schema
+// Main Wishlist Schema
 const WishlistSchema = new Schema({
-  userId: {
+  user: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
-    index: true
+    required: true
   },
   items: [WishlistItemSchema],
   createdAt: {
@@ -56,17 +55,13 @@ const WishlistSchema = new Schema({
     type: Date,
     default: Date.now
   }
-}, { timestamps: true });
+});
 
-// Create compound index for faster lookups
-WishlistSchema.index({ userId: 1, 'items.productId': 1, 'items.variantId': 1 });
-
-// Method to check if an item already exists in the wishlist
-WishlistSchema.methods.itemExists = function(productId, variantId) {
-  return this.items.some(item => 
-    item.productId.toString() === productId.toString() && 
-    item.variantId.toString() === variantId.toString()
-  );
+// Method to calculate total value of wishlist items
+WishlistSchema.methods.getTotalValue = function() {
+  return this.items.reduce((sum, item) => sum + item.price, 0);
 };
 
-module.exports = mongoose.model('Wishlist', WishlistSchema);
+const Wishlist = mongoose.model('Wishlist', WishlistSchema);
+
+module.exports = Wishlist;

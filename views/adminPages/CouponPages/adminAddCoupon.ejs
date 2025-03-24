@@ -262,7 +262,6 @@
               id="couponCode"
               name="code"
               placeholder="Enter coupon code (e.g. SUMMER25)"
-              
             />
             <div id="couponCodeError" class="error-message"></div>
           </div>
@@ -273,15 +272,57 @@
               id="description"
               name="description"
               placeholder="Enter coupon description"
-              
             ></textarea>
             <div id="descriptionError" class="error-message"></div>
           </div>
+          <div class="form-section">
+            <h3>Applicable Items</h3>
+            <div class="form-group">
+              <label for="appliedCategories">Apply to Categories</label>
+              <select
+                id="appliedCategories"
+                name="appliedCategories"
+                multiple
+                style="height: 120px"
+              >
+                <option value="">Select categories</option>
+                <% categories.forEach(function(category) { %>
+                <option value="<%= category._id %>">
+                  <%= category.name %>
+                </option>
+                <% }); %>
+              </select>
+              <div id="appliedCategoriesError" class="error-message"></div>
+              <small style="display: block; margin-top: 0.5rem; color: #6c757d">
+                Hold Ctrl (or Cmd on Mac) to select multiple categories. Leave
+                empty to apply to all categories.
+              </small>
+            </div>
 
+            <div class="form-group">
+              <label for="appliedProducts">Apply to Products</label>
+              <select
+                id="appliedProducts"
+                name="appliedProducts"
+                multiple
+                style="height: 120px"
+              >
+                <option value="">Select products</option>
+                <% products.forEach(function(product) { %>
+                <option value="<%= product._id %>"><%= product.name %></option>
+                <% }); %>
+              </select>
+              <div id="appliedProductsError" class="error-message"></div>
+              <small style="display: block; margin-top: 0.5rem; color: #6c757d">
+                Hold Ctrl (or Cmd on Mac) to select multiple products. Leave
+                empty to apply to all products.
+              </small>
+            </div>
+          </div>
           <div class="form-row">
             <div class="form-group">
               <label for="discountType">Discount Type</label>
-              <select id="discountType" name="discountType" >
+              <select id="discountType" name="discountType">
                 <option value="">Select discount type</option>
                 <option value="percentage">Percentage (%)</option>
                 <option value="fixed">Fixed Amount</option>
@@ -298,7 +339,6 @@
                 placeholder="Enter discount value"
                 min="0"
                 step="0.01"
-                
               />
               <div id="discountValueError" class="error-message"></div>
             </div>
@@ -324,13 +364,13 @@
           <div class="form-row">
             <div class="form-group">
               <label for="startDate">Start Date</label>
-              <input type="datetime-local" id="startDate" name="startDate"  />
+              <input type="datetime-local" id="startDate" name="startDate" />
               <div id="startDateError" class="error-message"></div>
             </div>
 
             <div class="form-group">
               <label for="expiryDate">Expiry Date</label>
-              <input type="datetime-local" id="expiryDate" name="expiryDate"  />
+              <input type="datetime-local" id="expiryDate" name="expiryDate" />
               <div id="expiryDateError" class="error-message"></div>
             </div>
           </div>
@@ -372,21 +412,27 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
       // Set default start date to current date and time
-      document.addEventListener('DOMContentLoaded', function() {
+      document.addEventListener("DOMContentLoaded", function () {
         const now = new Date();
-        const localDatetime = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-                                .toISOString()
-                                .slice(0, 16);
-        
-        document.getElementById('startDate').value = localDatetime;
-        
+        const localDatetime = new Date(
+          now.getTime() - now.getTimezoneOffset() * 60000
+        )
+          .toISOString()
+          .slice(0, 16);
+
+        document.getElementById("startDate").value = localDatetime;
+
         // Set default expiry date to 30 days from now
-        const thirtyDaysLater = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-        const expiryLocalDatetime = new Date(thirtyDaysLater.getTime() - now.getTimezoneOffset() * 60000)
-                                      .toISOString()
-                                      .slice(0, 16);
-        
-        document.getElementById('expiryDate').value = expiryLocalDatetime;
+        const thirtyDaysLater = new Date(
+          now.getTime() + 30 * 24 * 60 * 60 * 1000
+        );
+        const expiryLocalDatetime = new Date(
+          thirtyDaysLater.getTime() - now.getTimezoneOffset() * 60000
+        )
+          .toISOString()
+          .slice(0, 16);
+
+        document.getElementById("expiryDate").value = expiryLocalDatetime;
       });
 
       // Validation Rules
@@ -394,18 +440,18 @@
         couponCode: {
           minLength: 3,
           maxLength: 20,
-          pattern: /^[A-Za-z0-9_-]+$/
+          pattern: /^[A-Za-z0-9_-]+$/,
         },
         description: {
           minLength: 10,
-          maxLength: 200
+          maxLength: 200,
         },
         discountValue: {
           max: {
             percentage: 100,
-            fixed: 1000000 // Arbitrary high value, adjust as needed
-          }
-        }
+            fixed: 1000000, // Arbitrary high value, adjust as needed
+          },
+        },
       };
 
       // Helper functions
@@ -422,21 +468,24 @@
       const statusToggle = document.querySelector('input[name="active"]');
       const statusText = document.getElementById("statusText");
 
-      statusToggle.addEventListener("change", function() {
+      statusToggle.addEventListener("change", function () {
         statusText.textContent = this.checked ? "Active" : "Inactive";
       });
 
       // Discount type handling
-      const discountTypeSelect = document.getElementById('discountType');
-      const discountValueInput = document.getElementById('discountValue');
-      
-      discountTypeSelect.addEventListener('change', function() {
-        if (this.value === 'percentage') {
-          discountValueInput.setAttribute('max', '100');
-          discountValueInput.setAttribute('placeholder', 'Enter percentage value (0-100)');
+      const discountTypeSelect = document.getElementById("discountType");
+      const discountValueInput = document.getElementById("discountValue");
+
+      discountTypeSelect.addEventListener("change", function () {
+        if (this.value === "percentage") {
+          discountValueInput.setAttribute("max", "100");
+          discountValueInput.setAttribute(
+            "placeholder",
+            "Enter percentage value (0-100)"
+          );
         } else {
-          discountValueInput.removeAttribute('max');
-          discountValueInput.setAttribute('placeholder', 'Enter fixed amount');
+          discountValueInput.removeAttribute("max");
+          discountValueInput.setAttribute("placeholder", "Enter fixed amount");
         }
       });
 
@@ -450,17 +499,26 @@
         }
 
         if (code.length < VALIDATION_RULES.couponCode.minLength) {
-          showError(errorElement, `Coupon code must be at least ${VALIDATION_RULES.couponCode.minLength} characters`);
+          showError(
+            errorElement,
+            `Coupon code must be at least ${VALIDATION_RULES.couponCode.minLength} characters`
+          );
           return false;
         }
 
         if (code.length > VALIDATION_RULES.couponCode.maxLength) {
-          showError(errorElement, `Coupon code cannot exceed ${VALIDATION_RULES.couponCode.maxLength} characters`);
+          showError(
+            errorElement,
+            `Coupon code cannot exceed ${VALIDATION_RULES.couponCode.maxLength} characters`
+          );
           return false;
         }
 
         if (!VALIDATION_RULES.couponCode.pattern.test(code)) {
-          showError(errorElement, "Coupon code can only contain letters, numbers, hyphens, and underscores");
+          showError(
+            errorElement,
+            "Coupon code can only contain letters, numbers, hyphens, and underscores"
+          );
           return false;
         }
 
@@ -477,12 +535,18 @@
         }
 
         if (description.length < VALIDATION_RULES.description.minLength) {
-          showError(errorElement, `Description must be at least ${VALIDATION_RULES.description.minLength} characters`);
+          showError(
+            errorElement,
+            `Description must be at least ${VALIDATION_RULES.description.minLength} characters`
+          );
           return false;
         }
 
         if (description.length > VALIDATION_RULES.description.maxLength) {
-          showError(errorElement, `Description cannot exceed ${VALIDATION_RULES.description.maxLength} characters`);
+          showError(
+            errorElement,
+            `Description cannot exceed ${VALIDATION_RULES.description.maxLength} characters`
+          );
           return false;
         }
 
@@ -515,7 +579,10 @@
           return false;
         }
 
-        if (type === 'percentage' && value > VALIDATION_RULES.discountValue.max.percentage) {
+        if (
+          type === "percentage" &&
+          value > VALIDATION_RULES.discountValue.max.percentage
+        ) {
           showError(errorElement, "Percentage discount cannot exceed 100%");
           return false;
         }
@@ -527,66 +594,86 @@
       function validateDates(startDate, expiryDate) {
         const startDateError = document.getElementById("startDateError");
         const expiryDateError = document.getElementById("expiryDateError");
-        
+
         if (!startDate) {
           showError(startDateError, "Start date is required");
           return false;
         }
-        
+
         if (!expiryDate) {
           showError(expiryDateError, "Expiry date is required");
           return false;
         }
-        
+
         const startDateTime = new Date(startDate);
         const expiryDateTime = new Date(expiryDate);
-        
+
         if (expiryDateTime <= startDateTime) {
           showError(expiryDateError, "Expiry date must be after start date");
           return false;
         }
-        
+
         hideError(startDateError);
         hideError(expiryDateError);
         return true;
       }
 
       // Real-time validation
-      document.getElementById("couponCode").addEventListener("input", function() {
-        validateCouponCode(this.value);
-      });
+      document
+        .getElementById("couponCode")
+        .addEventListener("input", function () {
+          validateCouponCode(this.value);
+        });
 
-      document.getElementById("description").addEventListener("input", function() {
-        validateDescription(this.value);
-      });
+      document
+        .getElementById("description")
+        .addEventListener("input", function () {
+          validateDescription(this.value);
+        });
 
-      document.getElementById("discountType").addEventListener("change", function() {
-        validateDiscountType(this.value);
-      });
+      document
+        .getElementById("discountType")
+        .addEventListener("change", function () {
+          validateDiscountType(this.value);
+        });
 
-      document.getElementById("discountValue").addEventListener("input", function() {
-        validateDiscountValue(this.value, document.getElementById("discountType").value);
-      });
+      document
+        .getElementById("discountValue")
+        .addEventListener("input", function () {
+          validateDiscountValue(
+            this.value,
+            document.getElementById("discountType").value
+          );
+        });
 
-      document.getElementById("startDate").addEventListener("change", function() {
-        validateDates(this.value, document.getElementById("expiryDate").value);
-      });
+      document
+        .getElementById("startDate")
+        .addEventListener("change", function () {
+          validateDates(
+            this.value,
+            document.getElementById("expiryDate").value
+          );
+        });
 
-      document.getElementById("expiryDate").addEventListener("change", function() {
-        validateDates(document.getElementById("startDate").value, this.value);
-      });
+      document
+        .getElementById("expiryDate")
+        .addEventListener("change", function () {
+          validateDates(document.getElementById("startDate").value, this.value);
+        });
 
       // Form submission
-      $(document).ready(function() {
-        $("#addCouponForm").on("submit", function(e) {
+      $(document).ready(function () {
+        $("#addCouponForm").on("submit", function (e) {
           e.preventDefault();
 
           // Validate all fields
           const codeValid = validateCouponCode($("#couponCode").val());
           const descriptionValid = validateDescription($("#description").val());
-          const discountTypeValid = validateDiscountType($("#discountType").val());
+          const discountTypeValid = validateDiscountType(
+            $("#discountType").val()
+          );
           const discountValueValid = validateDiscountValue(
-            $("#discountValue").val(), 
+            $("#discountValue").val(),
             $("#discountType").val()
           );
           const datesValid = validateDates(
@@ -594,7 +681,13 @@
             $("#expiryDate").val()
           );
 
-          if (!codeValid || !descriptionValid || !discountTypeValid || !discountValueValid || !datesValid) {
+          if (
+            !codeValid ||
+            !descriptionValid ||
+            !discountTypeValid ||
+            !discountValueValid ||
+            !datesValid
+          ) {
             return;
           }
 
@@ -611,12 +704,12 @@
 
           const formData = new FormData(this);
           const jsonData = {};
-          
+
           // Convert FormData to JSON object
           for (const [key, value] of formData.entries()) {
-            if (key === 'active') {
-              jsonData[key] = value === 'on';
-            } else if (key === 'usageLimit' && value === '') {
+            if (key === "active") {
+              jsonData[key] = value === "on";
+            } else if (key === "usageLimit" && value === "") {
               jsonData[key] = null;
             } else {
               jsonData[key] = value;
@@ -628,7 +721,7 @@
             type: "POST",
             data: JSON.stringify(jsonData),
             contentType: "application/json",
-            success: function(response) {
+            success: function (response) {
               if (response.status === "success") {
                 Swal.fire({
                   icon: "success",
@@ -649,11 +742,12 @@
                 });
               }
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
               console.error("AJAX Error:", status, error);
               console.log("Response:", xhr.responseJSON);
 
-              let errorMessage = "An unexpected error occurred. Please try again.";
+              let errorMessage =
+                "An unexpected error occurred. Please try again.";
 
               switch (xhr.status) {
                 case 400:
@@ -684,7 +778,7 @@
                 text: errorMessage,
                 showConfirmButton: true,
               });
-            }
+            },
           });
         });
       });

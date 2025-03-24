@@ -532,7 +532,7 @@
           <div class="order-item">
             <% items.forEach(item =>{ %>
             <span><%= item.name %></span>
-            <span><%= item.price * item.quantity %></span>
+            <span><%= item.price * item.quantity %></span><br>
             <% }) %>
           </div>
 
@@ -554,6 +554,69 @@
           <div class="order-total">
             <span>Total</span>
             <span>$<%= cart.total.toFixed(2) %></span>
+          </div>
+          <div class="coupon-section" style="margin-top: 20px">
+            <% if(coupons && coupons.length > 0) { %>
+            <div
+              class="available-coupons"
+              style="
+                margin-top: 15px;
+                border-top: 1px dashed #ddd;
+                padding-top: 12px;
+              "
+            >
+              <h5 style="font-size: 0.9rem; color: #666; margin-bottom: 8px">
+                Available Coupons:
+              </h5>
+              <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                <% coupons.forEach(coupon => { %>
+                <div
+                  class="coupon-chip"
+                  style="
+                    background-color: #f5f5f5;
+                    border: 1px dashed #aaa;
+                    border-radius: 4px;
+                    padding: 5px 10px;
+                    font-size: 0.85rem;
+                    cursor: pointer;
+                  "
+                  onclick="document.getElementById('couponCode').value='<%= coupon.code %>'"
+                >
+                  <strong><%= coupon.code %></strong>
+                  <% if(coupon.discountType === 'percentage') { %> - <%=
+                  coupon.discountValue %>% off <% } else { %> - $<%=
+                  coupon.discountValue %> off <% } %>
+                </div>
+                <% }) %>
+              </div>
+            </div>
+            <% } %>
+            <h4 style="font-size: 1rem; margin-bottom: 10px">Have a coupon?</h4>
+            <div style="display: flex; gap: 8px; margin-bottom: 15px">
+              <input
+                type="text"
+                id="couponCode"
+                name="couponCode"
+                placeholder="Enter coupon code"
+                style="flex: 1"
+              />
+              <button
+                type="button"
+                id="applyCoupon"
+                class="btn"
+                style="width: auto; padding: 12px 15px"
+              >
+                Apply
+              </button>
+            </div>
+            <div
+              id="couponMessage"
+              style="font-size: 0.9rem; margin-top: 5px; display: none"
+            ></div>
+            <div id="couponDiscount" class="order-item" style="display: none">
+              <span>Discount</span>
+              <span id="discountAmount">-$0.00</span>
+            </div>
           </div>
         </div>
       </div>
@@ -684,6 +747,174 @@
             this.classList.add("selected");
           });
         });
+      });
+    </script>
+    <script>
+      // Coupon code handling
+      const applyCouponBtn = document.getElementById("applyCoupon");
+      const couponInput = document.getElementById("couponCode");
+      const couponMessage = document.getElementById("couponMessage");
+      const couponDiscountDiv = document.getElementById("couponDiscount");
+      const discountAmountSpan = document.getElementById("discountAmount");
+      const orderTotalElement = document.querySelector(
+        ".order-total span:last-child"
+      );
+      let appliedCoupon = null;
+      let originalTotal = parseFloat("<%= cart.total %>");
+
+      applyCouponBtn.addEventListener("click", function () {
+        const code = couponInput.value.trim();
+
+        if (!code) {
+          showCouponMessage("Please enter a coupon code", "error");
+          return;
+        }
+
+        // Send request to validate coupon
+        fetch(`/checkout/apply-coupon`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            code: code,
+            cartId: "<%= cart._id %>",
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.status === "success") {
+              appliedCoupon = data.coupon;
+
+              // Calculate discount
+              let discount = 0;
+              if (appliedCoupon.discountType === "percentage") {
+                discount = (originalTotal * appliedCoupon.discountValue) / 100;
+              } else {
+                discount = appliedCoupon.discountValue;
+              }
+
+              // Ensure discount doesn't exceed the total
+              discount = Math.min(discount, originalTotal);
+
+              // Update UI with formatted discount
+              discountAmountSpan.textContent = `-$${discount.toFixed(2)}`;
+              couponDiscountDiv.style.display = "flex";
+
+              // Update total amount
+              const newTotal = (originalTotal - discount).toFixed(2);
+              orderTotalElement.textContent = `$${newTotal}`;
+
+              // Add hidden input for the coupon
+              if (!document.getElementById("appliedCouponInput")) {
+                const couponInput = document.createElement("input");
+                couponInput.type = "hidden";
+                couponInput.id = "appliedCouponInput";
+                couponInput.name = "couponCode";
+                couponInput.value = code;
+                document
+                  .getElementById("checkoutForm")
+                  .appendChild(couponInput);
+              } else {
+                document.getElementById("appliedCouponInput").value = code;
+              }
+
+              // Add discount amount as hidden input
+              if (!document.getElementById("discountAmountInput")) {
+                const discountInput = document.createElement("input");
+                discountInput.type = "hidden";
+                discountInput.id = "discountAmountInput";
+                discountInput.name = "discountAmount";
+                discountInput.value = discount.toFixed(2);
+                document
+                  .getElementById("checkoutForm")
+                  .appendChild(discountInput);
+              } else {
+                document.getElementById("discountAmountInput").value =
+                  discount.toFixed(2);
+              }
+
+              showCouponMessage(
+                `Coupon applied! You saved $${discount.toFixed(2)}`,
+                "success"
+              );
+            } else {
+              showCouponMessage(data.message || "Invalid coupon code", "error");
+              resetCoupon();
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            showCouponMessage(
+              "There was an error applying the coupon",
+              "error"
+            );
+            resetCoupon();
+          });
+      });
+
+      // Function to handle clicking on coupon chips
+      function selectCoupon(code) {
+        couponInput.value = code;
+        applyCouponBtn.click(); // Automatically apply the selected coupon
+      }
+
+      // Function to show coupon status messages
+      function showCouponMessage(message, type) {
+        couponMessage.textContent = message;
+        couponMessage.style.display = "block";
+
+        if (type === "error") {
+          couponMessage.style.color = "#dc3545";
+        } else {
+          couponMessage.style.color = "#28a745";
+        }
+
+        // Hide message after 5 seconds
+        setTimeout(() => {
+          couponMessage.style.display = "none";
+        }, 5000);
+      }
+
+      // Function to reset coupon if invalid
+      function resetCoupon() {
+        couponDiscountDiv.style.display = "none";
+        orderTotalElement.textContent = `$${originalTotal.toFixed(2)}`;
+
+        // Remove hidden inputs
+        const couponInput = document.getElementById("appliedCouponInput");
+        const discountInput = document.getElementById("discountAmountInput");
+
+        if (couponInput) couponInput.parentNode.removeChild(couponInput);
+        if (discountInput) discountInput.parentNode.removeChild(discountInput);
+
+        appliedCoupon = null;
+      }
+
+      // For the clickable coupon chips
+      document.querySelectorAll(".coupon-chip").forEach((chip) => {
+        chip.addEventListener("click", function () {
+          const code = this.querySelector("strong").textContent;
+          selectCoupon(code);
+        });
+      });
+
+      // Update the form submission to include coupon info
+      const checkoutForm = document.getElementById("checkoutForm");
+      const originalSubmitHandler = checkoutForm.onsubmit;
+
+      checkoutForm.addEventListener("submit", function (e) {
+        // If we have an applied coupon, make sure it's included in the submission
+        if (appliedCoupon) {
+          if (!document.getElementById("appliedCouponInput")) {
+            const couponInput = document.createElement("input");
+            couponInput.type = "hidden";
+            couponInput.id = "appliedCouponInput";
+            couponInput.name = "couponCode";
+            couponInput.value = appliedCoupon.code;
+            this.appendChild(couponInput);
+          }
+        }
       });
     </script>
   </body>

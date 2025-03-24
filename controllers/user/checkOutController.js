@@ -3,6 +3,7 @@ const Cart = require("../../models/Cart");
 const Address = require("../../models/Address");
 const Order = require("../../models/Order");
 const Product = require("../../models/Product");
+const Coupon = require("../../models/Coupon");
 
 exports.getCheckoutPage = async (req, res) => {
   try {
@@ -15,9 +16,10 @@ exports.getCheckoutPage = async (req, res) => {
         message: "Cart Id not found",
       });
     }
-    // console.log(cartId);
 
-    const cart = await Cart.findOne({ _id: cartId });
+    const cart = await Cart.findOne({ _id: cartId }).populate(
+      "items.productId"
+    );
     if (!cart) {
       return res.status(400).json({
         status: "error",
@@ -27,7 +29,32 @@ exports.getCheckoutPage = async (req, res) => {
     }
 
     const items = cart.items;
-    console.log("These are the items in the cart : ", items);
+    const productIds = cart.items.map((item) => item.productId._id);
+    const categoryIds = cart.items.map((item) => {
+      return item.productId.category || item.productId.categoryId;
+    });
+
+    const cartTotal = cart.items.reduce((total, item) => {
+      return total + item.price * item.quantity;
+    }, 0);
+
+    const currentDate = new Date();
+    const validCoupons = await Coupon.find({
+      $or: [
+        { appliedProducts: { $in: productIds } },
+        { appliedCategories: { $in: categoryIds } },
+      ],
+      active: true,
+      startDate: { $lte: currentDate },
+      expiryDate: { $gte: currentDate },
+    }).lean();
+
+    // const finalCoupons = validCoupons.filter(
+    //   (coupon) => cartTotal >= (coupon.minPurchase || 0)
+    // );
+
+    console.log("These are the items in the cart: ", items);
+    console.log("Coupons available: ", validCoupons);
 
     const addresses = await Address.find({ userId: req.session.userId });
     if (!addresses) {
@@ -38,9 +65,12 @@ exports.getCheckoutPage = async (req, res) => {
       });
     }
 
-    return res
-      .status(200)
-      .render("userPages/checkoutPage", { cart, addresses, items });
+    return res.status(200).render("userPages/checkoutPage", {
+      cart,
+      addresses,
+      items,
+      coupons: validCoupons,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({
@@ -136,6 +166,7 @@ exports.placeOrderController = async (req, res) => {
       userId,
       amount,
       amount,
+      grantTotal: cart.total,
       paymentMethod,
       items: orderItems,
       addressId,
@@ -180,6 +211,57 @@ exports.placeOrderController = async (req, res) => {
       status: "success",
       title: "Success",
       message: "Order placed successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      status: "error",
+      title: "Error",
+      message: "Server error",
+    });
+  }
+};
+
+exports.applyCouponController = async (req, res) => {
+  try {
+    const { cartId, code } = req.body;
+    console.log('apply coupon working')
+    if (!code || !cartId) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Coupon code and cart ID are required",
+      });
+    }
+
+    const coupon = await Coupon.findOne({
+      code: code.toUpperCase(),
+      isActive: true,
+    });
+
+    if (!coupon) {
+      return res.status(404).json({
+        status: "error",
+        message: "Invalid coupon code",
+      });
+    }
+
+    coupon.usedCount += 1;
+    await coupon.save();
+
+    const updatedCart = await Cart.findByIdAndUpdate(
+      cartId,
+      {
+        appliedCoupon: coupon._id,
+      },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      status: "success",
+      message: "Coupon applied to order",
+      cart: updatedCart,
+      coupon
     });
   } catch (err) {
     console.error(err);

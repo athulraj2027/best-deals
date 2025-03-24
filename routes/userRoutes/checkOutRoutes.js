@@ -8,4 +8,5 @@ router
   .get(userGuestMiddleware, checkOutController.getCheckoutPage)
   .post(checkOutController.placeOrderController);
 
+router.route("/apply-coupon").post(checkOutController.applyCouponController);
 module.exports = router;
