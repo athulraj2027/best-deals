@@ -13,7 +13,7 @@ const CartItemSchema = new mongoose.Schema(
     color: { type: String, required: true },
     size: { type: String, required: true },
     price: { type: Number, required: true },
-    quantity: { type: Number, required: true, min: 1 },
+    quantity: { type: Number, required: true, min: 1,default : 1 },
     image: { type: String, required: true },
   },
   { timestamps: true }

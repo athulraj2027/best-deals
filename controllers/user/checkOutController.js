@@ -4,10 +4,34 @@ const Address = require("../../models/Address");
 const Order = require("../../models/Order");
 const Product = require("../../models/Product");
 const Coupon = require("../../models/Coupon");
+const Razorpay = require("razorpay");
+
+// helper function
+// return new Promise((resolve, reject) => {
+var instance = new Razorpay({
+  key_id: "rzp_test_tTcfsqC1bRVLSi",
+  key_secret: "GmoWj3uV9ZKKDB9T5hJwU6Sn",
+});
+// });
+function generateRazorpay(orderId, total) {
+  return new Promise((resolve, reject) => {
+    var options = {
+      amount: Math.round(parseFloat(total)),
+      currency: "INR",
+      receipt: orderId,
+    };
+    instance.orders.create(options, function (err, order) {
+      if (err) {
+        console.log("error:", err);
+      }
+      console.log("New order : ", order);
+    });
+  });
+}
 
 exports.getCheckoutPage = async (req, res) => {
   try {
-    console.log(req.params.id);
+    // console.log(req.params.id);
     const cartId = req.params.id;
     if (!cartId) {
       return res.status(400).json({
@@ -53,8 +77,8 @@ exports.getCheckoutPage = async (req, res) => {
     //   (coupon) => cartTotal >= (coupon.minPurchase || 0)
     // );
 
-    console.log("These are the items in the cart: ", items);
-    console.log("Coupons available: ", validCoupons);
+    // console.log("These are the items in the cart: ", items);
+    // console.log("Coupons available: ", validCoupons);
 
     const addresses = await Address.find({ userId: req.session.userId });
     if (!addresses) {
@@ -83,14 +107,14 @@ exports.getCheckoutPage = async (req, res) => {
 
 exports.placeOrderController = async (req, res) => {
   try {
-    console.log("Request body : ", req.body);
+    // console.log("Request body : ", req.body);
     const userId = req.session.userId;
     const cartId = req.params.id;
+console.log(req.body)
+    const {amount,  paymentMethod, items, addressId } = req.body;
+    console.log(paymentMethod);
 
-    const { amount, paymentMethod, items, addressId } = req.body;
-    console.log(items);
-
-    if (!amount || !paymentMethod || !items || !addressId) {
+    if ( !amount ||!paymentMethod || !items || !addressId) {
       return res.status(400).json({
         status: "error",
         title: "Error",
@@ -109,13 +133,6 @@ exports.placeOrderController = async (req, res) => {
         status: "error",
         title: "Error",
         message: "UserId not found",
-      });
-    }
-    if (!amount) {
-      return res.status(400).json({
-        status: "error",
-        title: "Error",
-        message: "Amount not added",
       });
     }
 
@@ -165,14 +182,18 @@ exports.placeOrderController = async (req, res) => {
     const order = new Order({
       userId,
       amount,
-      amount,
       grantTotal: cart.total,
       paymentMethod,
       items: orderItems,
       addressId,
       status: "pending",
     });
+    console.log("amount : ", amount);
+    if (order.paymentMethod === "razorpay") {
+      console.log("razorpay working");
 
+      generateRazorpay(order._id.toString(), order.grantTotal);
+    }
     for (const item of items) {
       const updatedProduct = await Product.findOneAndUpdate(
         {
@@ -225,7 +246,7 @@ exports.placeOrderController = async (req, res) => {
 exports.applyCouponController = async (req, res) => {
   try {
     const { cartId, code } = req.body;
-    console.log('apply coupon working')
+    console.log("apply coupon working");
     if (!code || !cartId) {
       return res.status(400).json({
         status: "error",
@@ -261,7 +282,7 @@ exports.applyCouponController = async (req, res) => {
       status: "success",
       message: "Coupon applied to order",
       cart: updatedCart,
-      coupon
+      coupon,
     });
   } catch (err) {
     console.error(err);

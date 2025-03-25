@@ -350,7 +350,11 @@
             method="post"
             id="checkoutForm"
           >
-            <input type="hidden" name="amount" value="<%= cart.total %>" />
+            <input
+              type="hidden"
+              name="amount"
+              value="<%= Math.round( cart.total ) %>"
+            />
             <input
               type="hidden"
               name="items"
@@ -406,7 +410,6 @@
                 <div class="tab-btn" data-tab="cod" data-payment="cod">
                   Cash on Delivery
                 </div>
-                <div class="tab-btn" data-tab="upi" data-payment="upi">UPI</div>
                 <div
                   class="tab-btn"
                   data-tab="razorpay"
@@ -417,48 +420,16 @@
               </div>
 
               <div class="payment-methods">
-                <!-- <div class="payment-tab active" id="card">
+                <div class="payment-tab active" id="card">
                   <div class="tab-content">
-                    <div class="form-group">
-                      <label for="cardName">Name on Card *</label>
-                      <input type="text" id="cardName" required />
-                    </div>
-
-                    <div class="form-group">
-                      <label for="cardNumber">Card Number *</label>
-                      <input
-                        type="text"
-                        id="cardNumber"
-                        placeholder="1234 5678 9012 3456"
-                        required
-                      />
-                    </div>
-
-                    <div class="form-row">
-                      <div class="form-group">
-                        <label for="expiration">Expiration Date *</label>
-                        <input
-                          type="text"
-                          id="expiration"
-                          placeholder="MM/YY"
-                          required
-                        />
-                      </div>
-
-                      <div class="form-group">
-                        <label for="cvv">CVV *</label>
-                        <input type="text" id="cvv" required />
-                      </div>
-                    </div>
-
-                    <div class="payment-icons">
+                    <p>Pay with your credit or debit card securely.</p>
+                    <div class="payment-icons" style="margin-top: 15px">
                       <div class="payment-icon">Visa</div>
                       <div class="payment-icon">MC</div>
                       <div class="payment-icon">Amex</div>
-                      <div class="payment-icon">Disc</div>
                     </div>
                   </div>
-                </div> -->
+                </div>
 
                 <div class="payment-tab" id="cod">
                   <div class="tab-content">
@@ -467,37 +438,6 @@
                       Additional fee of $2.99 will be applied for Cash on
                       Delivery.
                     </p>
-                  </div>
-                </div>
-
-                <!-- <div class="payment-tab" id="upi">
-                  <div class="tab-content">
-                    <p>Select your preferred UPI app:</p>
-
-                    <div class="upi-options">
-                      <div class="upi-option selected">
-                        <div class="payment-logo">GPay</div>
-                      </div>
-                      <div class="upi-option">
-                        <div class="payment-logo">PhonePe</div>
-                      </div>
-                      <div class="upi-option">
-                        <div class="payment-logo">Paytm</div>
-                      </div>
-                      <div class="upi-option">
-                        <div class="payment-logo">Amazon Pay</div>
-                      </div>
-                    </div>
-
-                    <div class="form-group">
-                      <label for="upiId">UPI ID *</label>
-                      <input
-                        type="text"
-                        id="upiId"
-                        placeholder="yourname@upi"
-                        required
-                      />
-                    </div>
                   </div>
                 </div>
 
@@ -518,7 +458,7 @@
                       <div class="payment-icon">Bank</div>
                     </div>
                   </div>
-                </div> -->
+                </div>
               </div>
             </div>
 
@@ -529,10 +469,12 @@
         <div class="order-summary">
           <h3>Order Summary</h3>
 
-          <div class="order-item">
+          <div class="order-items">
             <% items.forEach(item =>{ %>
-            <span><%= item.name %></span>
-            <span><%= item.price * item.quantity %></span><br>
+            <div class="order-item">
+              <span><%= item.name %></span>
+              <span>$<%= (item.price * item.quantity).toFixed(2) %></span>
+            </div>
             <% }) %>
           </div>
 
@@ -543,7 +485,7 @@
 
           <div class="order-item">
             <span>Shipping</span>
-            <span><%= cart.shipping.toFixed(2) %></span>
+            <span>$<%= cart.shipping.toFixed(2) %></span>
           </div>
 
           <div class="order-item">
@@ -626,6 +568,7 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         // Payment method tabs
@@ -697,13 +640,85 @@
             }
           });
 
-          // Send as JSON to your backend
+          // Check if Razorpay is selected
+          if (formDataObj.paymentMethod === "razorpay") {
+            // Create Razorpay order first
+            fetch(`/checkout/create-razorpay-order`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                amount: formDataObj.amount,
+                cartId: "<%= cart._id %>",
+              }),
+            })
+              .then((response) => response.json())
+              .then((orderData) => {
+                if (orderData.status === "success") {
+                  // Configure Razorpay options
+                  const options = {
+                    key: "rzp_test_tTcfsqC1bRVLSi", // Enter the Key ID from the Dashboard
+                    amount: orderData.order.amount, // Amount in paise
+                    currency: "INR",
+                    name: "BestDeals",
+                    description: "Order Payment",
+                    order_id: orderData.order.id,
+                    handler: function (response) {
+                      // On successful payment, submit the form with payment details
+                      formDataObj.razorpayPaymentId =
+                        response.razorpay_payment_id;
+                      formDataObj.razorpayOrderId = response.razorpay_order_id;
+                      formDataObj.razorpaySignature =
+                        response.razorpay_signature;
+
+                      submitOrder(formDataObj);
+                    },
+                    prefill: {
+                      name: "Customer",
+                      email: "customer@example.com",
+                      contact: "",
+                    },
+                    theme: {
+                      color: "#4a90e2",
+                    },
+                  };
+
+                  // Initialize Razorpay
+                  const razorpay = new Razorpay(options);
+                  razorpay.open();
+                } else {
+                  Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: orderData.message || "Failed to create payment order",
+                    confirmButtonText: "OK",
+                  });
+                }
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+                Swal.fire({
+                  icon: "error",
+                  title: "Error",
+                  text: "Failed to initialize payment",
+                  confirmButtonText: "OK",
+                });
+              });
+          } else {
+            // For non-Razorpay methods, submit directly
+            submitOrder(formDataObj);
+          }
+        });
+
+        // Function to submit the order
+        function submitOrder(formData) {
           fetch(`/checkout/<%= cart._id %>`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify(formDataObj),
+            body: JSON.stringify(formData),
           })
             .then((response) => response.json())
             .then((data) => {
@@ -711,7 +726,6 @@
                 Swal.fire({
                   icon: "success",
                   title: "Success",
-                  status: "success",
                   text: data.message,
                   confirmButtonText: "OK",
                 }).then(() => {
@@ -721,7 +735,6 @@
                 Swal.fire({
                   icon: "error",
                   title: "Error",
-                  status: "error",
                   text: data.message,
                   confirmButtonText: "OK",
                 });
@@ -732,21 +745,11 @@
               Swal.fire({
                 icon: "error",
                 title: "Error",
-                status: "error",
-                text: data.message,
+                text: "An unexpected error occurred",
                 confirmButtonText: "OK",
               });
             });
-        });
-
-        // UPI option selection remains the same
-        const upiOptions = document.querySelectorAll(".upi-option");
-        upiOptions.forEach((option) => {
-          option.addEventListener("click", function () {
-            upiOptions.forEach((o) => o.classList.remove("selected"));
-            this.classList.add("selected");
-          });
-        });
+        }
       });
     </script>
     <script>
@@ -853,12 +856,6 @@
           });
       });
 
-      // Function to handle clicking on coupon chips
-      function selectCoupon(code) {
-        couponInput.value = code;
-        applyCouponBtn.click(); // Automatically apply the selected coupon
-      }
-
       // Function to show coupon status messages
       function showCouponMessage(message, type) {
         couponMessage.textContent = message;
@@ -895,26 +892,9 @@
       document.querySelectorAll(".coupon-chip").forEach((chip) => {
         chip.addEventListener("click", function () {
           const code = this.querySelector("strong").textContent;
-          selectCoupon(code);
+          couponInput.value = code;
+          applyCouponBtn.click(); // Automatically apply the selected coupon
         });
-      });
-
-      // Update the form submission to include coupon info
-      const checkoutForm = document.getElementById("checkoutForm");
-      const originalSubmitHandler = checkoutForm.onsubmit;
-
-      checkoutForm.addEventListener("submit", function (e) {
-        // If we have an applied coupon, make sure it's included in the submission
-        if (appliedCoupon) {
-          if (!document.getElementById("appliedCouponInput")) {
-            const couponInput = document.createElement("input");
-            couponInput.type = "hidden";
-            couponInput.id = "appliedCouponInput";
-            couponInput.name = "couponCode";
-            couponInput.value = appliedCoupon.code;
-            this.appendChild(couponInput);
-          }
-        }
       });
     </script>
   </body>
