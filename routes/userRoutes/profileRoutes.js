@@ -21,7 +21,7 @@ router
 
 router
   .route("/password")
-  .get(profileController.getResetPasswordController)
+  .get(profileController.getResetPassword)
   .post(profileController.resetPasswordController);
   
 module.exports = router;

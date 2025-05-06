@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Edit Product</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
       :root {
         --primary-color: #4361ee;
@@ -1050,7 +1051,8 @@
             title: 'Validation Error',
             text: 'Please check the form for errors.',
           });
-        } else {
+          return
+        } 
           // Show loading state
           Swal.fire({
             title: 'Updating Product',
@@ -1061,58 +1063,40 @@
             }
           });
           
-    // Create FormData object
+    // Use FormData directly for the fetch
     const formData = new FormData(editProductForm);
-    const formObject = {};
+    formData.append('active', statusToggle.checked);
 
-formData.forEach((value, key) => {
-  formObject[key] = value;
-});
+    const response = await fetch('/admin/products/edit/<%= product._id %>', {
+      method: 'POST',
+      body: formData // Don't convert to JSON - FormData handles files properly
+    });
 
-formObject.active = statusToggle.checked;
+    const data = await response.json();
 
-    
-    fetch('/admin/products/edit/<%= product._id %>', {
-      method: 'POST', headers: {
-    'Content-Type': 'application/json'
-  },
-      body: JSON.stringify(formObject)
-    })
-    .then(data=>data.json())
-    .then(data => {
-      if(data.status==='success'){
-        Swal.fire({
+    if (data.status === 'success') {
+      await Swal.fire({
         icon: 'success',
         title: 'Success!',
         text: data.message || 'Product updated successfully',
         confirmButtonText: 'OK'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.href = '/admin/products';
-        }
       });
-      }
-      else{
-        Swal.fire({
-        icon: 'error',
-        title: 'Error!',
-        text: data.message || 'Product updation failed',
-        confirmButtonText: 'OK'
-      }
-        )}
-      
-    })
-    .catch(error => {
-      // Handle error
-      console.error('Error:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to update Product. Please try again later.'
-      });
+      window.location.href = '/admin/products';
+    } else {
+      throw new Error(data.message || 'Product update failed');
+    }
+  
+    console.error('Error:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: error.message || 'Failed to update Product. Please try again later.'
     });
-        }
-      });
+  }
+);
+
+    
+ 
     </script>
   </body>
 </html>

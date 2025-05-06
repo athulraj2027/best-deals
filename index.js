@@ -5,6 +5,7 @@ const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const razorpay = require('razorpay')
+
 // --- Local imports --- 
 
 const userRoutes = require("./routes/userRoutes/userMainRoutes");
@@ -36,9 +37,9 @@ app.use(authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/", userRoutes);
 
-app.use((req, res, next) => {
-  res.status(404).send("Page not found");
-});
+// app.use((req, res, next) => {
+//   res.status(404).send("Page not found");
+// });
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

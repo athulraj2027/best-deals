@@ -13,20 +13,20 @@ var instance = new Razorpay({
   key_secret: "GmoWj3uV9ZKKDB9T5hJwU6Sn",
 });
 // });
-function generateRazorpay(orderId, total) {
-  return new Promise((resolve, reject) => {
-    var options = {
-      amount: Math.round(parseFloat(total)),
-      currency: "INR",
-      receipt: orderId,
-    };
-    instance.orders.create(options, function (err, order) {
-      if (err) {
-        console.log("error:", err);
-      }
-      console.log("New order : ", order);
-    });
-  });
+async function generateRazorpay(orderId, total) {
+  var options = {
+    amount: Math.round(parseFloat(total) * 100), // Razorpay expects amount in paise (multiply by 100)
+    currency: "INR",
+    receipt: orderId,
+  };
+
+  try {
+    const order = await instance.orders.create(options);
+    return order.id; // Return Razorpay order ID
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to create Razorpay order");
+  }
 }
 
 exports.getCheckoutPage = async (req, res) => {
@@ -110,17 +110,17 @@ exports.placeOrderController = async (req, res) => {
     // console.log("Request body : ", req.body);
     const userId = req.session.userId;
     const cartId = req.params.id;
-console.log(req.body)
-    const {amount,  paymentMethod, items, addressId } = req.body;
+    console.log(req.body);
+    const { amount, paymentMethod, items, addressId } = req.body;
     console.log(paymentMethod);
 
-    if ( !amount ||!paymentMethod || !items || !addressId) {
-      return res.status(400).json({
-        status: "error",
-        title: "Error",
-        message: "Credentials not complete",
-      });
-    }
+    // if ( !amount ||!paymentMethod || !items || !addressId) {
+    //   return res.status(400).json({
+    //     status: "error",
+    //     title: "Error",
+    //     message: "Credentials not complete",
+    //   });
+    // }
     if (!cartId) {
       return res.status(400).json({
         status: "error",
@@ -168,6 +168,8 @@ console.log(req.body)
       });
     }
 
+    const orderTotalPrice =
+      cart.updatedTotal === 0 ? cart.total : cart.updatedTotal;
     const orderItems = cart.items.map((item) => ({
       productId: item.productId._id,
       variantId: item.variantId,
@@ -182,17 +184,38 @@ console.log(req.body)
     const order = new Order({
       userId,
       amount,
-      grantTotal: cart.total,
+      grantTotal: orderTotalPrice,
+      originalPrice: cart.total,
       paymentMethod,
       items: orderItems,
       addressId,
       status: "pending",
     });
     console.log("amount : ", amount);
-    if (order.paymentMethod === "razorpay") {
-      console.log("razorpay working");
 
-      generateRazorpay(order._id.toString(), order.grantTotal);
+    if (!order) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Order failed",
+      });
+    }
+    if (order.paymentMethod === "razorpay") {
+      console.log(order);
+      const razorpayOrderId = await generateRazorpay(
+        order._id.toString(),
+        order.grantTotal
+      );
+      order.razorpayOrderId = razorpayOrderId;
+      await order.save();
+      console.log("saving order");
+
+      return res.render("userPages/payment", {
+        orderId: order._id,
+        order,
+        razorpayOrderId,
+        key: "rzp_test_tTcfsqC1bRVLSi",
+      });
     }
     for (const item of items) {
       const updatedProduct = await Product.findOneAndUpdate(
@@ -215,17 +238,10 @@ console.log(req.body)
       }
     }
 
-    if (!order) {
-      return res.status(400).json({
-        status: "error",
-        title: "Error",
-        message: "Order failed",
-      });
-    }
-
     await order.save();
 
     cart.items = [];
+    cart.updatedTotal = 0;
 
     await cart.save();
     return res.status(200).json({
@@ -246,6 +262,7 @@ console.log(req.body)
 exports.applyCouponController = async (req, res) => {
   try {
     const { cartId, code } = req.body;
+    console.log(typeof code);
     console.log("apply coupon working");
     if (!code || !cartId) {
       return res.status(400).json({
@@ -255,11 +272,12 @@ exports.applyCouponController = async (req, res) => {
       });
     }
 
+    const cart = await Cart.findById(cartId);
     const coupon = await Coupon.findOne({
-      code: code.toUpperCase(),
-      isActive: true,
+      code: code,
+      active: true,
     });
-
+    console.log("coupon : ", coupon);
     if (!coupon) {
       return res.status(404).json({
         status: "error",
@@ -267,25 +285,154 @@ exports.applyCouponController = async (req, res) => {
       });
     }
 
-    coupon.usedCount += 1;
-    await coupon.save();
+    if (coupon.discountType === "fixed") {
+      cart.updatedTotal = cart.total - coupon.discountValue;
+    } else {
+      cart.updatedTotal = ((100 - coupon.discountValue) / 100) * cart.total;
+    }
 
-    const updatedCart = await Cart.findByIdAndUpdate(
-      cartId,
-      {
-        appliedCoupon: coupon._id,
-      },
-      { new: true }
-    );
+    coupon.usageCount--;
+    cart.appliedCoupon = coupon._id;
+
+    await coupon.save();
+    await cart.save();
 
     return res.status(200).json({
       status: "success",
       message: "Coupon applied to order",
-      cart: updatedCart,
+      cart,
       coupon,
     });
   } catch (err) {
     console.error(err);
+    return res.status(500).json({
+      status: "error",
+      title: "Error",
+      message: "Server error ",
+    });
+  }
+};
+
+exports.addDeliveryAddressController = async (req, res) => {
+  const { streetAddress, city, state, zipCode, country, phoneNumber } =
+    req.body;
+  const userId = req.session.userId;
+  try {
+    if (!streetAddress) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Add street address",
+      });
+    }
+    if (!city) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Add city",
+      });
+    }
+
+    if (!state) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Add state",
+      });
+    }
+    if (!zipCode) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Add zipcode",
+      });
+    }
+    if (!country) {
+      return res.status(400).jsosn({
+        status: "error",
+        title: "Error",
+        message: "Add country",
+      });
+    }
+    if (!phoneNumber) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Add phone number",
+      });
+    }
+
+    const stateRegex = /^[A-Za-z\s]{2,50}$/;
+    const countryRegex = /^[A-Za-z\s]{2,60}$/;
+    const cityRegex = /^[A-Za-z\s]{2,50}$/;
+    const zipCodeRegex = /^\d{6}$/;
+    const streetAddressRegex = /^[A-Za-z0-9\s,.#-]{5,100}$/;
+
+    if (!stateRegex.test(state)) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Invalid format for state name",
+      });
+    }
+    if (!countryRegex.test(country)) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Invalid format for country name",
+      });
+    }
+    if (!cityRegex.test(city)) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Invalid format for city name",
+      });
+    }
+    if (!zipCodeRegex.test(zipCode)) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Invalid format for Zip Code",
+      });
+    }
+
+    if (!streetAddressRegex.test(streetAddress)) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Invalid format for street address",
+      });
+    }
+    console.log("saving the new address");
+
+    const newAddress = new Address({
+      userId,
+      type: "Other",
+      streetAddress,
+      city,
+      state,
+      zipCode,
+      country,
+    });
+
+    await newAddress.save();
+
+    if (!newAddress) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "User not found or something wrong in adding address",
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      title: "Success",
+      message: "Address created successfully",
+    });
+  } catch (err) {
+    console.log("Error in adding delivery address : ", err);
     return res.status(500).json({
       status: "error",
       title: "Error",

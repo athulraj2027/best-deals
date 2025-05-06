@@ -18,6 +18,7 @@ exports.getUserProfilePage = async (req, res) => {
 
 exports.getUserAddressPage = async (req, res) => {
   const userId = req.session.userId;
+  const user = await User.findById(userId);
   try {
     if (!userId) {
       return res.status(400).json({
@@ -48,6 +49,7 @@ exports.getUserAddressPage = async (req, res) => {
 
     return res.status(200).render("userPages/profilePages/addressPage", {
       addresses: userAddresses,
+      user,
     });
   } catch (err) {
     console.log(err);
@@ -251,7 +253,7 @@ exports.getEditAddressPage = async (req, res) => {
 
     return res
       .status(200)
-      .render("userPages/profilePages/editAddressPage", { address });
+      .render("userPages/profilePages/editAddressPage", { address, user });
   } catch (err) {
     console.error("Error in loading edit address Page : ", err);
     return res.status(500).json({
@@ -393,7 +395,7 @@ exports.editAddressController = async (req, res) => {
 exports.getOrdersPage = async (req, res) => {
   try {
     const userId = req.session.userId;
-
+    const user = await User.findById(userId);
     const orders = await Order.find({ userId });
     if (!orders) {
       return res.status(400).json({
@@ -405,7 +407,7 @@ exports.getOrdersPage = async (req, res) => {
 
     return res
       .status(200)
-      .render("userPages/profilePages/orderPage", { orders });
+      .render("userPages/profilePages/orderPage", { orders, user });
   } catch (err) {
     console.error(err);
     return res.status;
@@ -485,7 +487,7 @@ exports.cancelOrderController = async (req, res) => {
   }
 };
 
-exports.getResetPasswordController = async (req, res) => {
+exports.getResetPassword = async (req, res) => {
   try {
     console.log("sessionId : ", req.session.userId);
 
@@ -496,6 +498,9 @@ exports.getResetPasswordController = async (req, res) => {
         title: "Error",
         message: "User not found",
       });
+    }
+    if (user.googleId) {
+      return res.status(400).redirect("/profile");
     }
     return res.status(200).render("userPages/profilePages/passwordPage");
   } catch (err) {
@@ -521,10 +526,7 @@ exports.resetPasswordController = async (req, res) => {
       });
     }
 
-    const isPasswordValid = bcrypt.compare(
-      currentPassword,
-      user.password
-    );
+    const isPasswordValid = bcrypt.compare(currentPassword, user.password);
     if (!isPasswordValid) {
       return res.status(400).json({
         status: "error",
@@ -541,7 +543,7 @@ exports.resetPasswordController = async (req, res) => {
         message: "Couldn't hash password",
       });
     }
-    
+
     user.password = newUserPassword;
     await user.save();
 
@@ -550,9 +552,7 @@ exports.resetPasswordController = async (req, res) => {
       title: "Success",
       message: "Password updated successfully",
     });
-
   } catch (error) {
-
     console.error(error);
     return res.status(500).json({
       status: "error",

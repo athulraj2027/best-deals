@@ -324,8 +324,7 @@
                   '' %> <% } else { %> No items <% } %>
                 </td>
                 <td>
-                  $<%= order.items.reduce((sum, item) => sum + (item.price *
-                  item.quantity), 0).toFixed(2) %>
+                  $<%= order.grantTotal%>
                 </td>
                 <td>
                   <span class="status status-<%= order.status %>">
@@ -462,8 +461,7 @@
                     >
                       <span class="detail-label">Order Total:</span>
                       <span class="detail-value"
-                        >$<%= order.items.reduce((sum, item) => sum +
-                        (item.price * item.quantity), 0).toFixed(2) %></span
+                        >$<%= order.grantTotal %></span
                       >
                     </div>
 

@@ -25,7 +25,7 @@ const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["pending", "processing", "delivered", "cancelled"],
+    enum: ["pending", "processing", "delivered", "cancelled", "paid"],
     default: "pending",
   },
   grantTotal: {
@@ -52,6 +52,36 @@ const orderSchema = new mongoose.Schema({
     default: Date.now,
   },
   items: [OrderItemSchema],
+  razorpay: {
+    orderId: {
+      type: String,
+      // This stores the Razorpay order ID returned when creating an order
+    },
+    paymentId: {
+      type: String,
+      // This stores the Razorpay payment ID after successful payment
+    },
+    signature: {
+      type: String,
+      // This stores the Razorpay signature for payment verification
+    },
+    amount: {
+      type: Number,
+      // Amount in smallest currency unit (e.g., paise for INR, cents for USD)
+    },
+    currency: {
+      type: String,
+      default: "INR",
+    },
+    receipt: {
+      type: String,
+      // Optional: Razorpay receipt ID (could be your internal order ID)
+    },
+    paymentDate: {
+      type: Date,
+    },
+  },
+  originalPrice: { type: Number, required: true },
 });
 
 module.exports = mongoose.model("Order", orderSchema);

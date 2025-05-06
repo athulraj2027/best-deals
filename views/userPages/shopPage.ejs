@@ -16,33 +16,35 @@
     <link rel="stylesheet" href="/userCSS/partials/partials_css.css" />
     <style>
       :root {
-        --primary-color: #6c5ce7;
-        --secondary-color: #a29bfe;
-        --accent-color: #00cec9;
-        --dark-bg: #121212;
-        --card-bg: #37404d;
-        --text-primary: #f5f5f5;
-        --text-secondary: #b3b3b3;
+        --primary-color: #1d4ed8; /* bg-blue-700 */
+        --secondary-color: #60a5fa; /* lighter blue */
+        --accent-color: #2563eb; /* medium blue */
+        --background: #ffffff;
+        --card-bg: #f8fafc;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
       }
 
       body {
-        /* background-color: var(--dark-bg); */
+        background-color: var(--background);
         color: var(--text-primary);
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       }
 
       .page-header {
-        padding: 3rem 0;
-        background: linear-gradient(135deg, #6c5ce7, #00cec9);
+        padding: 2rem 0;
+        background: var(--primary-color);
         margin-bottom: 2rem;
-        border-radius: 0 0 30px 30px;
-        box-shadow: 0 4px 20px rgba(108, 92, 231, 0.2);
+        border-radius: 0 0 20px 20px;
+        box-shadow: 0 4px 10px rgba(29, 78, 216, 0.2);
       }
 
       .page-header h1 {
         font-weight: 700;
         letter-spacing: 1px;
-        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        color: white;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
 
       /* Filter Panel Styles */
@@ -52,9 +54,9 @@
         background-color: var(--primary-color);
         color: white;
         border: none;
-        padding: 12px;
+        padding: 10px;
         margin-bottom: 15px;
-        border-radius: 10px;
+        border-radius: 8px;
         font-weight: 600;
         text-align: left;
       }
@@ -70,19 +72,18 @@
 
       .filter-section {
         background-color: var(--card-bg);
-        padding: 1.5rem;
-        border-radius: 15px;
+        padding: 1.25rem;
+        border-radius: 10px;
         margin-bottom: 20px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        border-left: 4px solid var(--primary-color);
-        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        border-left: 3px solid var(--primary-color);
       }
 
       .filter-section h5 {
-        color: var(--accent-color);
-        margin-bottom: 1.5rem;
+        color: var(--primary-color);
+        margin-bottom: 1.25rem;
         font-weight: 600;
-        border-bottom: 1px solid #333;
+        border-bottom: 1px solid var(--border-color);
         padding-bottom: 10px;
         display: flex;
         align-items: center;
@@ -92,24 +93,22 @@
       .filter-section label {
         color: var(--text-secondary);
         font-weight: 500;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
         font-size: 0.9rem;
       }
 
       .form-select,
       .form-control {
-        background-color: #252525;
-        border: 1px solid #444;
+        background-color: white;
+        border: 1px solid var(--border-color);
         color: var(--text-primary);
-        border-radius: 8px;
-        transition: all 0.3s ease;
+        border-radius: 6px;
       }
 
       .form-select:focus,
       .form-control:focus {
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.25);
-        background-color: #2a2a2a;
+        box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.15);
       }
 
       /* Price Range Slider */
@@ -121,53 +120,32 @@
         display: flex;
         justify-content: space-between;
         margin-bottom: 10px;
-        color: var(--accent-color);
+        color: var(--primary-color);
         font-weight: 600;
       }
-/* 
-      .range-slider {
-        .-webkit-appearance: none;
-        width: 100%;
-        height: 5px;
-        background: #333;
-        border-radius: 5px;
-        margin-bottom: 15px;
-      } */
 
       .range-slider::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
         background: var(--primary-color);
-        cursor: pointer;
-        box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
       }
 
       .range-slider::-moz-range-thumb {
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
         background: var(--primary-color);
-        cursor: pointer;
-        box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
       }
 
       /* Chip-style Filters */
       .chip-container {
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
-        margin-bottom: 20px;
+        gap: 8px;
+        margin-bottom: 15px;
       }
 
       .filter-chip {
-        background-color: #252525;
-        border: 1px solid #444;
+        background-color: #f1f5f9;
+        border: 1px solid var(--border-color);
         color: var(--text-secondary);
         border-radius: 50px;
-        padding: 6px 14px;
+        padding: 5px 12px;
         font-size: 0.85rem;
         cursor: pointer;
         transition: all 0.2s ease;
@@ -187,10 +165,10 @@
       /* Product Cards */
       .card {
         width: 100%;
-        background-color: var(--card-bg);
+        background-color: white;
         color: var(--text-primary);
-        border: none;
-        border-radius: 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
         overflow: hidden;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         height: 100%;
@@ -198,7 +176,7 @@
 
       .card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
       }
 
       .card-img-wrapper {
@@ -220,7 +198,7 @@
 
       .card-body {
         padding: 1.25rem;
-        border-top: 1px solid #333;
+        border-top: 1px solid var(--border-color);
       }
 
       .card-title {
@@ -234,7 +212,7 @@
       .product-price {
         font-size: 1.25rem;
         font-weight: 700;
-        color: var(--accent-color);
+        color: var(--primary-color);
         margin-bottom: 1rem;
       }
 
@@ -243,7 +221,7 @@
         top: 10px;
         right: 10px;
         background-color: var(--accent-color);
-        color: #121212;
+        color: white;
         font-weight: bold;
         padding: 5px 10px;
         border-radius: 20px;
@@ -253,35 +231,34 @@
       .sale-badge {
         top: 10px;
         left: 10px;
-        background-color: #ff6b6b;
+        background-color: #ef4444;
       }
 
       .btn-primary {
         background-color: var(--primary-color);
         border: none;
-        border-radius: 8px;
+        border-radius: 6px;
         padding: 0.5rem 1rem;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
         font-weight: 500;
         width: 100%;
       }
 
       .btn-primary:hover {
-        background-color: #5649c0;
+        background-color: #1e40af;
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(108, 92, 231, 0.3);
+        box-shadow: 0 4px 6px rgba(29, 78, 216, 0.2);
       }
 
       .btn-filter {
-        background-color: var(--accent-color);
-        color: #121212;
+        background-color: var(--primary-color);
+        color: white;
         font-weight: 600;
         margin-top: 1rem;
       }
 
       .btn-filter:hover {
-        background-color: #00b2af;
-        color: #121212;
+        background-color: #1e40af;
       }
 
       .clear-filter {
@@ -300,7 +277,7 @@
       .no-products {
         background-color: var(--card-bg);
         padding: 3rem;
-        border-radius: 15px;
+        border-radius: 10px;
         text-align: center;
       }
 
@@ -321,17 +298,18 @@
         display: flex;
         gap: 5px;
         background-color: var(--card-bg);
-        padding: 10px 15px;
+        padding: 8px 12px;
         border-radius: 50px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
       }
 
       .pagination a {
-        width: 38px;
-        height: 38px;
+        width: 35px;
+        height: 35px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: #252525;
+        background-color: white;
         color: var(--text-secondary);
         border-radius: 50%;
         text-decoration: none;
@@ -339,13 +317,40 @@
       }
 
       .pagination a:hover {
-        background-color: #333;
+        background-color: #f1f5f9;
         color: var(--text-primary);
       }
 
       .pagination a.active {
         background-color: var(--primary-color);
         color: white;
+      }
+
+      /* Color Options */
+      .color-options {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .color-option {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        cursor: pointer;
+        position: relative;
+        border: 1px solid #e2e8f0;
+      }
+
+      .color-option.selected::after {
+        content: "";
+        position: absolute;
+        top: -3px;
+        left: -3px;
+        right: -3px;
+        bottom: -3px;
+        border: 2px solid var(--primary-color);
+        border-radius: 50%;
       }
 
       /* Responsive Styles */
@@ -361,7 +366,7 @@
         }
 
         .filter-section {
-          margin-bottom: 20px;
+          margin-bottom: 15px;
         }
 
         .filter-collapse {
@@ -373,8 +378,8 @@
         }
 
         .page-header {
-          padding: 2rem 0;
-          border-radius: 0 0 20px 20px;
+          padding: 1.5rem 0;
+          border-radius: 0 0 15px 15px;
         }
 
         .page-header h1 {
@@ -401,69 +406,26 @@
         }
 
         .pagination a {
-          width: 32px;
-          height: 32px;
+          width: 30px;
+          height: 30px;
           font-size: 0.85rem;
         }
       }
 
-      /* Quick View Modal */
-      .modal-content {
-        background-color: var(--card-bg);
-        color: var(--text-primary);
-        border-radius: 15px;
-        border: none;
-      }
-
-      .modal-header {
-        border-bottom: 1px solid #333;
-      }
-
-      .modal-footer {
-        border-top: 1px solid #333;
-      }
-
-      .close {
-        color: var(--text-primary);
-        opacity: 0.8;
-      }
-
-      .close:hover {
-        opacity: 1;
-      }
-
-      /* Color Options */
-      .color-options {
-        display: flex;
-        gap: 8px;
-        margin-top: 10px;
-      }
-
-      .color-option {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        cursor: pointer;
-        position: relative;
-      }
-
-      .color-option.selected::after {
-        content: "";
-        position: absolute;
-        top: -4px;
-        left: -4px;
-        right: -4px;
-        bottom: -4px;
-        border: 2px solid var(--accent-color);
-        border-radius: 50%;
+      /* Rating Stars */
+      .rating .fa-star, .rating .fa-star-half-alt {
+        color: #f59e0b;
       }
     </style>
   </head>
   <body>
     <%- include('./partials/headerPartial') %>
+    
 
     <div class="container my-4">
       <div class="row">
+        
+        
         <!-- Mobile Filter Toggle -->
         <div class="col-12 d-md-none mb-3">
           <button class="filter-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
@@ -473,6 +435,22 @@
 
         <!-- Filter Section -->
         <div class="col-md-3">
+          <div class="mb-3">
+            <label for="search" class="form-label">Search Products</label>
+            <div class="input-group">
+              <input 
+                type="text" 
+                class="form-control" 
+                id="search" 
+                name="search" 
+                placeholder="Search by name, description..." 
+                value="<%= filters && filters.search ? filters.search : '' %>"
+              >
+              <button class="btn btn-outline-secondary" type="submit">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </div>
           <div class="filter-collapse collapse d-md-block" id="filterCollapse">
             <div class="filter-section">
               <h5>
@@ -482,7 +460,7 @@
               
               <form id="filterForm" method="GET" action="/shop">
                 <!-- Category Chips -->
-                <div class="mb-4">
+                <div class="mb-3">
                   <label class="form-label">Category</label>
                   <div class="chip-container">
                     <div class="filter-chip active" data-value="">All</div>
@@ -494,7 +472,7 @@
                 </div>
                 
                 <!-- Brand Selection -->
-                <div class="mb-4">
+                <!-- <div class="mb-3">
                   <label for="brand" class="form-label">Brand</label>
                   <select class="form-select" id="brand" name="brand">
                     <option value="">All Brands</option>
@@ -505,50 +483,23 @@
                     <option value="microsoft">Microsoft</option>
                   </select>
                 </div>
-                
+                 -->
                 <!-- Price Range Slider -->
-                <div class="mb-4">
+                <div class="mb-3">
                   <label for="priceRange" class="form-label">Price Range</label>
                   <div class="price-range-container">
                     <div class="price-display">
                       <span id="minPriceDisplay">$0</span>
                       <span id="maxPriceDisplay">$2000</span>
                     </div>
-                    <input type="range" class="range-slider" id="priceRange" min="0" max="2000" step="50" value="1000">
+                    <input type="range" class="range-slider form-range" id="priceRange" min="0" max="2000" step="50" value="1000">
                     <input type="hidden" id="minPrice" name="minPrice" value="0">
                     <input type="hidden" id="maxPrice" name="maxPrice" value="1000">
                   </div>
                 </div>
                 
-                <!-- Ratings Filter -->
-                <!-- <div class="mb-4">
-                  <label class="form-label">Rating</label>
-                  <div class="rating-filter d-flex align-items-center gap-2 mb-2">
-                    <input type="checkbox" class="form-check-input" id="rating4plus" name="rating" value="4">
-                    <label for="rating4plus" class="form-check-label">
-                      <i class="fas fa-star text-warning"></i>
-                      <i class="fas fa-star text-warning"></i>
-                      <i class="fas fa-star text-warning"></i>
-                      <i class="fas fa-star text-warning"></i>
-                      <i class="far fa-star text-warning"></i>
-                      & Up
-                    </label>
-                  </div>
-                  <div class="rating-filter d-flex align-items-center gap-2">
-                    <input type="checkbox" class="form-check-input" id="rating3plus" name="rating" value="3">
-                    <label for="rating3plus" class="form-check-label">
-                      <i class="fas fa-star text-warning"></i>
-                      <i class="fas fa-star text-warning"></i>
-                      <i class="fas fa-star text-warning"></i>
-                      <i class="far fa-star text-warning"></i>
-                      <i class="far fa-star text-warning"></i>
-                      & Up
-                    </label>
-                  </div> -->
-                <!-- </div> -->
-                
                 <!-- Availability Filter -->
-                <div class="mb-4">
+                <div class="mb-3">
                   <label class="form-label">Availability</label>
                   <div class="d-flex align-items-center gap-2 mb-2">
                     <input type="checkbox" class="form-check-input" id="inStock" name="inStock" value="true" checked>
@@ -560,15 +511,16 @@
                   </div>
                 </div>
                 
-                <!-- Sort By -->
-                <div class="mb-4">
+                <div class="mb-3">
                   <label for="sort" class="form-label">Sort By</label>
                   <select class="form-select" id="sort" name="sort">
                     <option value="">Recommended</option>
-                    <option value="price-asc">Price: Low to High</option>
-                    <option value="price-desc">Price: High to Low</option>
-                    <option value="newest">Newest First</option>
-                    <option value="popular">Most Popular</option>
+                    <option value="price-asc" <%= filters && filters.sort === 'price-asc' ? 'selected' : '' %>>Price: Low to High</option>
+                    <option value="price-desc" <%= filters && filters.sort === 'price-desc' ? 'selected' : '' %>>Price: High to Low</option>
+                    <option value="newest" <%= filters && filters.sort === 'newest' ? 'selected' : '' %>>Newest First</option>
+                    <option value="popular" <%= filters && filters.sort === 'popular' ? 'selected' : '' %>>Most Popular</option>
+                    <option value="rating-desc" <%= filters && filters.sort === 'rating-desc' ? 'selected' : '' %>>Highest Rated</option>
+                    <option value="name-asc" <%= filters && filters.sort === 'name-asc' ? 'selected' : '' %>>Name: A to Z</option>
                   </select>
                 </div>
                 
@@ -618,10 +570,10 @@
                         <div class="product-price">$<%= product.actualPrice %></div>
                         <div class="rating">
                           <% for(let i=0; i<Math.floor(3.5 + Math.random() * 1.5); i++) { %>
-                            <i class="fas fa-star text-warning small"></i>
+                            <i class="fas fa-star small"></i>
                           <% } %>
                           <% for(let i=0; i<5-Math.floor(3.5 + Math.random() * 1.5); i++) { %>
-                            <i class="far fa-star text-warning small"></i>
+                            <i class="far fa-star small"></i>
                           <% } %>
                         </div>
                       </div>
@@ -635,14 +587,10 @@
                         </div>
                       <% } %>
                       
-                      <div class="mt-3 d-flex gap-2">
-                        <a href="/product/<%= product._id %>" class="btn btn-primary flex-grow-1">
+                      <div class="mt-3">
+                        <a href="/product/<%= product._id %>" class="btn btn-primary">
                           <i class="fas fa-shopping-cart me-2"></i>View
                         </a>
-                        <!-- <button class="btn btn-outline-secondary" style="width: 46px; padding: 0;" 
-                                data-bs-toggle="modal" data-bs-target="#quickViewModal">
-                          <i class="fas fa-eye"></i>
-                        </button> -->
                       </div>
                     </div>
                   </div>
@@ -661,7 +609,7 @@
           </div>
           <% } %>
           
-          <!-- Improved Pagination -->
+          <!-- Pagination -->
           <div class="pagination-container">
             <div class="pagination">
               <% if (currentPage > 1) { %>
@@ -690,184 +638,243 @@
       </div>
     </div>
 
-    <!-- Quick View Modal -->
-    <!-- <div class="modal fade" id="quickViewModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Product Quick View</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <div class="row">
-              <div class="col-md-6">
-                <img src="https://via.placeholder.com/400x400" alt="Product" class="img-fluid rounded">
-              </div>
-              <div class="col-md-6">
-                <h4>Premium Wireless Earbuds</h4>
-                <div class="d-flex mb-3">
-                  <div class="me-3">
-                    <i class="fas fa-star text-warning"></i>
-                    <i class="fas fa-star text-warning"></i>
-                    <i class="fas fa-star text-warning"></i>
-                    <i class="fas fa-star text-warning"></i>
-                    <i class="fas fa-star-half-alt text-warning"></i>
-                    <span class="ms-1 text-secondary">(24)</span>
-                  </div>
-                </div>
-                <h3 class="text-info mb-3">$129.99</h3>
-                <p>High-quality wireless earbuds with active noise cancellation and crystal-clear sound.</p>
-                
-                <div class="mb-3">
-                  <h6>Color</h6>
-                  <div class="color-options">
-                    <div class="color-option selected" style="background-color: #000000;"></div>
-                    <div class="color-option" style="background-color: #f5f5f5;"></div>
-                    <div class="color-option" style="background-color: #0071e3;"></div>
-                  </div>
-                </div>
-                
-                <div class="d-flex mt-4">
-                  <select class="form-select me-2" style="width: 80px;">
-                    <option>1</option>
-                    <option>2</option>
-                    <option>3</option>
-                  </select>
-                  <button class="btn btn-primary flex-grow-1">Add to Cart</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div> -->
-
     <%- include('./partials/footer') %>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      // Script for managing filter chips
-      document.addEventListener('DOMContentLoaded', function() {
-        // Category filter chips
-        const categoryChips = document.querySelectorAll('.chip-container .filter-chip');
-        const categoryInput = document.getElementById('categoryInput');
-        
-        categoryChips.forEach(chip => {
-          chip.addEventListener('click', function() {
-            // Remove active class from all chips
-            categoryChips.forEach(c => c.classList.remove('active'));
-            // Add active class to clicked chip
-            this.classList.add('active');
-            // Update hidden input
-            categoryInput.value = this.getAttribute('data-value');
-          });
-        });
-        
-        // Price range slider
-        const priceSlider = document.getElementById('priceRange');
-        const minPriceDisplay = document.getElementById('minPriceDisplay');
-        const maxPriceDisplay = document.getElementById('maxPriceDisplay');
-        const minPriceInput = document.getElementById('minPrice');
-        const maxPriceInput = document.getElementById('maxPrice');
-        
-        priceSlider.addEventListener('input', function() {
-          const value = this.value;
-          maxPriceInput.value = value;
-          maxPriceDisplay.textContent = '$' + value;
-        });
-        
-        // Color options in product cards and modal
-        const colorOptions = document.querySelectorAll('.color-option');
-        colorOptions.forEach(option => {
-          option.addEventListener('click', function() {
-            // Find all color options in the same container
-            const container = this.closest('.color-options');
-            const siblings = container.querySelectorAll('.color-option');
-            
-            // Remove selected class from all siblings
-            siblings.forEach(sib => sib.classList.remove('selected'));
-            // Add selected class to clicked option
-            this.classList.add('selected');
-          });
-        });
-        
-        // Mobile filter toggle animation
-        const filterToggle = document.querySelector('.filter-toggle');
-        const filterCollapse = document.getElementById('filterCollapse');
-        
-        filterCollapse.addEventListener('shown.bs.collapse', function () {
-          filterToggle.innerHTML = '<i class="fas fa-times"></i> Hide Filters';
-        });
-        
-        filterCollapse.addEventListener('hidden.bs.collapse', function () {
-          filterToggle.innerHTML = '<i class="fas fa-sliders-h"></i> Show Filters';
-        });
-      });
-    </script>
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        // Handle category chip selection
-        const categoryChips = document.querySelectorAll('.filter-chip');
-        const categoryInput = document.getElementById('categoryInput');
-        
-        // Set initial state based on URL params
-        const urlParams = new URLSearchParams(window.location.search);
-        const categoryParam = urlParams.get('category');
-        if (categoryParam) {
-          categoryChips.forEach(chip => {
-            if (chip.dataset.value === categoryParam) {
-              chip.classList.add('active');
-            } else {
-              chip.classList.remove('active');
-            }
-          });
-          categoryInput.value = categoryParam;
-        }
-        
-        categoryChips.forEach(chip => {
-          chip.addEventListener('click', function() {
-            categoryChips.forEach(c => c.classList.remove('active'));
-            this.classList.add('active');
-            categoryInput.value = this.dataset.value;
-          });
-        });
-        
-        // Handle price range slider
-        const priceSlider = document.getElementById('priceRange');
-        const minPriceDisplay = document.getElementById('minPriceDisplay');
-        const maxPriceDisplay = document.getElementById('maxPriceDisplay');
-        const minPriceInput = document.getElementById('minPrice');
-        const maxPriceInput = document.getElementById('maxPrice');
-        
-        // Set initial state from URL params
-        const minPriceParam = urlParams.get('minPrice');
-        const maxPriceParam = urlParams.get('maxPrice');
-        if (minPriceParam) minPriceInput.value = minPriceParam;
-        if (maxPriceParam) {
-          maxPriceInput.value = maxPriceParam;
-          priceSlider.value = maxPriceParam;
-          maxPriceDisplay.textContent = '$' + maxPriceParam;
-        }
-        
-        priceSlider.addEventListener('input', function() {
-          maxPriceInput.value = this.value;
-          maxPriceDisplay.textContent = '$' + this.value;
-        });
-        
-        // Set other form elements based on URL params
-        const brandSelect = document.getElementById('brand');
-        const brandParam = urlParams.get('brand');
-        if (brandParam) brandSelect.value = brandParam;
-        
-        const inStockCheck = document.getElementById('inStock');
-        inStockCheck.checked = urlParams.get('inStock') !== 'false';
-        
-        const dealsCheck = document.getElementById('deals');
-        dealsCheck.checked = urlParams.get('deals') === 'true';
-        
-        const sortSelect = document.getElementById('sort');
-        const sortParam = urlParams.get('sort');
-        if (sortParam) sortSelect.value = sortParam;
-      });
-    </script>
+   <script>
+    document.addEventListener('DOMContentLoaded', function() {
+  // Get current URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  
+  // Category filter chips
+  const categoryChips = document.querySelectorAll('.chip-container .filter-chip');
+  const categoryInput = document.getElementById('categoryInput');
+  
+  // Set initial state based on URL params
+  const categoryParam = urlParams.get('category');
+  if (categoryParam) {
+    categoryChips.forEach(chip => {
+      if (chip.dataset.value === categoryParam) {
+        chip.classList.add('active');
+        categoryInput.value = categoryParam;
+      } else {
+        chip.classList.remove('active');
+      }
+    });
+  }
+  
+  categoryChips.forEach(chip => {
+    chip.addEventListener('click', function() {
+      // Remove active class from all chips
+      categoryChips.forEach(c => c.classList.remove('active'));
+      // Add active class to clicked chip
+      this.classList.add('active');
+      // Update hidden input
+      categoryInput.value = this.getAttribute('data-value');
+    });
+  });
+  
+  // Set other form elements based on URL params
+  const brandSelect = document.getElementById('brand');
+  const brandParam = urlParams.get('brand');
+  if (brandParam) brandSelect.value = brandParam;
+  
+  const inStockCheck = document.getElementById('inStock');
+  inStockCheck.checked = urlParams.get('inStock') !== 'false';
+  
+  const dealsCheck = document.getElementById('deals');
+  dealsCheck.checked = urlParams.get('deals') === 'true';
+  
+  const sortSelect = document.getElementById('sort');
+  const sortParam = urlParams.get('sort');
+  if (sortParam) sortSelect.value = sortParam;
+  
+  // Set price slider based on URL params
+  const priceSlider = document.getElementById('priceRange');
+  const minPriceDisplay = document.getElementById('minPriceDisplay');
+  const maxPriceDisplay = document.getElementById('maxPriceDisplay');
+  const minPriceInput = document.getElementById('minPrice');
+  const maxPriceInput = document.getElementById('maxPrice');
+  
+  const minPriceParam = urlParams.get('minPrice');
+  const maxPriceParam = urlParams.get('maxPrice');
+  if (minPriceParam) minPriceInput.value = minPriceParam;
+  if (maxPriceParam) {
+    maxPriceInput.value = maxPriceParam;
+    priceSlider.value = maxPriceParam;
+    maxPriceDisplay.textContent = '$' + maxPriceParam;
+  }
+  
+  priceSlider.addEventListener('input', function() {
+    const value = this.value;
+    maxPriceInput.value = value;
+    maxPriceDisplay.textContent = '$' + value;
+  });
+  
+  // Color options in product cards
+  const colorOptions = document.querySelectorAll('.color-option');
+  colorOptions.forEach(option => {
+    option.addEventListener('click', function() {
+      // Find all color options in the same container
+      const container = this.closest('.color-options');
+      const siblings = container.querySelectorAll('.color-option');
+      
+      // Remove selected class from all siblings
+      siblings.forEach(sib => sib.classList.remove('selected'));
+      // Add selected class to clicked option
+      this.classList.add('selected');
+    });
+  });
+  
+  // Mobile filter toggle animation
+  const filterToggle = document.querySelector('.filter-toggle');
+  const filterCollapse = document.getElementById('filterCollapse');
+  
+  filterCollapse.addEventListener('shown.bs.collapse', function () {
+    filterToggle.innerHTML = '<i class="fas fa-times"></i> Hide Filters';
+  });
+  
+  filterCollapse.addEventListener('hidden.bs.collapse', function () {
+    filterToggle.innerHTML = '<i class="fas fa-sliders-h"></i> Show Filters';
+  });
+  
+  // Handle search input
+  const searchInput = document.getElementById('search');
+  const searchParam = urlParams.get('search');
+  if (searchParam) {
+    searchInput.value = searchParam;
+  }
+  
+  // Important: Make the search button work with form submission
+  const searchBtn = searchInput.nextElementSibling;
+  searchBtn.addEventListener('click', function() {
+    document.getElementById('filterForm').submit();
+  });
+  
+  // Update the filter form to maintain all parameters
+  const filterForm = document.getElementById('filterForm');
+  filterForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Create new URLSearchParams from the form
+    const formData = new FormData(this);
+    const newParams = new URLSearchParams();
+    
+    // Add form fields to params (only if they have values)
+    for (const [key, value] of formData.entries()) {
+      if (value !== '' && value !== 'false') {
+        newParams.append(key, value);
+      }
+    }
+    
+    // Add the search parameter if it exists
+    if (searchInput.value) {
+      newParams.append('search', searchInput.value);
+    }
+    
+    // Redirect to the new URL
+    window.location.href = `/shop?${newParams.toString()}`;
+  });
+  
+  // Display active filters as chips and make them clickable to remove
+  const activeFiltersDiv = document.querySelector('.active-filters .d-flex');
+  activeFiltersDiv.innerHTML = ''; // Clear existing filters
+  
+  // Add search filter chip if search is active
+  if (searchParam) {
+    addFilterChip('Search: "' + searchParam + '"', function() {
+      removeFilterAndRedirect('search');
+    });
+  }
+  
+  // Add category filter chip if category is selected
+  if (categoryParam && categoryParam !== '') {
+    addFilterChip('Category: ' + categoryParam, function() {
+      removeFilterAndRedirect('category');
+    });
+  }
+  
+  // Add brand filter chip if brand is selected
+  if (brandParam && brandParam !== '') {
+    addFilterChip('Brand: ' + brandParam, function() {
+      removeFilterAndRedirect('brand');
+    });
+  }
+  
+  // Add price range filter chip
+  if (minPriceParam || maxPriceParam) {
+    const min = minPriceParam || '0';
+    const max = maxPriceParam || '2000';
+    addFilterChip('Price: $' + min + ' - $' + max, function() {
+      removeFilterAndRedirect(['minPrice', 'maxPrice']);
+    });
+  }
+  
+  // Add other filter chips as needed
+  if (urlParams.get('inStock') === 'true') {
+    addFilterChip('In Stock', function() {
+      removeFilterAndRedirect('inStock');
+    });
+  }
+  
+  if (urlParams.get('deals') === 'true') {
+    addFilterChip('Special Deals', function() {
+      removeFilterAndRedirect('deals');
+    });
+  }
+  
+  // Helper function to add a filter chip
+  function addFilterChip(text, clickHandler) {
+    const chip = document.createElement('span');
+    chip.className = 'filter-chip active';
+    chip.innerHTML = text + ' <i class="fas fa-times-circle ms-1"></i>';
+    chip.addEventListener('click', clickHandler);
+    activeFiltersDiv.appendChild(chip);
+  }
+  
+  // Helper function to remove a filter parameter and redirect
+  function removeFilterAndRedirect(paramName) {
+    const params = new URLSearchParams(window.location.search);
+    
+    if (Array.isArray(paramName)) {
+      paramName.forEach(name => params.delete(name));
+    } else {
+      params.delete(paramName);
+    }
+    
+    window.location.href = `/shop?${params.toString()}`;
+  }
+  
+  // Add a "Clear All" button if any filters are active
+  if (activeFiltersDiv.children.length > 0) {
+    const clearAllChip = document.createElement('span');
+    clearAllChip.className = 'filter-chip clear-all';
+    clearAllChip.innerHTML = 'Clear All <i class="fas fa-times-circle ms-1"></i>';
+    clearAllChip.addEventListener('click', function() {
+      window.location.href = '/shop';
+    });
+    activeFiltersDiv.appendChild(clearAllChip);
+  }
+  
+  // Update pagination links to include all current parameters
+  document.querySelectorAll('.pagination a').forEach(link => {
+    const href = new URL(link.href);
+    const linkParams = new URLSearchParams(href.search);
+    
+    // Get the page parameter from the link
+    const linkPage = linkParams.get('page');
+    
+    // Copy all parameters from the current URL
+    const newParams = new URLSearchParams(window.location.search);
+    
+    // Update just the page parameter
+    if (linkPage) {
+      newParams.set('page', linkPage);
+    }
+    
+    // Update the link's href
+    link.href = `/shop?${newParams.toString()}`;
+  });
+});
+   </script>
   </body>
-</html> 
+</html>

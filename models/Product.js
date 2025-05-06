@@ -58,6 +58,28 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: true, // true for Listed, false for Unlisted
     },
+    inStock: {
+      type: Boolean,
+      default: true, // Product is available in stock
+    },
+    onSale: {
+      type: Boolean,
+      default: false, // Product is on sale/special deal
+    },
+    avgRating: {
+      type: Number,
+      default: 0, // Average product rating
+      min: 0,
+      max: 5,
+    },
+    popularity: {
+      type: Number,
+      default: 0, // Metric for product popularity (could be view count or purchase count)
+    },
+    featured: {
+      type: Boolean,
+      default: false, // Featured products appear first in default sort
+    },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields automatically
@@ -65,7 +87,7 @@ const productSchema = new mongoose.Schema(
 );
 
 // Create indexes for better search performance
-productSchema.index({ name: "text", brand: "text" });
+productSchema.index({ name: "text", description: "text", brand: "text" });
 
 const Product = mongoose.model("Product", productSchema);
 

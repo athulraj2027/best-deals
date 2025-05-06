@@ -13,7 +13,7 @@ const CartItemSchema = new mongoose.Schema(
     color: { type: String, required: true },
     size: { type: String, required: true },
     price: { type: Number, required: true },
-    quantity: { type: Number, required: true, min: 1,default : 1 },
+    quantity: { type: Number, required: true, min: 1, default: 1 },
     image: { type: String, required: true },
   },
   { timestamps: true }
@@ -56,6 +56,14 @@ const CartSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  appliedCoupon: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Coupon",
+  },
+  updatedTotal :{
+    type:Number,
+    default:0
+  }
 });
 
 // Pre-save middleware to calculate totals
