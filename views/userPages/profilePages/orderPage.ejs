@@ -342,7 +342,10 @@
                     <i class="fas fa-eye me-1"></i> View Details
                   </button>
                   <% if(order.status !== 'cancelled' && order.status !==
-                  'delivered'){ %>
+                  'delivered' && order.status !==
+                  'return requested' && order.status !==
+                  'return accepted' && order.status !==
+                  'returned'){ %>
                   <form
                     action="/profile/orders/cancel/<%= order._id %>"
                     method="post"
@@ -352,10 +355,19 @@
                       <i class="fas fa-times me-1"></i> Cancel
                     </button>
                   </form>
-                  <% } %>
+                  <% } else if(order.status === 'delivered'){%>
+                    <form
+                    action="/profile/orders/return/<%= order._id %>"
+                    method="post"
+                    class="order-return-form d-inline"
+                  >
+                    <button type="submit" class="action-btn cancel-btn">
+                      <i class="fas fa-times me-1"></i> Return
+                    </button>
+                  </form>
                 </td>
               </tr>
-              <% }); %>
+              <% }}); %>
             </tbody>
           </table>
         </div>
@@ -588,5 +600,98 @@
         });
       });
     </script>
+
+<script>
+  $(document).ready(function () {
+    // Cancel order form submission
+    $(".order-return-form").on("submit", function (e) {
+      e.preventDefault();
+
+      // Get the form that was submitted
+      const form = $(this);
+
+      // Get the order ID from the form's action attribute
+      const formAction = form.attr("action");
+
+      Swal.fire({
+  title: "Return Order?",
+  text: "Are you sure you want to return this order?",
+  icon: "warning",
+  showCancelButton: true,
+  confirmButtonColor: "#d33",
+  cancelButtonColor: "#3085d6",
+  confirmButtonText: "Yes",
+  cancelButtonText: "No, keep it",
+  html: `
+    <div class="form-check mt-3">
+      <h3>Why are you returning the product?</h3>
+      <input class="form-check-input" type="checkbox" id="reasonDefective">
+      <label class="form-check-label" for="reasonDefective">Item is defective</label><br/>
+      <input class="form-check-input" type="checkbox" id="reasonQuality">
+      <label class="form-check-label" for="reasonQuality">Cheap quality</label><br/>
+      <input class="form-check-input" type="checkbox" id="reasonDifferent">
+      <label class="form-check-label" for="reasonDifferent">Different product</label><br/>
+    </div>
+  `,
+  preConfirm: () => {
+    const reasons = [];
+    if (document.getElementById('reasonDefective').checked) reasons.push("Item is defective");
+    if (document.getElementById('reasonQuality').checked) reasons.push("Cheap quality");
+    if (document.getElementById('reasonDifferent').checked) reasons.push("Different product");
+
+    if (reasons.length === 0) {
+      Swal.showValidationMessage("Please select at least one reason.");
+    }
+
+    return reasons;
+  }
+}).then((result) => {
+  if (result.isConfirmed) {
+    const selectedReasons = result.value;
+
+    $.ajax({
+      url: formAction,
+      type: "POST",
+      data: JSON.stringify({
+        reasons: selectedReasons,
+      }),
+      contentType: "application/json", 
+      success: function (response) {
+        if (response.status === "success") {
+          Swal.fire({
+            title: response.title,
+            text: response.message,
+            icon: response.status,
+            confirmButtonText: "OK",
+          }).then(() => {
+            window.location.reload(true);
+          });
+        } else {
+          Swal.fire({
+            title: response.title,
+            text: response.message,
+            icon: response.status,
+            confirmButtonText: "OK",
+          });
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error("AJAX Error:", status, error);
+        Swal.fire({
+          title: "Oops!",
+          text:
+            xhr.responseJSON?.message ||
+            "An error occurred while returning your order.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      },
+    });
+  }
+});
+
+    });
+  });
+</script>
   </body>
 </html>

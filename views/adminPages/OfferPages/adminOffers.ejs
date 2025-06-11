@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="/adminCSS/partials/menu.css" />
+    <title>Coupons</title>
+    <style>
+      :root {
+        --primary-color: #f57c00;
+        --primary-hover: #e65100;
+        --light-bg: #fff9f0;
+        --text-dark: #333;
+        --sidebar-width: 250px;
+        --sidebar-collapsed-width: 70px;
+      }
+      
+      body {
+        background-color: #f8f9fa;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        overflow-x: hidden;
+      }
+      
+      /* Main layout structure */
+      .main-content-wrapper {
+        display: flex;
+        width: 100%;
+        min-height: 100vh;
+      }
+      
+      /* Main content area that adjusts with sidebar */
+      .main-content {
+        flex: 1;
+        padding: 20px;
+        margin-left: var(--sidebar-width);
+        transition: margin-left 0.3s ease;
+        width: calc(100% - var(--sidebar-width));
+      }
+      
+      .page-title {
+        font-weight: 600;
+        color: var(--text-dark);
+        border-left: 5px solid var(--primary-color);
+        padding-left: 15px;
+      }
+      
+      .btn-primary-custom {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+        transition: all 0.3s;
+      }
+      
+      .btn-primary-custom:hover {
+        background-color: var(--primary-hover);
+        border-color: var(--primary-hover);
+      }
+      
+      .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      
+      .table-header {
+        background-color: var(--primary-color);
+        color: white;
+      }
+      
+      .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+        max-height: 70vh;
+      }
+      
+      .form-control, .form-select {
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+      }
+      
+      .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(245, 124, 0, 0.25);
+      }
+      
+      .filter-section {
+        background-color: var(--light-bg);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+      
+      .status-badge {
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      
+      .status-active {
+        background-color: #e7f5ea;
+        color: #198754;
+      }
+      
+      .status-expired {
+        background-color: #f8d7da;
+        color: #dc3545;
+      }
+      
+      .status-upcoming {
+        background-color: #cfe2ff;
+        color: #0d6efd;
+      }
+      
+      .status-inactive {
+        background-color: #fff3cd;
+        color: #664d03;
+      }
+      
+      .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin: 20px 0;
+        font-size: 16px;
+      }
+      
+      .pagination-button {
+        padding: 8px 14px;
+        background-color: var(--primary-color);
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: all 0.3s;
+        font-weight: bold;
+      }
+      
+      .pagination-button:hover {
+        background-color: var(--primary-hover);
+        color: white;
+        text-decoration: none;
+      }
+      
+      .page-info {
+        font-weight: bold;
+        color: var(--text-dark);
+      }
+      
+      .coupon-code {
+        font-family: monospace;
+        font-weight: bold;
+        background-color: #f0f0f0;
+        padding: 3px 8px;
+        border-radius: 4px;
+        letter-spacing: 1px;
+      }
+      
+      /* Responsive adjustments */
+      @media (max-width: 992px) {
+        .filter-controls {
+          flex-direction: column;
+          gap: 10px;
+        }
+        
+        .filter-controls > form {
+          width: 100%;
+        }
+      }
+      
+      @media (max-width: 768px) {
+        .main-content {
+          margin-left: var(--sidebar-collapsed-width);
+          width: calc(100% - var(--sidebar-collapsed-width));
+        }
+        
+        body.sidebar-hidden .main-content {
+          margin-left: 0;
+          width: 100%;
+        }
+        
+        .action-buttons {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+          align-items: stretch;
+        }
+        
+        .action-buttons form, 
+        .action-buttons a {
+          width: 100%;
+        }
+      }
+      
+      @media (max-width: 576px) {
+        .main-content {
+          margin-left: 0;
+          width: 100%;
+        }
+        
+        body.sidebar-expanded .main-content {
+          margin-left: var(--sidebar-width);
+          width: calc(100% - var(--sidebar-width));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-content-wrapper">
+      <!-- Include sidebar partial -->
+      <%- include('../partials/menu') %>
+      
+      <!-- Main content area -->
+      <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+          <h1 class="page-title mb-3 mb-md-0">Offers</h1>
+          <a href="/admin/offers/add" class="btn btn-primary-custom">
+            <i class="fas fa-plus me-2"></i>Add Offer
+          </a>
+        </div>
+
+        <!-- Filter, Sort, and Search Options -->
+        <div class="filter-section">
+          <div class="d-flex justify-content-between align-items-center filter-controls gap-3 flex-wrap">
+            <!-- Filter by Status -->
+            <form action="/admin/offers" method="GET" class="flex-grow-1">
+              <div class="input-group">
+                <span class="input-group-text bg-white">
+                  <i class="fas fa-filter text-secondary"></i>
+                </span>
+                <select name="status" class="form-select" onchange="this.form.submit()">
+                  <option value="">Filter by Status</option>
+                  <option value="all" <%= selectedStatus === 'all' ? 'selected' : '' %>>All</option>
+                  <option value="active" <%= selectedStatus === 'active' ? 'selected' : '' %>>Active</option>
+                  <option value="expired" <%= selectedStatus === 'expired' ? 'selected' : '' %>>Expired</option>
+                  <option value="upcoming" <%= selectedStatus === 'upcoming' ? 'selected' : '' %>>Upcoming</option>
+                  <option value="inactive" <%= selectedStatus === 'inactive' ? 'selected' : '' %>>Inactive</option>
+                </select>
+              </div>
+            </form>
+
+            <!-- Sort Options -->
+            <form action="/admin/offers" method="GET" class="flex-grow-1">
+              <div class="input-group">
+                <span class="input-group-text bg-white">
+                  <i class="fas fa-sort text-secondary"></i>
+                </span>
+                <select name="sort" class="form-select" onchange="this.form.submit()">
+                  <option value="">Sort By</option>
+                  <option value="expiry_asc" <%= selectedSort === 'expiry_asc' ? 'selected' : '' %>>Expiry Date (Earliest First)</option>
+                  <option value="expiry_desc" <%= selectedSort === 'expiry_desc' ? 'selected' : '' %>>Expiry Date (Latest First)</option>
+                  <option value="creation_asc" <%= selectedSort === 'creation_asc' ? 'selected' : '' %>>Creation Date (Oldest First)</option>
+                  <option value="creation_desc" <%= selectedSort === 'creation_desc' ? 'selected' : '' %>>Creation Date (Newest First)</option>
+                  <option value="discount_high" <%= selectedSort === 'discount_high' ? 'selected' : '' %>>Discount (High to Low)</option>
+                  <option value="discount_low" <%= selectedSort === 'discount_low' ? 'selected' : '' %>>Discount (Low to High)</option>
+                </select>
+              </div>
+            </form>
+
+            <!-- Search by Coupon Code or Name -->
+            <form action="/admin/offers" method="GET" class="flex-grow-1">
+              <div class="input-group">
+                <input type="text" name="query" placeholder="Search by code or description" class="form-control" value="<%= query || '' %>" />
+                <button type="submit" class="btn btn-primary-custom">
+                  <i class="fas fa-search"></i>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Coupons Table -->
+        <div class="card border-0">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover m-0">
+                <thead class="table-header">
+                  <tr class="text-center">
+                    <th class="py-3">SI.No</th>
+                    <th class="py-3">Offer Name</th>
+                    <th class="py-3">Description</th>
+                    <th class="py-3">Offer</th>
+                   
+                    <th class="py-3">Created On</th>
+                    <th class="py-3">Expires On</th>
+                    <th class="py-3">Status</th>
+                    <th class="py-3">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (offers && offers.length > 0) { %>
+                    <% offers.forEach((offer, index) => { %>
+                      <tr>
+                        <td class="text-center"><%= index + 1 %></td>
+                        <td class="text-center"><span class="coupon-code"><%= offer.name %></span></td>
+                        <td><%= offer.description %></td>
+                        <td class="text-center">
+                          <% if (offer.offerType === 'percentage') { %>
+                            <%= offer.offerValue %>%
+                          <% } else { %>
+                            $<%= offer.offerValue.toFixed(2) %>
+                          <% } %>
+                        </td>
+                        
+                        <td class="text-center"><%= new Date(offer.createdAt).toLocaleDateString() %></td>
+                        <td class="text-center"><%= new Date(offer.expiryDate).toLocaleDateString() %></td>
+                        <td class="text-center">
+                          <% 
+                            let statusClass = 'status-inactive';
+                            let statusText = 'Inactive';
+                            
+                            if (offer.active) {
+                              const now = new Date();
+                              const expiryDate = new Date(offer.expiryDate);
+                              const startDate = new Date(offer.startDate || offer.createdAt);
+                              
+                              if (now > expiryDate) {
+                                statusClass = 'status-expired';
+                                statusText = 'Expired';
+                              } else if (now < startDate) {
+                                statusClass = 'status-upcoming';
+                                statusText = 'Upcoming';
+                              } else {
+                                statusClass = 'status-active';
+                                statusText = 'Active';
+                              }
+                            }
+                          %>
+                          <span class="status-badge <%= statusClass %>">
+                            <%= statusText %>
+                          </span>
+                        </td>
+                        <td>
+                          <div class="d-flex justify-content-center gap-2 action-buttons">
+                            <a href="/admin/offers/edit/<%= offer._id %>" class="btn btn-sm btn-primary-custom">
+                              <i class="fas fa-edit me-1"></i> Edit
+                            </a>
+                            
+                            <% if (offer.active) { %>
+                              <!-- Deactivate Button -->
+                              <form action="/admin/offers/deactivate/<%= offer._id %>" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-warning w-100">
+                                  <i class="fas fa-ban me-1"></i> Deactivate
+                                </button>
+                              </form>
+                            <% } else { %>
+                              <!-- Activate Button -->
+                              <form action="/admin/offers/activate/<%= offer._id %>" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-success w-100">
+                                  <i class="fas fa-check me-1"></i> Activate
+                                </button>
+                              </form>
+                            <% } %>
+                            
+                            <!-- Delete Button with Confirmation Modal Trigger -->
+                       
+                          </div>
+                        </td>
+                      </tr>
+                    <% }); %>
+                  <% } else { %>
+                    <tr>
+                      <td colspan="9" class="text-center">No offers found.</td>
+                    </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination section -->
+        <div class="pagination-container">
+          <% if (hasPrevPage) { %>
+            <a href="/admin/offers?page=<%= prevPage %>&limit=10<%= query ? '&query=' + query : '' %><%= selectedStatus ? '&status=' + selectedStatus : '' %><%= selectedSort ? '&sort=' + selectedSort : '' %>" class="pagination-button">
+              <i class="fas fa-chevron-left me-2"></i>Previous
+            </a>
+          <% } %>
+
+          <span class="page-info">
+            Page <%= currentPage %> of <%= totalPages %>
+          </span>
+
+          <% if (hasNextPage) { %>
+            <a href="/admin/offers?page=<%= nextPage %>&limit=10<%= query ? '&query=' + query : '' %><%= selectedStatus ? '&status=' + selectedStatus : '' %><%= selectedSort ? '&sort=' + selectedSort : '' %>" class="pagination-button">
+              Next<i class="fas fa-chevron-right ms-2"></i>
+            </a>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

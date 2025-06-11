@@ -43,7 +43,6 @@ exports.adminLoginController = async (req, res) => {
     }
     req.session.adminEmail = email;
 
-    console.log(req.session);
     console.log("session created");
     return res.status(statusCodes.SUCCESS).json({
       status: "success",

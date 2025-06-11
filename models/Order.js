@@ -25,7 +25,16 @@ const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["pending", "processing", "delivered", "cancelled", "paid"],
+    enum: [
+      "pending",
+      "processing",
+      "delivered",
+      "cancelled",
+      "paid",
+      "return requested",
+      "return accepted",
+      "returned",
+    ],
     default: "pending",
   },
   grantTotal: {
@@ -81,7 +90,7 @@ const orderSchema = new mongoose.Schema({
       type: Date,
     },
   },
-  originalPrice: { type: Number, required: true },
+  // originalPrice: { type: Number, required: true },
 });
 
 module.exports = mongoose.model("Order", orderSchema);

@@ -125,7 +125,7 @@ exports.addCouponController = async (req, res) => {
       appliedProducts,
       appliedCategories,
     } = req.body;
-    
+
     console.log(appliedProducts);
     const existingCoupon = await Coupon.findOne({ code: code.toUpperCase() });
     if (existingCoupon) {

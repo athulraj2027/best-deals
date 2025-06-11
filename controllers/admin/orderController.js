@@ -1,4 +1,5 @@
 const Order = require("../../models/Order");
+const User = require("../../models/User");
 const mongoose = require("mongoose");
 
 exports.getOrdersPage = async (req, res) => {
@@ -18,8 +19,16 @@ exports.getOrdersPage = async (req, res) => {
           return "bg-success";
         case "cancelled":
           return "bg-danger";
+        case "paid":
+          return "bg-primary";
+        case "return requested":
+          return "bg-warning text-dark";
+        case "return accepted":
+          return "bg-info text-dark";
+        case "returned":
+          return "bg-secondary text-white";
         default:
-          return "bg-secondary";
+          return "bg-dark";
       }
     };
 
@@ -97,7 +106,17 @@ exports.changeStatusController = async (req, res) => {
         message: "Could not update the order",
       });
     }
+    if (updatedOrder.status === "returned") {
+      const user = await User.findById(updatedOrder.userId);
+      if (user) {
+        user.wallet += updatedOrder.grantTotal;
+        updatedOrder.payment_status = "refunded";
+        await updatedOrder.save();
+        await user.save();
+      }
+    }
 
+    console.log("refunded,user wallet updated");
     return res.status(200).json({
       status: "success",
       title: "Success",

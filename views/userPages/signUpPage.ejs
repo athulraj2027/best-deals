@@ -258,6 +258,22 @@
                 style="color: red"
               ></small>
             </div>
+            <div class="mb-3">
+              <label for="referral" class="form-label">Referral Code( if any )</label>
+              <input
+                type="text"
+                class="form-control"
+                id="referral-code"
+                name="referral"
+                placeholder="Enter your referral code "
+                autocomplete="referral"
+              />
+              <small
+                class="error-message"
+                id="referralError"
+                style="color: red"
+              ></small>
+            </div>
             <!-- Sign Up Button -->
             <div class="d-grid mt-4">
               <button type="submit" class="btn btn-primary">Sign Up</button>
@@ -301,6 +317,8 @@
           const email = $("#email").val();
           const password = $("#password").val();
           const confirmPassword = $("#confirm-password").val();
+          const referralCode =  $("#referral-code").val();
+          console.log(referralCode)
 
           // Clear previous error messages
           $(".error-message").text("");
@@ -328,6 +346,7 @@
               email: email,
               password: password,
               confirmPassword: confirmPassword,
+              referralCode : referralCode
             }),
             success: function (response) {
               if (response.status === "success") {

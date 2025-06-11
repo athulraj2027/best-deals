@@ -420,12 +420,10 @@
   </head>
   <body>
     <%- include('./partials/headerPartial') %>
-    
 
     <div class="container my-4">
       <div class="row">
-        
-        
+               
         <!-- Mobile Filter Toggle -->
         <div class="col-12 d-md-none mb-3">
           <button class="filter-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
@@ -548,7 +546,7 @@
           
           <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
             <% products.forEach((product, index) => { %>
-              <% if (product.category && product.category.status ==='listed') { %>
+       
                 <div class="col">
                   <div class="card h-100">
                     <div class="card-img-wrapper">
@@ -595,7 +593,7 @@
                     </div>
                   </div>
                 </div>
-              <% } %>
+            
             <% }) %>
           </div>
 
@@ -775,11 +773,9 @@
     window.location.href = `/shop?${newParams.toString()}`;
   });
   
-  // Display active filters as chips and make them clickable to remove
   const activeFiltersDiv = document.querySelector('.active-filters .d-flex');
-  activeFiltersDiv.innerHTML = ''; // Clear existing filters
+  activeFiltersDiv.innerHTML = ''; 
   
-  // Add search filter chip if search is active
   if (searchParam) {
     addFilterChip('Search: "' + searchParam + '"', function() {
       removeFilterAndRedirect('search');

@@ -464,7 +464,16 @@ exports.cancelOrderController = async (req, res) => {
       }
     }
 
-    order.status = "cancelled";
+    const user = await User.findById(order.userId);
+    if (!user)
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: `Couldn't find user`,
+      });
+
+    user.wallet += order.grantTotal;
+    order.status = "return requested";
 
     if (order.payment_status === "paid") {
       order.payment_status = "refunded";
@@ -551,6 +560,40 @@ exports.resetPasswordController = async (req, res) => {
       status: "success",
       title: "Success",
       message: "Password updated successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: "error",
+      title: "Error",
+      message: "Something went wrong",
+    });
+  }
+};
+
+exports.returnOrderController = async (req, res) => {
+  console.log("order returning started")
+  const orderId = req.params.id;
+  try {
+    const cancelledOrder = await Order.findByIdAndUpdate(
+      orderId,
+      {
+        status: "return requested",
+      },
+      { new: true }
+    );
+
+    if (!cancelledOrder)
+      return res.status(404).json({
+        status: "error",
+        title: "Error",
+        message: "Order not found",
+      });
+
+    return res.status(200).json({
+      status: "success",
+      title: "Success",
+      message: "Request accepted",
     });
   } catch (error) {
     console.error(error);

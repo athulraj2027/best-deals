@@ -23,5 +23,9 @@ router
   .route("/password")
   .get(profileController.getResetPassword)
   .post(profileController.resetPasswordController);
-  
+
+router
+  .route("/orders/return/:id")
+  .post(profileController.returnOrderController);
+
 module.exports = router;

@@ -236,12 +236,18 @@
                 <span class="input-group-text bg-white">
                   <i class="fas fa-filter text-secondary"></i>
                 </span>
-                <select name="status" class="form-select" onchange="this.form.submit()">
-                  <option value="" <%= !selectedStatus ? 'selected' : '' %>>Filter by Status</option>
-                  <option value="pending" <%= selectedStatus === 'pending' ? 'selected' : '' %>>Pending</option>
-                  <option value="processing" <%= selectedStatus === 'processing' ? 'selected' : '' %>>Processing</option>
-                  <option value="cancelled" <%= selectedStatus === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
-                  <option value="delivered" <%= selectedStatus === 'delivered' ? 'selected' : '' %>>Delivered</option>
+             <select name="status" class="form-select" onchange="this.form.submit()">
+  <option value="" <%= !selectedStatus ? 'selected' : '' %>>Filter by Status</option>
+  <option value="pending" <%= selectedStatus === 'pending' ? 'selected' : '' %>>Pending</option>
+  <option value="processing" <%= selectedStatus === 'processing' ? 'selected' : '' %>>Processing</option>
+  <option value="paid" <%= selectedStatus === 'paid' ? 'selected' : '' %>>Paid</option>
+  <option value="delivered" <%= selectedStatus === 'delivered' ? 'selected' : '' %>>Delivered</option>
+  <option value="cancelled" <%= selectedStatus === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+  <option value="return requested" <%= selectedStatus === 'return requested' ? 'selected' : '' %>>Return Requested</option>
+  <option value="return accepted" <%= selectedStatus === 'return accepted' ? 'selected' : '' %>>Return Accepted</option>
+  <option value="returned" <%= selectedStatus === 'returned' ? 'selected' : '' %>>Returned</option>
+</select>
+
                 </select>
               </div>
             </form>
@@ -306,18 +312,15 @@
                                 class="form-select form-select-sm"
                                 aria-label="Change status"
                               >
-                                <option value="pending" <%= order.status === 'pending' ? 'selected' : '' %>>
-                                  Pending
-                                </option>
-                                <option value="processing" <%= order.status === 'processing' ? 'selected' : '' %>>
-                                  Processing
-                                </option>
-                                <option value="delivered" <%= order.status === 'delivered' ? 'selected' : '' %>>
-                                  Delivered
-                                </option>
-                                <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>
-                                  Cancelled
-                                </option>
+                               <option value="pending" <%= order.status === 'pending' ? 'selected' : '' %>>Pending</option>
+<option value="processing" <%= order.status === 'processing' ? 'selected' : '' %>>Processing</option>
+<option value="delivered" <%= order.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+<option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+<option value="paid" <%= order.status === 'paid' ? 'selected' : '' %>>Paid</option>
+<option value="return requested" <%= order.status === 'return requested' ? 'selected' : '' %>>Return Requested</option>
+<option value="return accepted" <%= order.status === 'return accepted' ? 'selected' : '' %>>Return Accepted</option>
+<option value="returned" <%= order.status === 'returned' ? 'selected' : '' %>>Returned</option>
+
                               </select>
                               <button type="button" class="btn btn-sm btn-primary-custom update-status-btn">
                                 <i class="fas fa-check"></i>

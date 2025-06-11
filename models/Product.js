@@ -38,6 +38,25 @@ const productSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    best_offer: {
+      type: {
+        offer_id: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Offer",
+        },
+        name: {type:String,},
+        discount_type: {
+          type: String,
+          enum: ["percentage", "fixed"],
+        },
+        discount_value: Number,
+        discounted_price: Number,
+        savings: Number,
+        valid_until: Date,
+      },
+      default: undefined, // <-- This makes it undefined by default
+    },
+
     brand: {
       type: String,
       required: true,

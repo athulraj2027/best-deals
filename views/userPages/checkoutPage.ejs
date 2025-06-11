@@ -336,6 +336,10 @@
         border-color: #4a90e2;
         background-color: rgba(74, 144, 226, 0.05);
       }
+      .btn.active {
+    background-color: #28a745; /* green */
+    color: white;
+  }
     </style>
   </head>
   <body>
@@ -364,34 +368,44 @@
               type="hidden"
               id="paymentMethod"
               name="paymentMethod"
-              value="card"
+              value="cod"
+            />
+            <input
+              type="hidden"
+              id="cartId"
+              name="cartId"
+              value="<%= cart._id %>"
             />
 
             <div class="form-section">
               <h3>Shipping Address</h3>
 
-              <% addresses.forEach(address => { %>
-              <input
-                type="hidden"
-                id="selectedAddressId"
-                name="addressId"
-                value="<%= address._id %>"
-              />
-              <div
-                class="address-card <%= address.type === 'Home' ? 'selected' : '' %>"
-                data-address-id="<%= address._id %>"
-              >
-                <span class="address-name"><%= address.type %></span>
-                <div class="address-details">
-                  <p>
-                    <%= address.streetAddress %><br />
-                    <%= address.city %>, <%= address.state %> <%=
-                    address.zipCode %><br />
-                    <%= address.country %>
-                  </p>
+              <% if(addresses && addresses.length > 0) { %>
+                <input
+                  type="hidden"
+                  id="selectedAddressId"
+                  name="addressId"
+                  value=""
+                />
+                <% addresses.forEach(address => { %>
+                <div
+                  class="address-card <%= address.type === 'Home' ? 'selected' : '' %>"
+                  data-address-id="<%= address._id %>"
+                >
+                  <span class="address-name"><%= address.type %></span>
+                  <div class="address-details">
+                    <p>
+                      <%= address.streetAddress %><br />
+                      <%= address.city %>, <%= address.state %> <%=
+                      address.zipCode %><br />
+                      <%= address.country %>
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <% }); %>
+                <% }); %>
+              <% } else { %>
+                <p>No saved addresses found. Please add a delivery address.</p>
+              <% } %>
 
               <div class="toggle-form">
                 <button
@@ -408,7 +422,7 @@
               <h3>Payment Method</h3>
 
               <div class="tab-buttons">
-                <div class="tab-btn" data-tab="cod" data-payment="cod">
+                <div class="tab-btn active" data-tab="cod" data-payment="cod">
                   Cash on Delivery
                 </div>
                 <div
@@ -460,33 +474,52 @@
           <h3>Order Summary</h3>
 
           <div class="order-items">
-            <% items.forEach(item =>{ %>
-            <div class="order-item">
-              <span><%= item.name %></span>
-              <span>$<%= (item.price * item.quantity).toFixed(2) %></span>
-            </div>
-            <% }) %>
+            <% if(items && items.length > 0) { %>
+              <% items.forEach(item =>{ %>
+              <div class="order-item">
+                <span><%= item.name %></span>
+                <span>$<%= (item.price * item.quantity).toFixed(2) %></span>
+              </div>
+              <% }) %>
+            <% } else { %>
+              <p>No items in cart</p>
+            <% } %>
           </div>
 
           <div class="order-item">
             <span>Subtotal</span>
-            <span>$<%= cart.subtotal.toFixed(2) %></span>
+            <span>$<%= cart.subtotal %></span>
           </div>
 
           <div class="order-item">
             <span>Shipping</span>
-            <span>$<%= cart.shipping.toFixed(2) %></span>
+            <span>$<%= cart.shipping%></span>
           </div>
 
           <div class="order-item">
             <span>Tax</span>
-            <span>$<%= cart.tax.toFixed(2) %></span>
+            <span>$<%= cart.tax %></span>
           </div>
 
-          <div class="order-total">
-            <span>Total</span>
-            <span>$<%= cart.total.toFixed(2) %></span>
-          </div>
+         <div class="order-total">
+  <span>Total</span>
+  <span id="total-amount">$<%= cart.total %></span>
+</div>
+
+<div>
+  Wallet Savings: 
+  $<span id="wallet-balance"><%= walletBalance %></span>
+</div>
+<br />
+
+<button 
+  id="useWallet"
+  class="btn"
+  style="width: auto; padding: 12px 15px"
+>
+  Use Wallet
+</button>
+
           <div class="coupon-section" style="margin-top: 20px">
             <% if(coupons && coupons.length > 0) { %>
             <div
@@ -586,7 +619,7 @@
                 />
               </div>
 
-              <div class="form-row">
+              <div class="row">
                 <div class="form-group mb-3 col-md-6">
                   <label for="city">City</label>
                   <input
@@ -610,7 +643,7 @@
                 </div>
               </div>
 
-              <div class="form-row">
+              <div class="row">
                 <div class="form-group mb-3 col-md-6">
                   <label for="zipCode">ZIP/Postal Code</label>
                   <input
@@ -644,6 +677,15 @@
                   required
                 />
               </div>
+              
+              <div class="form-group mb-3">
+                <label for="addressType">Address Type</label>
+                <select class="form-control" id="addressType" name="type" required>
+                  <option value="Home">Home</option>
+                  <option value="Work">Work</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
             </form>
           </div>
           <div class="modal-footer">
@@ -662,511 +704,733 @@
       </div>
     </div>
 
-    <!-- Add this script at the end of your body, with your other scripts -->
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        // Get modal elements
-        const addAddressBtn = document.getElementById("addAddressBtn");
-        const saveAddressBtn = document.getElementById("saveAddressBtn");
-        const addressModal = new bootstrap.Modal(
-          document.getElementById("addressModal")
-        );
-
-        // Open modal when Add Address button is clicked
-        addAddressBtn.addEventListener("click", function () {
-          addressModal.show();
-        });
-
-        // Handle form submission
-        saveAddressBtn.addEventListener("click", function () {
-          const form = document.getElementById("newAddressForm");
-
-          // Check form validity
-          if (form.checkValidity()) {
-            // Get form data
-            const formData = new FormData(form);
-            const formDataObj = {};
-            formData.forEach((value, key) => {
-              formDataObj[key] = value;
-            });
-
-            // Submit form data via fetch
-            fetch("/checkout/add-delivery-address", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(formDataObj),
-            })
-              .then((response) => response.json())
-              .then((data) => {
-                if (data.status === "success") {
-                  // Close modal
-                  addressModal.hide();
-
-                  // Show success message
-                  Swal.fire({
-                    icon: "success",
-                    title: "Success",
-                    text: "Address added successfully!",
-                    confirmButtonText: "OK",
-                  }).then(() => {
-                    // Reload page to show new address
-                    window.location.reload();
-                  });
-                } else {
-                  // Show error message
-                  Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: data.message || "Failed to add address",
-                    confirmButtonText: "OK",
-                  });
-                }
-              })
-              .catch((error) => {
-                console.error("Error:", error);
-                Swal.fire({
-                  icon: "error",
-                  title: "Error",
-                  text: "An unexpected error occurred",
-                  confirmButtonText: "OK",
-                });
-              });
-          } else {
-            // Trigger HTML5 validation
-            form.reportValidity();
-          }
-        });
-      });
-    </script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        // Payment method tabs
-        const tabButtons = document.querySelectorAll(".tab-btn");
-        const paymentTabs = document.querySelectorAll(".payment-tab");
-        const paymentMethodInput = document.getElementById("paymentMethod");
 
-        tabButtons.forEach((button) => {
-          button.addEventListener("click", function () {
-            // Remove active class from all buttons and tabs
-            tabButtons.forEach((btn) => btn.classList.remove("active"));
-            paymentTabs.forEach((tab) => tab.classList.remove("active"));
+ <script>// Initialize variables
+let discountedAmount = null;
+let walletUsed = false;
+const originalTotal = parseFloat("<%= cart.total.toFixed(2) %>");
+const walletBalance = parseFloat("<%= walletBalance.toFixed(2) %>");
 
-            // Add active class to clicked button
-            this.classList.add("active");
+document.addEventListener("DOMContentLoaded", function () {
+  // Initialize Bootstrap components
+  const addressModal = new bootstrap.Modal(document.getElementById("addressModal"));
+  
+  // Get elements
+  const addAddressBtn = document.getElementById("addAddressBtn");
+  const saveAddressBtn = document.getElementById("saveAddressBtn");
+  const checkoutForm = document.getElementById("checkoutForm");
+  const paymentMethodInput = document.getElementById("paymentMethod");
+  const tabButtons = document.querySelectorAll(".tab-btn");
+  const paymentTabs = document.querySelectorAll(".payment-tab");
+  const addressCards = document.querySelectorAll(".address-card");
+  const selectedAddressIdInput = document.getElementById("selectedAddressId");
+  const useWalletBtn = document.getElementById("useWallet");
+  const totalSpan = document.getElementById("total-amount");
+  const walletBalanceSpan = document.getElementById("wallet-balance");
+  const applyCouponBtn = document.getElementById("applyCoupon");
+  const couponCodeInput = document.getElementById("couponCode");
+  const couponMessage = document.getElementById("couponMessage");
+  const couponDiscount = document.getElementById("couponDiscount");
+  const discountAmount = document.getElementById("discountAmount");
+  const amountInput = document.querySelector('input[name="amount"]');
+  
+  // Set up hidden form fields
+  createHiddenFormFields();
+  
+  // Set default selected address if available
+  initializeAddressSelection();
+  
+  // Set up event listeners
+  setupEventListeners();
+  
+  // ====== HELPER FUNCTIONS ======
+  
+  function createHiddenFormFields() {
+    // Create wallet-related hidden fields
+    if (!document.getElementById("walletUsed")) {
+      const walletUsedInput = document.createElement("input");
+      walletUsedInput.type = "hidden";
+      walletUsedInput.id = "walletUsed";
+      walletUsedInput.name = "walletUsed";
+      walletUsedInput.value = "false";
+      checkoutForm.appendChild(walletUsedInput);
+    }
+    
+    if (!document.getElementById("walletAmount")) {
+      const walletAmountInput = document.createElement("input");
+      walletAmountInput.type = "hidden";
+      walletAmountInput.id = "walletAmount";
+      walletAmountInput.name = "walletAmount";
+      walletAmountInput.value = "0";
+      checkoutForm.appendChild(walletAmountInput);
+    }
+  }
+  
+  function initializeAddressSelection() {
+    if (addressCards.length > 0) {
+      // Find selected address or use the first one as default
+      let selectedCard = document.querySelector(".address-card.selected") || addressCards[0];
+      selectedCard.classList.add("selected");
+      selectedAddressIdInput.value = selectedCard.getAttribute("data-address-id");
+    }
+  }
+  
+  function setupEventListeners() {
+    // Payment method tabs
+    tabButtons.forEach((button) => {
+      button.addEventListener("click", handlePaymentTabChange);
+    });
 
-            // Show corresponding tab
-            const tabId = this.getAttribute("data-tab");
-            document.getElementById(tabId).classList.add("active");
+    // Address selection
+    addressCards.forEach((card) => {
+      card.addEventListener("click", handleAddressSelection);
+    });
 
-            // Update the payment method hidden input
-            const paymentMethod = this.getAttribute("data-payment");
-            paymentMethodInput.value = paymentMethod;
-          });
-        });
+    // Open address modal
+    if (addAddressBtn) {
+      addAddressBtn.addEventListener("click", function() {
+        addressModal.show();
+      });
+    }
 
-        // Address selection
-        const addressCards = document.querySelectorAll(".address-card");
-        let selectedAddressId = null;
+    // Save new address
+    if (saveAddressBtn) {
+      saveAddressBtn.addEventListener("click", handleSaveAddress);
+    }
 
-        addressCards.forEach((card) => {
-          card.addEventListener("click", function () {
-            // Remove selected class from all cards
-            addressCards.forEach((c) => c.classList.remove("selected"));
+    // Form submission
+    if (checkoutForm) {
+      checkoutForm.addEventListener("submit", handleFormSubmission);
+    }
+    
+    // Wallet toggle
+    if (useWalletBtn) {
+      useWalletBtn.addEventListener("click", handleWalletToggle);
+    }
+    
+    // Apply coupon
+    if (applyCouponBtn) {
+      applyCouponBtn.addEventListener("click", handleCouponApplication);
+    }
+  }
+  
+  function handlePaymentTabChange() {
+    // Remove active class from all buttons and tabs
+    tabButtons.forEach((btn) => btn.classList.remove("active"));
+    paymentTabs.forEach((tab) => tab.classList.remove("active"));
 
-            // Add selected class to clicked card
-            this.classList.add("selected");
+    // Add active class to clicked button
+    this.classList.add("active");
 
-            // Get the selected address ID
-            selectedAddressId = this.getAttribute("data-address-id");
+    // Show corresponding tab
+    const tabId = this.getAttribute("data-tab");
+    document.getElementById(tabId).classList.add("active");
 
-            // Update the hidden input field
-            document.getElementById("selectedAddressId").value =
-              selectedAddressId;
-          });
-        });
+    // Update the payment method hidden input
+    const paymentMethod = this.getAttribute("data-payment");
+    paymentMethodInput.value = paymentMethod;
+  }
+  
+  function handleAddressSelection() {
+    // Remove selected class from all cards
+    addressCards.forEach((c) => c.classList.remove("selected"));
 
-        // Form submission handling
-        const checkoutForm = document.getElementById("checkoutForm");
+    // Add selected class to clicked card
+    this.classList.add("selected");
 
-        checkoutForm.addEventListener("submit", function (e) {
-          e.preventDefault(); // Prevent default form submission
+    // Get the selected address ID
+    const selectedAddressId = this.getAttribute("data-address-id");
 
-          // Gather form data
-          const formData = new FormData(checkoutForm);
-          const formDataObj = {};
+    // Update the hidden input field
+    selectedAddressIdInput.value = selectedAddressId;
+  }
+  
+  function handleSaveAddress() {
+    const form = document.getElementById("newAddressForm");
 
-          formData.forEach((value, key) => {
-            // For items, parse the JSON string back to an object
-            if (key === "items") {
-              try {
-                formDataObj[key] = JSON.parse(value);
-              } catch (err) {
-                console.error("Error parsing items JSON", err);
-                formDataObj[key] = [];
-              }
-            } else {
-              formDataObj[key] = value;
-            }
-          });
+    // Check form validity
+    if (form.checkValidity()) {
+      // Get form data
+      const formData = new FormData(form);
+      const formDataObj = Object.fromEntries(formData.entries());
 
-          // Check if Razorpay is selected
-          if (formDataObj.paymentMethod == "razorpay") {
-            (async function () {
-              const response = await fetch("/order", {
-                method: "POST",
-                headers: { "Content-type": "application/json" },
-                body: JSON.stringify(formDataObj),
-                paymentMethod: "razorpay",
-              });
-
-              if (!response.ok) {
-                throw new Error("Failed to create order");
-              }
-
-              const orderData = await response.json();
-              const options = {
-                key: "rzp_test_tTcfsqC1bRVLSi",
-                amount: orderData.amount,
-                currency: orderData.currency,
-                name: "BestDeals",
-                description: "Test Transaction",
-                order_id: orderData.id,
-                handler: async function (response) {
-                  const verifyResponse = await fetch(
-                    "/verify-payment/<%= cart._id %>",
-                    {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify({
-                        razorpay_order_id: response.order_id,
-                        razorpay_payment_id: response.payment_id,
-                        razorpay_signature: response.signature,
-                      }),
-                    }
-                  );
-
-                  const verificationResult = await verifyResponse.json();
-                  submitOrder(formDataObj);
-                  if (verificationResult.status === "success") {
-                    alert("Payment Successful!");
-                  } else {
-                    alert("Payment Failed");
-                  }
-                },
-
-                prefill: {
-                  name: "Customer Name",
-                  email: "customer@example.com",
-                  contact: "+919999999999",
-                },
-                notes: {
-                  address: selectedAddressId,
-                },
-                theme: {
-                  color: "#3399cc",
-                },
-              };
-              const rzp1 = new Razorpay(options);
-              rzp1.open();
-            })();
-            // Create Razorpay order first
-            // fetch(`/checkout/create-razorpay-order/<%= cart._id %>`, {
-            //   method: "POST",
-            //   headers: {
-            //     "Content-Type": "application/json",
-            //   },
-            //   body: JSON.stringify(formDataObj),
-            //   paymentMethod: "razorpay",
-            // })
-            //   .then((response) => response.json())
-            //   .then((orderData) => {
-            //     if (orderData.status === "success") {
-            //       // Configure Razorpay options
-            //       const options = {
-            //         key: "rzp_test_tTcfsqC1bRVLSi", // Enter the Key ID from the Dashboard
-            //         amount: orderData.order.amount, // Amount in paise
-            //         currency: "INR",
-            //         name: "BestDeals",
-            //         description: "Order Payment",
-            //         order_id: orderData.order.id,
-            //         handler: function (response) {
-            //           // On successful payment, submit the form with payment details
-            //           formDataObj.razorpayPaymentId =
-            //             response.razorpay_payment_id;
-            //           formDataObj.razorpayOrderId = response.razorpay_order_id;
-            //           formDataObj.razorpaySignature =
-            //             response.razorpay_signature;
-
-            //           (async function verifyRazorpayPayment(paymentData) {
-            //             try {
-            //               const verifyResponse = await fetch(
-            //                 "/verify-Onlinepayment",
-            //                 {
-            //                   method: "POST",
-            //                   headers: { "Content-Type": "application/json" },
-            //                   body: JSON.stringify(paymentData),
-            //                 }
-            //               );
-            //               const verifyData = await verifyResponse.json();
-            //               console.log(verifyData)
-            //               if (verifyData.success) {
-            //                 window.location.href = '/'; // Success redirect
-            //               } else {
-            //                 Swal.fire({
-            //                   icon: "error",
-            //                   title: "Payment Failed",
-            //                   text:
-            //                     verifyData.message ||
-            //                     "Payment verification failed.",
-            //                   confirmButtonText: "OK",
-            //                 }).then(() => {
-            //                   window.location.href = '/'; // Redirect on failure
-            //                 });
-            //               }
-            //             } catch (error) {
-            //               console.error(
-            //                 "Error in payment verification:",
-            //                 error
-            //               );
-            //               // Handle error appropriately, e.g., show user message
-            //             }
-            //           })();
-
-            //           submitOrder(formDataObj);
-            //         },
-            //         prefill: {
-            //           name: "Customer",
-            //           email: "customer@example.com",
-            //           contact: "",
-            //         },
-            //         theme: {
-            //           color: "#4a90e2",
-            //         },
-            //       };
-
-            //       // Initialize Razorpay
-            //       const razorpay = new Razorpay(options);
-            //       razorpay.open();
-            //     } else {
-            //       Swal.fire({
-            //         icon: "error",
-            //         title: "Error",
-            //         text: orderData.message || "Failed to create payment order",
-            //         confirmButtonText: "OK",
-            //       });
-            //     }
-            //   })
-            //   .catch((error) => {
-            //     console.error("Error:", error);
-
-            //     Swal.fire({
-            //       icon: "error",
-            //       title: "Error",
-            //       text: "Failed to initialize payment",
-            //       confirmButtonText: "OK",
-            //     });
-            //   });
-          } else {
-            // For non-Razorpay methods, submit directly
-            submitOrder(formDataObj);
+      // Submit form data via fetch
+      fetch("/checkout/add-delivery-address", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formDataObj),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
           }
-        });
+          return response.json();
+        })
+        .then((data) => {
+          if (data.status === "success") {
+            // Close modal
+            addressModal.hide();
 
-        // Function to submit the order
-        function submitOrder(formData) {
-          fetch(`/checkout/<%= cart._id %>`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.status === "success") {
-                Swal.fire({
-                  icon: "success",
-                  title: "Success",
-                  text: data.message,
-                  confirmButtonText: "OK",
-                }).then(() => {
-                  window.location.href = `/shop`;
-                });
-              } else {
-                Swal.fire({
-                  icon: "error",
-                  title: "Error",
-                  text: data.message,
-                  confirmButtonText: "OK",
-                });
+            // Show success message
+            Swal.fire({
+              icon: "success",
+              title: "Success",
+              text: "Address added successfully!",
+              confirmButtonText: "OK",
+            }).then(() => {
+              // Reload page to show new address
+              window.location.reload();
+            });
+          } else {
+            // Show error message
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: data.message || "Failed to add address",
+              confirmButtonText: "OK",
+            });
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "An unexpected error occurred",
+            confirmButtonText: "OK",
+          });
+        });
+    } else {
+      // Trigger HTML5 validation
+      form.reportValidity();
+    }
+  }
+  
+  function handleFormSubmission(e) {
+    e.preventDefault(); // Prevent default form submission
+    
+    // Validate address selection
+    if (!selectedAddressIdInput.value) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Please select a delivery address",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+
+    // Gather form data
+    const formData = new FormData(checkoutForm);
+    const formDataObj = {};
+
+    formData.forEach((value, key) => {
+      // For items, parse the JSON string back to an object
+      if (key === "items") {
+        try {
+          formDataObj[key] = JSON.parse(value);
+        } catch (err) {
+          console.error("Error parsing items JSON", err);
+          formDataObj[key] = [];
+        }
+      } else {
+        formDataObj[key] = value;
+      }
+    });
+    
+    // Apply discounted amount if a coupon was applied
+    if (discountedAmount !== null) {
+      formDataObj.amount = Math.round(discountedAmount);
+    }
+    
+    // Check payment method
+    if (formDataObj.paymentMethod === "razorpay") {
+      processRazorpayPayment(formDataObj);
+    } else {
+      // For non-Razorpay methods (COD), submit directly
+      submitOrder(formDataObj);
+    }
+  }
+  
+  function handleWalletToggle() {
+    walletUsed = !walletUsed;
+    
+    // Update hidden form inputs
+    document.getElementById("walletUsed").value = walletUsed.toString();
+    document.getElementById("walletAmount").value = walletUsed ? Math.min(walletBalance, originalTotal).toString() : "0";
+
+    if (walletUsed) {
+      // Apply wallet
+      const walletAmount = Math.min(walletBalance, originalTotal);
+      const newTotal = Math.max(originalTotal - walletAmount, 0);
+      
+      // Update display total
+      totalSpan.textContent = `$${newTotal.toFixed(2)}`;
+      
+      // Update hidden amount input for form submission
+      if (amountInput) {
+        amountInput.value = Math.round(newTotal);
+      }
+      
+      // Update button appearance
+      useWalletBtn.textContent = "Wallet Applied";
+      useWalletBtn.classList.add("active");
+      
+      // Call API to apply wallet
+      fetch("/use-wallet", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          walletBalance: walletAmount,
+          cartId: document.getElementById("cartId").value
+        }),
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Failed to apply wallet");
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.status === "success") {
+            // Show success message
+            showCouponMessage("Wallet savings applied successfully!", "success");
+            
+            // Update display if the server returns different values
+            if (data.newTotal !== undefined) {
+              totalSpan.textContent = `$${data.newTotal.toFixed(2)}`;
+              if (amountInput) {
+                amountInput.value = Math.round(data.newTotal);
               }
-            })
-            .catch((error) => {
-              console.error("Error:", error);
+              
+              // Store for later use
+              discountedAmount = data.newTotal;
+            }
+            
+            // Show discount if provided
+            if (data.discount !== undefined) {
+              if (couponDiscount && discountAmount) {
+                couponDiscount.style.display = "flex";
+                discountAmount.textContent = `-$${data.discount.toFixed(2)}`;
+              }
+            }
+          } else {
+            // Show error message and revert changes
+            showCouponMessage(data.message || "Failed to apply wallet.", "error");
+            resetWallet();
+          }
+        })
+        .catch(error => {
+          console.error("Wallet Error:", error);
+          showCouponMessage("An error occurred while applying wallet savings.", "error");
+          resetWallet();
+        });
+    } else {
+      // Reset wallet changes
+      resetWallet();
+      
+      // Call API to remove wallet application if needed
+      fetch("/remove-wallet", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          cartId: document.getElementById("cartId").value
+        }),
+      })
+      .catch(error => {
+        console.error("Wallet Removal Error:", error);
+      });
+    }
+  }
+  
+  function resetWallet() {
+    // Reset display total
+    totalSpan.textContent = `$${originalTotal.toFixed(2)}`;
+    
+    // Reset hidden amount input
+    if (amountInput) {
+      amountInput.value = Math.round(originalTotal);
+    }
+    
+    // Reset button appearance
+    useWalletBtn.textContent = "Use Wallet";
+    useWalletBtn.classList.remove("active");
+    
+    // Reset wallet tracking
+    walletUsed = false;
+    document.getElementById("walletUsed").value = "false";
+    document.getElementById("walletAmount").value = "0";
+    
+    // Hide discount display if it's being shown
+    if (couponDiscount) {
+      couponDiscount.style.display = "none";
+    }
+  }
+  
+  function handleCouponApplication() {
+    const couponCode = couponCodeInput.value.trim();
+    
+    if (!couponCode) {
+      showCouponMessage("Please enter a coupon code.", "error");
+      return;
+    }
+    
+    // Validate coupon with server
+    fetch("/checkout/apply-coupon", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        couponCode: couponCode,
+        cartId: document.getElementById("cartId").value
+      }),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Server error");
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.status === "success") {
+          // Show success message and update discount display
+          showCouponMessage("Coupon applied successfully!", "success");
+          
+          if (couponDiscount) {
+            couponDiscount.style.display = "flex";
+          }
+          
+          // Ensure discount is displayed properly
+          const discountValue = typeof data.discount === 'string' ? 
+            parseFloat(data.discount) : data.discount;
+          
+          if (discountAmount) {
+            discountAmount.textContent = `-$${discountValue.toFixed(2)}`;
+          }
+          
+          // Update total if provided
+          if (data.newTotal !== undefined) {
+            const newTotal = typeof data.newTotal === 'string' ? 
+              parseFloat(data.newTotal) : data.newTotal;
+            
+            // Update the display total
+            if (totalSpan) {
+              totalSpan.textContent = `$${newTotal.toFixed(2)}`;
+            }
+            
+            // Update the hidden amount input for form submission
+            if (amountInput) {
+              amountInput.value = Math.round(newTotal);
+            }
+            
+            // Store the discounted amount for later use
+            discountedAmount = newTotal;
+            
+            // Add a hidden input to track that a coupon was applied
+            let couponAppliedInput = document.getElementById("couponApplied");
+            if (!couponAppliedInput) {
+              couponAppliedInput = document.createElement("input");
+              couponAppliedInput.type = "hidden";
+              couponAppliedInput.id = "couponApplied";
+              couponAppliedInput.name = "couponApplied";
+              couponAppliedInput.value = couponCode;
+              checkoutForm.appendChild(couponAppliedInput);
+            } else {
+              couponAppliedInput.value = couponCode;
+            }
+          }
+        } else {
+          // Show error message
+          showCouponMessage(data.message || "Invalid coupon code.", "error");
+          
+          if (couponDiscount) {
+            couponDiscount.style.display = "none";
+          }
+        }
+      })
+      .catch(error => {
+        console.error("Coupon Error:", error);
+        showCouponMessage("An error occurred while validating the coupon.", "error");
+      });
+  }
+  
+  function showCouponMessage(message, type) {
+    if (!couponMessage) return;
+    
+    couponMessage.textContent = message;
+    couponMessage.style.display = "block";
+    
+    if (type === "success") {
+      couponMessage.style.color = "#28a745";
+    } else {
+      couponMessage.style.color = "#dc3545";
+    }
+    
+    // Hide message after 5 seconds
+    setTimeout(() => {
+      couponMessage.style.display = "none";
+    }, 5000);
+  }
+  
+  function processRazorpayPayment(formData) {
+    // Show loading indicator
+    Swal.fire({
+      title: 'Processing Payment',
+      text: 'Please wait...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+    
+    // Create Razorpay order
+    fetch(`/order/create-razorpay`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        cartId: formData.cartId,
+        amount: formData.amount,
+        addressId: formData.addressId,
+        couponCode: formData.couponApplied || null,
+        walletUsed: formData.walletUsed === "true",
+        walletAmount: parseFloat(formData.walletAmount || 0)
+      }),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Failed to create order");
+        }
+        return response.json();
+      })
+      .then(orderData => {
+        // Close loading indicator
+        Swal.close();
+        
+        if (!orderData.id) {
+          throw new Error("Invalid order data received");
+        }
+        
+        formData.backendOrderId = orderData.orderId;
+        
+        // Configure Razorpay options
+        const options = {
+          key: "rzp_test_tTcfsqC1bRVLSi",
+          amount: orderData.amount,
+          currency: orderData.currency || "INR",
+          name: "BestDeals",
+          description: "Order Payment",
+          order_id: orderData.id,
+          handler: function (response) {
+            // Add Razorpay payment details to form data
+            formData.razorpayPaymentId = response.razorpay_payment_id;
+            formData.razorpayOrderId = response.razorpay_order_id;
+            formData.razorpaySignature = response.razorpay_signature;
+
+            // Verify payment before completing order
+            verifyRazorpayPayment(formData);
+          },
+          prefill: {
+            name: "Customer",
+            email: "customer@example.com",
+            contact: "",
+          },
+          theme: {
+            color: "#4a90e2",
+          },
+          modal: {
+            ondismiss: function() {
+              // Handle payment cancellation
               Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: "An unexpected error occurred",
+                icon: "info",
+                title: "Payment Cancelled",
+                text: "Your payment was cancelled. You can try again or choose another payment method.",
                 confirmButtonText: "OK",
               });
-            });
-        }
-      });
-    </script>
-    <script>
-      // Coupon code handling
-      const applyCouponBtn = document.getElementById("applyCoupon");
-      const couponInput = document.getElementById("couponCode");
-      const couponMessage = document.getElementById("couponMessage");
-      const couponDiscountDiv = document.getElementById("couponDiscount");
-      const discountAmountSpan = document.getElementById("discountAmount");
-      const orderTotalElement = document.querySelector(
-        ".order-total span:last-child"
-      );
-      let appliedCoupon = null;
-      let originalTotal = parseFloat("<%= cart.total %>");
-
-      applyCouponBtn.addEventListener("click", function () {
-        const code = couponInput.value.trim();
-        console.log(code);
-
-        if (!code) {
-          showCouponMessage("Please enter a coupon code", "error");
-          return;
-        }
-
-        // Send request to validate coupon
-        fetch(`/checkout/apply-coupon`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            code: code,
-            cartId: "<%= cart._id %>",
-          }),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.status === "success") {
-              appliedCoupon = data.coupon;
-
-              // Calculate discount
-              let discount = 0;
-              if (appliedCoupon.discountType === "percentage") {
-                discount = (originalTotal * appliedCoupon.discountValue) / 100;
-              } else {
-                discount = appliedCoupon.discountValue;
-              }
-
-              // Ensure discount doesn't exceed the total
-              discount = Math.min(discount, originalTotal);
-
-              // Update UI with formatted discount
-              discountAmountSpan.textContent = `-$${discount.toFixed(2)}`;
-              couponDiscountDiv.style.display = "flex";
-
-              // Update total amount
-              const newTotal = (originalTotal - discount).toFixed(2);
-              orderTotalElement.textContent = `$${newTotal}`;
-
-              // Add hidden input for the coupon
-              if (!document.getElementById("appliedCouponInput")) {
-                const couponInput = document.createElement("input");
-                couponInput.type = "hidden";
-                couponInput.id = "appliedCouponInput";
-                couponInput.name = "couponCode";
-                couponInput.value = code;
-                document
-                  .getElementById("checkoutForm")
-                  .appendChild(couponInput);
-              } else {
-                document.getElementById("appliedCouponInput").value = code;
-              }
-
-              // Add discount amount as hidden input
-              if (!document.getElementById("discountAmountInput")) {
-                const discountInput = document.createElement("input");
-                discountInput.type = "hidden";
-                discountInput.id = "discountAmountInput";
-                discountInput.name = "discountAmount";
-                discountInput.value = discount.toFixed(2);
-                document
-                  .getElementById("checkoutForm")
-                  .appendChild(discountInput);
-              } else {
-                document.getElementById("discountAmountInput").value =
-                  discount.toFixed(2);
-              }
-
-              showCouponMessage(
-                `Coupon applied! You saved $${discount.toFixed(2)}`,
-                "success"
-              );
-            } else {
-              showCouponMessage(data.message || "Invalid coupon code", "error");
-              resetCoupon();
             }
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-            showCouponMessage(
-              "There was an error applying the coupon",
-              "error"
-            );
-            resetCoupon();
+          }
+        };
+
+        // Initialize Razorpay
+        const razorpay = new Razorpay(options);
+        razorpay.on('payment.failed', function(response) {
+          Swal.fire({
+            icon: "error",
+            title: "Payment Failed",
+            text: response.error.description || "Your payment could not be processed. Please try again.",
+            confirmButtonText: "OK",
           });
-      });
-
-      // Function to show coupon status messages
-      function showCouponMessage(message, type) {
-        couponMessage.textContent = message;
-        couponMessage.style.display = "block";
-
-        if (type === "error") {
-          couponMessage.style.color = "#dc3545";
-        } else {
-          couponMessage.style.color = "#28a745";
-        }
-
-        // Hide message after 5 seconds
-        setTimeout(() => {
-          couponMessage.style.display = "none";
-        }, 5000);
-      }
-
-      // Function to reset coupon if invalid
-      function resetCoupon() {
-        couponDiscountDiv.style.display = "none";
-        orderTotalElement.textContent = `$${originalTotal.toFixed(2)}`;
-
-        // Remove hidden inputs
-        const couponInput = document.getElementById("appliedCouponInput");
-        const discountInput = document.getElementById("discountAmountInput");
-
-        if (couponInput) couponInput.parentNode.removeChild(couponInput);
-        if (discountInput) discountInput.parentNode.removeChild(discountInput);
-
-        appliedCoupon = null;
-      }
-
-      // For the clickable coupon chips
-      document.querySelectorAll(".coupon-chip").forEach((chip) => {
-        chip.addEventListener("click", function () {
-          const code = this.querySelector("strong").textContent;
-          couponInput.value = code;
-          applyCouponBtn.click(); // Automatically apply the selected coupon
+        });
+        razorpay.open();
+      })
+      .catch(error => {
+        console.error("Razorpay Error:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Payment Error",
+          text: "Failed to initialize payment. Please try again.",
+          confirmButtonText: "OK",
         });
       });
-    </script>
-    <script></script>
+  }
+
+  function verifyRazorpayPayment(paymentData) {
+    // Show loading indicator
+    Swal.fire({
+      title: 'Verifying Payment',
+      text: 'Please wait...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+    
+    fetch(`/verify-payment/${paymentData.cartId}`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json" 
+      },
+      body: JSON.stringify({
+        razorpay_order_id: paymentData.razorpayOrderId,
+        razorpay_payment_id: paymentData.razorpayPaymentId,
+        razorpay_signature: paymentData.razorpaySignature,
+        cartId: paymentData.cartId
+      }),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Verification failed");
+        }
+        return response.json();
+      })
+      .then(verifyData => {
+        // Close loading indicator
+        Swal.close();
+        
+        if (verifyData.status === "success") {
+          if (verifyData.orderId) {
+            // If backend already created order, just redirect
+            window.location.href = `/thank-you?orderId=${verifyData.orderId}`;
+          } else {
+            // Otherwise complete the order submission
+            submitOrder(paymentData);
+          }
+        } else {
+          // If payment verification failed
+          Swal.fire({
+            icon: "error",
+            title: "Payment Verification Failed",
+            text: verifyData.message || "Your payment could not be verified. Please try again or contact support.",
+            confirmButtonText: "OK",
+          });
+        }
+      })
+      .catch(error => {
+        console.error("Verification Error:", error);
+        Swal.close();
+        Swal.fire({
+          icon: "error",
+          title: "Payment Verification Error",
+          text: "An error occurred while verifying your payment. Please contact support.",
+          confirmButtonText: "OK",
+        });
+      });
+  }
+  
+  function submitOrder(orderData) {
+    // Show loading indicator
+    Swal.fire({
+      title: 'Processing Order',
+      text: 'Please wait...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+    
+    // Make sure coupon information is included if a coupon was applied
+    if (document.getElementById("couponApplied")) {
+      orderData.couponCode = document.getElementById("couponApplied").value;
+    }
+    
+    // Make sure wallet information is included if wallet was used
+    if (document.getElementById("walletUsed") && document.getElementById("walletUsed").value === "true") {
+      orderData.walletUsed = true;
+      orderData.walletAmount = parseFloat(document.getElementById("walletAmount").value || 0);
+    }
+
+    // Submit order to server
+    fetch(`/checkout/${orderData.cartId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(orderData),
+    })
+    .then(response => {
+      // First check if the response is ok
+      if (!response.ok) {
+        return response.text().then(text => {
+          // Try to parse as JSON, but if it fails, throw the text
+          try {
+            return Promise.reject(JSON.parse(text));
+          } catch (e) {
+            return Promise.reject(new Error(text || "Server error"));
+          }
+        });
+      }
+      
+      // If response is ok, try to parse as JSON
+      return response.text().then(text => {
+        try {
+          return JSON.parse(text);
+        } catch (e) {
+          throw new Error("Invalid JSON response from server");
+        }
+      });
+    })
+    .then(data => {
+      // Close loading indicator
+      Swal.close();
+      
+      if (data.status === "success") {
+        // Show success message and redirect to order confirmation
+        window.location.href = `/thank-you${data.orderId ? '?orderId=' + data.orderId : ''}`;
+      } else {
+        // Show error message
+        Swal.fire({
+          icon: "error",
+          title: "Order Failed",
+          text: data.message || "Failed to place your order. Please try again.",
+          confirmButtonText: "OK",
+        });
+      }
+    })
+    .catch(error => {
+      console.error("Order Error:", error);
+      Swal.close();
+      
+      // Display a user-friendly error message
+      Swal.fire({
+        icon: "error",
+        title: "Order Error",
+        text: error.message || "An unexpected error occurred while placing your order.",
+        confirmButtonText: "OK",
+      });
+    });
+  }
+});</script>
   </body>
 </html>

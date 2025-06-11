@@ -10,7 +10,8 @@ router
 router
   .route("/:id")
   .get(userGuestMiddleware, checkOutController.getCheckoutPage)
-  .post(checkOutController.placeOrderController);
+  .post(checkOutController.checkoutController);
+
 
 // router
 //   .route("/create-razorpay-order/:id")

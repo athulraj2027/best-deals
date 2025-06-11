@@ -25,7 +25,10 @@ exports.getCategoriesPage = async (req, res) => {
     const skip = (currentPage - 1) * limit;
 
     const totalCategories = await Category.countDocuments();
-    const categories = await Category.find(filter).sort(sortOption).skip(skip).limit(limit);
+    const categories = await Category.find(filter)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limit);
 
     const totalPages = Math.ceil(totalCategories / limit);
     const hasPrevPage = currentPage > 1;

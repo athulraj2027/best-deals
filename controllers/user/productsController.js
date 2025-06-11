@@ -51,9 +51,9 @@ exports.addtoWishlistController = async (req, res) => {
         message: "Error in request body of wishlist item",
       });
     }
-    let wishlist = await Wishlist.findOne({ user:userId });
+    let wishlist = await Wishlist.findOne({ user: userId });
     if (!wishlist) {
-      wishlist = new Wishlist({user: userId, items: [] });
+      wishlist = new Wishlist({ user: userId, items: [] });
     }
     const existingItem = await wishlist.items.find(
       (item) => item.variantId.toString() === wishlistItem.variantId
@@ -103,7 +103,7 @@ exports.addtoCartController = async (req, res) => {
     if (!cart) {
       cart = new Cart({ userId, items: [] });
     }
-    const existingItem = await cart.items.find(
+    const existingItem = cart.items.find(
       (item) => item.variantId.toString() === cartItem.variantId
     );
 
@@ -112,6 +112,10 @@ exports.addtoCartController = async (req, res) => {
     } else {
       cart.items.push(cartItem);
     }
+
+    cart.subtotal += cartItem.price;
+    cart.tax += cartItem.price * 0.1;
+    cart.total = cart.subtotal + cart.tax;
 
     await cart.save();
 
@@ -133,36 +137,36 @@ exports.addtoCartController = async (req, res) => {
 exports.addToCart = async (req, res) => {
   try {
     // Extract cart item details from request body
-    const { 
-      productId, 
-      variantId, 
-      name, 
-      color, 
-      size, 
-      price, 
+    const {
+      productId,
+      variantId,
+      name,
+      color,
+      size,
+      price,
       quantity = 1,
-      image 
+      image,
     } = req.body;
 
     // Check if user is authenticated (adjust based on your auth middleware)
     if (!req.user) {
-      return res.status(401).json({ 
-        status: 'error', 
-        message: 'User not authenticated' 
+      return res.status(401).json({
+        status: "error",
+        message: "User not authenticated",
       });
     }
 
     // Find or create user's cart
-    let cart = await Cart.findOne({ userId: req.user._id, status: 'active' });
-    
+    let cart = await Cart.findOne({ userId: req.user._id, status: "active" });
+
     if (!cart) {
       cart = new Cart({ userId: req.user._id });
     }
 
     // Check if item already exists in cart
     const existingItemIndex = cart.items.findIndex(
-      item => 
-        item.productId.toString() === productId && 
+      (item) =>
+        item.productId.toString() === productId &&
         item.variantId.toString() === variantId
     );
 
@@ -179,7 +183,7 @@ exports.addToCart = async (req, res) => {
         size,
         price,
         quantity,
-        image
+        image,
       });
     }
 
@@ -191,18 +195,17 @@ exports.addToCart = async (req, res) => {
     await cart.save();
 
     res.status(200).json({
-      status: 'success',
-      message: 'Item added to cart',
+      status: "success",
+      message: "Item added to cart",
       cartCount: cart.getItemCount(),
-      cart: cart
+      cart: cart,
     });
-
   } catch (error) {
-    console.error('Add to Cart Error:', error);
-    res.status(500).json({ 
-      status: 'error', 
-      message: 'Failed to add item to cart',
-      error: error.message 
+    console.error("Add to Cart Error:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Failed to add item to cart",
+      error: error.message,
     });
   }
 };

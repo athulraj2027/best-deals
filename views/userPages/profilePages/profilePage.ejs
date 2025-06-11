@@ -92,6 +92,25 @@
               <p><strong>Name :</strong> <%= user.name %></p>
               <p><strong>Email:</strong> <%= user.email %></p>
               <p><strong>Phone:</strong> <%= user.phone || 'Not provided' %></p>
+              <p><strong>Referral Code :</strong></p>
+              <div class="referral-box d-flex align-items-center">
+                <input
+                  type="text"
+                  id="referralCode"
+                  class="form-control me-2"
+                  value="<%= user.referralCode %>"
+                  readonly
+                  style="max-width: 200px"
+                />
+                <button
+                  class="btn btn-outline-primary"
+                  onclick="copyReferralCode()"
+                >
+                  Copy
+                </button>
+              </div><br/>
+              <h1>Wallet Savings</h1><br>
+              <h3>$ <%= user.wallet.toFixed(2) %></h3>
             </div>
             <form id="editProfileForm">
               <div class="edit-field">
@@ -205,6 +224,23 @@
           editToggleBtn.textContent = "Edit Profile";
         });
       });
+    </script>
+    <script>
+      function copyReferralCode() {
+        const input = document.getElementById("referralCode");
+        input.select();
+        input.setSelectionRange(0, 99999); // For mobile
+        document.execCommand("copy");
+
+        // Optional feedback
+
+        Swal.fire({
+          title: "Referral Copied",
+          text: "Referral code has been copied to the clipboard",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
+      }
     </script>
   </body>
 </html>

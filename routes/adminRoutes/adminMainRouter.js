@@ -10,12 +10,14 @@ const guestMiddleware = require("../../middlewares/guestMiddleware");
 const orderRoutes = require("./orderRoutes");
 const couponRoutes = require("./couponRoutes");
 const salesReportRoutes = require('./salesReportRoutes')
+const offerRoutes = require('./offerRoutes')
 
 router.use("/categories", categoryRoutes);
 router.use("/products", productRoutes);
 router.use("/customers", usersRoutes);
 router.use("/orders", orderRoutes);
 router.use("/coupons", couponRoutes);
+router.use("/offers",offerRoutes)
 router.use(
   "/dashboard",
   guestMiddleware,

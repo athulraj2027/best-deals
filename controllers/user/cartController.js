@@ -66,6 +66,7 @@ exports.updateQuantityController = async (req, res) => {
 
     if (action === "increase") {
       cartItem.quantity = Math.min(parseInt(cartItem.quantity) + 1, 5);
+      
     } else if (action === "decrease") {
       cartItem.quantity = Math.max(parseInt(cartItem.quantity) - 1, 1);
     } else {
@@ -73,7 +74,7 @@ exports.updateQuantityController = async (req, res) => {
       cartItem.quantity = Math.max(1, Math.min(parseInt(quantity), 5));
     }
 
-    await cart.calculateSubtotal();
+    // await cart.calculateSubtotal();
     await cart.save();
 
     // For AJAX requests, return JSON response

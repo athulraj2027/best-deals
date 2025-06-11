@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Coupon</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+      :root {
+        --primary-color: #4361ee;
+        --secondary-color: #3f37c9;
+        --accent-color: #4895ef;
+        --success-color: #4cc9f0;
+        --text-color: #2b2d42;
+        --bg-color: #f8f9fa;
+        --card-bg: #ffffff;
+        --border-radius: 12px;
+        --transition: all 0.3s ease;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", system-ui, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        color: var(--text-color);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 800px;
+        background: var(--card-bg);
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+      }
+
+      .header p {
+        color: #6c757d;
+        font-size: 1.1rem;
+      }
+
+      .form-section {
+        background: var(--bg-color);
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 1.5rem;
+      }
+
+      .form-section h3 {
+        color: var(--secondary-color);
+        margin-bottom: 1.5rem;
+        font-size: 1.2rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .form-row .form-group {
+        flex: 1;
+        margin-bottom: 0;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-color);
+        font-weight: 500;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: var(--transition);
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        outline: none;
+      }
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      .submit-btn {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        width: 100%;
+        margin-top: 1rem;
+      }
+
+      .submit-btn:hover {
+        background: var(--secondary-color);
+        transform: translateY(-2px);
+      }
+
+      .status-toggle {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.5rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+      }
+
+      .status-toggle label {
+        margin: 0;
+        cursor: pointer;
+      }
+
+      .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+      }
+
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.4s;
+        border-radius: 34px;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+
+      input:checked + .slider {
+        background-color: var(--success-color);
+      }
+
+      input:checked + .slider:before {
+        transform: translateX(26px);
+      }
+
+      .error-message {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: none;
+      }
+
+      .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .cancel-btn {
+        color: white;
+        background: red;
+        border: none;
+        border-radius: 8px;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .cancel-btn:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 1rem;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+
+        .form-row {
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('../partials/menu') %>
+    <div class="container">
+      <div class="header">
+        <h1>Add Offer</h1>
+        <p>Create and manage your offers</p>
+      </div>
+
+      <form id="addOfferForm">
+        <div class="form-section">
+          <h3>Basic Information</h3>
+          <div class="form-group">
+            <label for="offerName">Offer name</label>
+            <input
+              type="text"
+              id="offerName"
+              name="code"
+              placeholder="Enter offer code name"
+            />
+            <div id="offerNameError" class="error-message"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea
+              id="description"
+              name="description"
+              placeholder="Enter offer description"
+            ></textarea>
+            <div id="descriptionError" class="error-message"></div>
+          </div>
+          <div class="form-section">
+            <h3>Applicable Items</h3>
+            <div class="form-group">
+              <label for="appliedCategories">Apply to Categories</label>
+              <select
+                id="appliedCategories"
+                name="appliedCategories"
+                multiple
+                style="height: 120px"
+              >
+                <option value="">Select categories</option>
+                <% categories.forEach(function(category) { %>
+                <option value="<%= category._id %>">
+                  <%= category.name %>
+                </option>
+                <% }); %>
+              </select>
+              <div id="appliedCategoriesError" class="error-message"></div>
+              <small style="display: block; margin-top: 0.5rem; color: #6c757d">
+                Hold Ctrl (or Cmd on Mac) to select multiple categories. Leave
+                empty to apply to all categories.
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label for="appliedProducts">Apply to Products</label>
+              <select
+                id="appliedProducts"
+                name="appliedProducts"
+                multiple
+                style="height: 120px"
+              >
+                <option value="">Select products</option>
+                <% products.forEach(function(product) { %>
+                <option value="<%= product._id %>"><%= product.name %></option>
+                <% }); %>
+              </select>
+              <div id="appliedProductsError" class="error-message"></div>
+              <small style="display: block; margin-top: 0.5rem; color: #6c757d">
+                Hold Ctrl (or Cmd on Mac) to select multiple products. Leave
+                empty to apply to all products.
+              </small>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="offerType">Offer Type</label>
+              <select id="offerType" name="offerType">
+                <option value="">Select offer type</option>
+                <option value="percentage">Percentage (%)</option>
+                <option value="fixed">Fixed Amount</option>
+              </select>
+              <div id="offerTypeError" class="error-message"></div>
+            </div>
+
+            <div class="form-group">
+              <label for="offerValue">Offer Value</label>
+              <input
+                type="number"
+                id="offerValue"
+                name="offerValue"
+                placeholder="Enter offer value"
+                min="0"
+                step="0.01"
+              />
+              <div id="offerValueError" class="error-message"></div>
+            </div>
+          </div>
+
+          
+        </div>
+
+        <div class="form-section">
+          <h3>Validity & Usage</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="startDate">Start Date</label>
+              <input type="datetime-local" id="startDate" name="startDate" />
+              <div id="startDateError" class="error-message"></div>
+            </div>
+
+            <div class="form-group">
+              <label for="expiryDate">Expiry Date</label>
+              <input type="datetime-local" id="expiryDate" name="expiryDate" />
+              <div id="expiryDateError" class="error-message"></div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Offer Status</label>
+              <div class="status-toggle">
+                <label class="toggle-switch">
+                  <input type="checkbox" name="active" checked />
+                  <span class="slider"></span>
+                </label>
+                <span id="statusText">Active</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button type="submit" class="submit-btn">Create Offer</button>
+          <a href="/admin/offers" class="cancel-btn">Cancel</a>
+        </div>
+      </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      // Set default start date to current date and time
+      document.addEventListener("DOMContentLoaded", function () {
+        const now = new Date();
+        const localDatetime = new Date(
+          now.getTime() - now.getTimezoneOffset() * 60000
+        )
+          .toISOString()
+          .slice(0, 16);
+
+        document.getElementById("startDate").value = localDatetime;
+
+        // Set default expiry date to 30 days from now
+        const thirtyDaysLater = new Date(
+          now.getTime() + 30 * 24 * 60 * 60 * 1000
+        );
+        const expiryLocalDatetime = new Date(
+          thirtyDaysLater.getTime() - now.getTimezoneOffset() * 60000
+        )
+          .toISOString()
+          .slice(0, 16);
+
+        document.getElementById("expiryDate").value = expiryLocalDatetime;
+      });
+
+      // Validation Rules
+      const VALIDATION_RULES = {
+        offerName: {
+          minLength: 3,
+          maxLength: 20,
+          pattern: /^[A-Za-z0-9_-]+$/,
+        },
+        description: {
+          minLength: 10,
+          maxLength: 200,
+        },
+        offerValue: {
+          max: {
+            percentage: 100,
+            fixed: 1000000, // Arbitrary high value, adjust as needed
+          },
+        },
+      };
+
+      // Helper functions
+      function showError(element, message) {
+        element.textContent = message;
+        element.style.display = "block";
+      }
+
+      function hideError(element) {
+        element.style.display = "none";
+      }
+
+      // Status toggle handling
+      const statusToggle = document.querySelector('input[name="active"]');
+      const statusText = document.getElementById("statusText");
+
+      statusToggle.addEventListener("change", function () {
+        statusText.textContent = this.checked ? "Active" : "Inactive";
+      });
+
+      // Discount type handling
+      const offerTypeSelect = document.getElementById("offerType");
+      const offerValueInput = document.getElementById("offerValue");
+
+      offerTypeSelect.addEventListener("change", function () {
+        if (this.value === "percentage") {
+          offerValueInput.setAttribute("max", "100");
+          offerValueInput.setAttribute(
+            "placeholder",
+            "Enter percentage value (0-100)"
+          );
+        } else {
+          offerValueInput.removeAttribute("max");
+          offerValueInput.setAttribute("placeholder", "Enter fixed amount");
+        }
+      });
+
+      // Validation functions
+      function validateOfferName(code) {
+        const errorElement = document.getElementById("offerNameError");
+
+        if (!code) {
+          showError(errorElement, "Offer name is required");
+          return false;
+        }
+
+        if (code.length < VALIDATION_RULES.offerName.minLength) {
+          showError(
+            errorElement,
+            `Offer name must be at least ${VALIDATION_RULES.offerName.minLength} characters`
+          );
+          return false;
+        }
+
+        if (name.length > VALIDATION_RULES.offerName.maxLength) {
+          showError(
+            errorElement,
+            `Offer name cannot exceed ${VALIDATION_RULES.offerName.maxLength} characters`
+          );
+          return false;
+        }
+
+        if (!VALIDATION_RULES.offerName.pattern.test(code)) {
+          showError(
+            errorElement,
+            "Offer name can only contain letters, numbers, hyphens, and underscores"
+          );
+          return false;
+        }
+
+        hideError(errorElement);
+        return true;
+      }
+
+      function validateDescription(description) {
+        const errorElement = document.getElementById("descriptionError");
+
+        if (!description) {
+          showError(errorElement, "Description is required");
+          return false;
+        }
+
+        if (description.length < VALIDATION_RULES.description.minLength) {
+          showError(
+            errorElement,
+            `Description must be at least ${VALIDATION_RULES.description.minLength} characters`
+          );
+          return false;
+        }
+
+        if (description.length > VALIDATION_RULES.description.maxLength) {
+          showError(
+            errorElement,
+            `Description cannot exceed ${VALIDATION_RULES.description.maxLength} characters`
+          );
+          return false;
+        }
+
+        hideError(errorElement);
+        return true;
+      }
+
+      function validateOfferType(type) {
+        const errorElement = document.getElementById("offerTypeError");
+
+        if (!type) {
+          showError(errorElement, "Please select a offer type");
+          return false;
+        }
+
+        hideError(errorElement);
+        return true;
+      }
+
+      function validateOfferValue(value, type) {
+        const errorElement = document.getElementById("offerValueError");
+
+        if (!value) {
+          showError(errorElement, "Offer value is required");
+          return false;
+        }
+
+        if (value <= 0) {
+          showError(errorElement, "Offer value must be greater than 0");
+          return false;
+        }
+
+        if (
+          type === "percentage" &&
+          value > VALIDATION_RULES.offerValue.max.percentage
+        ) {
+          showError(errorElement, "Percentage discount cannot exceed 100%");
+          return false;
+        }
+
+        hideError(errorElement);
+        return true;
+      }
+
+      function validateDates(startDate, expiryDate) {
+        const startDateError = document.getElementById("startDateError");
+        const expiryDateError = document.getElementById("expiryDateError");
+
+        if (!startDate) {
+          showError(startDateError, "Start date is required");
+          return false;
+        }
+
+        if (!expiryDate) {
+          showError(expiryDateError, "Expiry date is required");
+          return false;
+        }
+
+        const startDateTime = new Date(startDate);
+        const expiryDateTime = new Date(expiryDate);
+
+        if (expiryDateTime <= startDateTime) {
+          showError(expiryDateError, "Expiry date must be after start date");
+          return false;
+        }
+
+        hideError(startDateError);
+        hideError(expiryDateError);
+        return true;
+      }
+
+      // Real-time validation
+      document
+        .getElementById("offerName")
+        .addEventListener("input", function () {
+          validateOfferName(this.value);
+        });
+
+      document
+        .getElementById("description")
+        .addEventListener("input", function () {
+          validateDescription(this.value);
+        });
+
+      document
+        .getElementById("offerType")
+        .addEventListener("change", function () {
+          validateOfferType(this.value);
+        });
+
+      document
+        .getElementById("offerValue")
+        .addEventListener("input", function () {
+          validateOfferValue(
+            this.value,
+            document.getElementById("offerType").value
+          );
+        });
+
+      document
+        .getElementById("startDate")
+        .addEventListener("change", function () {
+          validateDates(
+            this.value,
+            document.getElementById("expiryDate").value
+          );
+        });
+
+      document
+        .getElementById("expiryDate")
+        .addEventListener("change", function () {
+          validateDates(document.getElementById("startDate").value, this.value);
+        });
+
+      // Form submission
+      $(document).ready(function () {
+        $("#addOfferForm").on("submit", function (e) {
+          e.preventDefault();
+
+          // Validate all fields
+          const nameValid = validateOfferName($("#offerName").val());
+          const descriptionValid = validateDescription($("#description").val());
+          const offerTypeValid = validateOfferType(
+            $("#offerType").val()
+          );
+          const offerValueValid = validateOfferValue(
+            $("#offerValue").val(),
+            $("#offerType").val()
+          );
+          const datesValid = validateDates(
+            $("#startDate").val(),
+            $("#expiryDate").val()
+          );
+
+          if (
+            !nameValid ||
+            !descriptionValid ||
+            !offerTypeValid ||
+            !offerValueValid ||
+            !datesValid
+          ) {
+            return;
+          }
+
+          // Show loading state
+          Swal.fire({
+            title: "Adding Offer...",
+            text: "Please wait while we process your request",
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            willOpen: () => {
+              Swal.showLoading();
+            },
+          });
+
+          const formData = new FormData(this);
+          const jsonData = {};
+
+          // Convert FormData to JSON object
+          for (const [key, value] of formData.entries()) {
+            if (key === "active") {
+              jsonData[key] = value === "on";
+            
+            } else {
+              jsonData[key] = value;
+            }
+          }
+
+          $.ajax({
+            url: "/admin/offers/add",
+            type: "POST",
+            data: JSON.stringify(jsonData),
+            contentType: "application/json",
+            success: function (response) {
+              if (response.status === "success") {
+                Swal.fire({
+                  icon: "success",
+                  title: "Success!",
+                  text: "Offer added successfully",
+                  showConfirmButton: true,
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    window.location.href = "/admin/offers";
+                  }
+                });
+              } else {
+                Swal.fire({
+                  icon: "error",
+                  title: "Failed!",
+                  text: response.message || "Failed to add offer",
+                  showConfirmButton: true,
+                });
+              }
+            },
+            error: function (xhr, status, error) {
+              console.error("AJAX Error:", status, error);
+              console.log("Response:", xhr.responseJSON);
+
+              let errorMessage =
+                "An unexpected error occurred. Please try again.";
+
+              switch (xhr.status) {
+                case 400:
+                  if (xhr.responseJSON?.error === "DUPLICATE_COUPON") {
+                    errorMessage = "A offer with this name already exists.";
+                  } else {
+                    errorMessage = "Invalid data. Please check your inputs.";
+                  }
+                  break;
+                case 401:
+                  errorMessage = "Please login to continue.";
+                  break;
+                case 403:
+                  errorMessage = "You don't have permission to add offers.";
+                  break;
+                case 500:
+                  errorMessage = "Server error. Please try again later.";
+                  break;
+              }
+
+              if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMessage = xhr.responseJSON.message;
+              }
+
+              Swal.fire({
+                icon: "error",
+                title: "Error!",
+                text: errorMessage,
+                showConfirmButton: true,
+              });
+            },
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
