@@ -4,473 +4,229 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Address Management</title>
-    <link rel="stylesheet" href="/styles/profile.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
       rel="stylesheet"
     />
-    <!-- Add CSRF token meta tag if needed -->
-    <!-- <meta name="csrf-token" content="your-csrf-token-here"> -->
-
-    <link rel="stylesheet" href="/userCSS/partials/headerPartial.css" />
-    <link rel="stylesheet" href="/userCSS/partials/partials_css.css" />
-    <style>
-      .address-container {
-        max-width: 800px;
-        margin: 30px auto;
-        padding: 20px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-        background-color: #37404d;
-        color: white;
-      }
-      .address-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 30px;
-        justify-content: space-between;
-      }
-      .address-card {
-        background-color: #2d3540;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 20px;
-        position: relative;
-        border: 1px solid #4a4f57;
-      }
-      .address-actions {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-      }
-      .address-type {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 12px;
-        margin-bottom: 10px;
-      }
-      .default-address {
-        background-color: #4a7bff;
-      }
-      .home-address {
-        background-color: #2d8a39;
-      }
-      .work-address {
-        background-color: #b06d14;
-      }
-      .other-address {
-        background-color: #6c757d;
-      }
-      .form-container {
-        display: none;
-        background-color: #2d3540;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 20px;
-        border: 1px solid #4a4f57;
-      }
-      .sidebar-container {
-        width: 100%;
-        max-width: 250px;
-        padding: 20px 0;
-      }
-      .account-sidebar {
-        background-color: #2d3540;
-        border-radius: 8px;
-        padding: 15px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-      }
-      .sidebar-menu {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-      }
-      .sidebar-item {
-        margin-bottom: 8px;
-      }
-      .sidebar-link {
-        display: block;
-        padding: 12px 15px;
-        color: #e0e0e0;
-        text-decoration: none;
-        border-radius: 6px;
-        font-weight: 500;
-        transition: all 0.3s ease;
-      }
-      .sidebar-link:hover {
-        background-color: #3a4653;
-        color: #ffffff;
-      }
-      .sidebar-link.active {
-        background-color: #4a7bff;
-        color: #ffffff;
-      }
-      /* Optional: Add responsive behavior for mobile */
-      @media (max-width: 768px) {
-        .sidebar-container {
-          max-width: 100%;
-          margin-bottom: 20px;
-        }
-      }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   </head>
-  <body>
+  <body class="bg-gray-100 min-h-screen">
     <%- include('../partials/headerPartial') %>
-    <div class="container d-flex m-0">
-      <%- include('./partial')%>
 
-      <div class="container address-container">
-        <div class="address-header">
-          <h2>Your Addresses</h2>
-          <button class="btn btn-primary" id="showAddFormBtn">
+    <div class="flex flex-col md:flex-row max-w-6xl mx-auto mt-8 px-4 md:px-0 gap-6">
+      <!-- Sidebar -->
+      <div class="w-full md:w-1/4">
+        <%- include('./partial') %>
+      </div>
+
+      <!-- Address Container -->
+      <div class="w-full md:w-3/4 bg-white rounded-xl shadow-lg p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-gray-800">Your Addresses</h2>
+          <button
+            id="showAddFormBtn"
+            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+          >
             <i class="fas fa-plus me-2"></i>Add New Address
           </button>
         </div>
 
         <!-- Add Address Form -->
-
-        <div class="form-container" id="addAddressForm">
-          <h4 class="mb-3">Add New Address</h4>
-          <form id="addressForm">
-            <div class="mb-3">
-              <label class="form-label">Address Type</label>
-              <div class="d-flex">
-                <div class="form-check me-3">
-                  <input
-                    class="form-check-input"
-                    type="radio"
-                    name="type"
-                    id="homeType"
-                    value="Home"
-                    checked
-                  />
-                  <label class="form-check-label" for="homeType">Home</label>
-                </div>
-                <div class="form-check me-3">
-                  <input
-                    class="form-check-input"
-                    type="radio"
-                    name="type"
-                    id="workType"
-                    value="Work"
-                  />
-                  <label class="form-check-label" for="workType">Work</label>
-                </div>
-                <div class="form-check">
-                  <input
-                    class="form-check-input"
-                    type="radio"
-                    name="type"
-                    id="otherType"
-                    value="Other"
-                  />
-                  <label class="form-check-label" for="otherType">Other</label>
-                </div>
+        <div
+          id="addAddressForm"
+          class="hidden bg-gray-50 border border-gray-300 rounded-lg p-6 mb-6"
+        >
+          <h4 class="text-lg font-semibold mb-4">Add New Address</h4>
+          <form id="addressForm" class="space-y-4">
+            <!-- Address Type -->
+            <div>
+              <label class="block font-medium text-gray-700 mb-1">Address Type</label>
+              <div class="flex gap-4">
+                <label class="inline-flex items-center">
+                  <input type="radio" name="type" value="Home" checked class="form-radio text-blue-600"/>
+                  <span class="ml-2">Home</span>
+                </label>
+                <label class="inline-flex items-center">
+                  <input type="radio" name="type" value="Work" class="form-radio text-green-600"/>
+                  <span class="ml-2">Work</span>
+                </label>
+                <label class="inline-flex items-center">
+                  <input type="radio" name="type" value="Other" class="form-radio text-gray-600"/>
+                  <span class="ml-2">Other</span>
+                </label>
               </div>
             </div>
 
-            <div class="mb-3">
-              <label for="streetAddress" class="form-label"
-                >Street Address</label
-              >
+            <!-- Address Fields -->
+            <div>
+              <label for="streetAddress" class="block font-medium text-gray-700 mb-1">Street Address</label>
               <input
                 type="text"
-                class="form-control"
                 id="streetAddress"
                 name="streetAddress"
                 placeholder="Street address, P.O. box, company name"
+                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
-            <div class="mb-3">
-              <label for="city" class="form-label">City</label>
-              <input
-                type="text"
-                class="form-control"
-                id="city"
-                name="city"
-                
-              />
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="city" class="block font-medium text-gray-700 mb-1">City</label>
+                <input
+                  type="text"
+                  id="city"
+                  name="city"
+                  class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label for="state" class="block font-medium text-gray-700 mb-1">State</label>
+                <input
+                  type="text"
+                  id="state"
+                  name="state"
+                  class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
 
-            <div class="mb-3">
-              <label for="state" class="form-label">State</label>
-              <input
-                type="text"
-                class="form-control"
-                id="state"
-                name="state"
-                
-              />
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="zipCode" class="block font-medium text-gray-700 mb-1">ZIP Code</label>
+                <input
+                  type="text"
+                  id="zipCode"
+                  name="zipCode"
+                  class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label for="country" class="block font-medium text-gray-700 mb-1">Country</label>
+                <input
+                  type="text"
+                  id="country"
+                  name="country"
+                  class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
 
-            <div class="mb-3">
-              <label for="zipCode" class="form-label">ZIP Code</label>
-              <input
-                type="text"
-                class="form-control"
-                id="zipCode"
-                name="zipCode"
-              />
-            </div>
-
-            <div class="mb-3">
-              <label for="country" class="form-label">Country</label>
-              <input
-                type="text"
-                class="form-control"
-                id="country"
-                name="country"
-              />
-            </div>
-
-            <div class="d-flex">
-              <button type="submit" class="btn btn-success me-2">
-                Save Address
-              </button>
-              <button type="button" class="btn btn-secondary" id="cancelAddBtn">
-                Cancel
-              </button>
+            <div class="flex gap-2 mt-4">
+              <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">Save Address</button>
+              <button type="button" id="cancelAddBtn" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition">Cancel</button>
             </div>
           </form>
         </div>
-        <div id="addressList">
-          <% if (addresses && addresses.length > 0) { %> <%
-          addresses.forEach((address, index) => { %>
-          <div class="address-card">
-            <span class="address-type <%= address.type.toLowerCase() %>-address"
-              ><%= address.type %></span
-            >
 
-            <div class="address-actions">
-              <a
-                href="/profile/address/edit/<%= address._id %>"
-                class="btn btn-sm btn-outline-info me-1"
-              >
-                <i class="fas fa-edit"></i>
-              </a>
+        <!-- Address List -->
+        <div id="addressList" class="space-y-4">
+          <% if (addresses && addresses.length > 0) { %>
+            <% addresses.forEach((address, index) => { %>
+              <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 relative">
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold 
+                  <% if(address.type === 'Home'){ %> bg-green-500 <% } else if(address.type === 'Work'){ %> bg-blue-500 <% } else { %> bg-gray-500 <% } %> text-white mb-2">
+                  <%= address.type %>
+                </span>
 
-              <form
-                action="/profile/address/delete/<%= address._id %>"
-                method="post"
-                id="delete-form-<%= address._id %>"
-              >
-                <!-- Add CSRF token if needed -->
-                <button
-                  class="btn btn-sm btn-outline-danger delete-address-btn"
-                  data-address-id="<%= address._id %>"
-                  style="margin-top: 5px"
-                >
-                  <i class="fas fa-trash"></i>
-                </button>
-              </form>
+                <div class="absolute top-4 right-4 flex gap-2">
+                  <a href="/profile/address/edit/<%= address._id %>" class="text-blue-600 hover:text-blue-800">
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  <button class="text-red-600 hover:text-red-800 delete-address-btn" data-address-id="<%= address._id %>">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+
+                <p class="mt-6 text-gray-700">
+                  <%= address.streetAddress %><br/>
+                  <%= address.city %>, <%= address.state %> <%= address.zipCode %><br/>
+                  <%= address.country %>
+                </p>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <div class="text-center text-gray-500 py-6 border border-dashed border-gray-300 rounded">
+              <p>You don't have any saved addresses. Add one above.</p>
             </div>
-            <p>
-              <%= address.streetAddress %><br />
-              <%= address.city %>, <%= address.state %> <%= address.zipCode
-              %><br />
-              <%= address.country %>
-            </p>
-          </div>
-          <% }); %> <% } else { %>
-          <div class="no-address-message">
-            <p>You don't have any saved addresses. Add one below.</p>
-          </div>
           <% } %>
         </div>
       </div>
     </div>
+
     <%- include('../partials/footer') %>
 
-    <!-- Required Scripts -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-      // Helper function to get CSRF token from meta tag
-      function getCSRFToken() {
-        const metaTag = document.querySelector('meta[name="csrf-token"]');
-        return metaTag ? metaTag.getAttribute("content") : "";
-      }
-
       document.addEventListener("DOMContentLoaded", function () {
-        // DOM Elements
         const showAddFormBtn = document.getElementById("showAddFormBtn");
         const addAddressForm = document.getElementById("addAddressForm");
         const cancelAddBtn = document.getElementById("cancelAddBtn");
 
-        // Show add address form
-        showAddFormBtn.addEventListener("click", function () {
-          addAddressForm.style.display = "block";
+        showAddFormBtn.addEventListener("click", () => {
+          addAddressForm.classList.remove("hidden");
         });
 
-        // Cancel add address
-        cancelAddBtn.addEventListener("click", function () {
-          addAddressForm.style.display = "none";
+        cancelAddBtn.addEventListener("click", () => {
+          addAddressForm.classList.add("hidden");
           document.getElementById("addressForm").reset();
         });
 
-        // Address form submission
+        // Form submission
         const addressForm = document.getElementById("addressForm");
-        if (addressForm) {
-          addressForm.addEventListener("submit", function (e) {
-            e.preventDefault();
+        addressForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+          const formData = Object.fromEntries(new FormData(this).entries());
 
-            // Get CSRF token if needed
-            const csrfToken = getCSRFToken();
-
-            // Collect form data
-            const formData = new FormData(this);
-            const addressData = {};
-
-            for (const [key, value] of formData.entries()) {
-              addressData[key] = value;
-            }
-
-            // Show loading state
-            Swal.fire({
-              title: "Saving...",
-              text: "Please wait while we save your address",
-              allowOutsideClick: false,
-              didOpen: () => {
-                Swal.showLoading();
-              },
-            });
-
-            // Fetch API instead of jQuery ajax
-            fetch("/profile/address/add", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "CSRF-Token": csrfToken, // Include if needed
-              },
-              body: JSON.stringify(addressData),
-            })
-              .then((response) => response.json())
-              .then((data) => {
-                if (data.status === "success") {
-                  Swal.fire({
-                    icon: "success",
-                    title: "Success!",
-                    text: "Your address has been saved successfully",
-                    confirmButtonColor: "#28a745",
-                  }).then((result) => {
-                    if (result.isConfirmed) {
-                      window.location.reload();
-                    }
-                  });
-                } else {
-                  Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: data.message || "Something went wrong",
-                  });
-                }
-              })
-              .catch((error) => {
-                console.error("Error:", error);
-                Swal.fire({
-                  icon: "error",
-                  title: "Oops...",
-                  text: "Failed to save address. Please try again.",
-                  confirmButtonColor: "#dc3545",
-                });
-              });
+          Swal.fire({
+            title: "Saving...",
+            didOpen: () => Swal.showLoading(),
+            allowOutsideClick: false,
           });
-        }
-      });
-    </script>
 
-    <script>
-      $(document).ready(function () {
+          fetch("/profile/address/add", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              Swal.close();
+              if (data.status === "success") {
+                Swal.fire({ icon: "success", text: "Address saved successfully" })
+                  .then(() => location.reload());
+              } else {
+                Swal.fire({ icon: "error", text: data.message || "Error saving address" });
+              }
+            })
+            .catch((err) => {
+              Swal.fire({ icon: "error", text: "Something went wrong" });
+              console.error(err);
+            });
+        });
+
+        // Delete address
         $(document).on("click", ".delete-address-btn", function (e) {
-          e.preventDefault(); // Prevent form submission
-          e.stopPropagation(); // Stop event bubbling
-
-          let addressId = $(this).data("address-id");
-
+          e.preventDefault();
+          const id = $(this).data("address-id");
           Swal.fire({
             title: "Are you sure?",
             text: "This address will be permanently deleted!",
             icon: "warning",
             showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#3085d6",
             confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "Cancel",
           }).then((result) => {
             if (result.isConfirmed) {
-              $.ajax({
-                url: `/profile/address/delete/${addressId}`,
-                type: "POST",
-                dataType: "json", // Expect JSON response
-                success: function (response) {
-                  if (response.status === "success") {
-                    Swal.fire(
-                      response.title,
-                      response.message,
-                      response.status
-                    );
-                    let addressElement = $("#delete-form-" + addressId).closest(
-                      ".address-item"
-                    );
-
-                    // If that doesn't work, try finding by data attribute
-                    if (addressElement.length === 0) {
-                      addressElement = $(
-                        "[data-address-id='" + addressId + "']"
-                      ).closest(".address-item");
-                    }
-
-                    // If that doesn't work, try finding by any element containing the address ID
-                    if (addressElement.length === 0) {
-                      addressElement = $(
-                        ".address-item:has([data-id='" + addressId + "'])"
-                      );
-                    }
-
-                    // Remove the element if found
-                    if (addressElement.length > 0) {
-                      addressElement.remove();
-                      console.log("Address removed from DOM");
-                    } else {
-                      console.log("Could not find address element to remove");
-                      // If all else fails, reload the page
-                      setTimeout(() => {
-                        window.location.reload();
-                      }, 1500);
-                    }
+              fetch(`/profile/address/delete/${id}`, { method: "POST" })
+                .then((res) => res.json())
+                .then((data) => {
+                  if (data.status === "success") {
+                    Swal.fire({ icon: "success", text: data.message }).then(() => location.reload());
                   } else {
-                    Swal.fire(
-                      response.title || "Error",
-                      response.message || "Failed to delete address",
-                      response.status || "error"
-                    );
+                    Swal.fire({ icon: "error", text: data.message || "Failed to delete" });
                   }
-                },
-                error: function (xhr) {
-                  let errorMessage = "Something went wrong";
-
-                  try {
-                    const response = JSON.parse(xhr.responseText);
-                    errorMessage = response.message || errorMessage;
-                  } catch (e) {}
-
-                  Swal.fire("Error!", errorMessage, "error");
-                  console.error(xhr);
-                },
-              });
+                });
             }
           });
         });

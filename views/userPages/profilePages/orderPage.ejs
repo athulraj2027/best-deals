@@ -1,539 +1,179 @@
+<!-- profile-orders.ejs -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>User Profile</title>
-    <link rel="stylesheet" href="/styles/profile.css" />
+    <title>User Orders</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
     />
-    <link rel="stylesheet" href="/userCSS/partials/headerPartial.css" />
-    <link rel="stylesheet" href="/userCSS/partials/partials_css.css" />
-    <style>
-      body {
-        background-color: #f8f9fa;
-      }
-
-      .orders-container {
-        max-width: 1000px;
-        margin: 30px auto;
-        background-color: #fff;
-        border-radius: 12px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        padding: 25px;
-      }
-
-      .orders-heading {
-        color: #343a40;
-        margin-bottom: 25px;
-        padding-bottom: 15px;
-        border-bottom: 2px solid #f0f0f0;
-        font-weight: 600;
-      }
-
-      .orders-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        margin-top: 20px;
-      }
-
-      .orders-table th,
-      .orders-table td {
-        padding: 16px;
-        text-align: left;
-        vertical-align: middle;
-      }
-
-      .orders-table th {
-        background-color: #f8f9fa;
-        color: #495057;
-        font-weight: 600;
-        border-bottom: 2px solid #dee2e6;
-      }
-
-      .orders-table tbody tr {
-        border-bottom: 1px solid #f0f0f0;
-        transition: background-color 0.2s;
-      }
-
-      .orders-table tbody tr:hover {
-        background-color: #f8f9fa;
-      }
-
-      .order-id {
-        font-family: monospace;
-        font-weight: 600;
-        color: #6c757d;
-      }
-
-      .status {
-        display: inline-block;
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-weight: 500;
-        font-size: 0.9rem;
-        text-align: center;
-        min-width: 100px;
-      }
-
-      .status-pending {
-        background-color: #fff3cd;
-        color: #856404;
-      }
-
-      .status-processing {
-        background-color: #d1ecf1;
-        color: #0c5460;
-      }
-
-      .status-delivered {
-        background-color: #d4edda;
-        color: #155724;
-      }
-
-      .status-cancelled {
-        background-color: #f8d7da;
-        color: #721c24;
-      }
-
-      .action-btn {
-        padding: 8px 16px;
-        border-radius: 6px;
-        font-weight: 500;
-        font-size: 0.85rem;
-        transition: all 0.2s;
-        border: none;
-        margin-right: 5px;
-      }
-
-      .view-btn {
-        background-color: #007bff;
-        color: white;
-      }
-
-      .view-btn:hover {
-        background-color: #0069d9;
-      }
-
-      .cancel-btn {
-        background-color: #dc3545;
-        color: white;
-      }
-
-      .cancel-btn:hover {
-        background-color: #c82333;
-      }
-
-      .no-orders {
-        text-align: center;
-        padding: 50px 20px;
-        background-color: #f8f9fa;
-        border-radius: 12px;
-        margin-top: 20px;
-        color: #6c757d;
-      }
-
-      .no-orders i {
-        color: #adb5bd;
-        margin-bottom: 20px;
-      }
-
-      .no-orders .btn {
-        padding: 10px 25px;
-        border-radius: 25px;
-        font-weight: 500;
-      }
-
-      /* Modal Styles */
-      .order-modal .modal-header {
-        background-color: #f8f9fa;
-        border-bottom: 2px solid #dee2e6;
-      }
-
-      .order-modal .modal-title {
-        font-weight: 600;
-        color: #343a40;
-      }
-
-      .order-details-section {
-        margin-bottom: 20px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #eee;
-      }
-
-      .order-details-section h5 {
-        font-weight: 600;
-        color: #495057;
-        margin-bottom: 15px;
-      }
-
-      .detail-row {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 8px;
-      }
-
-      .detail-label {
-        font-weight: 500;
-        color: #6c757d;
-      }
-
-      .detail-value {
-        font-weight: 500;
-        color: #343a40;
-      }
-
-      .product-item {
-        display: flex;
-        align-items: center;
-        padding: 15px 0;
-        border-bottom: 1px solid #f0f0f0;
-      }
-
-      .product-image {
-        width: 80px;
-        height: 80px;
-        object-fit: cover;
-        border-radius: 8px;
-        margin-right: 15px;
-      }
-
-      .product-details {
-        flex-grow: 1;
-      }
-
-      .product-name {
-        font-weight: 600;
-        margin-bottom: 5px;
-      }
-
-      .product-meta {
-        color: #6c757d;
-        font-size: 0.9rem;
-      }
-
-      .product-price {
-        font-weight: 600;
-        color: #343a40;
-        text-align: right;
-        min-width: 100px;
-      }
-
-      .order-summary {
-        background-color: #f8f9fa;
-        padding: 15px;
-        border-radius: 8px;
-        margin-top: 15px;
-      }
-
-      .payment-info {
-        margin-top: 10px;
-        padding-top: 10px;
-        border-top: 1px dashed #dee2e6;
-      }
-      /* Replace or update the table-responsive-container and related media query styles */
-      .table-responsive-container {
-        width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
-      }
-
-      .orders-table {
-        width: 100%;
-        min-width: 800px; /* Ensures table doesn't compress too much */
-      }
-
-      /* Remove the max-width: 900px from the media query as it might be limiting the table */
-      .orders-container {
-        flex: 1;
-        min-width: 0; /* This is crucial for flex items with overflow */
-        max-width: 100%;
-      }
-
-      @media (max-width: 992px) {
-        .sidebar-container {
-          max-width: 100%;
-          margin-bottom: 0;
-        }
-
-        .container-fluid {
-          flex-direction: column;
-        }
-
-        .orders-container {
-          max-width: 100%;
-          margin: 0 auto;
-        }
-      }
-      @media (max-width: 1000px) {
-        .table-responsive-container {
-          overflow-x: auto;
-        }
-
-        .orders-container {
-          padding: 15px; /* Reduce padding on smaller screens */
-        }
-      }
-    </style>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
-  <body>
+  <body class="bg-gray-100 min-h-screen">
     <%- include('../partials/headerPartial') %>
-    <div
-      class="container-fluid d-flex flex-wrap"
-      style="gap: 20px; padding: 20px"
-    >
-      <div class="m-35"><%- include('./partial') %></div>
-      <div class="orders-container">
-        <h2 class="orders-heading">
-          <i class="fas fa-shopping-bag me-2"></i> Your Orders
+
+    <div class="flex flex-col md:flex-row max-w-6xl mx-auto mt-8 px-4 md:px-0 gap-6">
+      <!-- Sidebar -->
+      <div class="w-full md:w-1/4">
+        <%- include('./partial') %>
+      </div>
+
+      <!-- Orders Container -->
+      <div class="w-full md:w-3/4 space-y-6">
+        <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+          <i class="fas fa-shopping-bag"></i> Your Orders
         </h2>
 
         <% if (orders && orders.length > 0) { %>
-        <div class="table-responsive-container">
-          <table class="orders-table">
-            <thead>
-              <tr>
-                <th>Order ID</th>
-                <th>Date</th>
-                <th>Items</th>
-                <th>Total</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-  <% orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate)).forEach(order => { %>
-    <tr>
-      <td class="order-id">#<%= order._id.toString().slice(-8) %></td>
-      <td>
-        <%= new Date(order.orderDate).toLocaleDateString('en-US', {
-          year: 'numeric', month: 'short', day: 'numeric'
-        }) %>
-      </td>
-      <td>
-        <% if (order.items && order.items.length > 0) { %> 
-          <%= order.items.length %> item<%= order.items.length > 1 ? 's' : '' %>
-        <% } else { %> 
-          No items 
-        <% } %>
-      </td>
-      <td>
-        $<%= order.grantTotal %>
-      </td>
-      <td>
-        <span class="status status-<%= order.status %>">
-          <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
-        </span>
-      </td>
-      <td>
-        <button type="button" class="action-btn view-btn" data-bs-toggle="modal" data-bs-target="#orderModal<%= order._id %>">
-          <i class="fas fa-eye me-1"></i> View Details
-        </button>
-        <% if (order.status !== 'cancelled' && order.status !== 'delivered' && order.status !== 'return requested' && order.status !== 'return accepted' && order.status !== 'returned') { %>
-          <form action="/profile/orders/cancel/<%= order._id %>" method="post" class="order-cancel-form d-inline">
-            <button type="submit" class="action-btn cancel-btn">
-              <i class="fas fa-times me-1"></i> Cancel
-            </button>
-          </form>
-        <% } else if (order.status === 'delivered') { %>
-          <form action="/profile/orders/return/<%= order._id %>" method="post" class="order-return-form d-inline">
-            <button type="submit" class="action-btn cancel-btn">
-              <i class="fas fa-times me-1"></i> Return
-            </button>
-          </form>
-        <% } %>
-      </td>
-    </tr>
-  <% }); %>
-</tbody>
-
-          </table>
-        </div>
-        <!-- Order Detail Modals -->
-        <% orders.forEach(order => { %>
-        <div
-          class="modal fade order-modal"
-          id="orderModal<%= order._id %>"
-          tabindex="-1"
-          aria-labelledby="orderModalLabel<%= order._id %>"
-          aria-hidden="true"
-        >
-          <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="orderModalLabel<%= order._id %>">
-                  Order Details #<%= order._id.toString().slice(-8) %>
-                </h5>
-                <button
-                  type="button"
-                  class="btn-close"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                ></button>
+          <% orders.sort((a,b) => new Date(b.orderDate)-new Date(a.orderDate)).forEach(order => { %>
+          <div class="bg-white rounded-xl shadow-lg p-5 flex flex-col md:flex-row md:items-center justify-between">
+            <div class="space-y-1 md:space-y-0 md:flex md:gap-4 md:items-center flex-1">
+              <div class="text-gray-500 font-mono font-semibold">#<%= order._id.toString().slice(-8) %></div>
+              <div class="text-gray-600"><%= new Date(order.orderDate).toLocaleDateString('en-US', {year:'numeric', month:'short', day:'numeric'}) %></div>
+              <div class="text-gray-700">
+                <% if(order.items && order.items.length > 0){ %>
+                  <%= order.items.length %> item<%= order.items.length > 1 ? 's' : '' %>
+                <% } else { %> 
+                  No items
+                <% } %>
               </div>
-              <div class="modal-body">
-                <div class="order-details-section">
-                  <h5>Order Information</h5>
-                  <div class="detail-row">
-                    <span class="detail-label">Order Date:</span>
-                    <span class="detail-value"
-                      ><%= new Date(order.orderDate).toLocaleDateString('en-US',
-                      { weekday: 'long', year: 'numeric', month: 'long', day:
-                      'numeric' }) %></span
-                    >
+              <div class="text-gray-800 font-semibold">$<%= order.grantTotal %></div>
+              <div>
+                <% 
+                  const statusClasses = {
+                    pending: 'bg-yellow-100 text-yellow-800',
+                    processing: 'bg-sky-100 text-sky-800',
+                    delivered: 'bg-green-100 text-green-800',
+                    cancelled: 'bg-red-100 text-red-800',
+                    'return requested': 'bg-orange-100 text-orange-800',
+                    'return accepted': 'bg-green-200 text-green-900',
+                    returned: 'bg-gray-200 text-gray-700'
+                  };
+                %>
+                <span class="px-3 py-1 rounded-full font-medium text-sm <%= statusClasses[order.status] || 'bg-gray-100 text-gray-800' %>">
+                  <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+                </span>
+              </div>
+            </div>
+
+            <div class="flex mt-3 md:mt-0 gap-2">
+              <button type="button" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition" data-bs-toggle="modal" data-bs-target="#orderModal<%= order._id %>">
+                <i class="fas fa-eye mr-1"></i> View
+              </button>
+              <% if(order.status !== 'cancelled' && order.status !== 'delivered' && order.status !== 'return requested' && order.status !== 'return accepted' && order.status !== 'returned'){ %>
+                <form action="/profile/orders/cancel/<%= order._id %>" method="post" class="order-cancel-form">
+                  <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition">
+                    <i class="fas fa-times mr-1"></i> Cancel
+                  </button>
+                </form>
+              <% } else if(order.status === 'delivered'){ %>
+                <form action="/profile/orders/return/<%= order._id %>" method="post" class="order-return-form">
+                  <button type="submit" class="bg-orange-600 text-white px-3 py-1 rounded hover:bg-orange-700 transition">
+                    <i class="fas fa-undo mr-1"></i> Return
+                  </button>
+                </form>
+              <% } %>
+            </div>
+          </div>
+
+          <!-- Order Modal -->
+          <div class="modal fade" id="orderModal<%= order._id %>" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                <div class="modal-header bg-gray-100 border-b">
+                  <h5 class="modal-title font-bold text-gray-800">Order #<%= order._id.toString().slice(-8) %></h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body space-y-4">
+                  <!-- Order Info -->
+                  <div class="border-b pb-3">
+                    <h5 class="font-semibold text-gray-700 mb-2">Order Information</h5>
+                    <div class="flex justify-between text-gray-600 mb-1">
+                      <span>Order Date:</span>
+                      <span class="font-medium"><%= new Date(order.orderDate).toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric'}) %></span>
+                    </div>
+                    <div class="flex justify-between text-gray-600 mb-1">
+                      <span>Status:</span>
+                      <span class="px-3 py-1 rounded-full text-sm font-medium <%= statusClasses[order.status] || 'bg-gray-100 text-gray-800' %>"><%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %></span>
+                    </div>
+                    <div class="flex justify-between text-gray-600 mb-1">
+                      <span>Payment Status:</span>
+                      <span class="font-medium"><%= order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1) %></span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                      <span>Payment Method:</span>
+                      <span class="font-medium"><%= order.paymentMethod %></span>
+                    </div>
                   </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Status:</span>
-                    <span class="status status-<%= order.status %>">
-                      <%= order.status.charAt(0).toUpperCase() +
-                      order.status.slice(1) %>
-                    </span>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Payment Status:</span>
-                    <span class="detail-value"
-                      ><%= order.payment_status.charAt(0).toUpperCase() +
-                      order.payment_status.slice(1) %></span
-                    >
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Payment Method:</span>
-                    <span class="detail-value"><%= order.paymentMethod %></span>
+
+                  <!-- Items -->
+                  <div>
+                    <h5 class="font-semibold text-gray-700 mb-3">Items</h5>
+                    <% if(order.items && order.items.length > 0){ %>
+                      <% order.items.forEach(item => { %>
+                      <div class="flex items-center gap-4 border-b py-2">
+                        <img src="<%= item.image %>" alt="<%= item.name %>" class="w-20 h-20 object-cover rounded" />
+                        <div class="flex-1">
+                          <div class="font-semibold text-gray-800"><%= item.name %></div>
+                          <div class="text-gray-500 text-sm">Size: <%= item.size %> | Color: <%= item.color %> | Qty: <%= item.quantity %></div>
+                        </div>
+                        <div class="font-semibold text-gray-800 text-right">$<%= (item.price*item.quantity).toFixed(2) %></div>
+                      </div>
+                      <% }); %>
+
+                      <!-- Summary -->
+                      <div class="bg-gray-100 rounded p-3 mt-3 space-y-1 text-gray-700">
+                        <div class="flex justify-between"><span>Items Total:</span> <span>$<%= order.items.reduce((sum,item)=>sum+(item.price*item.quantity),0).toFixed(2) %></span></div>
+                        <div class="flex justify-between"><span>Shipping:</span> <span>$0.00</span></div>
+                        <div class="flex justify-between"><span>Tax:</span> <span>Included</span></div>
+                        <div class="flex justify-between font-semibold text-gray-800 text-lg mt-2"><span>Order Total:</span> <span>$<%= order.grantTotal %></span></div>
+                        <div class="flex justify-between border-t border-dashed pt-2"><span>Payment Method:</span> <span><%= order.paymentMethod %></span></div>
+                      </div>
+                    <% } else { %>
+                      <p class="text-gray-500">No items in this order.</p>
+                    <% } %>
                   </div>
                 </div>
 
-                <div class="order-details-section">
-                  <h5>Items</h5>
-                  <% if (order.items && order.items.length > 0) { %> <%
-                  order.items.forEach(item => { %>
-                  <div class="product-item">
-                    <img
-                      src="<%= item.image %>"
-                      alt="<%= item.name %>"
-                      class="product-image"
-                    />
-                    <div class="product-details">
-                      <div class="product-name"><%= item.name %></div>
-                      <div class="product-meta">
-                        Size: <%= item.size %> | Color: <%= item.color %> | Qty:
-                        <%= item.quantity %>
-                      </div>
-                    </div>
-                    <div class="product-price">
-                      $<%= (item.price * item.quantity).toFixed(2) %>
-                    </div>
-                  </div>
-                  <% }); %>
-
-                  <div class="order-summary">
-                    <div class="detail-row">
-                      <span class="detail-label">Items Total:</span>
-                      <span class="detail-value"
-                        >$<%= order.items.reduce((sum, item) => sum +
-                        (item.price * item.quantity), 0).toFixed(2) %></span
-                      >
-                    </div>
-                    <div class="detail-row">
-                      <span class="detail-label">Shipping:</span>
-                      <span class="detail-value">$0.00</span>
-                    </div>
-                    <div class="detail-row">
-                      <span class="detail-label">Tax:</span>
-                      <span class="detail-value">Included</span>
-                    </div>
-                    <div
-                      class="detail-row"
-                      style="
-                        font-weight: bold;
-                        font-size: 1.1rem;
-                        margin-top: 10px;
-                      "
-                    >
-                      <span class="detail-label">Order Total:</span>
-                      <span class="detail-value"
-                        >$<%= order.grantTotal %></span
-                      >
-                    </div>
-
-                    <div class="payment-info">
-                      <div class="detail-row">
-                        <span class="detail-label">Payment Method:</span>
-                        <span class="detail-value"
-                          ><%= order.paymentMethod %></span
-                        >
-                      </div>
-                    </div>
-                  </div>
-                  <% } else { %>
-                  <p>No items in this order.</p>
+                <div class="modal-footer flex justify-end gap-2">
+                  <button type="button" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400" data-bs-dismiss="modal">Close</button>
+                  <% if(order.status !== 'cancelled' && order.status !== 'delivered'){ %>
+                  <form action="/profile/orders/cancel/<%= order._id %>" method="post">
+                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Cancel Order</button>
+                  </form>
                   <% } %>
                 </div>
               </div>
-              <div class="modal-footer">
-                <button
-                  type="button"
-                  class="btn btn-secondary"
-                  data-bs-dismiss="modal"
-                >
-                  Close
-                </button>
-                <% if(order.status !== 'cancelled' && order.status !==
-                'delivered'){ %>
-                <form
-                  action="/profile/orders/cancel/<%= order._id %>"
-                  method="post"
-                  class="order-cancel-form d-inline"
-                >
-                  <button type="submit" class="btn btn-danger">
-                    Cancel Order
-                  </button>
-                </form>
-                <% } %>
-              </div>
             </div>
           </div>
-        </div>
-        <% }); %> <% } else { %>
-        <div class="no-orders">
-          <i class="fas fa-shopping-bag fa-4x mb-4"></i>
-          <h3>You don't have any orders yet</h3>
-          <p class="mb-4">
-            Once you place an order, it will appear here with all the details
-          </p>
-          <a href="/products" class="btn btn-primary mt-2">
-            <i class="fas fa-shopping-cart me-2"></i> Start Shopping
-          </a>
-        </div>
+          <% }); %>
+        <% } else { %>
+          <div class="bg-white rounded-xl shadow-lg p-8 text-center space-y-4">
+            <i class="fas fa-shopping-bag text-gray-400 text-6xl"></i>
+            <h3 class="text-gray-700 font-semibold text-xl">You don't have any orders yet</h3>
+            <p class="text-gray-500">Once you place an order, it will appear here with all the details</p>
+            <a href="/shop?category=all" class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 inline-flex items-center gap-2">
+              <i class="fas fa-shopping-cart"></i> Start Shopping
+            </a>
+          </div>
         <% } %>
       </div>
     </div>
-    <%-include('../partials/footer') %>
 
-    <!-- Required Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <%- include('../partials/footer') %>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       $(document).ready(function () {
-        // Cancel order form submission
+        // Cancel order
         $(".order-cancel-form").on("submit", function (e) {
           e.preventDefault();
-
-          // Get the form that was submitted
           const form = $(this);
-
-          // Get the order ID from the form's action attribute
-          const formAction = form.attr("action");
-
+          const action = form.attr("action");
           Swal.fire({
             title: "Cancel Order?",
             text: "Are you sure you want to cancel this order?",
@@ -545,140 +185,60 @@
             cancelButtonText: "No, keep it",
           }).then((result) => {
             if (result.isConfirmed) {
-              $.ajax({
-                url: formAction,
-                type: "POST",
-                success: function (response) {
-                  console.log(response); // Log the response for debugging
-                  if (response.status === "success") {
-                    Swal.fire({
-                      title: response.title,
-                      text: response.message,
-                      icon: response.status, // 'success'
-                      confirmButtonText: "OK",
-                    }).then(() => {
-                      window.location.reload(true); // Reload after successful cancellation
-                    });
-                  } else {
-                    Swal.fire({
-                      title: response.title,
-                      text: response.message,
-                      icon: response.status, // 'error'
-                      confirmButtonText: "OK",
-                    });
-                  }
-                },
-                error: function (xhr, status, error) {
-                  console.error("AJAX Error:", status, error);
-                  console.log("Error Response JSON:", xhr.responseJSON);
+              $.post(action, function(response){
+                if(response.status==='success'){
+                  Swal.fire({title:response.title,text:response.message,icon:'success'}).then(()=>window.location.reload());
+                }else{
+                  Swal.fire({title:response.title,text:response.message,icon:'error'});
+                }
+              });
+            }
+          });
+        });
 
-                  Swal.fire({
-                    title: "Oops!",
-                    text:
-                      xhr.responseJSON?.message ||
-                      "An error occurred while cancelling your order.",
-                    icon: "error",
-                    confirmButtonText: "OK",
-                  });
-                },
+        // Return order
+        $(".order-return-form").on("submit", function (e) {
+          e.preventDefault();
+          const form = $(this);
+          const action = form.attr("action");
+          Swal.fire({
+            title: "Return Order?",
+            text: "Select reason(s) for return",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            html: `
+              <div class="space-y-2 mt-3 text-left">
+                <label class="flex items-center gap-2"><input type="checkbox" id="reasonDefective"> Item is defective</label>
+                <label class="flex items-center gap-2"><input type="checkbox" id="reasonQuality"> Cheap quality</label>
+                <label class="flex items-center gap-2"><input type="checkbox" id="reasonDifferent"> Different product</label>
+              </div>
+            `,
+            preConfirm: () => {
+              const reasons = [];
+              if(document.getElementById('reasonDefective').checked) reasons.push("Item is defective");
+              if(document.getElementById('reasonQuality').checked) reasons.push("Cheap quality");
+              if(document.getElementById('reasonDifferent').checked) reasons.push("Different product");
+              if(reasons.length===0) Swal.showValidationMessage("Select at least one reason");
+              return reasons;
+            }
+          }).then(result=>{
+            if(result.isConfirmed){
+              $.ajax({
+                url: action,
+                type: 'POST',
+                data: JSON.stringify({reasons: result.value}),
+                contentType: 'application/json',
+                success: function(res){
+                  if(res.status==='success') Swal.fire({title:res.title,text:res.message,icon:'success'}).then(()=>window.location.reload());
+                  else Swal.fire({title:res.title,text:res.message,icon:'error'});
+                }
               });
             }
           });
         });
       });
     </script>
-
-<script>
-  $(document).ready(function () {
-    // Cancel order form submission
-    $(".order-return-form").on("submit", function (e) {
-      e.preventDefault();
-
-      // Get the form that was submitted
-      const form = $(this);
-
-      // Get the order ID from the form's action attribute
-      const formAction = form.attr("action");
-
-      Swal.fire({
-  title: "Return Order?",
-  text: "Are you sure you want to return this order?",
-  icon: "warning",
-  showCancelButton: true,
-  confirmButtonColor: "#d33",
-  cancelButtonColor: "#3085d6",
-  confirmButtonText: "Yes",
-  cancelButtonText: "No, keep it",
-  html: `
-    <div class="form-check mt-3">
-      <h3>Why are you returning the product?</h3>
-      <input class="form-check-input" type="checkbox" id="reasonDefective">
-      <label class="form-check-label" for="reasonDefective">Item is defective</label><br/>
-      <input class="form-check-input" type="checkbox" id="reasonQuality">
-      <label class="form-check-label" for="reasonQuality">Cheap quality</label><br/>
-      <input class="form-check-input" type="checkbox" id="reasonDifferent">
-      <label class="form-check-label" for="reasonDifferent">Different product</label><br/>
-    </div>
-  `,
-  preConfirm: () => {
-    const reasons = [];
-    if (document.getElementById('reasonDefective').checked) reasons.push("Item is defective");
-    if (document.getElementById('reasonQuality').checked) reasons.push("Cheap quality");
-    if (document.getElementById('reasonDifferent').checked) reasons.push("Different product");
-
-    if (reasons.length === 0) {
-      Swal.showValidationMessage("Please select at least one reason.");
-    }
-
-    return reasons;
-  }
-}).then((result) => {
-  if (result.isConfirmed) {
-    const selectedReasons = result.value;
-
-    $.ajax({
-      url: formAction,
-      type: "POST",
-      data: JSON.stringify({
-        reasons: selectedReasons,
-      }),
-      contentType: "application/json", 
-      success: function (response) {
-        if (response.status === "success") {
-          Swal.fire({
-            title: response.title,
-            text: response.message,
-            icon: response.status,
-            confirmButtonText: "OK",
-          }).then(() => {
-            window.location.reload(true);
-          });
-        } else {
-          Swal.fire({
-            title: response.title,
-            text: response.message,
-            icon: response.status,
-            confirmButtonText: "OK",
-          });
-        }
-      },
-      error: function (xhr, status, error) {
-        console.error("AJAX Error:", status, error);
-        Swal.fire({
-          title: "Oops!",
-          text:
-            xhr.responseJSON?.message ||
-            "An error occurred while returning your order.",
-          icon: "error",
-          confirmButtonText: "OK",
-        });
-      },
-    });
-  }
-});
-
-    });
-  });
-</script>
   </body>
 </html>

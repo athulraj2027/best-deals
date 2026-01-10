@@ -1,876 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Shop</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
-    />
-    <link rel="stylesheet" href="/userCSS/partials/headerPartial.css" />
-    <link rel="stylesheet" href="/userCSS/partials/partials_css.css" />
-    <style>
-      :root {
-        --primary-color: #1d4ed8; /* bg-blue-700 */
-        --secondary-color: #60a5fa; /* lighter blue */
-        --accent-color: #2563eb; /* medium blue */
-        --background: #ffffff;
-        --card-bg: #f8fafc;
-        --text-primary: #1e293b;
-        --text-secondary: #64748b;
-        --border-color: #e2e8f0;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-      body {
-        background-color: var(--background);
-        color: var(--text-primary);
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      }
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"/>
 
-      .page-header {
-        padding: 2rem 0;
-        background: var(--primary-color);
-        margin-bottom: 2rem;
-        border-radius: 0 0 20px 20px;
-        box-shadow: 0 4px 10px rgba(29, 78, 216, 0.2);
-      }
+  <title>Shop | BestDeals</title>
+</head>
 
-      .page-header h1 {
-        font-weight: 700;
-        letter-spacing: 1px;
-        color: white;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
+<body class="bg-gray-100">
 
-      /* Filter Panel Styles */
-      .filter-toggle {
-        display: none;
-        width: 100%;
-        background-color: var(--primary-color);
-        color: white;
-        border: none;
-        padding: 10px;
-        margin-bottom: 15px;
-        border-radius: 8px;
-        font-weight: 600;
-        text-align: left;
-      }
+<%- include('./partials/headerPartial') %>
 
-      .filter-toggle i {
-        margin-right: 8px;
-        transition: transform 0.3s;
-      }
+<!-- PAGE HEADER -->
+<div class="bg-indigo-600 text-white py-6 rounded-b-3xl shadow">
+  <h1 class="text-center text-3xl font-bold">Shop Products</h1>
+</div>
 
-      .filter-toggle.collapsed i {
-        transform: rotate(-90deg);
-      }
+<div class="max-w-7xl mx-auto px-4 py-6 grid md:grid-cols-4 gap-6">
 
-      .filter-section {
-        background-color: var(--card-bg);
-        padding: 1.25rem;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        border-left: 3px solid var(--primary-color);
-      }
+<!-- FILTER -->
+<div class="bg-white p-5 rounded-xl shadow-md">
 
-      .filter-section h5 {
-        color: var(--primary-color);
-        margin-bottom: 1.25rem;
-        font-weight: 600;
-        border-bottom: 1px solid var(--border-color);
-        padding-bottom: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
+<form id="filterForm" action="/shop" method="GET" class="space-y-4">
 
-      .filter-section label {
-        color: var(--text-secondary);
-        font-weight: 500;
-        margin-bottom: 6px;
-        font-size: 0.9rem;
-      }
+<h3 class="font-bold text-lg text-indigo-600 flex justify-between">
+  Filters
+  <a href="/shop" class="text-sm text-gray-500 hover:text-red-500">Clear</a>
+</h3>
 
-      .form-select,
-      .form-control {
-        background-color: white;
-        border: 1px solid var(--border-color);
-        color: var(--text-primary);
-        border-radius: 6px;
-      }
+<!-- Search -->
+<input name="search" placeholder="Search..."
+class="w-full px-3 py-2 border rounded focus:ring-2 ring-indigo-400"
+value="<%= filters?.search || '' %>">
 
-      .form-select:focus,
-      .form-control:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.15);
-      }
+<!-- Category -->
+<div>
+<p class="font-medium mb-2">Category</p>
+<div class="flex flex-wrap gap-2">
+<span data-value=""
+class="chip px-3 py-1 rounded-full border cursor-pointer bg-indigo-600 text-white">All</span>
 
-      /* Price Range Slider */
-      .price-range-container {
-        padding: 10px 5px;
-      }
+<% categories.forEach(c => { %>
+<span data-value="<%= c.name %>"
+class="chip px-3 py-1 rounded-full border cursor-pointer hover:bg-indigo-100">
+<%= c.name %>
+</span>
+<% }) %>
+</div>
+<input type="hidden" name="category" id="categoryInput">
+</div>
 
-      .price-display {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 10px;
-        color: var(--primary-color);
-        font-weight: 600;
-      }
+<!-- Price -->
+<div>
+<p class="font-medium mb-2">Max Price</p>
+<input type="range" min="0" max="2000" step="50"
+id="priceRange" class="w-full">
 
-      .range-slider::-webkit-slider-thumb {
-        background: var(--primary-color);
-      }
+<p class="text-indigo-600 font-semibold">
+₹ <span id="priceText">1000</span>
+</p>
 
-      .range-slider::-moz-range-thumb {
-        background: var(--primary-color);
-      }
+<input type="hidden" name="maxPrice" id="maxPrice" value="1000">
+</div>
 
-      /* Chip-style Filters */
-      .chip-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-bottom: 15px;
-      }
+<!-- Sort -->
+<select name="sort"
+class="w-full border px-3 py-2 rounded">
 
-      .filter-chip {
-        background-color: #f1f5f9;
-        border: 1px solid var(--border-color);
-        color: var(--text-secondary);
-        border-radius: 50px;
-        padding: 5px 12px;
-        font-size: 0.85rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-      }
+<option value="">Recommended</option>
+<option value="price-asc">Low to High</option>
+<option value="price-desc">High to Low</option>
+<option value="newest">Newest</option>
+</select>
 
-      .filter-chip:hover {
-        border-color: var(--accent-color);
-        color: var(--accent-color);
-      }
+<button class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">
+Apply Filters
+</button>
 
-      .filter-chip.active {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-        color: white;
-      }
+</form>
+</div>
 
-      /* Product Cards */
-      .card {
-        width: 100%;
-        background-color: white;
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-        border-radius: 10px;
-        overflow: hidden;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        height: 100%;
-      }
+<!-- PRODUCTS -->
+<div class="md:col-span-3">
 
-      .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-      }
+<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
-      .card-img-wrapper {
-        height: 200px;
-        overflow: hidden;
-        position: relative;
-      }
+<% products.forEach(product => { %>
 
-      .card img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.5s ease;
-      }
+<div class="bg-white rounded-xl shadow hover:-translate-y-1 transition">
 
-      .card:hover img {
-        transform: scale(1.05);
-      }
+<img
+src="<%= product.variants?.[0]?.images?.[0]?.url || 'https://via.placeholder.com/300' %>"
+class="w-full h-48 object-cover rounded-t-xl">
 
-      .card-body {
-        padding: 1.25rem;
-        border-top: 1px solid var(--border-color);
-      }
+<div class="p-4 space-y-2">
 
-      .card-title {
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
+<h3 class="font-semibold truncate">
+<%= product.name %>
+</h3>
 
-      .product-price {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--primary-color);
-        margin-bottom: 1rem;
-      }
+<div class="flex justify-between items-center">
+<p class="text-xl font-bold text-indigo-600">
+₹ <%= product.actualPrice %>
+</p>
 
-      .product-badge {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background-color: var(--accent-color);
-        color: white;
-        font-weight: bold;
-        padding: 5px 10px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-      }
+<div class="text-yellow-400">
+<i class="fas fa-star"></i>
+<i class="fas fa-star"></i>
+<i class="fas fa-star"></i>
+<i class="fas fa-star-half-alt"></i>
+</div>
+</div>
 
-      .sale-badge {
-        top: 10px;
-        left: 10px;
-        background-color: #ef4444;
-      }
+<a href="/product/<%= product._id %>"
+class="block text-center bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">
+View Product
+</a>
 
-      .btn-primary {
-        background-color: var(--primary-color);
-        border: none;
-        border-radius: 6px;
-        padding: 0.5rem 1rem;
-        transition: all 0.2s ease;
-        font-weight: 500;
-        width: 100%;
-      }
+</div>
+</div>
 
-      .btn-primary:hover {
-        background-color: #1e40af;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 6px rgba(29, 78, 216, 0.2);
-      }
+<% }) %>
 
-      .btn-filter {
-        background-color: var(--primary-color);
-        color: white;
-        font-weight: 600;
-        margin-top: 1rem;
-      }
+</div>
 
-      .btn-filter:hover {
-        background-color: #1e40af;
-      }
+<!-- EMPTY -->
+<% if(products.length === 0){ %>
+<div class="bg-white p-10 rounded-xl text-center">
+<i class="fas fa-box-open text-5xl text-gray-400"></i>
+<p class="mt-4 text-gray-600">No products found</p>
+</div>
+<% } %>
 
-      .clear-filter {
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        transition: color 0.2s;
-      }
+<!-- PAGINATION -->
+<div class="flex justify-center mt-8 gap-2">
 
-      .clear-filter:hover {
-        color: var(--accent-color);
-      }
+<% if(currentPage>1){ %>
+<a href="?page=<%=currentPage-1%>"
+class="px-3 py-1 bg-white rounded shadow">‹</a>
+<% } %>
 
-      .no-products {
-        background-color: var(--card-bg);
-        padding: 3rem;
-        border-radius: 10px;
-        text-align: center;
-      }
+<% for(let i=1;i<=totalPages;i++){ %>
+<a href="?page=<%=i%>"
+class="px-3 py-1 rounded shadow
+<%= i===currentPage ? 'bg-indigo-600 text-white':'bg-white' %>">
+<%= i %>
+</a>
+<% } %>
 
-      .no-products i {
-        font-size: 3rem;
-        color: var(--text-secondary);
-        margin-bottom: 1rem;
-      }
+<% if(currentPage<totalPages){ %>
+<a href="?page=<%=currentPage+1%>"
+class="px-3 py-1 bg-white rounded shadow">›</a>
+<% } %>
 
-      /* Pagination */
-      .pagination-container {
-        display: flex;
-        justify-content: center;
-        margin-top: 2rem;
-      }
+</div>
 
-      .pagination {
-        display: flex;
-        gap: 5px;
-        background-color: var(--card-bg);
-        padding: 8px 12px;
-        border-radius: 50px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-      }
+</div>
+</div>
 
-      .pagination a {
-        width: 35px;
-        height: 35px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: white;
-        color: var(--text-secondary);
-        border-radius: 50%;
-        text-decoration: none;
-        transition: all 0.2s ease;
-      }
+<%- include('./partials/footer') %>
 
-      .pagination a:hover {
-        background-color: #f1f5f9;
-        color: var(--text-primary);
-      }
+<script>
+/* Category chips */
+document.querySelectorAll('.chip').forEach(chip=>{
+chip.onclick=()=>{
+document.querySelectorAll('.chip').forEach(c=>c.classList.remove('bg-indigo-600','text-white'))
+chip.classList.add('bg-indigo-600','text-white')
+document.getElementById('categoryInput').value=chip.dataset.value
+}
+})
 
-      .pagination a.active {
-        background-color: var(--primary-color);
-        color: white;
-      }
+/* Price */
+const slider=document.getElementById('priceRange')
+const text=document.getElementById('priceText')
+const input=document.getElementById('maxPrice')
 
-      /* Color Options */
-      .color-options {
-        display: flex;
-        gap: 8px;
-        margin-top: 10px;
-      }
+slider.oninput=()=>{
+text.textContent=slider.value
+input.value=slider.value
+}
+</script>
 
-      .color-option {
-        width: 22px;
-        height: 22px;
-        border-radius: 50%;
-        cursor: pointer;
-        position: relative;
-        border: 1px solid #e2e8f0;
-      }
-
-      .color-option.selected::after {
-        content: "";
-        position: absolute;
-        top: -3px;
-        left: -3px;
-        right: -3px;
-        bottom: -3px;
-        border: 2px solid var(--primary-color);
-        border-radius: 50%;
-      }
-
-      /* Responsive Styles */
-      @media (max-width: 991.98px) {
-        .row-cols-lg-3 {
-          --bs-gutter-x: 10px;
-        }
-      }
-
-      @media (max-width: 767.98px) {
-        .filter-toggle {
-          display: block;
-        }
-
-        .filter-section {
-          margin-bottom: 15px;
-        }
-
-        .filter-collapse {
-          display: none;
-        }
-
-        .filter-collapse.show {
-          display: block;
-        }
-
-        .page-header {
-          padding: 1.5rem 0;
-          border-radius: 0 0 15px 15px;
-        }
-
-        .page-header h1 {
-          font-size: 1.8rem;
-        }
-
-        .card-img-wrapper {
-          height: 180px;
-        }
-      }
-
-      @media (max-width: 575.98px) {
-        .row-cols-1 {
-          --bs-gutter-x: 0;
-        }
-        
-        .container {
-          padding-left: 10px;
-          padding-right: 10px;
-        }
-
-        .card-img-wrapper {
-          height: 160px;
-        }
-
-        .pagination a {
-          width: 30px;
-          height: 30px;
-          font-size: 0.85rem;
-        }
-      }
-
-      /* Rating Stars */
-      .rating .fa-star, .rating .fa-star-half-alt {
-        color: #f59e0b;
-      }
-    </style>
-  </head>
-  <body>
-    <%- include('./partials/headerPartial') %>
-
-    <div class="container my-4">
-      <div class="row">
-               
-        <!-- Mobile Filter Toggle -->
-        <div class="col-12 d-md-none mb-3">
-          <button class="filter-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
-            <i class="fas fa-sliders-h"></i> Show Filters
-          </button>
-        </div>
-
-        <!-- Filter Section -->
-        <div class="col-md-3">
-          <div class="mb-3">
-            <label for="search" class="form-label">Search Products</label>
-            <div class="input-group">
-              <input 
-                type="text" 
-                class="form-control" 
-                id="search" 
-                name="search" 
-                placeholder="Search by name, description..." 
-                value="<%= filters && filters.search ? filters.search : '' %>"
-              >
-              <button class="btn btn-outline-secondary" type="submit">
-                <i class="fas fa-search"></i>
-              </button>
-            </div>
-          </div>
-          <div class="filter-collapse collapse d-md-block" id="filterCollapse">
-            <div class="filter-section">
-              <h5>
-                <span><i class="fas fa-filter me-2"></i>FILTERS</span>
-                <a href="/shop" class="clear-filter"><i class="fas fa-times me-1"></i> Clear</a>
-              </h5>
-              
-              <form id="filterForm" method="GET" action="/shop">
-                <!-- Category Chips -->
-                <div class="mb-3">
-                  <label class="form-label">Category</label>
-                  <div class="chip-container">
-                    <div class="filter-chip active" data-value="">All</div>
-                    <% categories.forEach(function(category) { %>
-                      <div class="filter-chip" data-value="<%= category.name %>"><%= category.name %></div>
-                    <% }); %>
-                  </div>
-                  <input type="hidden" name="category" id="categoryInput" value="">
-                </div>
-                
-                <!-- Brand Selection -->
-                <!-- <div class="mb-3">
-                  <label for="brand" class="form-label">Brand</label>
-                  <select class="form-select" id="brand" name="brand">
-                    <option value="">All Brands</option>
-                    <option value="apple">Apple</option>
-                    <option value="samsung">Samsung</option>
-                    <option value="sony">Sony</option>
-                    <option value="google">Google</option>
-                    <option value="microsoft">Microsoft</option>
-                  </select>
-                </div>
-                 -->
-                <!-- Price Range Slider -->
-                <div class="mb-3">
-                  <label for="priceRange" class="form-label">Price Range</label>
-                  <div class="price-range-container">
-                    <div class="price-display">
-                      <span id="minPriceDisplay">₹0</span>
-                      <span id="maxPriceDisplay">₹2000</span>
-                    </div>
-                    <input type="range" class="range-slider form-range" id="priceRange" min="0" max="2000" step="50" value="1000">
-                    <input type="hidden" id="minPrice" name="minPrice" value="0">
-                    <input type="hidden" id="maxPrice" name="maxPrice" value="1000">
-                  </div>
-                </div>
-                
-                <!-- Availability Filter -->
-                <div class="mb-3">
-                  <label class="form-label">Availability</label>
-                  <div class="d-flex align-items-center gap-2 mb-2">
-                    <input type="checkbox" class="form-check-input" id="inStock" name="inStock" value="true" checked>
-                    <label for="inStock" class="form-check-label">In Stock</label>
-                  </div>
-                  <div class="d-flex align-items-center gap-2">
-                    <input type="checkbox" class="form-check-input" id="deals" name="deals" value="true">
-                    <label for="deals" class="form-check-label">Special Deals</label>
-                  </div>
-                </div>
-                
-                <div class="mb-3">
-                  <label for="sort" class="form-label">Sort By</label>
-                  <select class="form-select" id="sort" name="sort">
-                    <option value="">Recommended</option>
-                    <option value="price-asc" <%= filters && filters.sort === 'price-asc' ? 'selected' : '' %>>Price: Low to High</option>
-                    <option value="price-desc" <%= filters && filters.sort === 'price-desc' ? 'selected' : '' %>>Price: High to Low</option>
-                    <option value="newest" <%= filters && filters.sort === 'newest' ? 'selected' : '' %>>Newest First</option>
-                    <option value="popular" <%= filters && filters.sort === 'popular' ? 'selected' : '' %>>Most Popular</option>
-                    <option value="rating-desc" <%= filters && filters.sort === 'rating-desc' ? 'selected' : '' %>>Highest Rated</option>
-                    <option value="name-asc" <%= filters && filters.sort === 'name-asc' ? 'selected' : '' %>>Name: A to Z</option>
-                  </select>
-                </div>
-                
-                <button type="submit" class="btn btn-filter w-100">
-                  <i class="fas fa-search me-2"></i>Apply Filters
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-
-        <!-- Product Grid -->
-        <div class="col-md-9">
-          <!-- Active Filters Display -->
-          <div class="active-filters mb-3">
-            <div class="d-flex flex-wrap gap-2">
-              <span class="filter-chip active">
-                All Products <i class="fas fa-times-circle ms-1"></i>
-              </span>
-              <span class="filter-chip active">
-                Price: ₹0 - ₹1000 <i class="fas fa-times-circle ms-1"></i>
-              </span>
-            </div>
-          </div>
-          
-          <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
-            <% products.forEach((product, index) => { %>
-       
-                <div class="col">
-                  <div class="card h-100">
-                    <div class="card-img-wrapper">
-                      <img
-                        src="<%= product.variants && product.variants.length > 0 && product.variants[0].images && product.variants[0].images.length > 0 ? product.variants[0].images[0].url : 'https://via.placeholder.com/400x400?text=No+Image' %>"
-                        alt="<%= product.name %>"
-                        class="card-img-top"
-                      />
-                      <% if (Math.random() > 0.7) { %>
-                        <div class="product-badge">NEW</div>
-                      <% } %>
-                      <% if (Math.random() > 0.8) { %>
-                        <div class="product-badge sale-badge">SALE</div>
-                      <% } %>
-                    </div>
-                    <div class="card-body">
-                      <h5 class="card-title" title="<%= product.name %>"><%= product.name %></h5>
-                      <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="product-price">₹<%= product.actualPrice %></div>
-                        <div class="rating">
-                          <% for(let i=0; i<Math.floor(3.5 + Math.random() * 1.5); i++) { %>
-                            <i class="fas fa-star small"></i>
-                          <% } %>
-                          <% for(let i=0; i<5-Math.floor(3.5 + Math.random() * 1.5); i++) { %>
-                            <i class="far fa-star small"></i>
-                          <% } %>
-                        </div>
-                      </div>
-                      
-                      <!-- Color options if available -->
-                      <% if (Math.random() > 0.5) { %>
-                        <div class="color-options">
-                          <div class="color-option selected" style="background-color: #000000;"></div>
-                          <div class="color-option" style="background-color: #f5f5f5;"></div>
-                          <div class="color-option" style="background-color: #0071e3;"></div>
-                        </div>
-                      <% } %>
-                      
-                      <div class="mt-3">
-                        <a href="/product/<%= product._id %>" class="btn btn-primary">
-                          <i class="fas fa-shopping-cart me-2"></i>View
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-            
-            <% }) %>
-          </div>
-
-          <% if (products.length === 0) { %>
-          <div class="no-products">
-            <i class="fas fa-box-open"></i>
-            <h4>No products available</h4>
-            <p class="text-secondary">
-              Try adjusting your filters or check back later for new items.
-            </p>
-          </div>
-          <% } %>
-          
-          <!-- Pagination -->
-          <div class="pagination-container">
-            <div class="pagination">
-              <% if (currentPage > 1) { %>
-              <a href="?page=<%= currentPage - 1 %>&limit=10"><i class="fas fa-chevron-left"></i></a>
-              <% } %>
-              
-              <% let startPage = Math.max(1, currentPage - 2);
-                 let endPage = Math.min(totalPages, startPage + 4);
-                 if (endPage - startPage < 4) {
-                   startPage = Math.max(1, endPage - 4);
-                 }
-              %>
-              
-              <% for (let i = startPage; i <= endPage; i++) { %>
-              <a href="?page=<%= i %>&limit=10" class="<%= i === currentPage ? 'active' : '' %>">
-                <%= i %>
-              </a>
-              <% } %>
-              
-              <% if (currentPage < totalPages) { %>
-              <a href="?page=<%= currentPage + 1 %>&limit=10"><i class="fas fa-chevron-right"></i></a>
-              <% } %>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <%- include('./partials/footer') %>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-  // Get current URL parameters
-  const urlParams = new URLSearchParams(window.location.search);
-  
-  // Category filter chips
-  const categoryChips = document.querySelectorAll('.chip-container .filter-chip');
-  const categoryInput = document.getElementById('categoryInput');
-  
-  // Set initial state based on URL params
-  const categoryParam = urlParams.get('category');
-  if (categoryParam) {
-    categoryChips.forEach(chip => {
-      if (chip.dataset.value === categoryParam) {
-        chip.classList.add('active');
-        categoryInput.value = categoryParam;
-      } else {
-        chip.classList.remove('active');
-      }
-    });
-  }
-  
-  categoryChips.forEach(chip => {
-    chip.addEventListener('click', function() {
-      // Remove active class from all chips
-      categoryChips.forEach(c => c.classList.remove('active'));
-      // Add active class to clicked chip
-      this.classList.add('active');
-      // Update hidden input
-      categoryInput.value = this.getAttribute('data-value');
-    });
-  });
-  
-  // Set other form elements based on URL params
-  const brandSelect = document.getElementById('brand');
-  const brandParam = urlParams.get('brand');
-  if (brandParam) brandSelect.value = brandParam;
-  
-  const inStockCheck = document.getElementById('inStock');
-  inStockCheck.checked = urlParams.get('inStock') !== 'false';
-  
-  const dealsCheck = document.getElementById('deals');
-  dealsCheck.checked = urlParams.get('deals') === 'true';
-  
-  const sortSelect = document.getElementById('sort');
-  const sortParam = urlParams.get('sort');
-  if (sortParam) sortSelect.value = sortParam;
-  
-  // Set price slider based on URL params
-  const priceSlider = document.getElementById('priceRange');
-  const minPriceDisplay = document.getElementById('minPriceDisplay');
-  const maxPriceDisplay = document.getElementById('maxPriceDisplay');
-  const minPriceInput = document.getElementById('minPrice');
-  const maxPriceInput = document.getElementById('maxPrice');
-  
-  const minPriceParam = urlParams.get('minPrice');
-  const maxPriceParam = urlParams.get('maxPrice');
-  if (minPriceParam) minPriceInput.value = minPriceParam;
-  if (maxPriceParam) {
-    maxPriceInput.value = maxPriceParam;
-    priceSlider.value = maxPriceParam;
-    maxPriceDisplay.textContent = '$' + maxPriceParam;
-  }
-  
-  priceSlider.addEventListener('input', function() {
-    const value = this.value;
-    maxPriceInput.value = value;
-    maxPriceDisplay.textContent = '$' + value;
-  });
-  
-  // Color options in product cards
-  const colorOptions = document.querySelectorAll('.color-option');
-  colorOptions.forEach(option => {
-    option.addEventListener('click', function() {
-      // Find all color options in the same container
-      const container = this.closest('.color-options');
-      const siblings = container.querySelectorAll('.color-option');
-      
-      // Remove selected class from all siblings
-      siblings.forEach(sib => sib.classList.remove('selected'));
-      // Add selected class to clicked option
-      this.classList.add('selected');
-    });
-  });
-  
-  // Mobile filter toggle animation
-  const filterToggle = document.querySelector('.filter-toggle');
-  const filterCollapse = document.getElementById('filterCollapse');
-  
-  filterCollapse.addEventListener('shown.bs.collapse', function () {
-    filterToggle.innerHTML = '<i class="fas fa-times"></i> Hide Filters';
-  });
-  
-  filterCollapse.addEventListener('hidden.bs.collapse', function () {
-    filterToggle.innerHTML = '<i class="fas fa-sliders-h"></i> Show Filters';
-  });
-  
-  // Handle search input
-  const searchInput = document.getElementById('search');
-  const searchParam = urlParams.get('search');
-  if (searchParam) {
-    searchInput.value = searchParam;
-  }
-  
-  // Important: Make the search button work with form submission
-  const searchBtn = searchInput.nextElementSibling;
-  searchBtn.addEventListener('click', function() {
-    document.getElementById('filterForm').submit();
-  });
-  
-  // Update the filter form to maintain all parameters
-  const filterForm = document.getElementById('filterForm');
-  filterForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Create new URLSearchParams from the form
-    const formData = new FormData(this);
-    const newParams = new URLSearchParams();
-    
-    // Add form fields to params (only if they have values)
-    for (const [key, value] of formData.entries()) {
-      if (value !== '' && value !== 'false') {
-        newParams.append(key, value);
-      }
-    }
-    
-    // Add the search parameter if it exists
-    if (searchInput.value) {
-      newParams.append('search', searchInput.value);
-    }
-    
-    // Redirect to the new URL
-    window.location.href = `/shop?${newParams.toString()}`;
-  });
-  
-  const activeFiltersDiv = document.querySelector('.active-filters .d-flex');
-  activeFiltersDiv.innerHTML = ''; 
-  
-  if (searchParam) {
-    addFilterChip('Search: "' + searchParam + '"', function() {
-      removeFilterAndRedirect('search');
-    });
-  }
-  
-  // Add category filter chip if category is selected
-  if (categoryParam && categoryParam !== '') {
-    addFilterChip('Category: ' + categoryParam, function() {
-      removeFilterAndRedirect('category');
-    });
-  }
-  
-  // Add brand filter chip if brand is selected
-  if (brandParam && brandParam !== '') {
-    addFilterChip('Brand: ' + brandParam, function() {
-      removeFilterAndRedirect('brand');
-    });
-  }
-  
-  // Add price range filter chip
-  if (minPriceParam || maxPriceParam) {
-    const min = minPriceParam || '0';
-    const max = maxPriceParam || '2000';
-    addFilterChip('Price: $' + min + ' - $' + max, function() {
-      removeFilterAndRedirect(['minPrice', 'maxPrice']);
-    });
-  }
-  
-  // Add other filter chips as needed
-  if (urlParams.get('inStock') === 'true') {
-    addFilterChip('In Stock', function() {
-      removeFilterAndRedirect('inStock');
-    });
-  }
-  
-  if (urlParams.get('deals') === 'true') {
-    addFilterChip('Special Deals', function() {
-      removeFilterAndRedirect('deals');
-    });
-  }
-  
-  // Helper function to add a filter chip
-  function addFilterChip(text, clickHandler) {
-    const chip = document.createElement('span');
-    chip.className = 'filter-chip active';
-    chip.innerHTML = text + ' <i class="fas fa-times-circle ms-1"></i>';
-    chip.addEventListener('click', clickHandler);
-    activeFiltersDiv.appendChild(chip);
-  }
-  
-  // Helper function to remove a filter parameter and redirect
-  function removeFilterAndRedirect(paramName) {
-    const params = new URLSearchParams(window.location.search);
-    
-    if (Array.isArray(paramName)) {
-      paramName.forEach(name => params.delete(name));
-    } else {
-      params.delete(paramName);
-    }
-    
-    window.location.href = `/shop?${params.toString()}`;
-  }
-  
-  // Add a "Clear All" button if any filters are active
-  if (activeFiltersDiv.children.length > 0) {
-    const clearAllChip = document.createElement('span');
-    clearAllChip.className = 'filter-chip clear-all';
-    clearAllChip.innerHTML = 'Clear All <i class="fas fa-times-circle ms-1"></i>';
-    clearAllChip.addEventListener('click', function() {
-      window.location.href = '/shop';
-    });
-    activeFiltersDiv.appendChild(clearAllChip);
-  }
-  
-  // Update pagination links to include all current parameters
-  document.querySelectorAll('.pagination a').forEach(link => {
-    const href = new URL(link.href);
-    const linkParams = new URLSearchParams(href.search);
-    
-    // Get the page parameter from the link
-    const linkPage = linkParams.get('page');
-    
-    // Copy all parameters from the current URL
-    const newParams = new URLSearchParams(window.location.search);
-    
-    // Update just the page parameter
-    if (linkPage) {
-      newParams.set('page', linkPage);
-    }
-    
-    // Update the link's href
-    link.href = `/shop?${newParams.toString()}`;
-  });
-});
-   </script>
-  </body>
+</body>
 </html>

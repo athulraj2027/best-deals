@@ -44,6 +44,8 @@ exports.getHomePage = async (req, res) => {
       };
     });
 
+    
+
     const categories = await Category.find({ status: "listed" });
     const isLoggedIn = req.isAuthenticated();
 

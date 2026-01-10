@@ -5,176 +5,154 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Edit Address</title>
-    <!-- Bootstrap CSS for responsiveness -->
-
-    <link rel="stylesheet" href="/userCSS/partials/headerPartial.css" />
-    <link rel="stylesheet" href="/userCSS/partials/partials_css.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
       rel="stylesheet"
     />
-    <style>
-      .form-container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-        box-shadow: 0.5 0.5 0.5 0.5 rgb(85, 81, 81);
-      }
-
-      .required-field::after {
-        content: "*";
-        color: red;
-        margin-left: 4px;
-      }
-
-      .form-footer {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 20px;
-      }
-
-      @media (max-width: 768px) {
-        .form-footer {
-          flex-direction: column;
-          gap: 10px;
-        }
-
-        .form-footer button {
-          width: 100%;
-        }
-      }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   </head>
-  <body>
+  <body class="bg-gray-100 min-h-screen">
     <%- include('../partials/headerPartial') %>
-    <div class="container d-flex m-0">
-      <%- include('./partial')%>
 
-      <div class="container form-container">
-        <div class="row mb-4">
-          <div class="col">
-            <h2>Edit Address</h2>
-            <p class="text-muted">Update your address information below</p>
-          </div>
-        </div>
-        <form
-          action="/profile/address/edit/<%= address._id %>?"
-          method="POST"
-          id="editAddressForm"
-        >
-          <input type="hidden" name="userId" value="<%= address.userId %>" />
+    <div class="flex flex-col md:flex-row max-w-6xl mx-auto mt-8 px-4 md:px-0 gap-6">
+      <!-- Sidebar -->
+      <div class="w-full md:w-1/4">
+        <%- include('./partial') %>
+      </div>
 
-          <div class="mb-3">
-            <label class="form-label">Address Type</label>
-            <div class="d-flex">
-              <div class="form-check me-3">
-                <input class="form-check-input" type="radio" name="type"
-                id="homeType" value="Home" <% if(!address.type || address.type
-                === "Home") { %>checked<% } %> />
-                <label class="form-check-label" for="homeType">Home</label>
-              </div>
-              <div class="form-check me-3">
-                <input class="form-check-input" type="radio" name="type"
-                id="workType" value="Work" <% if(address.type === "Work") {
-                %>checked<% } %> />
-                <label class="form-check-label" for="workType">Work</label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="type"
-                id="otherType" value="Other" <% if(address.type === "Other") {
-                %>checked<% } %> />
-                <label class="form-check-label" for="otherType">Other</label>
-              </div>
+      <!-- Edit Address Container -->
+      <div class="w-full md:w-3/4 bg-white rounded-xl shadow-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">Edit Address</h2>
+        <p class="text-gray-600 mb-6">Update your address information below</p>
+
+        <form id="editAddressForm" class="space-y-4">
+          <!-- Address Type -->
+          <div>
+            <label class="block font-medium text-gray-700 mb-2">Address Type</label>
+            <div class="flex gap-4">
+              <label class="inline-flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="type"
+                  value="Home"
+                  class="form-radio text-blue-600"
+                  <% if(!address.type || address.type === "Home"){ %>checked<% } %>
+                />
+                <span>Home</span>
+              </label>
+              <label class="inline-flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="type"
+                  value="Work"
+                  class="form-radio text-green-600"
+                  <% if(address.type === "Work"){ %>checked<% } %>
+                />
+                <span>Work</span>
+              </label>
+              <label class="inline-flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="type"
+                  value="Other"
+                  class="form-radio text-gray-600"
+                  <% if(address.type === "Other"){ %>checked<% } %>
+                />
+                <span>Other</span>
+              </label>
             </div>
           </div>
 
-          <div class="row mb-3">
-            <div class="col-12 mb-3">
-              <label for="streetAddress" class="form-label required-field"
-                >Street Address</label
-              >
-              <input
-                type="text"
-                class="form-control"
-                id="streetAddress"
-                name="streetAddress"
-                value="<%= address.streetAddress %>"
-              />
-            </div>
+          <!-- Street Address -->
+          <div>
+            <label for="streetAddress" class="block font-medium text-gray-700 mb-1">
+              Street Address <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="streetAddress"
+              name="streetAddress"
+              value="<%= address.streetAddress %>"
+              class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
 
-          <div class="row mb-3">
-            <div class="col-md-6 mb-3">
-              <label for="city" class="form-label required-field">City</label>
+          <!-- City & State -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="city" class="block font-medium text-gray-700 mb-1">
+                City <span class="text-red-500">*</span>
+              </label>
               <input
                 type="text"
-                class="form-control"
                 id="city"
                 name="city"
                 value="<%= address.city %>"
+                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-
-            <div class="col-md-6 mb-3">
-              <label for="state" class="form-label required-field">State</label>
+            <div>
+              <label for="state" class="block font-medium text-gray-700 mb-1">
+                State <span class="text-red-500">*</span>
+              </label>
               <input
                 type="text"
-                class="form-control"
                 id="state"
                 name="state"
                 value="<%= address.state %>"
+                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
 
-          <div class="row mb-3">
-            <div class="col-md-6 mb-3">
-              <label for="zipCode" class="form-label required-field"
-                >Zip Code</label
-              >
+          <!-- ZIP & Country -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="zipCode" class="block font-medium text-gray-700 mb-1">
+                ZIP Code <span class="text-red-500">*</span>
+              </label>
               <input
                 type="text"
-                class="form-control"
                 id="zipCode"
                 name="zipCode"
                 value="<%= address.zipCode %>"
+                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-
-            <div class="col-md-6 mb-3">
-              <label for="country" class="form-label required-field"
-                >Country</label
-              >
+            <div>
+              <label for="country" class="block font-medium text-gray-700 mb-1">
+                Country <span class="text-red-500">*</span>
+              </label>
               <input
                 type="text"
-                class="form-control"
                 id="country"
                 name="country"
                 value="<%= address.country %>"
+                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
 
-          <div class="form-footer">
-            <a href="/profile/address" class="btn btn-outline-secondary"
-              >Cancel</a
-            >
-            <button type="submit" class="btn btn-primary">
+          <!-- Buttons -->
+          <div class="flex gap-4 mt-4">
+            <a href="/profile/address" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 transition">
+              Cancel
+            </a>
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
               Update Address
             </button>
           </div>
         </form>
       </div>
     </div>
+
     <%- include('../partials/footer') %>
-    <!-- Bootstrap JS (optional) -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
       $(document).ready(function () {
-        const form = $("#editAddressForm");
-        form.on("submit", function (e) {
+        $("#editAddressForm").on("submit", function (e) {
           e.preventDefault();
           const formData = {
             type: $("input[name='type']:checked").val(),
@@ -193,30 +171,25 @@
             success: function (response) {
               if (response.status === "success") {
                 Swal.fire({
+                  icon: "success",
                   title: response.title,
                   text: response.message,
-                  icon: response.status, // 'success'
-                  confirmButtonText: "OK",
                 }).then(() => {
-                  window.location.href = "/profile/address"; // Redirect after successful login
+                  window.location.href = "/profile/address";
                 });
               } else {
                 Swal.fire({
+                  icon: "error",
                   title: response.title,
                   text: response.message,
-                  icon: response.status, // 'error'
-                  confirmButtonText: "OK",
                 });
               }
             },
-            error: function (xhr, status, error) {
-              console.error("AJAX Error:", status, error);
-              console.log("Error Response JSON:", xhr.responseJSON);
+            error: function (xhr) {
               Swal.fire({
-                title: xhr.responseJSON.title,
-                text: xhr.responseJSON.message,
                 icon: "error",
-                confirmButtonText: "OK",
+                title: "Error",
+                text: xhr.responseJSON?.message || "Something went wrong",
               });
             },
           });

@@ -249,8 +249,14 @@ exports.deleteAddressController = async (req, res) => {
 exports.getEditAddressPage = async (req, res) => {
   try {
     const addressId = req.params.id;
+    const userId = req.session.userId;
     const address = await Address.findById(addressId);
 
+    const user = await User.findOne({ _id: userId });
+    if (!user)
+      return res
+        .status(400)
+        .json({ status: "error", title: "error", message: "User not found" });
     return res
       .status(200)
       .render("userPages/profilePages/editAddressPage", { address, user });
@@ -509,7 +515,9 @@ exports.getResetPassword = async (req, res) => {
     if (user.googleId) {
       return res.status(400).redirect("/profile");
     }
-    return res.status(200).render("userPages/profilePages/passwordPage");
+    return res
+      .status(200)
+      .render("userPages/profilePages/passwordPage", { user });
   } catch (err) {
     console.error(err);
     return res.status(500).json({

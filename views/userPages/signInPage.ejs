@@ -3,335 +3,147 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-      crossorigin="anonymous"
-    />
-    <link rel="stylesheet" href="userCSS/partials/headerPartial.css" />
-    <link rel="stylesheet" href="userCSS/partials/partials_css.css" />
-    <link rel="stylesheet" href="userCSS/signInPage.css" />
-    <title>Sign In</title>
-    <style>
-      /* Base styles */
-      body {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-      }
 
-      .main-content {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 1rem;
-      }
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-      .signin-container {
-        width: 100%;
-        max-width: 450px;
-        margin: 1rem auto;
-        padding: 2rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-      }
-
-      /* Form elements */
-      .form-control {
-        padding: 0.75rem 1rem;
-        border-radius: 6px;
-        transition: border-color 0.3s, box-shadow 0.3s;
-      }
-
-      .form-control:focus {
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
-      }
-
-      /* Button styling */
-      .btn-primary {
-        padding: 0.75rem;
-        font-weight: 500;
-        border-radius: 6px;
-        transition: all 0.3s ease;
-      }
-
-      .btn-primary:hover {
-        transform: translateY(-2px);
-      }
-
-      .social-signin-btn {
-        width: 100%;
-        margin-top: 1.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0.75rem;
-        border-radius: 6px;
-        font-size: 16px;
-        font-weight: 500;
-        cursor: pointer;
-        border: none;
-        transition: all 0.3s ease;
-      }
-
-      .google-btn {
-        background-color: #4285f4;
-        color: white;
-      }
-
-      .google-btn:hover {
-        background-color: #357ae8;
-        transform: translateY(-2px);
-      }
-
-      .google-logo {
-        margin-right: 10px;
-        vertical-align: middle;
-      }
-
-      /* Links styling */
-      .links-container {
-        display: flex;
-        flex-direction: column;
-        margin-top: 1.25rem;
-        align-items: center;
-      }
-
-      .links-container a {
-        margin: 0.5rem 0;
-        color: #4285f4;
-        transition: color 0.3s;
-      }
-
-      .links-container a:hover {
-        color: #357ae8;
-        text-decoration: underline !important;
-      }
-
-      /* Responsive adjustments */
-      @media (max-width: 576px) {
-        .signin-container {
-          margin: 0.5rem;
-          padding: 1.5rem;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        h2 {
-          font-size: 1.5rem;
-        }
-
-        .form-control,
-        .btn-primary,
-        .social-signin-btn {
-          padding: 0.625rem;
-        }
-      }
-
-      @media (max-width: 350px) {
-        .signin-container {
-          padding: 1rem;
-        }
-
-        h2 {
-          font-size: 1.25rem;
-        }
-
-        .form-label {
-          font-size: 0.9rem;
-        }
-
-        .social-signin-btn {
-          font-size: 0.9rem;
-        }
-      }
-
-      /* Dark mode support */
-      @media (prefers-color-scheme: dark) {
-        .signin-container.bg-light {
-          background-color: #2a2a2a !important;
-          color: #e6e6e6;
-        }
-
-        .form-control {
-          background-color: #3a3a3a;
-          border-color: #4a4a4a;
-          color: #e6e6e6;
-        }
-
-        .form-label {
-          color: #e6e6e6;
-        }
-
-        .links-container a {
-          color: #6ea8fe;
-        }
-
-        .links-container a:hover {
-          color: #8bb9fe;
-        }
-      }
-    </style>
+    <title>Sign In | BestDeals</title>
   </head>
-  <body>
+
+  <body class="min-h-screen">
+    <!-- HEADER -->
     <%- include('./partials/headerPartial')%>
 
-    <div class="main-content">
-      <div class="container">
-        <div class="signin-container bg-light">
-          <h2 class="text-center mb-4">Sign In</h2>
-          <form id="signin-form" action="/signin" method="POST">
-            <!-- Email Field -->
-            <div class="mb-3">
-              <label for="email" class="form-label">Email</label>
-              <input
-                type="email"
-                class="form-control"
-                id="email"
-                name="email"
-                placeholder="Enter your email"
-                autocomplete="email"
-              />
-              <small
-                class="error-message"
-                id="emailError"
-                style="color: red"
-              ></small>
-            </div>
-            <!-- Password Field -->
-            <div class="mb-3">
-              <label for="password" class="form-label">Password</label>
-              <input
-                type="password"
-                class="form-control"
-                id="password"
-                name="password"
-                placeholder="Enter your password"
-                autocomplete="current-password"
-              />
-              <small
-                class="error-message"
-                id="passwordError"
-                style="color: red"
-              ></small>
-            </div>
-            <!-- Sign In Button -->
-            <div class="d-grid mt-4">
-              <button type="submit" class="btn btn-primary">Sign In</button>
-            </div>
+    <!-- MAIN -->
+    <div class="flex items-center justify-center min-h-screen px-4">
+      <div
+        class="bg-white/95 backdrop-blur-md shadow-2xl rounded-2xl w-full max-w-md p-8"
+      >
+        <h2 class="text-3xl font-bold text-center mb-6 text-gray-800">
+          Welcome Back
+        </h2>
 
-            <!-- Links -->
-            <div class="links-container">
-              <a
-                href="/forgot-password/verify-email"
-                class="forgot-password text-decoration-none"
-                >Forgot Password?</a
-              >
-              <a href="/signup" class="signup-link text-decoration-none"
-                >Don't have an account? Sign Up</a
-              >
-            </div>
-          </form>
-
-          <!-- Google Sign-in Button -->
-          <div class="d-grid">
-            <a href="/auth/google" class="text-decoration-none">
-              <button class="social-signin-btn google-btn">
-                <img
-                  src="https://img.icons8.com/color/16/000000/google-logo.png"
-                  alt="Google Logo"
-                  class="google-logo"
-                />
-                Sign in with Google
-              </button>
-            </a>
+        <form id="signin-form" action="/signin" method="POST" class="space-y-4">
+          <!-- Email -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Email Address
+            </label>
+            <input
+              type="email"
+              name="email"
+              id="email"
+              placeholder="you@example.com"
+              class="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-indigo-500 outline-none"
+            />
+            <small id="emailError" class="text-red-500 text-xs"></small>
           </div>
-        </div>
+
+          <!-- Password -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              type="password"
+              name="password"
+              id="password"
+              placeholder="********"
+              class="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-indigo-500 outline-none"
+            />
+            <small id="passwordError" class="text-red-500 text-xs"></small>
+          </div>
+
+          <!-- Button -->
+          <button
+            type="submit"
+            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg transition"
+          >
+            Sign In
+          </button>
+
+          <!-- Links -->
+          <div class="text-center space-y-2 text-sm mt-4">
+            <a
+              href="/forgot-password/verify-email"
+              class="text-indigo-600 hover:underline block"
+            >
+              Forgot password?
+            </a>
+
+            <p>
+              Don't have an account?
+              <a
+                href="/signup"
+                class="text-indigo-600 font-medium hover:underline"
+              >
+                Sign Up
+              </a>
+            </p>
+          </div>
+        </form>
+
+        <!-- Google -->
+        <a
+          href="/auth/google"
+          class="mt-6 flex items-center justify-center gap-3 border rounded-lg py-2 hover:bg-gray-100 transition"
+        >
+          <img src="https://img.icons8.com/color/24/google-logo.png" />
+          <span class="font-medium text-gray-700">Continue with Google</span>
+        </a>
       </div>
     </div>
 
+    <!-- FOOTER -->
     <%- include('./partials/footer')%>
 
+    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
       $(document).ready(function () {
         const form = $("#signin-form");
 
         form.on("submit", function (e) {
-          e.preventDefault(); // Prevent default form submission
+          e.preventDefault();
 
           const email = $("#email").val();
           const password = $("#password").val();
 
-          // Clear previous error messages
           $(".error-message").text("");
 
-          // AJAX request
           $.ajax({
             url: "/signin",
             type: "POST",
             data: { email, password },
             dataType: "json",
 
-            success: function (response) {
-              console.log(response); // Log the response for debugging
-
-              if (response.status === "success") {
-                Swal.fire({
-                  title: response.title,
-                  text: response.message,
-                  icon: response.status, // 'success'
-                  confirmButtonText: "OK",
-                }).then(() => {
-                  window.location.href = "/"; // Redirect after successful login
-                });
+            success: function (res) {
+              if (res.status === "success") {
+                Swal.fire("Success", res.message, "success").then(
+                  () => (window.location.href = "/")
+                );
               } else {
-                Swal.fire({
-                  title: response.title,
-                  text: response.message,
-                  icon: response.status, // 'error'
-                  confirmButtonText: "OK",
-                });
+                Swal.fire("Error", res.message, "error");
 
-                if (response.errors?.email) {
-                  $("#emailError").text(response.errors.email);
+                if (res.errors?.email) {
+                  $("#emailError").text(res.errors.email);
                 }
-                if (response.errors?.password) {
-                  $("#passwordError").text(response.errors.password);
+                if (res.errors?.password) {
+                  $("#passwordError").text(res.errors.password);
                 }
               }
             },
 
-            error: function (xhr, status, error) {
-              console.error("AJAX Error:", status, error);
-              console.log("Error Response JSON:", xhr.responseJSON);
+            error: function (xhr) {
+              let msg = "Something went wrong";
 
-              let errorMessage =
-                "An unexpected error occurred. Please try again.";
+              if (xhr.status === 403) msg = "You are blocked!";
+              if (xhr.status === 400) msg = "Invalid credentials";
+              if (xhr.status === 500) msg = "Server error";
 
-              if (xhr.responseJSON) {
-                errorMessage = xhr.responseJSON.message || errorMessage;
-
-                // Handle different error cases based on status code
-                if (xhr.status === 400) {
-                  errorMessage = "Invalid email or password.";
-                } else if (xhr.status === 403) {
-                  errorMessage = "You have been blocked by the admin.";
-                } else if (xhr.status === 500) {
-                  errorMessage = "Server error. Please try again later.";
-                }
-              }
-
-              Swal.fire({
-                title: "Oops!",
-                text: errorMessage,
-                icon: "error",
-                confirmButtonText: "OK",
-              });
+              Swal.fire("Oops!", msg, "error");
             },
           });
         });
