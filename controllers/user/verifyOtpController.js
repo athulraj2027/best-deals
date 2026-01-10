@@ -22,7 +22,9 @@ exports.verifyOtpController = async (req, res) => {
   const name = req.session.name;
   const email = req.session.email;
   const password = req.session.password;
-  const referralCode = req.session.referral;
+  if (req.session.referral) {
+    var referralCode = req.session.referral;
+  }
 
   console.log(password);
   console.log(otpInput);
@@ -42,20 +44,20 @@ exports.verifyOtpController = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         console.log(hashedPassword);
 
-        const referredUser = await User.findOne({ referralCode });
-        console.log(referralCode)
-        if (!referredUser)
-          return res.status(statusCodes.BAD_REQUEST).json({
-            status: "error",
-            title: "Error",
-            message: "Referral code not valid",
+        if (referralCode) {
+          const referredUser = await User.findOne({ referralCode });
+          console.log(referralCode);
+          if (!referredUser)
+            return res.status(statusCodes.BAD_REQUEST).json({
+              status: "error",
+              title: "Error",
+              message: "Referral code not valid",
+            });
+
+          await User.findByIdAndUpdate(referredUser._id, {
+            $inc: { wallet: 100 }, // Add 100 to wallet
           });
-
-        await User.findByIdAndUpdate(referredUser._id, {
-          $inc: { wallet: 100 }, // Add 100 to wallet
-        });
-
-        
+        }
         const newUser = new User({
           name,
           email,

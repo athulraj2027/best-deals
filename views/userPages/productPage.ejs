@@ -25,7 +25,7 @@
           <span class="mx-2">/</span>
         </li>
         <li class="flex items-center">
-          <a href="/category/<%= product.category %>" class="text-blue-700 hover:text-blue-800">
+          <a href="/shop?category=<%= product.category.name %>" class="text-blue-700 hover:text-blue-800">
             <%= product.category.name %>
           </a>
           <span class="mx-2">/</span>
@@ -79,18 +79,64 @@
           <h1 class="text-2xl font-bold mb-2"><%= product.name %></h1>
           <p class="text-gray-600 mb-4"><i class="fas fa-industry mr-2"></i>Brand: <span class="font-semibold"><%= product.brand %></span></p>
 
-          <!-- Price display -->
-          <div class="flex items-center mb-6">
-            <span id="variant-price" class="text-2xl font-bold text-green-600 mr-2">
-              $<%= product.variants && product.variants.length > 0 && product.variants[0].price ? product.variants[0].price.toFixed(2) : (product.actualPrice ? product.actualPrice.toFixed(2) : '0.00') %>
-            </span>
-            <% if (product.variants && product.variants.length > 0 && product.variants[0].price && product.actualPrice && product.variants[0].price < product.actualPrice) { %>
-              <span class="text-lg text-gray-500 line-through mr-2">$<%= product.actualPrice.toFixed(2) %></span>
-              <span class="bg-red-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
-                <%= Math.round((1 - product.variants[0].price / product.actualPrice) * 100) %>% OFF
-              </span>
-            <% } %>
-          </div>
+<!-- Price display -->
+<div class="flex items-center mb-6">
+  <%
+    // Get the base price (variant price if available, else actual price)
+    let basePrice = (product.variants?.length && product.variants[0].price) 
+      ? product.variants[0].price 
+      : (product.actualPrice || 0);
+
+    // Check if there is an offer
+    let hasOffer = product.best_offer && product.best_offer.discounted_price;
+
+    // Correct discounted price from backend
+    let discountedPrice = hasOffer 
+      ? Number(product.best_offer.discounted_price) 
+      : basePrice;
+
+    // Correct savings text
+    let savingsText = null;
+    if (hasOffer) {
+      if (product.best_offer.discount_type === "percentage") {
+        savingsText = product.best_offer.discount_value + "% OFF";
+      } else {
+        savingsText = "Save ₹" + Number(product.best_offer.savings).toFixed(2);
+      }
+    }
+  %>
+
+  <!-- Discounted/Main Price -->
+  <span 
+   
+  
+    class="text-2xl font-bold text-green-600 mr-2">
+    ₹ <%= discountedPrice.toFixed(2) %>
+  </span>
+
+  <!-- Old Price -->
+  <% if (hasOffer) { %>
+    <span class="text-lg text-gray-500 line-through mr-2">
+      ₹ <%= basePrice.toFixed(2) %>
+    </span>
+  <% } %>
+
+  <!-- Discount Badge -->
+  <% if (hasOffer) { %>
+    <span class="bg-red-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
+      <%= savingsText %>
+    </span>
+  <% } %>
+</div>
+
+
+<!-- Optional: show offer validity -->
+<% if (product.best_offer) { %>
+  <p class="text-sm text-gray-500 mt-1">
+    Offer: <%= product.best_offer.name %> | Valid until <%= new Date(product.best_offer.valid_until).toDateString() %>
+  </p>
+<% } %>
+
 
           <!-- Color Selection -->
           <div class="mb-6">

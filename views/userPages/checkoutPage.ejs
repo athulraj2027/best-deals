@@ -439,7 +439,7 @@
                   <div class="tab-content">
                     <p>Pay with cash when your order is delivered.</p>
                     <p style="margin-top: 10px; color: #666; font-size: 0.9rem">
-                      Additional fee of $2.99 will be applied for Cash on
+                      Additional fee of ₹2.99 will be applied for Cash on
                       Delivery.
                     </p>
                   </div>
@@ -488,22 +488,22 @@
 
           <div class="order-item">
             <span>Subtotal</span>
-            <span>$<%= cart.subtotal %></span>
+            <span>₹<%= cart.subtotal %></span>
           </div>
 
           <div class="order-item">
             <span>Shipping</span>
-            <span>$<%= cart.shipping%></span>
+            <span>Free</span>
           </div>
 
           <div class="order-item">
             <span>Tax</span>
-            <span>$<%= cart.tax %></span>
+            <span>₹<%= cart.tax %></span>
           </div>
 
          <div class="order-total">
   <span>Total</span>
-  <span id="total-amount">$<%= cart.total %></span>
+  <span id="total-amount">₹<%= newTotal %></span>
 </div>
 
 <div>
@@ -511,14 +511,20 @@
   $<span id="wallet-balance"><%= walletBalance %></span>
 </div>
 <br />
+<input type="hidden" id="walletUsed" name="walletUsed" value="false" />
+<input type="hidden" id="walletAmount" name="walletAmount" value="0" />
 
 <button 
   id="useWallet"
   class="btn"
-  style="width: auto; padding: 12px 15px"
 >
-  Use Wallet
+  <% if(cart.walletApplied){ %>
+    Wallet applied
+  <% } else { %>
+    Use wallet
+  <% } %>
 </button>
+
 
           <div class="coupon-section" style="margin-top: 20px">
             <% if(coupons && coupons.length > 0) { %>
@@ -989,7 +995,6 @@ document.addEventListener("DOMContentLoaded", function () {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          walletBalance: walletAmount,
           cartId: document.getElementById("cartId").value
         }),
       })
@@ -1022,6 +1027,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 discountAmount.textContent = `-$${data.discount.toFixed(2)}`;
               }
             }
+             setTimeout(() => {
+    // window.location.reload();
+  }, 800); // delay is optional
           } else {
             // Show error message and revert changes
             showCouponMessage(data.message || "Failed to apply wallet.", "error");
@@ -1103,6 +1111,8 @@ document.addEventListener("DOMContentLoaded", function () {
         return response.json();
       })
       .then(data => {
+        console.log("📦 Coupon Response Data:", data);
+  console.log("🧪 typeof data.newTotal:", typeof data.newTotal);
         if (data.status === "success") {
           // Show success message and update discount display
           showCouponMessage("Coupon applied successfully!", "success");
@@ -1120,36 +1130,38 @@ document.addEventListener("DOMContentLoaded", function () {
           }
           
           // Update total if provided
-          if (data.newTotal !== undefined) {
-            const newTotal = typeof data.newTotal === 'string' ? 
-              parseFloat(data.newTotal) : data.newTotal;
-            
-            // Update the display total
-            if (totalSpan) {
-              totalSpan.textContent = `$${newTotal.toFixed(2)}`;
-            }
-            
-            // Update the hidden amount input for form submission
-            if (amountInput) {
-              amountInput.value = Math.round(newTotal);
-            }
-            
-            // Store the discounted amount for later use
-            discountedAmount = newTotal;
-            
-            // Add a hidden input to track that a coupon was applied
-            let couponAppliedInput = document.getElementById("couponApplied");
-            if (!couponAppliedInput) {
-              couponAppliedInput = document.createElement("input");
-              couponAppliedInput.type = "hidden";
-              couponAppliedInput.id = "couponApplied";
-              couponAppliedInput.name = "couponApplied";
-              couponAppliedInput.value = couponCode;
-              checkoutForm.appendChild(couponAppliedInput);
-            } else {
-              couponAppliedInput.value = couponCode;
-            }
-          }
+          if (data.newTotal !== undefined && data.newTotal !== null) {
+  const newTotal = Number(data.newTotal);
+  
+  if (!isNaN(newTotal)) {
+    if (totalSpan) {
+      totalSpan.textContent = `$${newTotal.toFixed(2)}`;
+    }
+
+    if (amountInput) {
+      amountInput.value = Math.round(newTotal);
+    }
+
+    discountedAmount = newTotal;
+
+    let couponAppliedInput = document.getElementById("couponApplied");
+    if (!couponAppliedInput) {
+      couponAppliedInput = document.createElement("input");
+      couponAppliedInput.type = "hidden";
+      couponAppliedInput.id = "couponApplied";
+      couponAppliedInput.name = "couponApplied";
+      couponAppliedInput.value = couponCode;
+      checkoutForm.appendChild(couponAppliedInput);
+    } else {
+      couponAppliedInput.value = couponCode;
+    }
+  } else {
+    console.error("Invalid newTotal received (not a number):", data.newTotal);
+  }
+} else {
+  console.error("newTotal is undefined or null");
+}
+
         } else {
           // Show error message
           showCouponMessage(data.message || "Invalid coupon code.", "error");
@@ -1227,7 +1239,7 @@ document.addEventListener("DOMContentLoaded", function () {
         
         // Configure Razorpay options
         const options = {
-          key: "rzp_test_tTcfsqC1bRVLSi",
+          key:  "<%= razorpayKey %>",
           amount: orderData.amount,
           currency: orderData.currency || "INR",
           name: "BestDeals",

@@ -87,7 +87,7 @@ exports.getProductsPage = async (req, res) => {
         products,
         categories,
         selectedCategory: category,
-        selectedSort:sort,
+        selectedSort: sort,
         currentPage: page,
         totalPages,
         hasNextPage: page < totalPages,
@@ -190,6 +190,7 @@ exports.addProductController = async (req, res) => {
       status,
       variants,
     } = req.body;
+    let categoryId;
     const existingProduct = await Product.findOne({ name });
     if (existingProduct) {
       console.log(existingProduct);
@@ -358,6 +359,17 @@ exports.editProductController = async (req, res) => {
       });
     }
 
+    const nameRegex = /^[a-zA-Z0-9][a-zA-Z0-9\s&.,'-]{2,99}$/;
+    const trimmedName = name.trim();
+    const lowercaseName = trimmedName.toLowerCase();
+    const isNameValid = nameRegex.test(lowercaseName);
+    if (!isNameValid)
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Name syntax invalid",
+      });
+
     const processedVariants = await Promise.all(
       variants.map(async (variant, variantIndex) => {
         // Basic variant properties
@@ -466,15 +478,22 @@ exports.editProductController = async (req, res) => {
         return processedVariant;
       })
     );
-    const productCategory = await Category.find({ category });
+    // const productCategory = await Category.findOne({ category });
+    // if (!productCategory) {
+    //   return res.status(400).json({
+    //     status: "error",
+    //     title: "Error",
+    //     message: "Invalid category",
+    //   });
+    // }
 
     const updatedProduct = await Product.findByIdAndUpdate(
       productId,
       {
-        name,
+        name:lowercaseName,
         brand,
         actualPrice,
-        productCategory,
+        category:category._id,
         status: status === "true",
         variants: processedVariants,
       },

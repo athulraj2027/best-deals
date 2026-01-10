@@ -73,7 +73,11 @@ exports.signUpController = async (req, res) => {
     req.session.name = name;
     req.session.email = email;
     req.session.password = password;
-    req.session.referral = referralCode;
+    if (referralCode) {
+      req.session.referral = referralCode;
+    } else {
+      delete req.session.referral;
+    }
 
     req.session.save();
     console.log(req.session);

@@ -107,7 +107,7 @@
                       </div>
 
                       <p class="mt-2 text-right font-semibold item-total">
-                        $<%= (item.price * item.quantity).toFixed(2) %>
+                        ₹<%= (item.price * item.quantity).toFixed(2) %>
                       </p>
                     </div>
                   </div>
@@ -142,24 +142,28 @@
               <div class="flex justify-between">
                 <span class="text-gray-600">Subtotal</span>
                 <span class="font-medium" id="cart-subtotal"
-                  >$<%= cart.subtotal %></span
+                  >₹
+                  <% if(cart.subtotal){ %>
+                    <%= cart.subtotal %>
+                    <% } %>
+                    </span
                 >
               </div>
 
               <div class="flex justify-between">
                 <span class="text-gray-600">Tax </span>
-                <span id="cart-tax">$<%= cart.tax %></span>
+                <span id="cart-tax">₹<%= cart.tax %></span>
               </div>
 
               <div class="flex justify-between">
                 <span class="text-gray-600">Shipping</span>
-                <span id="cart-shipping">$<%= cart.shipping %></span>
+                <span id="cart-shipping">Free</span>
               </div>
 
               <div class="border-t pt-4 mt-4">
                 <div class="flex justify-between font-bold">
                   <span>Total</span>
-                  <span id="cart-total">$<%= cart.total %></span>
+                  <span id="cart-total">₹<%= cart.total %></span>
                 </div>
               </div>
 
@@ -190,6 +194,7 @@
         </a>
       </div>
       <% } %>
+     
     </div>
 
     <%- include('./partials/footer')%>

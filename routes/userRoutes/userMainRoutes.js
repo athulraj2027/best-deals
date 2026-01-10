@@ -125,6 +125,7 @@ router.post("/order/create-razorpay", async (req, res) => {
 
     const { cartId, amount, addressId } = req.body;
     const userId = req.user?._id || req.session?.user?.id;
+    console.log("user id :  ", userId);
 
     // Validate required fields
     if (!cartId || !amount || !addressId) {
@@ -390,114 +391,83 @@ router.post("/refund", async (req, res) => {
 });
 
 router.route("/use-wallet").post(async (req, res) => {
-  console.log("using wallet");
+  console.log("calculating wallet preview");
   try {
-    const { cartId, walletBalance } = req.body;
-    const userId = req.session.userId; // Assuming you have user authentication middleware
+    const { cartId } = req.body;
+    const userId = req.session.userId;
 
     if (!cartId) {
-      console.log("no cartid");
       return res.status(400).json({
         status: "error",
         message: "Cart ID is required",
       });
     }
 
-    // Find the cart
     const cart = await Cart.findById(cartId);
-
     if (!cart) {
-      console.log("no cart");
       return res.status(404).json({
         status: "error",
         message: "Cart not found",
       });
     }
 
-    // Verify cart belongs to user
-    console.log("userId : ", userId);
-    console.log("cart.userId: ", cart.userId);
     if (cart.userId.toString() !== userId.toString()) {
-      console.log("cart mismatch with user");
       return res.status(403).json({
         status: "error",
         message: "Unauthorized: Cart belongs to another user",
       });
     }
 
-    // Get user's actual wallet balance
     const user = await User.findById(userId);
     if (!user) {
-      console.log("no user");
       return res.status(404).json({
         status: "error",
         message: "User not found",
       });
     }
 
-    // Store original total if not already saved
-    if (!cart.originalTotal) {
-      console.log("no originaltotal");
-      cart.originalTotal = cart.total;
-    }
+    // Use stored originalTotal if available
+    const cartTotal = cart.originalTotal ?? cart.total;
 
-    // Calculate how much wallet balance can be applied
-    // Use the smaller of: requested amount, actual wallet balance, or cart total
-    const actualWalletBalance = user.wallet;
-    const cartTotal = cart.originalTotal;
-
-    // If coupon is applied, use the discounted amount as the base
+    // Calculate base amount after coupon (if any)
     let baseAmount = cartTotal;
     if (cart.appliedCoupon && cart.discountAmount) {
-      baseAmount = cartTotal - cart.discountAmount;
+      baseAmount -= cart.discountAmount;
     }
 
-    const applicableAmount = Math.min(
-      parseFloat(walletBalance) || 0,
-      actualWalletBalance,
-      baseAmount
-    );
+    const walletBalance = user.wallet;
+    const applicableAmount = Math.min(walletBalance, baseAmount);
 
     if (applicableAmount <= 0) {
-      console.log("aplicable amount less than 0");
       return res.status(400).json({
         status: "error",
         message: "No wallet balance available to apply",
       });
     }
 
-    // Calculate new total after applying wallet
-    const newTotal = Math.max(0, baseAmount - applicableAmount);
-
-    // Update cart with wallet information
-    cart.walletApplied = true;
-    cart.walletAmount = applicableAmount;
-    cart.total = newTotal;
-    cart.updatedTotal = newTotal; // Update the updatedTotal field as well
-
-    await cart.save();
+    const newTotal = baseAmount - applicableAmount;
 
     return res.status(200).json({
       status: "success",
-      message: "Wallet balance applied successfully",
-      walletAmount: applicableAmount.toFixed(2),
-      discount: applicableAmount.toFixed(2),
-      newTotal: newTotal.toFixed(2),
+      message: "Wallet preview calculated successfully",
+      walletAmount: parseFloat(applicableAmount.toFixed(2)),
+      newTotal: parseFloat(newTotal.toFixed(2)),
     });
   } catch (err) {
-    console.error("Error applying wallet balance:", err);
+    console.error("Error calculating wallet preview:", err);
     return res.status(500).json({
       status: "error",
-      message: "Server error occurred while applying wallet balance",
+      message: "Server error occurred while calculating wallet preview",
     });
   }
 });
 
+
 router.route("/remove-wallet").post(async (req, res) => {
   try {
-    console.log("removing wallet");
+    console.log("removing wallet preview");
     const { cartId } = req.body;
-    const userId = req.user._id; // Assuming you have user authentication middleware
+    const userId = req.session.userId;
 
     if (!cartId) {
       return res.status(400).json({
@@ -506,7 +476,6 @@ router.route("/remove-wallet").post(async (req, res) => {
       });
     }
 
-    // Find the cart
     const cart = await Cart.findById(cartId);
     if (!cart) {
       return res.status(404).json({
@@ -515,7 +484,6 @@ router.route("/remove-wallet").post(async (req, res) => {
       });
     }
 
-    // Verify cart belongs to user
     if (cart.userId.toString() !== userId.toString()) {
       return res.status(403).json({
         status: "error",
@@ -523,41 +491,30 @@ router.route("/remove-wallet").post(async (req, res) => {
       });
     }
 
-    // Check if wallet is applied
-    if (!cart.walletApplied) {
-      return res.status(400).json({
-        status: "success",
-        message: "No wallet balance was applied",
-      });
-    }
+    // Start with original total (if available)
+    const cartTotal = cart.originalTotal ?? cart.total;
 
-    // Calculate new total - keep any coupon discounts applied
-    let newTotal = cart.originalTotal;
+    let newTotal = cartTotal;
+
+    // If a coupon is applied, subtract that from originalTotal
     if (cart.appliedCoupon && cart.discountAmount > 0) {
-      newTotal -= cart.discountAmount;
+      newTotal = cartTotal - cart.discountAmount;
     }
-
-    // Update cart
-    cart.total = newTotal;
-    cart.updatedTotal = newTotal;
-    cart.walletApplied = false;
-    cart.walletAmount = 0;
-
-    await cart.save();
 
     return res.status(200).json({
       status: "success",
-      message: "Wallet balance removed successfully",
-      newTotal: newTotal.toFixed(2),
+      message: "Wallet preview removed successfully",
+      newTotal: parseFloat(newTotal.toFixed(2)),
     });
   } catch (err) {
-    console.error("Error removing wallet balance:", err);
+    console.error("Error removing wallet preview:", err);
     return res.status(500).json({
       status: "error",
-      message: "Server error occurred while removing wallet balance",
+      message: "Server error occurred while removing wallet preview",
     });
   }
 });
+
 router.use("/", homePageRoutes);
 
 module.exports = router;

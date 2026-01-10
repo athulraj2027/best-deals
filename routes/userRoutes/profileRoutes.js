@@ -28,4 +28,8 @@ router
   .route("/orders/return/:id")
   .post(profileController.returnOrderController);
 
+router
+  .route("/wallet-transactions")
+  .get(profileController.getWalletTransactionsPage);
+  
 module.exports = router;

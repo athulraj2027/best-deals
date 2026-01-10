@@ -987,9 +987,9 @@
       // Form validation
       const editProductForm = document.getElementById('editProductForm');
       
-      editProductForm.addEventListener('submit', function(e) {
+      editProductForm.addEventListener('submit',async function(e) {
         let isValid = true;
-        
+        e.preventDefault()
         // Validate product name
         const nameInput = document.getElementById('name');
         const nameError = document.getElementById('nameError');
@@ -1038,7 +1038,7 @@
         }
         
         if (!isValid) {
-          e.preventDefault();
+          
           
           // Scroll to the first error
           const firstError = document.querySelector('.error-message[style="display: block;"]');
@@ -1064,12 +1064,14 @@
           });
           
     // Use FormData directly for the fetch
+  try {
+    // Create FormData from the form
     const formData = new FormData(editProductForm);
     formData.append('active', statusToggle.checked);
 
     const response = await fetch('/admin/products/edit/<%= product._id %>', {
       method: 'POST',
-      body: formData // Don't convert to JSON - FormData handles files properly
+      body: formData
     });
 
     const data = await response.json();
@@ -1081,21 +1083,21 @@
         text: data.message || 'Product updated successfully',
         confirmButtonText: 'OK'
       });
+
+      // ✅ Redirect after Swal confirm
       window.location.href = '/admin/products';
     } else {
       throw new Error(data.message || 'Product update failed');
     }
-  
+  } catch (error) {
     console.error('Error:', error);
     Swal.fire({
       icon: 'error',
       title: 'Error',
-      text: error.message || 'Failed to update Product. Please try again later.'
+      text: error.message || 'Failed to update product. Please try again later.'
     });
   }
-);
-
-    
+});
  
     </script>
   </body>

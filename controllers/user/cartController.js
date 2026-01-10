@@ -1,4 +1,5 @@
 const Cart = require("../../models/Cart");
+const Product = require("../../models/Product");
 const User = require("../../models/User");
 
 exports.getCartPage = async (req, res) => {
@@ -8,6 +9,11 @@ exports.getCartPage = async (req, res) => {
       return res.status(400).redirect("/signin");
     }
     const cart = await Cart.findOne({ userId });
+    if (!cart) {
+      cart = { userId, items: [] };
+    }
+
+    await cart.save();
     return res.status(200).render("userPages/cartPage", { cart });
   } catch (err) {
     console.error(err);
@@ -39,6 +45,25 @@ exports.updateQuantityController = async (req, res) => {
       });
     }
 
+    // Find Product & Variant
+    const product = await Product.findById(productId);
+    if (!product || !product.status || !product.inStock) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Product is unavailable",
+      });
+    }
+
+    const variant = product.variants.id(variantId);
+    if (!variant) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Variant not found",
+      });
+    }
+
     const cart = await Cart.findOne({ userId: req.session.userId });
     if (!cart) {
       return res.status(400).json({
@@ -64,20 +89,36 @@ exports.updateQuantityController = async (req, res) => {
       });
     }
 
+    // Determine new quantity
+    let newQuantity;
     if (action === "increase") {
-      cartItem.quantity = Math.min(parseInt(cartItem.quantity) + 1, 5);
-      
+      newQuantity = Math.min(cartItem.quantity + 1, 5);
     } else if (action === "decrease") {
-      cartItem.quantity = Math.max(parseInt(cartItem.quantity) - 1, 1);
+      newQuantity = Math.max(cartItem.quantity - 1, 1);
     } else {
-      // Direct quantity update (if needed)
-      cartItem.quantity = Math.max(1, Math.min(parseInt(quantity), 5));
+      newQuantity = Math.max(1, Math.min(parseInt(quantity), 5));
     }
 
-    // await cart.calculateSubtotal();
+    // Check available stock
+    if (newQuantity > variant.quantity) {
+      return res.status(400).json({
+        status: "error",
+        title: "Stock Error",
+        message: `Only ${variant.quantity} left in stock`,
+      });
+    }
+
+    // Update quantity and totals
+    const difference = newQuantity - cartItem.quantity;
+    cartItem.quantity = newQuantity;
+    cart.subtotal += difference * cartItem.price;
+
+    cart.tax = Number((0.1 * cart.subtotal).toFixed(2));
+    cart.total = (cart.tax + cart.subtotal).toFixed(2);
+
     await cart.save();
 
-    // For AJAX requests, return JSON response
+    // For AJAX requests
     if (req.xhr || req.headers["x-requested-with"] === "XMLHttpRequest") {
       return res.status(200).json({
         status: "success",
@@ -89,26 +130,16 @@ exports.updateQuantityController = async (req, res) => {
       });
     }
 
-    // For regular form submissions, redirect to cart page
     return res.status(200).redirect("/cart");
   } catch (err) {
     console.error(err);
+    const message = "Server error";
 
-    // For AJAX requests, return JSON error
     if (req.xhr || req.headers["x-requested-with"] === "XMLHttpRequest") {
-      return res.status(500).json({
-        status: "error",
-        title: "Error",
-        message: "Server error",
-      });
+      return res.status(500).json({ status: "error", title: "Error", message });
     }
 
-    // For regular form submissions, redirect with error
-    return res.status(500).json({
-      status: "error",
-      title: "Error",
-      message: "Server error",
-    });
+    return res.status(500).json({ status: "error", title: "Error", message });
   }
 };
 
@@ -153,6 +184,7 @@ exports.deleteItemController = async (req, res) => {
         message: "Cart item not found",
       });
     }
+    const itemQuantity = cartItem.quantity;
     cart.items = cart.items.filter((item) => {
       return !(
         item._id.toString() === itemId &&
@@ -161,7 +193,8 @@ exports.deleteItemController = async (req, res) => {
       );
     });
 
-    await cart.calculateSubtotal();
+    // await cart.calculateSubtotal();
+    cart.subtotal -= cartItem.price * itemQuantity;
     await cart.save();
 
     return res.status(200).json({
@@ -204,6 +237,8 @@ exports.clearCartController = async (req, res) => {
 
     cart.items = [];
     cart.subtotal = 0;
+    cart.tax = 0;
+    cart.walletApplied = false;
 
     await cart.save();
 

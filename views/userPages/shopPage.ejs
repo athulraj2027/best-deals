@@ -487,8 +487,8 @@
                   <label for="priceRange" class="form-label">Price Range</label>
                   <div class="price-range-container">
                     <div class="price-display">
-                      <span id="minPriceDisplay">$0</span>
-                      <span id="maxPriceDisplay">$2000</span>
+                      <span id="minPriceDisplay">₹0</span>
+                      <span id="maxPriceDisplay">₹2000</span>
                     </div>
                     <input type="range" class="range-slider form-range" id="priceRange" min="0" max="2000" step="50" value="1000">
                     <input type="hidden" id="minPrice" name="minPrice" value="0">
@@ -539,7 +539,7 @@
                 All Products <i class="fas fa-times-circle ms-1"></i>
               </span>
               <span class="filter-chip active">
-                Price: $0 - $1000 <i class="fas fa-times-circle ms-1"></i>
+                Price: ₹0 - ₹1000 <i class="fas fa-times-circle ms-1"></i>
               </span>
             </div>
           </div>
@@ -565,7 +565,7 @@
                     <div class="card-body">
                       <h5 class="card-title" title="<%= product.name %>"><%= product.name %></h5>
                       <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="product-price">$<%= product.actualPrice %></div>
+                        <div class="product-price">₹<%= product.actualPrice %></div>
                         <div class="rating">
                           <% for(let i=0; i<Math.floor(3.5 + Math.random() * 1.5); i++) { %>
                             <i class="fas fa-star small"></i>

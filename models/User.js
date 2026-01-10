@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const transactionSchema = require("./WalletTransaction");
 // Customer Schema
 const userSchema = new mongoose.Schema(
   {
@@ -59,6 +59,7 @@ const userSchema = new mongoose.Schema(
         return generateReferralCode(); // Call the function below
       },
     },
+    walletTransactions: [transactionSchema],
   },
   {
     timestamps: true,

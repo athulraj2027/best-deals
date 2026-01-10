@@ -109,8 +109,22 @@ exports.changeStatusController = async (req, res) => {
     if (updatedOrder.status === "returned") {
       const user = await User.findById(updatedOrder.userId);
       if (user) {
-        user.wallet += updatedOrder.grantTotal;
+        const refundAmount = updatedOrder.grantTotal;
+
+        // Update wallet balance
+        user.wallet += refundAmount;
+
+        // Add transaction
+        user.transactions.push({
+          type: "credit",
+          amount: refundAmount,
+          description: `Refund for returned order #${updatedOrder._id}`,
+          date: new Date(),
+        });
+
+        // Update order payment status
         updatedOrder.payment_status = "refunded";
+
         await updatedOrder.save();
         await user.save();
       }

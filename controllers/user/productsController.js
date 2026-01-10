@@ -3,28 +3,94 @@ const User = require("../../models/User");
 const Cart = require("../../models/Cart");
 const Wishlist = require("../../models/Wishlist");
 const statusCodes = require("../../services/statusCodes");
+const Offer = require("../../models/Offer");
 
 exports.getProductViewPage = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate("category");
+    let product = await Product.findById(req.params.id).populate("category");
     if (!product) {
       return res.status(statusCodes.BAD_REQUEST).redirect("/");
     }
 
-    if (product.status != true) {
+    if (!product.status || product.category.status !== "listed") {
       return res.status(statusCodes.BAD_REQUEST).redirect("/");
     }
-    if (product.category.status != "listed")
-      return res.status(500).redirect("/");
 
+    // STEP 1: Get all active offers
+    const now = new Date();
+    const offers = await Offer.find({
+      active: true,
+      status: "active",
+      expiryDate: { $gte: now },
+    });
+
+    // STEP 2: Find applicable offers (compare ObjectIds safely)
+    const applicableOffers = offers.filter((offer) => {
+      return (
+        offer.appliedProducts.some((id) => id.equals(product._id)) ||
+        offer.appliedCategories.some((id) => id.equals(product.category._id))
+      );
+    });
+
+    // STEP 3: Calculate best offer
+    let bestOffer = null;
+    let maxSavings = 0;
+
+    if (applicableOffers.length > 0) {
+      applicableOffers.forEach((offer) => {
+        product.variants.forEach((variant) => {
+          let savings = 0;
+
+          if (offer.offerType === "percentage") {
+            savings = (variant.price * offer.offerValue) / 100;
+          } else if (offer.offerType === "fixed") {
+            savings = offer.offerValue;
+          }
+
+          if (savings > maxSavings) {
+            maxSavings = savings;
+            bestOffer = {
+              offer_id: offer._id,
+              name: offer.name,
+              discount_type: offer.offerType,
+              discount_value: offer.offerValue,
+              discounted_price: Math.max(variant.price - savings, 0),
+              savings: savings,
+              valid_until: offer.expiryDate,
+            };
+          }
+        });
+      });
+    }
+
+    // STEP 4: Attach discounted price to each variant for frontend
+    const productObj = product.toObject();
+    productObj.best_offer = bestOffer;
+    productObj.variants = productObj.variants.map((v) => {
+      let savings = 0;
+      let discountedPrice = v.price;
+
+      if (bestOffer) {
+        if (bestOffer.discount_type === "percentage") {
+          savings = (v.price * bestOffer.discount_value) / 100;
+        } else {
+          savings = bestOffer.discount_value;
+        }
+        discountedPrice = Math.max(v.price - savings, 0);
+      }
+
+      return { ...v, discountedPrice };
+    });
+    // STEP 5: Related products
     const relatedProducts = await Product.find({
       category: product.category._id,
-      _id: { $ne: product._id }, // exclude current product
+      _id: { $ne: product._id },
     }).limit(4);
 
-    res.status(statusCodes.SUCCESS).render("userPages/productPage", {
+    console.log(productObj);
+    return res.status(statusCodes.SUCCESS).render("userPages/productPage", {
       title: product.name,
-      product,
+      product: productObj,
       relatedProducts,
     });
   } catch (err) {
@@ -191,13 +257,14 @@ exports.addToCart = async (req, res) => {
     await cart.save();
 
     // Recalculate totals (using pre-save middleware in the model)
-    cart.calculateSubtotal();
+    // cart.calculateSubtotal();
+    cart.subtotal += price;
     await cart.save();
 
     res.status(200).json({
       status: "success",
       message: "Item added to cart",
-      cartCount: cart.getItemCount(),
+      // cartCount: cart.getItemCount(),
       cart: cart,
     });
   } catch (error) {

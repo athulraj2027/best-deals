@@ -44,7 +44,7 @@ const productSchema = new mongoose.Schema(
           type: mongoose.Schema.Types.ObjectId,
           ref: "Offer",
         },
-        name: {type:String,},
+        name: { type: String, default: undefined },
         discount_type: {
           type: String,
           enum: ["percentage", "fixed"],

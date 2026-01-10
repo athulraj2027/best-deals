@@ -417,7 +417,6 @@ exports.getOrdersPage = async (req, res) => {
 exports.cancelOrderController = async (req, res) => {
   try {
     const orderId = req.params.id;
-
     const order = await Order.findById(orderId);
     if (!order) {
       return res.status(400).json({
@@ -435,13 +434,13 @@ exports.cancelOrderController = async (req, res) => {
       });
     }
 
-    if (order.status === "delivered" || order.status === "cancelled") {
-      return res.status(400).json({
-        status: "error",
-        title: "error",
-        message: "Order cannot be cancelled",
-      });
-    }
+    // if (order.status === "delivered" || order.status === "cancelled") {
+    //   return res.status(400).json({
+    //     status: "error",
+    //     title: "error",
+    //     message: "Order cannot be cancelled",
+    //   });
+    // }
 
     const items = order.items;
     for (const item of items) {
@@ -474,8 +473,7 @@ exports.cancelOrderController = async (req, res) => {
 
     user.wallet += order.grantTotal;
     order.status = "return requested";
-
-    if (order.payment_status === "paid") {
+    if (order.payment_status === "paid" && order.paymentMethod === "razorpay") {
       order.payment_status = "refunded";
     }
 
@@ -512,6 +510,34 @@ exports.getResetPassword = async (req, res) => {
       return res.status(400).redirect("/profile");
     }
     return res.status(200).render("userPages/profilePages/passwordPage");
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      status: "error",
+      title: "Error",
+      message: "Something went wrong",
+    });
+  }
+};
+
+exports.getWalletTransactionsPage = async (req, res) => {
+  try {
+    const user = await User.findById(req.session.userId);
+    if (!user) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "User not found",
+      });
+    }
+    const transactions = user.walletTransactions;
+    const walletBalance = user.wallet;
+    console.log("Transactions : ", transactions);
+    return res.status(200).render("userPages/profilePages/transactionsPage", {
+      transactions,
+      user,
+      walletBalance,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({
@@ -572,7 +598,7 @@ exports.resetPasswordController = async (req, res) => {
 };
 
 exports.returnOrderController = async (req, res) => {
-  console.log("order returning started")
+  console.log("order returning started");
   const orderId = req.params.id;
   try {
     const cancelledOrder = await Order.findByIdAndUpdate(

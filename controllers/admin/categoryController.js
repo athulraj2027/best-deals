@@ -92,13 +92,23 @@ exports.addCategoryController = async (req, res) => {
 
   const categoryImage = req.file;
   try {
+    const trimmedName = categoryName.trim();
+    const isValidCategoryName = /^[a-zA-Z0-9 ]{3,}$/.test(trimmedName);
+    if (!isValidCategoryName)
+      return res.status(400).json({
+        status: "error",
+        title: "error",
+        message: "Improper syntax for category name",
+      });
+    const lowercaseName = trimmedName.toLowerCase();
+
     const imageUrl = `images/categories/${categoryImage.filename}`;
     // console.log(imageUrl);
 
     const mappedStatus = status === "on" ? "listed" : "unlisted";
     console.log(mappedStatus);
 
-    const existingCategory = await Category.findOne({ name: categoryName });
+    const existingCategory = await Category.findOne({ name: lowercaseName });
     if (existingCategory) {
       return res.status(statusCodes.BAD_REQUEST).json({
         status: "error",
@@ -107,7 +117,7 @@ exports.addCategoryController = async (req, res) => {
       });
     }
     const newCategory = new Category({
-      name: categoryName,
+      name: lowercaseName,
       status: mappedStatus,
       categoryTags: typeof tags === "string" ? JSON.parse(tags) : [],
       imageUrl,
@@ -202,7 +212,18 @@ exports.editCategory = async (req, res) => {
         message: "No category found",
       });
     }
-    category.name = name;
+    const trimmedName = name.trim();
+    const isValidCategoryName = /^[a-zA-Z0-9 ]{3,}$/.test(trimmedName);
+    if (!isValidCategoryName)
+      return res.status(400).json({
+        status: "error",
+        title: "error",
+        message: "Improper syntax for category name",
+      });
+
+    const lowercaseName = trimmedName.toLowerCase();
+
+    category.name = lowercaseName;
     category.status = status;
     // category.tags = tags.split(','.map())
 
@@ -214,6 +235,7 @@ exports.editCategory = async (req, res) => {
 
     return res.status(statusCodes.SUCCESS).json({
       title: "Success",
+      status: "success",
       message: "Category edited successfully",
     });
   } catch (err) {
