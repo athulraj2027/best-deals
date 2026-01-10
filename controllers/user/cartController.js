@@ -8,12 +8,10 @@ exports.getCartPage = async (req, res) => {
     if (!userId) {
       return res.status(400).redirect("/signin");
     }
-    const cart = await Cart.findOne({ userId });
+    let cart = await Cart.findOne({ userId });
     if (!cart) {
       cart = { userId, items: [] };
     }
-
-    await cart.save();
     return res.status(200).render("userPages/cartPage", { cart });
   } catch (err) {
     console.error(err);
