@@ -52,7 +52,7 @@ exports.signUpController = async (req, res) => {
       });
     }
 
-    if (referralCode.trim() !== "") {
+    if (referralCode && referralCode.trim() !== "") {
       const isReferralValid = await User.findOne({ referralCode });
       if (!isReferralValid)
         return res.status(statusCodes.BAD_REQUEST).json({

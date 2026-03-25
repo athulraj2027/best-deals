@@ -186,7 +186,7 @@ exports.editProfileController = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { phone },
-      { new: true }
+      { new: true },
     );
     if (!updatedUser) {
       return res.status(400).json({
@@ -377,7 +377,7 @@ exports.editAddressController = async (req, res) => {
         zipCode,
         city,
       },
-      { new: true }
+      { new: true },
     );
     if (!updatedAddress) {
       return res.status(400).json({
@@ -410,6 +410,10 @@ exports.getOrdersPage = async (req, res) => {
         message: "Couldn't find your orders",
       });
     }
+
+    console.log("orders : ", orders);
+
+    orders.forEach((order) => console.log("items ; ", order.items));
 
     return res
       .status(200)
@@ -458,7 +462,7 @@ exports.cancelOrderController = async (req, res) => {
         {
           $inc: { "variants.$.quantity": +item.quantity },
         },
-        { new: true }
+        { new: true },
       );
       if (!updatedProduct) {
         return res.status(400).json({
@@ -477,17 +481,31 @@ exports.cancelOrderController = async (req, res) => {
         message: `Couldn't find user`,
       });
 
-    user.wallet += order.grantTotal;
-    order.status = "return requested";
-    if (order.payment_status === "paid" && order.paymentMethod === "razorpay") {
+    order.status = "cancelled";
+
+    // Refund to wallet if order was paid
+    if (order.payment_status === "paid") {
       order.payment_status = "refunded";
+      const refundAmount = order.grandTotal;
+      user.wallet += refundAmount;
+
+      const walletTransaction = {
+        type: "credit",
+        description: `Order cancellation refund for Order #${order.orderId}`,
+        amount: refundAmount,
+        date: new Date(),
+      };
+      user.walletTransactions.push(walletTransaction);
     }
 
     await order.save();
+    await user.save();
 
     return res.status(200).json({
-      success: true,
-      message: "Order cancelled successfully",
+      status: "success",
+      title: "Success",
+      message:
+        "Order cancelled successfully. Stock has been restored and refund processed.",
       order,
     });
   } catch (err) {
@@ -614,7 +632,7 @@ exports.returnOrderController = async (req, res) => {
       {
         status: "return requested",
       },
-      { new: true }
+      { new: true },
     );
 
     if (!cancelledOrder)
@@ -635,6 +653,134 @@ exports.returnOrderController = async (req, res) => {
       status: "error",
       title: "Error",
       message: "Something went wrong",
+    });
+  }
+};
+
+exports.cancelItemController = async (req, res) => {
+  try {
+    const { variantId, productId, orderId } = req.body;
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({
+        status: "failed",
+        message: "Order not found",
+      });
+    }
+
+    const item = order.items.find(
+      (i) =>
+        i.productId.toString() === productId &&
+        i.variantId.toString() === variantId,
+    );
+
+    if (!item) {
+      return res.status(404).json({
+        status: "failed",
+        message: "Item not found",
+      });
+    }
+
+    if (item.status !== "active") {
+      return res.status(400).json({
+        status: "failed",
+        message: "Item cannot be cancelled",
+      });
+    }
+
+    item.status = "cancelled";
+
+    // refund logic if prepaid
+    if (order.payment_status === "paid") {
+      const user = await User.findById(order.userId);
+      const refundAmount = item.paidAmount;
+      user.wallet += refundAmount;
+
+      const walletTransaction = {
+        type: "credit",
+        description: `Order cancellation refund for Order #${order.orderId} item`,
+        amount: refundAmount,
+        date: new Date(),
+      };
+      user.walletTransactions.push(walletTransaction);
+      await user.save();
+    }
+
+    const allItemsCancelled = order.items.every(
+      (i) => i.status === "cancelled",
+    );
+
+    if (allItemsCancelled) {
+      order.status = "cancelled";
+    }
+
+    await order.save();
+
+    await order.save();
+
+    res.json({
+      status: "success",
+      message: "Item cancelled successfully",
+    });
+  } catch (error) {
+    console.error("Cancel item error:", error);
+
+    res.status(500).json({
+      status: "failed",
+      message: "Server error",
+    });
+  }
+};
+
+exports.returnItemController = async (req, res) => {
+  try {
+    const { variantId, productId, orderId, reason } = req.body;
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({
+        status: "failed",
+        message: "Order not found",
+      });
+    }
+
+    const item = order.items.find(
+      (i) =>
+        i.productId.toString() === productId &&
+        i.variantId.toString() === variantId,
+    );
+
+    if (!item) {
+      return res.status(404).json({
+        status: "failed",
+        message: "Item not found in order",
+      });
+    }
+
+    if (item.status !== "active" && item.status !== "delivered") {
+      return res.status(400).json({
+        status: "failed",
+        message: "Item cannot be returned",
+      });
+    }
+
+    item.status = "return_requested";
+    item.returnReason = reason;
+
+    await order.save();
+
+    res.json({
+      status: "success",
+      message: "Return request submitted",
+    });
+  } catch (error) {
+    console.error("Return item error:", error);
+    res.status(500).json({
+      status: "failed",
+      message: "Server error",
     });
   }
 };

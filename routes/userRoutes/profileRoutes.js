@@ -31,5 +31,11 @@ router
 router
   .route("/wallet-transactions")
   .get(profileController.getWalletTransactionsPage);
-  
+
+router
+  .route("/orders/cancel-item")
+  .post(profileController.cancelItemController);
+router
+  .route("/orders/return-item")
+  .post(profileController.returnItemController);
 module.exports = router;

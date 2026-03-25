@@ -1,18 +1,60 @@
 const Cart = require("../../models/Cart");
 const Product = require("../../models/Product");
 const User = require("../../models/User");
+const {
+  determineBestOffer,
+} = require("../../services/offers/determineBestOffer");
 
 exports.getCartPage = async (req, res) => {
   const userId = req.session.userId;
+
   try {
     if (!userId) {
-      return res.status(400).redirect("/signin");
+      return res.redirect("/signin");
     }
+
     let cart = await Cart.findOne({ userId });
+
     if (!cart) {
       cart = { userId, items: [] };
+      return res.render("userPages/cartPage", { cart });
     }
-    return res.status(200).render("userPages/cartPage", { cart });
+
+    let subtotal = 0; // ✅ missing
+
+    for (let item of cart.items) {
+      const product = await Product.findById(item.productId).populate(
+        "category",
+      );
+
+      if (!product) continue;
+
+      const variant = product.variants.id(item.variantId);
+      if (!variant) continue;
+
+      const bestOffer = await determineBestOffer(product, variant.price);
+      console.log("best offers reeived ; ", bestOffer);
+
+      let finalPrice = variant.price;
+
+      if (bestOffer) {
+        finalPrice = bestOffer.discounted_price;
+      }
+
+      item.price = finalPrice;
+      item.offer = bestOffer ? bestOffer.name : null;
+
+      subtotal += finalPrice * item.quantity;
+    }
+
+    // ✅ calculate totals
+    cart.subtotal = Number(subtotal.toFixed(2));
+    cart.tax = Number((cart.subtotal * 0.1).toFixed(2));
+    cart.total = Number((cart.subtotal + cart.tax).toFixed(2));
+
+    await cart.save();
+
+    return res.render("userPages/cartPage", { cart });
   } catch (err) {
     console.error(err);
     return res.status(500).json({
@@ -26,6 +68,7 @@ exports.getCartPage = async (req, res) => {
 exports.updateQuantityController = async (req, res) => {
   try {
     const itemId = req.params.id;
+
     if (!itemId) {
       return res.status(400).json({
         status: "error",
@@ -35,21 +78,24 @@ exports.updateQuantityController = async (req, res) => {
     }
 
     const { productId, variantId, quantity, action } = req.body;
+
     if (!productId || !variantId || !action) {
       return res.status(400).json({
         status: "error",
         title: "Error",
-        message: "Credentials missing in the request body",
+        message: "Credentials missing",
       });
     }
 
-    // Find Product & Variant
-    const product = await Product.findById(productId);
+    /* ---------------- PRODUCT & VARIANT ---------------- */
+
+    const product = await Product.findById(productId).populate("category");
+
     if (!product || !product.status || !product.inStock) {
       return res.status(400).json({
         status: "error",
         title: "Error",
-        message: "Product is unavailable",
+        message: "Product unavailable",
       });
     }
 
@@ -62,7 +108,12 @@ exports.updateQuantityController = async (req, res) => {
       });
     }
 
-    const cart = await Cart.findOne({ userId: req.session.userId });
+    /* ---------------- CART ---------------- */
+
+    const cart = await Cart.findOne({
+      userId: req.session.userId,
+    });
+
     if (!cart) {
       return res.status(400).json({
         status: "error",
@@ -71,13 +122,12 @@ exports.updateQuantityController = async (req, res) => {
       });
     }
 
-    const cartItem = cart.items.find((item) => {
-      return (
+    const cartItem = cart.items.find(
+      (item) =>
         item._id.toString() === itemId &&
         item.productId.toString() === productId &&
-        item.variantId.toString() === variantId
-      );
-    });
+        item.variantId.toString() === variantId,
+    );
 
     if (!cartItem) {
       return res.status(400).json({
@@ -87,8 +137,10 @@ exports.updateQuantityController = async (req, res) => {
       });
     }
 
-    // Determine new quantity
+    /* ---------------- NEW QUANTITY ---------------- */
+
     let newQuantity;
+
     if (action === "increase") {
       newQuantity = Math.min(cartItem.quantity + 1, 5);
     } else if (action === "decrease") {
@@ -97,47 +149,65 @@ exports.updateQuantityController = async (req, res) => {
       newQuantity = Math.max(1, Math.min(parseInt(quantity), 5));
     }
 
-    // Check available stock
     if (newQuantity > variant.quantity) {
       return res.status(400).json({
         status: "error",
         title: "Stock Error",
-        message: `Only ${variant.quantity} left in stock`,
+        message: `Only ${variant.quantity} left`,
       });
     }
 
-    // Update quantity and totals
-    const difference = newQuantity - cartItem.quantity;
-    cartItem.quantity = newQuantity;
-    cart.subtotal += difference * cartItem.price;
+    /* ---------------- APPLY OFFER ---------------- */
 
-    cart.tax = Number((0.1 * cart.subtotal).toFixed(2));
-    cart.total = (cart.tax + cart.subtotal).toFixed(2);
+    const bestOffer = await determineBestOffer(product, variant.price);
+
+    let finalPrice = variant.price;
+
+    if (bestOffer) {
+      finalPrice = bestOffer.discounted_price;
+    }
+
+    cartItem.price = finalPrice;
+    cartItem.offer = bestOffer ? bestOffer.name : null;
+
+    /* ---------------- UPDATE CART ---------------- */
+
+    cartItem.quantity = newQuantity;
+
+    // Recalculate subtotal safely
+    cart.subtotal = cart.items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0,
+    );
+
+    cart.tax = Number((cart.subtotal * 0.1).toFixed(2));
+
+    cart.total = Number((cart.subtotal + cart.tax).toFixed(2));
 
     await cart.save();
 
-    // For AJAX requests
+    /* ---------------- AJAX RESPONSE ---------------- */
+
     if (req.xhr || req.headers["x-requested-with"] === "XMLHttpRequest") {
       return res.status(200).json({
         status: "success",
         title: "Success",
-        message: "Quantity updated successfully",
+        message: "Quantity updated",
         subtotal: cart.subtotal,
         itemPrice: cartItem.price * cartItem.quantity,
         quantity: cartItem.quantity,
       });
     }
 
-    return res.status(200).redirect("/cart");
+    return res.redirect("/cart");
   } catch (err) {
     console.error(err);
-    const message = "Server error";
 
-    if (req.xhr || req.headers["x-requested-with"] === "XMLHttpRequest") {
-      return res.status(500).json({ status: "error", title: "Error", message });
-    }
-
-    return res.status(500).json({ status: "error", title: "Error", message });
+    return res.status(500).json({
+      status: "error",
+      title: "Error",
+      message: "Server error",
+    });
   }
 };
 
@@ -145,22 +215,20 @@ exports.deleteItemController = async (req, res) => {
   try {
     const itemId = req.params.id;
     const { productId, variantId } = req.body;
-    if (!itemId) {
+    console.log("item deleting : ", req.body);
+
+    if (!itemId || !productId || !variantId) {
       return res.status(400).json({
         status: "error",
         title: "Error",
-        message: "No item ID found",
+        message: "Invalid request",
       });
     }
 
-    if (!productId || !variantId) {
-      return res.status(400).json({
-        status: "error",
-        title: "Error",
-        message: "Credentials not found",
-      });
-    }
-    const cart = await Cart.findOne({ userId: req.session.userId });
+    const cart = await Cart.findOne({
+      userId: req.session.userId,
+    });
+
     if (!cart) {
       return res.status(400).json({
         status: "error",
@@ -168,13 +236,14 @@ exports.deleteItemController = async (req, res) => {
         message: "Cart not found",
       });
     }
-    const cartItem = cart.items.find((item) => {
-      return (
+
+    const cartItem = cart.items.find(
+      (item) =>
         item._id.toString() === itemId &&
         item.productId.toString() === productId &&
-        item.variantId.toString() === variantId
-      );
-    });
+        item.variantId.toString() === variantId,
+    );
+
     if (!cartItem) {
       return res.status(400).json({
         status: "error",
@@ -182,26 +251,38 @@ exports.deleteItemController = async (req, res) => {
         message: "Cart item not found",
       });
     }
-    const itemQuantity = cartItem.quantity;
-    cart.items = cart.items.filter((item) => {
-      return !(
-        item._id.toString() === itemId &&
-        item.productId.toString() === productId &&
-        item.variantId.toString() === variantId
-      );
-    });
 
-    // await cart.calculateSubtotal();
-    cart.subtotal -= cartItem.price * itemQuantity;
+    /* -------- REMOVE ITEM -------- */
+
+    cart.items = cart.items.filter(
+      (item) =>
+        !(
+          item._id.toString() === itemId &&
+          item.productId.toString() === productId &&
+          item.variantId.toString() === variantId
+        ),
+    );
+
+    /* -------- RECALCULATE TOTALS -------- */
+
+    cart.subtotal = cart.items.reduce(
+      (sum, i) => sum + i.price * i.quantity,
+      0,
+    );
+
+    cart.tax = Number((cart.subtotal * 0.1).toFixed(2));
+
+    cart.total = Number((cart.subtotal + cart.tax).toFixed(2));
+
     await cart.save();
 
     return res.status(200).json({
       status: "success",
       title: "Success",
-      message: "Item removed from cart",
+      message: "Item removed",
     });
   } catch (err) {
-    console.error("Error in deleting item", err);
+    console.error("Delete error:", err);
     return res.status(500).json({
       status: "error",
       title: "Error",

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+
 const OrderItemSchema = new mongoose.Schema(
   {
     productId: {
@@ -13,8 +14,28 @@ const OrderItemSchema = new mongoose.Schema(
     price: { type: Number, required: true },
     quantity: { type: Number, required: true, min: 1 },
     image: { type: String, required: true },
+    paidAmount: { type: Number, required: true, default: 0 },
+    status: {
+      type: String,
+      enum: [
+        "active",
+        "cancelled",
+        "return_requested",
+        "return_accepted",
+        "returned",
+      ],
+      default: "active",
+    },
+
+    returnReason: {
+      type: String,
+    },
+
+    returnedAt: {
+      type: Date,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const orderSchema = new mongoose.Schema({
@@ -23,6 +44,7 @@ const orderSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  orderId: { type: String, unique: true, required: true },
   status: {
     type: String,
     enum: [
@@ -37,7 +59,7 @@ const orderSchema = new mongoose.Schema({
     ],
     default: "pending",
   },
-  grantTotal: {
+  grandTotal: {
     type: Number,
     required: true,
     default: 0,
@@ -46,6 +68,10 @@ const orderSchema = new mongoose.Schema({
     type: String,
     enum: ["pending", "paid", "refunded", "failed"],
     default: "pending",
+  },
+  coupon: {
+    code: String,
+    discountAmount: Number,
   },
   paymentMethod: {
     type: String,
@@ -91,6 +117,7 @@ const orderSchema = new mongoose.Schema({
     },
   },
   // originalPrice: { type: Number, required: true },
+  tax: { type: Number, default: 0 },
 });
 
 module.exports = mongoose.model("Order", orderSchema);

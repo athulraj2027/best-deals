@@ -22,6 +22,7 @@ const verifyOtpController = require("../../controllers/user/verifyOtpController"
 const checkBlockedUserMiddleware = require("../../middlewares/checkBlockedUserMiddleware");
 const Razorpay = require("razorpay");
 const userGuestMiddleware = require("../../middlewares/userGuestMiddleware");
+const { generateOrderId } = require("../../config/generate-order");
 
 const secret_key = "1234567890";
 
@@ -60,47 +61,245 @@ router.route("/logout").post(async (req, res) => {
 
 // Corrected thank-you route handler
 router.get("/thank-you", userGuestMiddleware, async (req, res) => {
-  console.log("thank you page rendering");
-  const { orderId } = req.query; // Changed from req.params to req.query since it's coming from a query string
+  console.log("Thank you page rendering");
+
+  const { orderId } = req.query;
 
   try {
-    // Handle case when no orderId is provided
     if (!orderId) {
-      console.log("No order ID provided");
       return res.render("userPages/thankYouPage", {
         order: null,
+        orderMeta: null,
+        itemsSummary: null,
+        shippingAddress: null,
+        paymentInfo: null,
+        couponInfo: null,
         error: "Order information not available",
       });
     }
 
+    // ── Fetch order with all populated refs ──────────────────────────────────
     const order = await Order.findById(orderId)
-      .populate("items.productId")
-      .populate("addressId");
+      .populate("userId", "name email phone") // basic user info
+      .populate("addressId") // full address doc
+      .populate("items.productId", "name images slug") // product details per item
+      .lean(); // plain JS object — faster, easier to manipulate below
 
     if (!order) {
-      console.log(`Order not found with ID: ${orderId}`);
       return res.render("userPages/thankYouPage", {
         order: null,
+        orderMeta: null,
+        itemsSummary: null,
+        shippingAddress: null,
+        paymentInfo: null,
+        couponInfo: null,
         error: "Order not found",
       });
     }
 
-    console.log(`Order found: ${order._id}`);
+    // ── 1. Order meta ─────────────────────────────────────────────────────────
+    const orderMeta = {
+      id: order._id.toString(),
+      orderId: order.orderId, // human-readable order ID
+      status: order.status,
+      statusLabel: formatStatus(order.status), // e.g. "Return Requested"
+      orderDate: order.orderDate,
+      orderDateFmt: formatDate(order.orderDate), // "12 Jan 2025, 3:45 PM"
+      totalItems: order.items.reduce((s, i) => s + i.quantity, 0),
+      grandTotal: order.grandTotal,
+      tax: order.tax || 0,
+      isDelivered: order.status === "delivered",
+      isCancelled: order.status === "cancelled",
+      isReturning: ["return requested", "return accepted", "returned"].includes(
+        order.status,
+      ),
+    };
 
-    // Render the thank you page with the order details
+    // ── 2. Items summary ──────────────────────────────────────────────────────
+    const itemsSummary = order.items.map((item) => ({
+      orderItemId: item._id.toString(),
+      productId: item.productId?._id?.toString() || item.productId?.toString(),
+      productSlug: item.productId?.slug || null,
+      name: item.name,
+      color: item.color,
+      size: item.size,
+      price: item.price,
+      quantity: item.quantity,
+      lineTotal: +(item.price * item.quantity).toFixed(2),
+      image: item.image,
+      // Extra product-level info if populated
+      productImages: item.productId?.images || [],
+    }));
+
+    // Subtotal before tax/coupon
+    const subtotal = +itemsSummary
+      .reduce((s, i) => s + i.lineTotal, 0)
+      .toFixed(2);
+
+    // ── 3. Shipping address ───────────────────────────────────────────────────
+    const addr = order.addressId || {};
+    const shippingAddress = {
+      id: addr._id?.toString(),
+      type: addr.type || "Other",
+      name: addr.name || order.userId?.name || "",
+      streetAddress: addr.streetAddress || "",
+      city: addr.city || "",
+      state: addr.state || "",
+      zipCode: addr.zipCode || "",
+      country: addr.country || "",
+      phoneNumber: addr.phoneNumber || "",
+      // Single formatted string for display
+      fullAddress: [
+        addr.streetAddress,
+        addr.city,
+        addr.state && addr.zipCode
+          ? `${addr.state} ${addr.zipCode}`
+          : addr.state || addr.zipCode,
+        addr.country,
+      ]
+        .filter(Boolean)
+        .join(", "),
+    };
+
+    // ── 4. Payment info ───────────────────────────────────────────────────────
+    const isRazorpay = order.paymentMethod === "razorpay";
+    const isCOD = order.paymentMethod === "cod";
+    const isWallet = order.paymentMethod === "wallet";
+
+    const paymentInfo = {
+      method: order.paymentMethod,
+      methodLabel: formatPaymentMethod(order.paymentMethod), // "Razorpay", "Cash on Delivery", etc.
+      status: order.payment_status,
+      statusLabel: formatPaymentStatus(order.payment_status),
+      isPaid: order.payment_status === "paid",
+      isRefunded: order.payment_status === "refunded",
+      isFailed: order.payment_status === "failed",
+      isPending: order.payment_status === "pending",
+      // Razorpay-specific details (null for COD/wallet)
+      razorpay: isRazorpay
+        ? {
+            orderId: order.razorpay?.orderId || null,
+            paymentId: order.razorpay?.paymentId || null,
+            signature: order.razorpay?.signature || null,
+            amount: order.razorpay?.amount || null, // in paise
+            amountINR: order.razorpay?.amount
+              ? +(order.razorpay.amount / 100).toFixed(2)
+              : null, // converted to ₹
+            currency: order.razorpay?.currency || "INR",
+            receipt: order.razorpay?.receipt || null,
+            paymentDate: order.razorpay?.paymentDate || null,
+            paymentDateFmt: order.razorpay?.paymentDate
+              ? formatDate(order.razorpay.paymentDate)
+              : null,
+          }
+        : null,
+    };
+
+    // ── 5. Coupon info ────────────────────────────────────────────────────────
+    const couponInfo = order.coupon?.code
+      ? {
+          code: order.coupon.code,
+          discountAmount: order.coupon.discountAmount || 0,
+          // Discount as a percentage of subtotal for display
+          discountPct:
+            subtotal > 0
+              ? +((order.coupon.discountAmount / subtotal) * 100).toFixed(1)
+              : 0,
+        }
+      : null;
+
+    // ── 6. Price breakdown (handy for the view) ───────────────────────────────
+    const priceBreakdown = {
+      subtotal,
+      couponDiscount: couponInfo?.discountAmount || 0,
+      tax: order.tax || 0,
+      grandTotal: order.grandTotal,
+      // Derived: what the user actually saved
+      totalSavings: +(couponInfo?.discountAmount || 0).toFixed(2),
+    };
+
+    // ── 7. Customer info ──────────────────────────────────────────────────────
+    const customerInfo = {
+      id: order.userId?._id?.toString(),
+      name: order.userId?.name || "Guest",
+      email: order.userId?.email || null,
+      phone: order.userId?.phone || shippingAddress.phoneNumber || null,
+    };
+
+    // ── Render ────────────────────────────────────────────────────────────────
     return res.render("userPages/thankYouPage", {
-      order,
+      order, // raw order doc (for anything not covered below)
+      orderMeta, // status, dates, counts
+      itemsSummary, // enriched items array
+      shippingAddress, // flat address object
+      paymentInfo, // payment method + razorpay details
+      couponInfo, // coupon code + discount (null if none)
+      priceBreakdown, // subtotal / tax / grand total
+      customerInfo, // user name / email / phone
       error: null,
     });
   } catch (error) {
     console.error("Error rendering thank you page:", error);
     return res.render("userPages/thankYouPage", {
       order: null,
+      orderMeta: null,
+      itemsSummary: null,
+      shippingAddress: null,
+      paymentInfo: null,
+      couponInfo: null,
+      priceBreakdown: null,
+      customerInfo: null,
       error: "Failed to retrieve your order information",
     });
   }
 });
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function formatDate(date) {
+  if (!date) return "";
+  return new Date(date).toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+function formatStatus(status) {
+  const map = {
+    pending: "Order Placed",
+    processing: "Processing",
+    paid: "Payment Confirmed",
+    delivered: "Delivered",
+    cancelled: "Cancelled",
+    "return requested": "Return Requested",
+    "return accepted": "Return Accepted",
+    returned: "Returned",
+  };
+  return map[status] || status;
+}
+
+function formatPaymentMethod(method) {
+  const map = {
+    cod: "Cash on Delivery",
+    razorpay: "Razorpay",
+    wallet: "Wallet",
+  };
+  return map[method] || method;
+}
+
+function formatPaymentStatus(status) {
+  const map = {
+    pending: "Awaiting Payment",
+    paid: "Paid",
+    refunded: "Refunded",
+    failed: "Payment Failed",
+  };
+  return map[status] || status;
+}
 //
 // Razorpay credentials
 const RAZORPAY_KEY_ID =
@@ -121,10 +320,9 @@ const razorpay = new Razorpay({
  */
 router.post("/order/create-razorpay", async (req, res) => {
   try {
-    console.log("RAZORPAY KEY:", process.env.RAZORPAY_KEY_ID); // should print your key
-
     const { cartId, amount, addressId } = req.body;
-    const userId = req.user?._id || req.session?.user?.id;
+    console.log(req);
+    const userId = req.user?._id || req.session?.userId;
     console.log("user id :  ", userId);
 
     // Validate required fields
@@ -163,14 +361,16 @@ router.post("/order/create-razorpay", async (req, res) => {
 
     // Create pending order in database
     const cartItems = cart.items || [];
+    const orderId = generateOrderId();
     const pendingOrder = new Order({
+      orderId,
       userId,
       items: cartItems,
       addressId,
       paymentMethod: "razorpay",
       payment_status: "pending",
       status: "pending",
-      grantTotal: cart.total, // ✅ this should exist in cart
+      grandTotal: cart.total, // ✅ this should exist in cart
       razorpay: {
         orderId: response.id, // ✅ this is the field you're querying later
         amount: response.amount,
@@ -207,7 +407,7 @@ router.post("/order/create-razorpay", async (req, res) => {
  * @desc    Verify Razorpay payment
  * @access  Private
  */
-router.post("/verify-payment/:id", async (req, res) => {
+router.post("/verify-payment", async (req, res) => {
   try {
     const {
       razorpay_order_id,
@@ -254,6 +454,7 @@ router.post("/verify-payment/:id", async (req, res) => {
 
     // Update order payment details
     order.payment_status = "paid";
+    order.grandTotal = order.razorpay.amount / 100;
     order.status = "paid";
     order.razorpay.paymentId = razorpay_payment_id;
     order.razorpay.signature = razorpay_signature;
@@ -264,12 +465,12 @@ router.post("/verify-payment/:id", async (req, res) => {
         // Find product and update the variant quantity
         await Product.updateOne(
           { _id: item.productId, "variants._id": item.variantId },
-          { $inc: { "variants.$.quantity": -item.quantity } }
+          { $inc: { "variants.$.quantity": -item.quantity } },
         );
       } catch (err) {
         console.error(
           `Error updating inventory for product ${item.productId}:`,
-          err
+          err,
         );
         // Continue with other products even if one fails
       }
@@ -461,7 +662,6 @@ router.route("/use-wallet").post(async (req, res) => {
     });
   }
 });
-
 
 router.route("/remove-wallet").post(async (req, res) => {
   try {

@@ -65,27 +65,6 @@
 <% }) %>
 
 </div>
-
-<!-- FLASH DEAL -->
-<div class="flex flex-wrap items-center gap-4 mt-16 border-l-4 border-pink-500 pl-4">
-  <h4 class="text-3xl font-bold text-purple-700">⚡ Flash Deals</h4>
-
-  <div class="flex bg-pink-100 px-6 py-2 rounded-full gap-6 shadow">
-    <div class="text-center">
-      <p class="font-bold text-pink-600" id="h">23</p>
-      <span class="text-xs">HRS</span>
-    </div>
-    <div class="text-center">
-      <p class="font-bold text-pink-600" id="m">45</p>
-      <span class="text-xs">MIN</span>
-    </div>
-    <div class="text-center">
-      <p class="font-bold text-pink-600" id="s">19</p>
-      <span class="text-xs">SEC</span>
-    </div>
-  </div>
-</div>
-
 <!-- PRODUCTS -->
 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mt-10">
 
@@ -108,7 +87,7 @@
 
     <div class="flex items-center justify-between mt-2">
       <p class="text-xl font-bold text-purple-700">
-        $<%=product.price.toFixed(2)%>
+        ₹<%=product.price.toFixed(2)%>
       </p>
       <p class="text-xs text-gray-500"><%=product.brand%></p>
     </div>
@@ -158,15 +137,6 @@
 
 <%- include('./partials/footer') %>
 
-<script>
-function updateCountdown(){
-  const now=new Date()
-  document.getElementById('h').innerText=23-now.getHours()
-  document.getElementById('m').innerText=59-now.getMinutes()
-  document.getElementById('s').innerText=59-now.getSeconds()
-}
-setInterval(updateCountdown,1000)
-</script>
 
 </body>
 </html>

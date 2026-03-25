@@ -87,7 +87,7 @@ exports.getProductViewPage = async (req, res) => {
       _id: { $ne: product._id },
     }).limit(4);
 
-    console.log(productObj);
+    console.log("product object sending : ", productObj);
     return res.status(statusCodes.SUCCESS).render("userPages/productPage", {
       title: product.name,
       product: productObj,
@@ -122,7 +122,7 @@ exports.addtoWishlistController = async (req, res) => {
       wishlist = new Wishlist({ user: userId, items: [] });
     }
     const existingItem = await wishlist.items.find(
-      (item) => item.variantId.toString() === wishlistItem.variantId
+      (item) => item.variantId.toString() === wishlistItem.variantId,
     );
     if (existingItem) {
       existingItem.quantity += wishlistItem.quantity;
@@ -154,7 +154,7 @@ exports.addtoCartController = async (req, res) => {
     if (!userId) {
       return res.status(400).json({
         status: "error",
-        title: "Error",
+        title: "Not Logged in",
         message: "Please log in to add to wishlist",
       });
     }
@@ -170,7 +170,7 @@ exports.addtoCartController = async (req, res) => {
       cart = new Cart({ userId, items: [] });
     }
     const existingItem = cart.items.find(
-      (item) => item.variantId.toString() === cartItem.variantId
+      (item) => item.variantId.toString() === cartItem.variantId,
     );
 
     if (existingItem) {
@@ -233,7 +233,7 @@ exports.addToCart = async (req, res) => {
     const existingItemIndex = cart.items.findIndex(
       (item) =>
         item.productId.toString() === productId &&
-        item.variantId.toString() === variantId
+        item.variantId.toString() === variantId,
     );
 
     if (existingItemIndex > -1) {

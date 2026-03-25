@@ -4,56 +4,52 @@ const Product = require("../../models/Product");
 /**
  * Determine the best offer for a product
  */
-async function determineBestOffer(product) {
-  // Find all active offers that apply to this product
+async function determineBestOffer(product, variantPrice) {
   const now = new Date();
 
   const offers = await Offer.find({
-    $and: [
-      { startDate: { $lte: now } },
-      { endDate: { $gte: now } },
-      { active: true },
-      {
-        $or: [
-          { appliedProducts: product._id },
-          { appliedCategories: product.category },
-        ],
-      },
+    active: true,
+    startDate: { $lte: now },
+    expiryDate: { $gte: now },
+    $or: [
+      { appliedProducts: product._id },
+      { appliedCategories: product.category },
     ],
   });
 
-  if (offers.length === 0) {
-    return null;
-  }
+  if (!offers.length) return null;
 
-  // Calculate discounts for each offer
-  const offersWithDiscounts = offers.map((offer) => {
+  let bestOffer = null;
+  let maxSavings = 0;
+
+  for (let offer of offers) {
     let discountAmount = 0;
-    let discountedPrice = product.price;
 
     if (offer.offerType === "percentage") {
-      discountAmount = product.price * (offer.offerValue / 100);
-      discountedPrice = product.price - discountAmount;
-    } else if (offer.offerType === "fixed") {
-      discountAmount = Math.min(offer.offerValue, product.price);
-      discountedPrice = product.price - discountAmount;
+      discountAmount = (variantPrice * offer.offerValue) / 100;
+    } else {
+      discountAmount = offer.offerValue;
     }
 
-    return {
-      offer_id: offer._id,
-      name: offer.name,
-      discount_type: offer.offerType,
-      discount_value: offer.offerValue,
-      discounted_price: parseFloat(discountedPrice.toFixed(2)),
-      savings: parseFloat(discountAmount.toFixed(2)),
-      valid_until: offer.endDate,
-    };
-  });
+    // Cap discount to product price
+    discountAmount = Math.min(discountAmount, variantPrice);
 
-  // Find the offer with the highest discount
-  return offersWithDiscounts.reduce((best, current) => {
-    return current.savings > best.savings ? current : best;
-  }, offersWithDiscounts[0]);
+    if (discountAmount > maxSavings) {
+      maxSavings = discountAmount;
+
+      bestOffer = {
+        offer_id: offer._id,
+        name: offer.name,
+        discount_type: offer.offerType,
+        discount_value: offer.offerValue,
+        discounted_price: Number((variantPrice - discountAmount).toFixed(2)),
+        savings: Number(discountAmount.toFixed(2)),
+        valid_until: offer.expiryDate,
+      };
+    }
+  }
+
+  return bestOffer;
 }
 
 /**
@@ -118,7 +114,7 @@ async function updateProductsForOffer(offerId) {
     const savings = originalPrice - newActualPrice;
     bestOffer.discounted_price = discounted_price;
     bestOffer.savings = savings;
-     bulkOps.push({
+    bulkOps.push({
       updateOne: {
         filter: { _id: product._id },
         update: {

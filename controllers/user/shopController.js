@@ -1,7 +1,10 @@
 const Product = require("../../models/Product");
 const statusCodes = require("../../services/statusCodes");
 const Category = require("../../models/Category");
-const mongoose = require("mongoose");
+const {
+  determineBestOffer,
+} = require("../../services/offers/determineBestOffer");
+
 exports.getShopPage = async (req, res) => {
   try {
     const {
@@ -20,21 +23,21 @@ exports.getShopPage = async (req, res) => {
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
     const skip = (pageNum - 1) * limitNum;
-    
+
     // Build base query - this will be for direct find() operation
     let query = { status: true };
-    
+
     // Handle search
-    if (search && search.trim() !== '') {
+    if (search && search.trim() !== "") {
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { brand: { $regex: search, $options: 'i' } }
+        { name: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+        { brand: { $regex: search, $options: "i" } },
       ];
     }
 
     // Handle category
-    if (category && category !== 'all' && category !== '') {
+    if (category && category !== "all" && category !== "") {
       try {
         const categoryObj = await Category.findOne({ name: category });
         if (categoryObj) {
@@ -46,7 +49,7 @@ exports.getShopPage = async (req, res) => {
     }
 
     // Handle brand
-    if (brand && brand !== 'all' && brand !== '') {
+    if (brand && brand !== "all" && brand !== "") {
       query.brand = brand;
     }
 
@@ -56,7 +59,7 @@ exports.getShopPage = async (req, res) => {
     if (!isNaN(minPriceVal) && !isNaN(maxPriceVal)) {
       query.actualPrice = {
         $gte: minPriceVal,
-        $lte: maxPriceVal
+        $lte: maxPriceVal,
       };
     }
 
@@ -74,7 +77,7 @@ exports.getShopPage = async (req, res) => {
 
     // Determine sort order
     let sortOption = { createdAt: -1 }; // Default sort
-    
+
     if (sort) {
       switch (sort) {
         case "price-asc":
@@ -97,20 +100,72 @@ exports.getShopPage = async (req, res) => {
     const totalPages = Math.ceil(totalProducts / limitNum);
 
     // Then get the products with populated categories
-    const products = await Product.find(query)
-      .populate('category')
+    let products = await Product.find(query)
+      .populate("category")
       .sort(sortOption)
       .skip(skip)
       .limit(limitNum);
 
-    console.log(`Found ${products.length} products out of ${totalProducts} total matches`);
+    // Calculate prices with offers for each product
+    const productsWithPrices = await Promise.all(
+      products.map(async (product) => {
+        const productObj = product.toObject();
+        // Get lowest price from variants
+        if (product.variants && product.variants.length > 0) {
+          const lowestVariant = product.variants.reduce((min, v) =>
+            v.price < min.price ? v : min,
+          );
+          const bestOffer = await determineBestOffer(
+            product,
+            lowestVariant.price,
+          );
+
+          if (bestOffer) {
+            productObj.displayPrice = bestOffer.discounted_price;
+            productObj.originalPrice = lowestVariant.price;
+            productObj.bestOffer = bestOffer;
+          } else {
+            productObj.displayPrice = lowestVariant.price;
+            productObj.originalPrice = lowestVariant.price;
+          }
+        } else {
+          const bestOffer = await determineBestOffer(
+            product,
+            product.actualPrice,
+          );
+          if (bestOffer) {
+            productObj.displayPrice = bestOffer.discounted_price;
+            productObj.originalPrice = product.actualPrice;
+            productObj.bestOffer = bestOffer;
+          } else {
+            productObj.displayPrice = product.actualPrice;
+            productObj.originalPrice = product.actualPrice;
+          }
+        }
+        return productObj;
+      }),
+    );
+
+    console.log(
+      `Found ${products.length} products out of ${totalProducts} total matches`,
+    );
 
     // Get categories for filter section
     const categories = await Category.find({ status: "listed" });
 
+    // If AJAX request, return JSON
+    if (req.query.ajax === "true") {
+      return res.json({
+        products: productsWithPrices,
+        currentPage: pageNum,
+        totalPages,
+        totalProducts,
+      });
+    }
+
     // Render the shop page
     res.render("userPages/shopPage", {
-      products,
+      products: productsWithPrices,
       categories,
       currentPage: pageNum,
       totalPages,
@@ -132,7 +187,8 @@ exports.getShopPage = async (req, res) => {
       categories: [],
       currentPage: 1,
       totalPages: 1,
-      error: "An error occurred while loading products. Please try again later.",
+      error:
+        "An error occurred while loading products. Please try again later.",
     });
   }
 };

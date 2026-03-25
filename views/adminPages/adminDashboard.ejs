@@ -2,714 +2,277 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <title>Admin Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-      crossorigin="anonymous"
-    />
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- FontAwesome -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
-    <link rel="stylesheet" href="/adminCSS/partials/menu.css" />
-    <title>Dashboard</title>
+
+    <!-- Google Font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
     <style>
-      :root {
-        --primary: #4361ee;
-        --secondary: #3f37c9;
-        --success: #4cc9f0;
-        --info: #4895ef;
-        --warning: #f72585;
-        --danger: #7209b7;
-        --light: #f8f9fa;
-        --dark: #212529;
-      }
-      
       body {
-        font-family: 'Poppins', sans-serif;
-        background-color: #f0f2f5;
-        overflow-x: hidden;
-      }
-      
-      .dashboard-container {
-        margin-left: 250px;
-        max-width: calc(100% - 250px);
-        padding: 20px;
-        transition: all 0.3s;
-      }
-      
-      .card {
-        box-shadow: 0 6px 10px rgba(0,0,0,.08);
-        border-radius: 16px;
-        border: none;
-        transition: all 0.3s ease;
-        margin-bottom: 24px;
-      }
-      
-      .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 20px rgba(0,0,0,.12);
-      }
-      
-      .card-header {
-        background-color: white;
-        border-bottom: 1px solid rgba(0,0,0,.05);
-        border-top-left-radius: 16px !important;
-        border-top-right-radius: 16px !important;
-        padding: 15px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      
-      .stat-card {
-        border-radius: 16px;
-        padding: 20px;
-        position: relative;
-        overflow: hidden;
-        min-height: 150px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        color: white;
-      }
-      
-      .stat-card .icon {
-        font-size: 48px;
-        opacity: 0.4;
-        position: absolute;
-        right: 20px;
-        top: 20px;
-      }
-      
-      .stat-card h2 {
-        font-size: 28px;
-        font-weight: 700;
-        margin-bottom: 5px;
-      }
-      
-      .stat-card p {
-        font-size: 16px;
-        opacity: 0.8;
-        margin-bottom: 0;
-      }
-      
-      .stat-card .trend {
-        display: flex;
-        align-items: center;
-        margin-top: 10px;
-        font-size: 14px;
-      }
-      
-      .stat-card .trend i {
-        margin-right: 5px;
-      }
-      
-      .chart-container {
-        position: relative;
-        height: 300px;
-        width: 100%;
-      }
-      
-      .title-section {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-      }
-      
-      .page-title {
-        font-weight: 700;
-        color: #333;
-        margin-bottom: 0;
-      }
-      
-      .report-form {
-        background-color: white;
-        border-radius: 16px;
-        box-shadow: 0 6px 10px rgba(0,0,0,.08);
-        padding: 24px;
-        margin-bottom: 24px;
-      }
-      
-      .form-group {
-        margin-bottom: 16px;
-      }
-      
-      .form-control {
-        border-radius: 8px;
-        padding: 10px 12px;
-      }
-      
-      .btn-generate {
-        background-color: var(--primary);
-        color: white;
-        border-radius: 8px;
-        padding: 10px 24px;
-        border: none;
-        font-weight: 600;
-        transition: all 0.3s;
-      }
-      
-      .btn-generate:hover {
-        background-color: var(--secondary);
-        transform: translateY(-2px);
-      }
-      
-      .action-buttons {
-        display: flex;
-        gap: 10px;
-      }
-      
-      .action-btn {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        cursor: pointer;
-        transition: all 0.3s;
-      }
-      
-      .action-btn:hover {
-        transform: scale(1.1);
-      }
-      
-      .dropdown-menu {
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,.1);
-        border: none;
-        padding: 10px;
-      }
-      
-      .dropdown-item {
-        padding: 8px 12px;
-        border-radius: 8px;
-        transition: all 0.2s;
-      }
-      
-      .dropdown-item:hover {
-        background-color: #f0f2f5;
-      }
-      
-      .recent-activity {
-        margin-top: 16px;
-      }
-      
-      .activity-item {
-        display: flex;
-        align-items: center;
-        padding: 12px 0;
-        border-bottom: 1px solid #f0f2f5;
-      }
-      
-      .activity-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 12px;
-        color: white;
-      }
-      
-      .activity-info {
-        flex: 1;
-      }
-      
-      .activity-title {
-        font-weight: 600;
-        margin-bottom: 0;
-        font-size: 14px;
-      }
-      
-      .activity-time {
-        font-size: 12px;
-        color: #6c757d;
-      }
-      
-      @media (max-width: 992px) {
-        .dashboard-container {
-          margin-left: 0;
-          max-width: 100%;
-        }
-      }
-      
-      @media (max-width: 768px) {
-        .card {
-          margin-bottom: 16px;
-        }
-        
-        .stat-card {
-          min-height: auto;
-        }
+        font-family: "Poppins", sans-serif;
       }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   </head>
-  <body>
-    <!-- Menu partial would be included here -->
+
+  <body class="bg-gray-100">
+    <!-- Sidebar -->
     <%- include('./partials/menu') %>
-    <div class="dashboard-container">
-      <div class="title-section">
-        <h2 class="page-title">Admin Dashboard</h2>
-        <div class="action-buttons">
-          <div class="dropdown">
-            <button class="btn btn-light" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="fa-solid fa-ellipsis-vertical"></i>
+
+    <!-- Main -->
+    <div class="ml-[250px] p-6 max-w-[calc(100%-250px)]">
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Admin Dashboard</h2>
+
+        <div class="relative">
+          <button class="p-2 bg-white rounded-lg shadow">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- STAT CARDS -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- USERS -->
+        <div
+          class="bg-gradient-to-r from-indigo-600 to-blue-500 text-white rounded-2xl p-5 relative shadow"
+        >
+          <i
+            class="fa-solid fa-users absolute right-5 top-5 text-5xl opacity-40"
+          ></i>
+          <p>Total Users</p>
+          <h2 class="text-3xl font-bold"><%= totalUsers %></h2>
+        </div>
+
+        <!-- SALES -->
+        <div
+          class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl p-5 relative shadow"
+        >
+          <i
+            class="fa-solid fa-chart-line absolute right-5 top-5 text-5xl opacity-40"
+          ></i>
+          <p>Total Sales</p>
+          <h2 class="text-3xl font-bold">₹ <%= totalSales %></h2>
+        </div>
+
+        <!-- PENDING -->
+        <div
+          class="bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-2xl p-5 relative shadow"
+        >
+          <i
+            class="fa-solid fa-list-check absolute right-5 top-5 text-5xl opacity-40"
+          ></i>
+          <p>Pending Orders</p>
+          <h2 class="text-3xl font-bold"><%= pendingOrders %></h2>
+        </div>
+
+        <!-- PRODUCTS -->
+        <div
+          class="bg-gradient-to-r from-indigo-800 to-violet-700 text-white rounded-2xl p-5 relative shadow"
+        >
+          <i
+            class="fa-solid fa-box absolute right-5 top-5 text-5xl opacity-40"
+          ></i>
+          <p>Total Products</p>
+          <h2 class="text-3xl font-bold"><%= totalProducts %></h2>
+        </div>
+      </div>
+
+      <!-- CONTENT -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+        <!-- REPORT FORM -->
+        <div class="bg-white rounded-2xl shadow p-6">
+          <h3 class="font-bold mb-4">Generate Sales Report</h3>
+
+          <form action="/admin/sales-report" method="get" class="space-y-4">
+            <select
+              name="type"
+              id="report-type"
+              class="w-full p-2 border rounded"
+            >
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+              <option value="custom">Custom</option>
+            </select>
+
+            <!-- DAILY -->
+            <div id="daily-input" class="hidden">
+              <input
+                type="date"
+                name="date"
+                class="w-full p-2 border rounded"
+              />
+            </div>
+
+            <!-- WEEKLY -->
+            <div id="weekly-input" class="hidden">
+              <input
+                type="date"
+                name="start_date"
+                class="w-full p-2 border rounded"
+              />
+            </div>
+
+            <!-- MONTHLY -->
+            <div id="monthly-input" class="hidden flex gap-3">
+              <input
+                type="number"
+                name="year"
+                placeholder="Year"
+                class="w-full p-2 border rounded"
+              />
+              <input
+                type="number"
+                name="month"
+                placeholder="Month"
+                class="w-full p-2 border rounded"
+              />
+            </div>
+
+            <!-- YEARLY -->
+            <div id="yearly-input" class="hidden">
+              <input
+                type="number"
+                name="year"
+                placeholder="Year"
+                class="w-full p-2 border rounded"
+              />
+            </div>
+
+            <!-- CUSTOM -->
+            <div id="custom-input" class="hidden flex gap-3">
+              <input
+                type="date"
+                name="start_date"
+                class="w-full p-2 border rounded"
+              />
+              <input
+                type="date"
+                name="end_date"
+                class="w-full p-2 border rounded"
+              />
+            </div>
+
+            <select name="download" class="w-full p-2 border rounded">
+              <option value="">View</option>
+              <option value="pdf">PDF</option>
+              <option value="excel">Excel</option>
+            </select>
+
+            <button
+              id="submitBtn"
+              disabled
+              class="w-full bg-indigo-600 text-white py-2 rounded transition disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-700"
+            >
+              Generate Report
             </button>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-              <li><a class="dropdown-item" href="#"><i class="fa-solid fa-download me-2"></i>Export Data</a></li>
-              <li><a class="dropdown-item" href="#"><i class="fa-solid fa-print me-2"></i>Print Dashboard</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#"><i class="fa-solid fa-gear me-2"></i>Settings</a></li>
-            </ul>
-          </div>
+          </form>
         </div>
-      </div>
 
-      <!-- Overview Cards -->
-      <div class="row">
-        <div class="col-md-6 col-lg-3">
-          <div class="card stat-card" style="background: linear-gradient(to right, #4361ee, #4895ef);">
-            <div class="icon">
-              <i class="fa-solid fa-users"></i>
-            </div>
-            <div>
-              <p>Total Users</p>
-              <h2>1,234</h2>
-              <div class="trend">
-                <i class="fa-solid fa-arrow-up"></i> 12% from last month
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-          <div class="card stat-card" style="background: linear-gradient(to right, #06d6a0, #1b9aaa);">
-            <div class="icon">
-              <i class="fa-solid fa-chart-line"></i>
-            </div>
-            <div>
-              <p>Total Sales</p>
-              <h2>$12,345</h2>
-              <div class="trend">
-                <i class="fa-solid fa-arrow-up"></i> 8% from last month
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-          <div class="card stat-card" style="background: linear-gradient(to right, #f72585, #b5179e);">
-            <div class="icon">
-              <i class="fa-solid fa-list-check"></i>
-            </div>
-            <div>
-              <p>Pending Orders</p>
-              <h2>45</h2>
-              <div class="trend">
-                <i class="fa-solid fa-arrow-down"></i> 3% from last month
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-          <div class="card stat-card" style="background: linear-gradient(to right, #3a0ca3, #7209b7);">
-            <div class="icon">
-              <i class="fa-solid fa-box"></i>
-            </div>
-            <div>
-              <p>Total Products</p>
-              <h2>789</h2>
-              <div class="trend">
-                <i class="fa-solid fa-arrow-up"></i> 5% from last month
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row">
-        <!-- Report Generation Form -->
-        <div class="col-md-12 col-lg-4 order-lg-2">
-          <div class="card">
-            <div class="card-header">
-              <h5 class="mb-0">Generate Sales Report</h5>
-            </div>
-            <div class="card-body">
-              <form action="/admin/sales-report" method="get" class="report-form">
-                <div class="form-group">
-                  <label for="report-type" class="form-label">Report Type:</label>
-                  <select name="type" id="report-type" class="form-select">
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="yearly">Yearly</option>
-                    <option value="custom">Custom</option>
-                  </select>
-                </div>
-
-                <div id="daily-input" class="form-group" style="display: none">
-                  <label for="date" class="form-label">Date:</label>
-                  <input type="date" name="date" id="date" class="form-control" />
-                </div>
-
-                <div id="weekly-input" class="form-group" style="display: none">
-                  <label for="start_date" class="form-label">Start Date:</label>
-                  <input type="date" name="start_date" id="start_date" class="form-control" />
-                </div>
-
-                <div id="monthly-input" class="form-group" style="display: none">
-                  <div class="row">
-                    <div class="col-md-6">
-                      <label for="year" class="form-label">Year:</label>
-                      <input type="number" name="year" id="year" min="1900" max="2100" class="form-control" />
-                    </div>
-                    <div class="col-md-6">
-                      <label for="month" class="form-label">Month:</label>
-                      <input type="number" name="month" id="month" min="1" max="12" class="form-control" />
-                    </div>
-                  </div>
-                </div>
-
-                <div id="yearly-input" class="form-group" style="display: none">
-                  <label for="year" class="form-label">Year:</label>
-                  <input type="number" name="year" id="year" min="1900" max="2100" class="form-control" />
-                </div>
-
-                <div id="custom-input" class="form-group" style="display: none">
-                  <div class="row">
-                    <div class="col-md-6">
-                      <label for="start_date" class="form-label">Start Date:</label>
-                      <input type="date" name="start_date" id="start_date" class="form-control" />
-                    </div>
-                    <div class="col-md-6">
-                      <label for="end_date" class="form-label">End Date:</label>
-                      <input type="date" name="end_date" id="end_date" class="form-control" />
-                    </div>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label for="download" class="form-label">Download Format:</label>
-                  <select name="download" id="download" class="form-select">
-                    <option value="">View Report</option>
-                    <option value="pdf">PDF</option>
-                    <option value="excel">Excel</option>
-                  </select>
-                </div>
-
-                <div class="d-grid gap-2 mt-4">
-                  <button type="submit" class="btn-generate">Generate Report</button>
-                </div>
-              </form>
-            </div>
-          </div>
-          
-          <div class="card">
-            <div class="card-header">
-              <h5 class="mb-0">Recent Activity</h5>
-            </div>
-            <div class="card-body">
-              <div class="recent-activity">
-                <div class="activity-item">
-                  <div class="activity-icon" style="background-color: var(--primary);">
-                    <i class="fa-solid fa-user"></i>
-                  </div>
-                  <div class="activity-info">
-                    <p class="activity-title">New user registered</p>
-                    <p class="activity-time">5 minutes ago</p>
-                  </div>
-                </div>
-                <div class="activity-item">
-                  <div class="activity-icon" style="background-color: var(--success);">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                  </div>
-                  <div class="activity-info">
-                    <p class="activity-title">New order placed</p>
-                    <p class="activity-time">15 minutes ago</p>
-                  </div>
-                </div>
-                <div class="activity-item">
-                  <div class="activity-icon" style="background-color: var(--warning);">
-                    <i class="fa-solid fa-comment"></i>
-                  </div>
-                  <div class="activity-info">
-                    <p class="activity-title">New product review</p>
-                    <p class="activity-time">45 minutes ago</p>
-                  </div>
-                </div>
-                <div class="activity-item">
-                  <div class="activity-icon" style="background-color: var(--danger);">
-                    <i class="fa-solid fa-credit-card"></i>
-                  </div>
-                  <div class="activity-info">
-                    <p class="activity-title">Payment processed</p>
-                    <p class="activity-time">1 hour ago</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Charts -->
-        <div class="col-md-12 col-lg-8 order-lg-1">
-          <div class="card">
-            <div class="card-header">
-              <h5 class="mb-0">Sales Overview</h5>
-              <div class="dropdown">
-                <button class="btn btn-sm btn-light" type="button" id="salesChartOptions" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="fa-solid fa-ellipsis-vertical"></i>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="salesChartOptions">
-                  <li><a class="dropdown-item" href="#">Last 7 Days</a></li>
-                  <li><a class="dropdown-item" href="#">Last 30 Days</a></li>
-                  <li><a class="dropdown-item" href="#">Last Year</a></li>
-                </ul>
-              </div>
-            </div>
-            <div class="card-body">
-              <div class="chart-container">
-                <canvas id="salesChart"></canvas>
-              </div>
-            </div>
-          </div>
-          
-          <div class="row">
-            <div class="col-md-6">
-              <div class="card">
-                <div class="card-header">
-                  <h5 class="mb-0">User Growth</h5>
-                </div>
-                <div class="card-body">
-                  <div class="chart-container" style="height: 250px;">
-                    <canvas id="userGrowthChart"></canvas>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="card">
-                <div class="card-header">
-                  <h5 class="mb-0">Traffic Sources</h5>
-                </div>
-                <div class="card-body">
-                  <div class="chart-container" style="height: 250px;">
-                    <canvas id="trafficSourcesChart"></canvas>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <!-- CHART -->
+        <div class="lg:col-span-2 bg-white rounded-2xl shadow p-6">
+          <h3 class="font-bold mb-4">Sales Overview</h3>
+          <canvas id="salesChart" height="120"></canvas>
         </div>
       </div>
     </div>
 
-    <!-- Include Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    
-    <!-- Include Chart.js -->
+    <!-- ChartJS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
       document
         .getElementById("report-type")
         .addEventListener("change", function () {
-          let type = this.value;
-          document.getElementById("daily-input").style.display =
-            type == "daily" ? "block" : "none";
-          document.getElementById("weekly-input").style.display =
-            type == "weekly" ? "block" : "none";
-          document.getElementById("monthly-input").style.display =
-            type == "monthly" ? "block" : "none";
-          document.getElementById("yearly-input").style.display =
-            type == "yearly" ? "block" : "none";
-          document.getElementById("custom-input").style.display =
-            type == "custom" ? "block" : "none";
+          ["daily", "weekly", "monthly", "yearly", "custom"].forEach((id) => {
+            document.getElementById(id + "-input")?.classList.add("hidden");
+          });
+          document
+            .getElementById(this.value + "-input")
+            ?.classList.remove("hidden");
         });
-        
-      // Sales Overview Chart
-      const salesCtx = document.getElementById("salesChart").getContext("2d");
-      const salesChart = new Chart(salesCtx, {
+
+      const ctx = document.getElementById("salesChart");
+      new Chart(ctx, {
         type: "line",
         data: {
-          labels: ["January", "February", "March", "April", "May", "June"],
+          labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
           datasets: [
             {
-              label: "This Year",
+              label: "Sales",
               data: [1200, 1500, 1100, 1800, 1400, 2000],
-              backgroundColor: "rgba(67, 97, 238, 0.1)",
-              borderColor: "rgba(67, 97, 238, 1)",
-              borderWidth: 2,
+              borderColor: "#4f46e5",
               tension: 0.4,
-              pointBackgroundColor: "white",
-              pointBorderColor: "rgba(67, 97, 238, 1)",
-              pointRadius: 4,
-              pointHoverRadius: 6,
-              fill: true
             },
-            {
-              label: "Last Year",
-              data: [1000, 1300, 950, 1600, 1200, 1800],
-              backgroundColor: "rgba(72, 149, 239, 0)",
-              borderColor: "rgba(72, 149, 239, 0.5)",
-              borderWidth: 2,
-              borderDash: [5, 5],
-              tension: 0.4,
-              pointBackgroundColor: "white",
-              pointBorderColor: "rgba(72, 149, 239, 0.5)",
-              pointRadius: 4,
-              pointHoverRadius: 6
-            }
           ],
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'top',
-              labels: {
-                boxWidth: 12,
-                usePointStyle: true,
-                pointStyle: 'circle'
-              }
-            },
-            tooltip: {
-              mode: 'index',
-              intersect: false,
-              backgroundColor: 'rgba(0, 0, 0, 0.7)',
-              titleColor: '#fff',
-              bodyColor: '#fff',
-              borderColor: 'rgba(255, 255, 255, 0.2)',
-              borderWidth: 1
-            }
-          },
-          scales: {
-            x: {
-              grid: {
-                display: false
-              }
-            },
-            y: {
-              beginAtZero: true,
-              grid: {
-                color: 'rgba(0, 0, 0, 0.05)',
-                tickBorderDash: [8, 4]
-              },
-              ticks: {
-                callback: function(value) {
-                  return '$' + value;
-                }
-              }
-            }
-          },
-          interaction: {
-            intersect: false,
-            mode: 'index'
-          }
-        },
       });
+    </script>
+    <script>
+      const submitBtn = document.getElementById("submitBtn");
+      const typeSelect = document.getElementById("report-type");
 
-      // User Growth Chart
-      const userGrowthCtx = document
-        .getElementById("userGrowthChart")
-        .getContext("2d");
-      const userGrowthChart = new Chart(userGrowthCtx, {
-        type: "bar",
-        data: {
-          labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
-          datasets: [
-            {
-              label: "New Users",
-              data: [50, 75, 100, 125],
-              backgroundColor: [
-                'rgba(67, 97, 238, 0.7)',
-                'rgba(72, 149, 239, 0.7)',
-                'rgba(6, 214, 160, 0.7)',
-                'rgba(247, 37, 133, 0.7)'
-              ],
-              borderColor: [
-                'rgba(67, 97, 238, 1)',
-                'rgba(72, 149, 239, 1)',
-                'rgba(6, 214, 160, 1)',
-                'rgba(247, 37, 133, 1)'
-              ],
-              borderWidth: 1,
-              borderRadius: 6
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false
-            }
-          },
-          scales: {
-            x: {
-              grid: {
-                display: false
-              }
-            },
-            y: {
-              beginAtZero: true,
-              grid: {
-                color: 'rgba(0, 0, 0, 0.05)',
-              },
-              ticks: {
-                precision: 0
-              }
-            }
-          }
-        },
-      });
-      
-      // Traffic Sources Chart
-      const trafficSourcesCtx = document
-        .getElementById("trafficSourcesChart")
-        .getContext("2d");
-      const trafficSourcesChart = new Chart(trafficSourcesCtx, {
-        type: "doughnut",
-        data: {
-          labels: ["Direct", "Social Media", "Organic Search", "Referral"],
-          datasets: [
-            {
-              data: [30, 25, 35, 10],
-              backgroundColor: [
-                'rgba(67, 97, 238, 0.8)',
-                'rgba(247, 37, 133, 0.8)',
-                'rgba(6, 214, 160, 0.8)',
-                'rgba(114, 9, 183, 0.8)'
-              ],
-              borderColor: 'white',
-              borderWidth: 2,
-              hoverOffset: 4
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: {
-                boxWidth: 12,
-                padding: 15,
-                usePointStyle: true,
-                pointStyle: 'circle'
-              }
-            }
-          },
-          cutout: '60%'
-        },
+      function validateForm() {
+        const type = typeSelect.value;
+        let valid = false;
+
+        if (type === "daily") {
+          valid = !!document.querySelector("input[name='date']").value;
+        }
+
+        if (type === "weekly") {
+          valid = !!document.querySelector("input[name='start_date']").value;
+        }
+
+        if (type === "monthly") {
+          const year = document.querySelector(
+            "#monthly-input input[name='year']",
+          ).value;
+          const month = document.querySelector(
+            "#monthly-input input[name='month']",
+          ).value;
+
+          valid = !!year && !!month;
+        }
+
+        if (type === "yearly") {
+          valid = !!document.querySelector("#yearly-input input[name='year']")
+            .value;
+        }
+
+        if (type === "custom") {
+          const start = document.querySelector(
+            "#custom-input input[name='start_date']",
+          ).value;
+          const end = document.querySelector(
+            "#custom-input input[name='end_date']",
+          ).value;
+
+          valid = !!start && !!end;
+        }
+
+        submitBtn.disabled = !valid;
+      }
+
+      // Listen for input changes
+      document.querySelectorAll("input, select").forEach((el) => {
+        el.addEventListener("input", validateForm);
+        el.addEventListener("change", validateForm);
       });
     </script>
   </body>

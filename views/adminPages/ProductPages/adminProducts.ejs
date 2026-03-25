@@ -1,368 +1,275 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-      crossorigin="anonymous"
-    />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <link rel="stylesheet" href="/adminCSS/partials/menu.css" />
-    <title>Products</title>
-    <style>
-      :root {
-        --primary-color: #f57c00;
-        --primary-hover: #e65100;
-        --light-bg: #fff9f0;
-        --text-dark: #333;
-        --sidebar-width: 250px;
-        --sidebar-collapsed-width: 70px;
-      }
-      
-      body {
-        background-color: #f8f9fa;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        overflow-x: hidden;
-      }
-      
-      /* Main layout structure */
-      .main-content-wrapper {
-        display: flex;
-        width: 100%;
-        min-height: 100vh;
-      }
-      
-      /* Main content area that adjusts with sidebar */
-      .main-content {
-        flex: 1;
-        padding: 20px;
-        margin-left: var(--sidebar-width);
-        transition: margin-left 0.3s ease;
-        width: calc(100% - var(--sidebar-width));
-      }
-      
-      .page-title {
-        font-weight: 600;
-        color: var(--text-dark);
-        border-left: 5px solid var(--primary-color);
-        padding-left: 15px;
-      }
-      
-      .btn-primary-custom {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-        color: white;
-        transition: all 0.3s;
-      }
-      
-      .btn-primary-custom:hover {
-        background-color: var(--primary-hover);
-        border-color: var(--primary-hover);
-      }
-      
-      .card {
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-      }
-      
-      .table-header {
-        background-color: var(--primary-color);
-        color: white;
-      }
-      
-      .table-responsive {
-        border-radius: 8px;
-        overflow: hidden;
-        max-height: 70vh;
-      }
-      
-      .form-control, .form-select {
-        border-radius: 8px;
-        border: 1px solid #ced4da;
-      }
-      
-      .form-control:focus, .form-select:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.25rem rgba(245, 124, 0, 0.25);
-      }
-      
-      .filter-section {
-        background-color: var(--light-bg);
-        border-radius: 10px;
-        padding: 15px;
-        margin-bottom: 20px;
-      }
-      
-      .status-badge {
-        padding: 6px 10px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-      }
-      
-      .status-listed {
-        background-color: #e7f5ea;
-        color: #198754;
-      }
-      
-      .status-unlisted {
-        background-color: #fff3cd;
-        color: #664d03;
-      }
-      
-      .pagination-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 12px;
-        margin: 20px 0;
-        font-size: 16px;
-      }
-      
-      .pagination-button {
-        padding: 8px 14px;
-        background-color: var(--primary-color);
-        color: white;
-        text-decoration: none;
-        border-radius: 6px;
-        transition: all 0.3s;
-        font-weight: bold;
-      }
-      
-      .pagination-button:hover {
-        background-color: var(--primary-hover);
-        color: white;
-        text-decoration: none;
-      }
-      
-      .page-info {
-        font-weight: bold;
-        color: var(--text-dark);
-      }
-      
-      /* Responsive adjustments */
-      @media (max-width: 992px) {
-        .filter-controls {
-          flex-direction: column;
-          gap: 10px;
-        }
-        
-        .filter-controls > form {
-          width: 100%;
-        }
-      }
-      
-      @media (max-width: 768px) {
-        .main-content {
-          margin-left: var(--sidebar-collapsed-width);
-          width: calc(100% - var(--sidebar-collapsed-width));
-        }
-        
-        body.sidebar-hidden .main-content {
-          margin-left: 0;
-          width: 100%;
-        }
-        
-        .action-buttons {
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
-          align-items: stretch;
-        }
-        
-        .action-buttons form, 
-        .action-buttons a {
-          width: 100%;
-        }
-      }
-      
-      @media (max-width: 576px) {
-        .main-content {
-          margin-left: 0;
-          width: 100%;
-        }
-        
-        body.sidebar-expanded .main-content {
-          margin-left: var(--sidebar-width);
-          width: calc(100% - var(--sidebar-width));
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="main-content-wrapper">
-      <!-- Include sidebar partial -->
-      <%- include('../partials/menu') %>
-      
-      <!-- Main content area -->
-      <div class="main-content">
-        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-          <h1 class="page-title mb-3 mb-md-0">Products</h1>
-          <a href="/admin/products/add" class="btn btn-primary-custom">
-            <i class="fas fa-plus me-2"></i>Add Product
-          </a>
-        </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-        <!-- Filter, Sort, and Search Options -->
-        <div class="filter-section">
-          <div class="d-flex justify-content-between align-items-center filter-controls gap-3 flex-wrap">
-            <!-- Filter by Category -->
-            <form action="/admin/products" method="GET" class="flex-grow-1">
-              <div class="input-group">
-                <span class="input-group-text bg-white">
-                  <i class="fas fa-filter text-secondary"></i>
-                </span>
-                <select name="category" class="form-select" onchange="this.form.submit()">
-                  <option value="">Filter by Category</option>
-                  <option value="all" <%= selectedCategory === 'all' ? 'selected' : '' %>>All</option>
-                  <% categories.forEach(category => { %>
-                    <option value="<%= category._id %>" <%= selectedCategory === category._id.toString() ? 'selected' : '' %>><%= category.name %></option>
-                  <% }); %>
-                </select>
-              </div>
-            </form>
+  <title>Products — Admin</title>
 
-            <!-- Sort Options -->
-            <form action="/admin/products" method="GET" class="flex-grow-1">
-              <div class="input-group">
-                <span class="input-group-text bg-white">
-                  <i class="fas fa-sort text-secondary"></i>
-                </span>
-                <select name="sort" class="form-select" onchange="this.form.submit()">
-                  <option value="">Sort By</option>
-                  <option value="price_low" <%= selectedSort === 'price_low' ? 'selected' : '' %>>Price (Low to High)</option>
-                  <option value="price_high" <%= selectedSort === 'price_high' ? 'selected' : '' %>>Price (High to Low)</option>
-                  <option value="oldest" <%= selectedSort === 'oldest' ? 'selected' : '' %>>Oldest</option>
-                  <option value="newest" <%= selectedSort === 'newest' ? 'selected' : '' %>>Newest</option>
-                </select>
-              </div>
-            </form>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/adminCSS/partials/menu.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-            <!-- Search by Name -->
-            <!-- <form action="/admin/products" method="GET" class="flex-grow-1">
-              <div class="input-group">
-                <input type="text" name="query" placeholder="Search by name or brand" class="form-control" />
-                <button type="submit" class="btn btn-primary-custom">
-                  <i class="fas fa-search"></i>
-                </button>
-              </div>
-            </form> -->
-          </div>
-        </div>
+  <style>
+    :root {
+      --brand:#f57c00;
+      --brand-dark:#e65100;
+      --ink:#1a1a2e;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+    }
+    body { font-family:'Manrope',sans-serif; background:#f4f5f7; }
+    .syne { font-family:'Syne',sans-serif; }
 
-        <!-- Products Table -->
-        <div class="card border-0">
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-hover m-0">
-                <thead class="table-header">
-                  <tr class="text-center">
-                    <th class="py-3">SI.No</th>
-                    <th class="py-3">Product Name</th>
-                    <th class="py-3">Brand</th>
-                    <th class="py-3">Base Price</th>
-                    <th class="py-3">Category</th>
-                    <th class="py-3">Variants</th>
-                    <th class="py-3">Status</th>
-                    <th class="py-3">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% if (products && products.length > 0) { %>
-                    <% products.forEach((product, index) => { %>
-                      <tr>
-                        <td class="text-center"><%= index + 1 %></td>
-                        <td><%= product.name %></td>
-                        <td><%= product.brand %></td>
-                        <td class="text-center">$<%= product.actualPrice.toFixed(2) %></td>
-                        <td class="text-center"><%= product.category.name %></td>
-                        <td class="text-center">
-                          <!-- Variants count with dropdown toggle -->
-                          <div class="dropdown">
-                            <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                              <%= product.variants.length %> Variants
-                            </button>
-                            <ul class="dropdown-menu">
-                              <% product.variants.forEach(variant => { %>
-                                <li class="dropdown-item">
-                                  <%= variant.color %> - <%= variant.size %>
-                                  <br />
-                                  Price: $<%= variant.price.toFixed(2) %>
-                                  <br />
-                                  Stock: <%= variant.quantity %>
-                                </li>
-                              <% }); %>
-                            </ul>
-                          </div>
-                        </td>
-                        <td class="text-center">
-                          <span class="status-badge <%= product.status ? 'status-listed' : 'status-unlisted' %>">
-                            <%= product.status ? 'Active' : 'Inactive' %>
-                          </span>
-                        </td>
-                        <td>
-                          <div class="d-flex justify-content-center gap-2 action-buttons">
-                            <a href="/admin/products/edit/<%= product._id %>" class="btn btn-sm btn-primary-custom">
-                              <i class="fas fa-edit me-1"></i> Edit
-                            </a>
-                            <a href="/admin/products/<%= product._id %>/add-variant" class="btn btn-sm btn-primary-custom">
-                              <i class="fas fa-plus me-1"></i> Variant
-                            </a>
-                            <% if (product.status) { %>
-                              <!-- Unlist Button -->
-                              <form action="/admin/products/unlist/<%= product._id %>" method="POST" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-warning w-100">
-                                  <i class="fas fa-eye-slash me-1"></i> Unlist
-                                </button>
-                              </form>
-                            <% } else { %>
-                              <!-- List Button -->
-                              <form action="/admin/products/list/<%= product._id %>" method="POST" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-success w-100">
-                                  <i class="fas fa-eye me-1"></i> List
-                                </button>
-                              </form>
-                            <% } %>
-                          </div>
-                        </td>
-                      </tr>
-                    <% }); %>
-                  <% } else { %>
-                    <tr>
-                      <td colspan="8" class="text-center">No products found.</td>
-                    </tr>
-                  <% } %>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+    .main-content { margin-left:250px; padding:28px 24px; }
+    @media(max-width:768px){ .main-content{ margin-left:70px; } }
+    @media(max-width:576px){ .main-content{ margin-left:0; } }
 
-        <!-- Pagination section -->
-        <div class="pagination-container">
-          <% if (hasPrevPage) { %>
-            <a href="/admin/products?page=<%= prevPage %>&limit=10" class="pagination-button">
-              <i class="fas fa-chevron-left me-2"></i>Previous
-            </a>
-          <% } %>
+    .card {
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:14px;
+      box-shadow:0 2px 10px rgba(0,0,0,.05);
+    }
 
-          <span class="page-info">
-            Page <%= currentPage %> of <%= totalPages %>
-          </span>
+    .tbl thead th {
+      background:var(--ink);
+      color:#fff;
+      font-size:.75rem;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+      padding:12px;
+    }
 
-          <% if (hasNextPage) { %>
-            <a href="/admin/products?page=<%= nextPage %>&limit=10" class="pagination-button">
-              Next<i class="fas fa-chevron-right ms-2"></i>
-            </a>
-          <% } %>
-        </div>
+    .tbl tbody td {
+      padding:12px;
+      font-size:.85rem;
+    }
+
+    .tbl tbody tr:hover {
+      background:#fffbf5;
+    }
+
+    .badge {
+      padding:4px 10px;
+      border-radius:20px;
+      font-size:.7rem;
+      font-weight:700;
+    }
+
+    .badge-active {
+      background:#dcfce7;
+      color:#14532d;
+    }
+
+    .badge-inactive {
+      background:#fee2e2;
+      color:#7f1d1d;
+    }
+
+    .btn-primary {
+      background:var(--brand);
+      color:#fff;
+      font-weight:700;
+      border-radius:8px;
+      padding:6px 12px;
+      font-size:.8rem;
+    }
+
+    .btn-primary:hover {
+      background:var(--brand-dark);
+    }
+  </style>
+</head>
+
+<body>
+<div class="flex">
+  <%- include('../partials/menu') %>
+
+  <div class="main-content w-full">
+
+    <!-- HEADER -->
+    <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
+      <div>
+        <h1 class="syne text-2xl font-extrabold">Products</h1>
+        <p class="text-sm text-gray-500">
+          <%= products.length %> products found
+        </p>
+      </div>
+
+      <a href="/admin/products/add" class="btn-primary">
+        + Add Product
+      </a>
+    </div>
+
+    <!-- 🔍 SEARCH BAR -->
+    <form action="/admin/products" method="GET" class="mb-4">
+      <div class="flex gap-2">
+        <input
+          type="text"
+          name="query"
+          placeholder="Search products, brand..."
+          class="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-orange-200"
+        />
+        <button class="btn-primary px-4">Search</button>
+      </div>
+    </form>
+
+    <!-- FILTER BAR -->
+    <div class="card p-4 mb-5 flex flex-wrap gap-3">
+
+      <!-- Category -->
+      <form action="/admin/products" method="GET">
+        <select name="category"
+          onchange="this.form.submit()"
+          class="px-3 py-2 rounded-lg border text-sm">
+          <option value="">All Categories</option>
+          <% categories.forEach(c => { %>
+            <option value="<%= c._id %>"><%= c.name %></option>
+          <% }) %>
+        </select>
+      </form>
+
+      <!-- Sort -->
+      <form action="/admin/products" method="GET">
+        <select name="sort"
+          onchange="this.form.submit()"
+          class="px-3 py-2 rounded-lg border text-sm">
+          <option value="">Sort</option>
+          <option value="price_low">Price Low → High</option>
+          <option value="price_high">Price High → Low</option>
+          <option value="newest">Newest</option>
+        </select>
+      </form>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="card overflow-hidden">
+      <div class="overflow-y-auto max-h-[70vh]">
+
+        <table class="w-full tbl">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Product</th>
+              <th>Brand</th>
+              <th>Price</th>
+              <th>Category</th>
+              <th>Variants</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <% if (products.length > 0) { %>
+
+              <% products.forEach((p, i) => { %>
+              <tr>
+
+                <td class="text-center text-gray-500"><%= i+1 %></td>
+
+                <!-- Product -->
+                <td>
+                  <div class="font-semibold"><%= p.name %></div>
+                </td>
+
+                <td><%= p.brand %></td>
+
+                <td class="font-bold">₹<%= p.actualPrice.toFixed(2) %></td>
+
+                <td><%= p.category.name %></td>
+
+                <!-- Variants -->
+                <td>
+                  <details class="cursor-pointer">
+                    <summary class="text-sm font-semibold text-orange-600">
+                      <%= p.variants.length %> variants
+                    </summary>
+                    <div class="mt-2 space-y-1 text-xs text-gray-600">
+                      <% p.variants.forEach(v => { %>
+                        <div>
+                          <b><%= v.color %> / <%= v.size %></b> —
+                          ₹<%= v.price %> | Stock: <%= v.quantity %>
+                        </div>
+                      <% }) %>
+                    </div>
+                  </details>
+                </td>
+
+                <!-- Status -->
+                <td>
+                  <span class="badge <%= p.status ? 'badge-active':'badge-inactive' %>">
+                    <%= p.status ? 'Active':'Inactive' %>
+                  </span>
+                </td>
+
+                <!-- Actions -->
+                <td>
+                  <div class="flex flex-col gap-1">
+
+                    <a href="/admin/products/edit/<%= p._id %>" class="btn-primary text-center">
+                      Edit
+                    </a>
+
+                    <a href="/admin/products/<%= p._id %>/add-variant" class="btn-primary text-center">
+                      Variant
+                    </a>
+
+                    <% if (p.status) { %>
+                      <form action="/admin/products/unlist/<%= p._id %>" method="POST">
+                        <button class="w-full bg-yellow-400 text-black text-xs py-1 rounded">
+                          Unlist
+                        </button>
+                      </form>
+                    <% } else { %>
+                      <form action="/admin/products/list/<%= p._id %>" method="POST">
+                        <button class="w-full bg-green-500 text-white text-xs py-1 rounded">
+                          List
+                        </button>
+                      </form>
+                    <% } %>
+
+                  </div>
+                </td>
+
+              </tr>
+              <% }) %>
+
+            <% } else { %>
+
+              <tr>
+                <td colspan="8" class="text-center py-10 text-gray-400">
+                  No products found
+                </td>
+              </tr>
+
+            <% } %>
+          </tbody>
+
+        </table>
       </div>
     </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
+
+    <!-- PAGINATION -->
+    <div class="flex justify-center items-center gap-4 mt-6">
+
+      <% if (hasPrevPage) { %>
+        <a href="?page=<%= prevPage %>" class="btn-primary">Prev</a>
+      <% } %>
+
+      <span class="text-sm font-semibold">
+        Page <%= currentPage %> of <%= totalPages %>
+      </span>
+
+      <% if (hasNextPage) { %>
+        <a href="?page=<%= nextPage %>" class="btn-primary">Next</a>
+      <% } %>
+
+    </div>
+
+  </div>
+</div>
+</body>
 </html>

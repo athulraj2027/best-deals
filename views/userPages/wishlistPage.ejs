@@ -33,7 +33,7 @@
               <div>
                 <h2 class="text-lg font-semibold text-gray-800"><%= item.name %></h2>
                 <p class="text-gray-500 mt-1 text-sm">Color: <%= item.color %> | Size: <%= item.size %></p>
-                <p class="text-green-600 font-bold mt-2 text-lg">$<%= item.price.toFixed(2) %></p>
+                <p class="text-green-600 font-bold mt-2 text-lg">₹<%= item.price.toFixed(2) %></p>
               </div>
 
               <!-- Actions -->
@@ -91,7 +91,7 @@
               <div class="flex justify-between text-gray-600">
                 <span>Total Value</span>
                 <span id="wishlist-total-value" class="font-medium">
-                  $<%= wishlist.getTotalValue ? wishlist.getTotalValue().toFixed(2) : wishlist.items.reduce((sum, item) => sum + item.price, 0).toFixed(2) %>
+                  ₹<%= wishlist.getTotalValue ? wishlist.getTotalValue().toFixed(2) : wishlist.items.reduce((sum, item) => sum + item.price, 0).toFixed(2) %>
                 </span>
               </div>
 

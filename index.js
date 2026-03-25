@@ -1,10 +1,9 @@
 const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
+require("dotenv").config();
 require('./jobs/updateProductOffers');
 const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 3000;
-const razorpay = require('razorpay')
 
 // --- Local imports --- 
 
@@ -37,13 +36,21 @@ app.use(authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/", userRoutes);
 
-// app.use((req, res, next) => {
-//   res.status(404).send("Page not found");
-// });
+// 404 handler
+app.use((req, res, next) => {
+  res.status(404).render("errorPage", {
+    error: "404 - Page Not Found",
+    message: "The page you are looking for does not exist.",
+  });
+});
 
+// Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).send("Something broke!");
+  res.status(500).render("serverError", {
+    error: err.message || "Internal Server Error",
+    stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+  });
 });
 
 app.listen(PORT, () => console.log("Server is connected"));

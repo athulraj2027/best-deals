@@ -57,6 +57,8 @@ exports.getHomePage = async (req, res) => {
     });
   } catch (err) {
     console.log("Error in loading home page: ", err);
-    return res.status(statusCodes.SERVER_ERROR).render("error");
+    return res.status(statusCodes.SERVER_ERROR).render("serverError", {
+      error: err.message || "Failed to load home page",
+    });
   }
 };

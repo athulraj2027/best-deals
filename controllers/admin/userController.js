@@ -120,6 +120,100 @@ exports.unblockCustomer = async (req, res) => {
   }
 };
 
+exports.updateWallet = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { amount, type, description } = req.body; // type: 'credit' or 'debit'
+
+    if (!amount || !type) {
+      return res.status(400).json({
+        status: "error",
+        message: "Amount and type are required",
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    const amountNum = parseFloat(amount);
+    if (isNaN(amountNum) || amountNum <= 0) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid amount",
+      });
+    }
+
+    if (type === "credit") {
+      user.wallet += amountNum;
+    } else if (type === "debit") {
+      if (user.wallet < amountNum) {
+        return res.status(400).json({
+          status: "error",
+          message: "Insufficient wallet balance",
+        });
+      }
+      user.wallet -= amountNum;
+    } else {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid type. Use 'credit' or 'debit'",
+      });
+    }
+
+    user.walletTransactions.push({
+      type: type,
+      amount: amountNum,
+      description: description || `Admin ${type === "credit" ? "added" : "deducted"} wallet balance`,
+      date: new Date(),
+    });
+
+    await user.save();
+
+    return res.status(200).json({
+      status: "success",
+      message: `Wallet ${type === "credit" ? "credited" : "debited"} successfully`,
+      newBalance: user.wallet,
+    });
+  } catch (err) {
+    console.error("Error updating wallet:", err);
+    return res.status(500).json({
+      status: "error",
+      message: "Server error",
+    });
+  }
+};
+
+exports.getWalletTransactions = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findById(userId).select("wallet walletTransactions");
+
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      wallet: user.wallet,
+      transactions: user.walletTransactions || [],
+    });
+  } catch (err) {
+    console.error("Error fetching wallet transactions:", err);
+    return res.status(500).json({
+      status: "error",
+      message: "Server error",
+    });
+  }
+};
+
 // exports.unlistCustomer = async (req, res) => {
 //   try {
 //     const customerId = req.params.customerId;
