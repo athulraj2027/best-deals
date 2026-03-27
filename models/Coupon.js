@@ -21,11 +21,13 @@ const couponSchema = new Schema(
         ref: "Category",
       },
     ],
-    appliedProducts:[{
-      type: mongoose.Schema.Types.ObjectId,
-      required: false,
-      ref: "Product"
-    }],
+    appliedProducts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        required: false,
+        ref: "Product",
+      },
+    ],
     discountType: {
       type: String,
       enum: ["percentage", "fixed"],
@@ -61,16 +63,8 @@ const couponSchema = new Schema(
       type: Number,
       default: 0,
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now,
-    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Virtual property to determine coupon status

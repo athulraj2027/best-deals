@@ -912,9 +912,28 @@
         },
         prefill: { name: '', email: '', contact: '' },
         theme:   { color: '#2563eb' },
-        modal: {
-          ondismiss: () => Swal.fire({ icon: 'info', title: 'Payment Cancelled', text: 'You can retry or choose another method.' })
-        }
+      modal: {
+  ondismiss: function () {
+    Swal.fire({
+      icon: "warning",
+      title: "Payment Cancelled",
+      text: "Your payment was not completed.",
+      showCancelButton: true,
+      confirmButtonText: "Retry Payment",
+      cancelButtonText: "Go to Cart",
+      confirmButtonColor: "#f57c00",
+      cancelButtonColor: "#6b7280"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // 🔁 Retry → reload checkout/payment
+        window.location.href = `/checkout/<%= cart._id %>`;
+      } else {
+        // 🛒 Go back to cart
+        window.location.href = "/cart";
+      }
+    });
+  }
+}
       };
 
       const rz = new Razorpay(options);

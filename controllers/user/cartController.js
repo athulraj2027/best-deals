@@ -5,6 +5,52 @@ const {
   determineBestOffer,
 } = require("../../services/offers/determineBestOffer");
 
+async function validateCart(cart) {
+  let validItems = [];
+  let removedItems = [];
+  let subtotal = 0;
+
+  for (let item of cart.items) {
+    const product = await Product.findById(item.productId).populate("category");
+
+    if (!product || !product.status) {
+      removedItems.push(item.name);
+      continue;
+    }
+
+    if (!product.category || product.category.status !== "listed") {
+      removedItems.push(item.name + " (category unavailable)");
+      continue;
+    }
+
+    const variant = product.variants.id(item.variantId);
+
+    if (!variant || variant.quantity <= 0) {
+      removedItems.push(item.name);
+      continue;
+    }
+
+    if (item.quantity > variant.quantity) {
+      item.quantity = variant.quantity;
+    }
+
+    const bestOffer = await determineBestOffer(product, variant.price);
+
+    item.price = bestOffer ? bestOffer.discounted_price : variant.price;
+
+    subtotal += item.price * item.quantity;
+
+    validItems.push(item);
+  }
+
+  cart.items = validItems;
+  cart.subtotal = subtotal;
+  cart.tax = Number((subtotal * 0.1).toFixed(2));
+  cart.total = Number((cart.subtotal + cart.tax).toFixed(2));
+
+  return { cart, removedItems };
+}
+
 exports.getCartPage = async (req, res) => {
   const userId = req.session.userId;
 
@@ -17,26 +63,38 @@ exports.getCartPage = async (req, res) => {
 
     if (!cart) {
       cart = { userId, items: [] };
-      return res.render("userPages/cartPage", { cart });
+      return res.render("userPages/cartPage", { cart, removedItems: [] });
     }
 
-    let subtotal = 0; // ✅ missing
+    let subtotal = 0;
+    let validItems = [];
+    let removedItems = [];
 
     for (let item of cart.items) {
       const product = await Product.findById(item.productId).populate(
         "category",
       );
 
-      if (!product) continue;
+      if (!product || !product.status) {
+        removedItems.push(item.name);
+        continue;
+      }
 
+      // ❌ category unlisted
+      if (!product.category || product.category.status !== "listed") {
+        removedItems.push(item.name + " (category unavailable)");
+        continue;
+      }
       const variant = product.variants.id(item.variantId);
-      if (!variant) continue;
+
+      if (!variant || variant.quantity <= 0) {
+        removedItems.push(item.name);
+        continue;
+      }
 
       const bestOffer = await determineBestOffer(product, variant.price);
-      console.log("best offers reeived ; ", bestOffer);
 
       let finalPrice = variant.price;
-
       if (bestOffer) {
         finalPrice = bestOffer.discounted_price;
       }
@@ -45,21 +103,26 @@ exports.getCartPage = async (req, res) => {
       item.offer = bestOffer ? bestOffer.name : null;
 
       subtotal += finalPrice * item.quantity;
+
+      validItems.push(item);
     }
 
-    // ✅ calculate totals
+    cart.items = validItems;
+
     cart.subtotal = Number(subtotal.toFixed(2));
     cart.tax = Number((cart.subtotal * 0.1).toFixed(2));
     cart.total = Number((cart.subtotal + cart.tax).toFixed(2));
 
     await cart.save();
 
-    return res.render("userPages/cartPage", { cart });
+    return res.render("userPages/cartPage", {
+      cart,
+      removedItems,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({
       status: "error",
-      title: "Error",
       message: "Something went wrong",
     });
   }
@@ -99,12 +162,20 @@ exports.updateQuantityController = async (req, res) => {
       });
     }
 
-    const variant = product.variants.id(variantId);
-    if (!variant) {
+    if (!product.category || product.category.status !== "listed") {
       return res.status(400).json({
         status: "error",
         title: "Error",
-        message: "Variant not found",
+        message: "Category unavailable",
+      });
+    }
+
+    const variant = product.variants.id(variantId);
+    if (!variant || variant.quantity <= 0) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Out of stock",
       });
     }
 
@@ -142,7 +213,7 @@ exports.updateQuantityController = async (req, res) => {
     let newQuantity;
 
     if (action === "increase") {
-      newQuantity = Math.min(cartItem.quantity + 1, 5);
+      newQuantity = Math.max(1, Math.min(parseInt(quantity), variant.quantity));
     } else if (action === "decrease") {
       newQuantity = Math.max(cartItem.quantity - 1, 1);
     } else {

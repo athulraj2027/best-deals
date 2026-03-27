@@ -34,38 +34,89 @@ async function generateRazorpay(orderId, total) {
 
 exports.getCheckoutPage = async (req, res) => {
   try {
-    // console.log(req.params.id);
     const cartId = req.params.id;
+
     if (!cartId) {
       return res.status(400).json({
         status: "error",
-        title: "Error",
         message: "Cart Id not found",
       });
     }
 
-    const cart = await Cart.findOne({ _id: cartId }).populate(
-      "items.productId",
-    );
+    const cart = await Cart.findById(cartId).populate("items.productId");
+
     if (!cart) {
       return res.status(400).json({
         status: "error",
-        title: "Error",
         message: "No cart found",
       });
     }
 
-    const items = cart.items;
-    const productIds = cart.items.map((item) => item.productId._id);
-    const categoryIds = cart.items.map((item) => {
-      return item.productId.category || item.productId.categoryId;
-    });
+    let validItems = [];
+    let removedItems = [];
+    let subtotal = 0;
 
-    // const cartTotal = cart.items.reduce((total, item) => {
-    //   return total + item.price * item.quantity;
-    // }, 0);
+    for (let item of cart.items) {
+      const product = item.productId;
+
+      // ❌ product deleted or unlisted
+      if (!product || !product.status) {
+        removedItems.push(item.name);
+        continue;
+      }
+
+      // ❌ category unlisted
+      if (!product.category || product.category.status !== "listed") {
+        removedItems.push(item.name + " (category unavailable)");
+        continue;
+      }
+      
+      const variant = product.variants.id(item.variantId);
+
+      // ❌ variant missing or out of stock
+      if (!variant || variant.quantity <= 0) {
+        removedItems.push(item.name);
+        continue;
+      }
+
+      // ❌ quantity exceeds stock
+      if (item.quantity > variant.quantity) {
+        item.quantity = variant.quantity; // auto fix
+      }
+
+      // ✅ recalc price
+      const bestOffer = await determineBestOffer(product, variant.price);
+
+      let finalPrice = variant.price;
+      if (bestOffer) {
+        finalPrice = bestOffer.discounted_price;
+      }
+
+      item.price = finalPrice;
+
+      subtotal += finalPrice * item.quantity;
+      validItems.push(item);
+    }
+
+    // ✅ update cart
+    cart.items = validItems;
+    cart.subtotal = subtotal;
+    cart.tax = subtotal * 0.1;
+    cart.total = cart.subtotal + cart.tax;
+
+    await cart.save();
+
+    // ❌ If cart becomes empty → redirect
+    if (cart.items.length === 0) {
+      return res.redirect("/cart");
+    }
+
+    // ✅ Coupon logic (unchanged)
+    const productIds = cart.items.map((item) => item.productId._id);
+    const categoryIds = cart.items.map((item) => item.productId.category);
 
     const currentDate = new Date();
+
     const validCoupons = await Coupon.find({
       active: true,
       startDate: { $lte: currentDate },
@@ -77,35 +128,23 @@ exports.getCheckoutPage = async (req, res) => {
       ],
     }).lean();
 
-    console.log("valid coupons", validCoupons);
-
     const addresses = await Address.find({ userId: req.session.userId });
-    if (!addresses) {
-      return res.status(400).json({
-        status: "error",
-        title: "Error",
-        message: "Couldn't fetch addresses",
-      });
-    }
-
     const user = await User.findById(req.session.userId);
-    const walletBalance = user.wallet;
-    const razorpayKey = process.env.RAZORPAY_KEY_ID;
 
-    return res.status(200).render("userPages/checkoutPage", {
+    return res.render("userPages/checkoutPage", {
       cart,
+      items: cart.items,
       addresses,
-      items,
       coupons: validCoupons,
-      walletBalance,
-      razorpayKey,
+      walletBalance: user.wallet,
+      razorpayKey: process.env.RAZORPAY_KEY_ID,
+      removedItems, // ✅ important for UI
       newTotal: cart.total,
     });
   } catch (err) {
     console.error(err);
     return res.status(500).json({
       status: "error",
-      title: "Error",
       message: "Server error",
     });
   }

@@ -117,30 +117,83 @@
 
       <!-- STATUS -->
       <form action="/admin/offers" method="GET">
-        <select name="status"
-          onchange="this.form.submit()"
-          class="px-3 py-2 rounded-lg border text-sm">
-          <option value="">All Status</option>
-          <option value="active" <%= selectedStatus==='active'?'selected':'' %>>Active</option>
-          <option value="expired" <%= selectedStatus==='expired'?'selected':'' %>>Expired</option>
-          <option value="upcoming" <%= selectedStatus==='upcoming'?'selected':'' %>>Upcoming</option>
-          <option value="inactive" <%= selectedStatus==='inactive'?'selected':'' %>>Inactive</option>
-        </select>
-      </form>
+  <!-- preserve other filters -->
+  <input type="hidden" name="sort" value="<%= selectedSort || '' %>">
+  <input type="hidden" name="query" value="<%= query || '' %>">
+
+  <select 
+    name="status"
+    onchange="this.form.submit()"
+    class="px-3 py-2 rounded-lg border text-sm"
+  >
+    <option value="" <%= !selectedStatus ? "selected" : "" %>>
+      All Status
+    </option>
+
+    <option value="active" 
+      <%= selectedStatus === "active" ? "selected" : "" %>>
+      Active
+    </option>
+
+    <option value="expired" 
+      <%= selectedStatus === "expired" ? "selected" : "" %>>
+      Expired
+    </option>
+
+    <option value="upcoming" 
+      <%= selectedStatus === "upcoming" ? "selected" : "" %>>
+      Upcoming
+    </option>
+
+    <option value="inactive" 
+      <%= selectedStatus === "inactive" ? "selected" : "" %>>
+      Inactive
+    </option>
+  </select>
+</form>
 
       <!-- SORT -->
       <form action="/admin/offers" method="GET">
-        <select name="sort"
-          onchange="this.form.submit()"
-          class="px-3 py-2 rounded-lg border text-sm">
-          <option value="creation_desc">Newest</option>
-          <option value="creation_asc">Oldest</option>
-          <option value="expiry_asc">Expiry ↑</option>
-          <option value="expiry_desc">Expiry ↓</option>
-          <option value="discount_high">Discount High → Low</option>
-          <option value="discount_low">Discount Low → High</option>
-        </select>
-      </form>
+  <!-- preserve other filters -->
+  <input type="hidden" name="status" value="<%= selectedStatus || '' %>">
+  <input type="hidden" name="query" value="<%= query || '' %>">
+
+  <select 
+    name="sort"
+    onchange="this.form.submit()"
+    class="px-3 py-2 rounded-lg border text-sm"
+  >
+    <option value="creation_desc" 
+      <%= !selectedSort || selectedSort === "creation_desc" ? "selected" : "" %>>
+      Newest
+    </option>
+
+    <option value="creation_asc" 
+      <%= selectedSort === "creation_asc" ? "selected" : "" %>>
+      Oldest
+    </option>
+
+    <option value="expiry_asc" 
+      <%= selectedSort === "expiry_asc" ? "selected" : "" %>>
+      Expiry ↑
+    </option>
+
+    <option value="expiry_desc" 
+      <%= selectedSort === "expiry_desc" ? "selected" : "" %>>
+      Expiry ↓
+    </option>
+
+    <option value="discount_high" 
+      <%= selectedSort === "discount_high" ? "selected" : "" %>>
+      Discount High → Low
+    </option>
+
+    <option value="discount_low" 
+      <%= selectedSort === "discount_low" ? "selected" : "" %>>
+      Discount Low → High
+    </option>
+  </select>
+</form>
 
     </div>
 

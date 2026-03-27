@@ -34,14 +34,6 @@ const userSchema = new mongoose.Schema(
     address: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Address", required: true },
     ],
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now,
-    },
     isActive: {
       type: Boolean,
       default: false,
@@ -63,7 +55,7 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 function generateReferralCode() {

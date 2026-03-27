@@ -561,3 +561,11 @@ exports.getOrdersData = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch orders data" });
   }
 };
+
+exports.getSalesReportPage = async (req, res) => {
+  try {
+    res.render("adminPages/salesReport")
+  } catch (error) {
+    
+  }
+};

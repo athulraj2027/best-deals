@@ -122,10 +122,8 @@ exports.addOfferController = async (req, res) => {
       description,
       offerType,
       offerValue,
-
       startDate,
       expiryDate,
-      //   usageLimit,
       active,
       appliedProducts,
       appliedCategories,

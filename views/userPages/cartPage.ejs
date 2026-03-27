@@ -206,7 +206,6 @@ function updateCartSummary() {
   $("#tax").text(tax.toFixed(2));
   $("#grand-total").text(total.toFixed(2));
 }
-
 $(".quantity-btn").click(function () {
 
   const form = $(this).closest(".quantity-form");
@@ -214,33 +213,93 @@ $(".quantity-btn").click(function () {
   const item = $("#item-" + id);
   const action = $(this).data("action");
   const input = form.find(".quantity-input");
+
   const productId = form.data("product-id");
-const variantId = form.data("variant-id");
+  const variantId = form.data("variant-id");
 
+  let oldQty = parseInt(input.val());
+  let newQty = oldQty;
 
-  let qty = parseInt(input.val());
-
-  if (action === "increase" && qty < 5) qty++
-  else if (action === "decrease" && qty > 1) qty--;
-  else {
-      Swal.fire({
-          title: "Max quantity reached",
-          text: "You can only select quantity between 1 and 5",
-          icon: "warning",
-          confirmButtonColor: "#dc2626",
-          confirmButtonText: "Ok",
-        })
+  // 🚨 LIMIT CHECK
+  if (action === "increase" && oldQty >= 5) {
+    Swal.fire({
+      icon: "warning",
+      title: "Max limit reached",
+      text: "Only 5 items allowed"
+    });
+    return;
   }
 
-  input.val(qty);
+  if (action === "decrease" && oldQty <= 1) {
+    Swal.fire({
+      icon: "warning",
+      title: "Minimum limit",
+      text: "Quantity cannot be less than 1"
+    });
+    return;
+  }
 
+  // calculate new qty
+  if (action === "increase") newQty++;
+  else newQty--;
+
+  // ✅ OPTIMISTIC UI UPDATE
+  input.val(newQty);
   updateItemTotal(item);
   updateCartSummary();
 
-  $.post(`/cart/quantity-update/${id}`,
-    { quantity: qty ,productId,variantId,action});
-});
+  // 🚀 API CALL
+  $.post(`/cart/quantity-update/${id}`, {
+    quantity: newQty,
+    productId,
+    variantId,
+    action
+  })
 
+  .done(function (res) {
+
+    if (!res.success) {
+      // ❌ rollback if backend rejects
+      input.val(oldQty);
+      updateItemTotal(item);
+      updateCartSummary();
+
+      Swal.fire({
+        icon: "warning",
+        title: res.message || "Update failed"
+      });
+    } else {
+      // ✅ success toast (clean UX)
+      Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "success",
+        title: res.message || "Updated",
+        showConfirmButton: false,
+        timer: 1200
+      });
+    }
+
+  })
+
+  .fail(function (xhr) {
+
+    // ❌ rollback on error
+    input.val(oldQty);
+    updateItemTotal(item);
+    updateCartSummary();
+
+    let message = xhr.responseJSON?.message || "Server error";
+
+    Swal.fire({
+      icon: "error",
+      title: "Update Failed",
+      text: message
+    });
+
+  });
+
+});
 $(".delete-item-btn").click(function () {
   const id = $(this).data("item-id");
   const productId = $(this).data("product-id");

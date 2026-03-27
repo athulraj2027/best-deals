@@ -112,21 +112,40 @@
     </form>
 
     <!-- FILTER BAR -->
-    <div class="card p-4 mb-5 flex flex-wrap gap-3">
+   <div class="card p-4 mb-5 flex flex-wrap gap-3">
 
-      <!-- Sort -->
-      <form action="/admin/customers" method="GET">
-        <select name="sort"
-          onchange="this.form.submit()"
-          class="px-3 py-2 rounded-lg border text-sm">
-          <option value="desc">Newest</option>
-          <option value="asc">Oldest</option>
-          <option value="name_asc">Name A-Z</option>
-          <option value="name_desc">Name Z-A</option>
-        </select>
-      </form>
+  <form action="/admin/customers" method="GET">
+    <!-- preserve search -->
+    <input type="hidden" name="query" value="<%= query || '' %>">
 
-    </div>
+    <select 
+      name="sort"
+      onchange="this.form.submit()"
+      class="px-3 py-2 rounded-lg border text-sm"
+    >
+      <option value="desc" 
+        <%= selectedSort === "desc" ? "selected" : "" %>>
+        Newest
+      </option>
+
+      <option value="asc" 
+        <%= selectedSort === "asc" ? "selected" : "" %>>
+        Oldest
+      </option>
+
+      <option value="name_asc" 
+        <%= selectedSort === "name_asc" ? "selected" : "" %>>
+        Name A-Z
+      </option>
+
+      <option value="name_desc" 
+        <%= selectedSort === "name_desc" ? "selected" : "" %>>
+        Name Z-A
+      </option>
+    </select>
+  </form>
+
+</div>
 
     <!-- TABLE -->
     <div class="card overflow-hidden">

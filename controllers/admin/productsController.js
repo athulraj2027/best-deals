@@ -43,7 +43,8 @@ const bufferToDataURI = (fileFormat, buffer) => {
 
 exports.getProductsPage = async (req, res) => {
   try {
-    const { category, sort } = req.query;
+    const { category, sort, query } = req.query;
+
     let filter = {};
     let sortOption = {};
 
@@ -53,10 +54,17 @@ exports.getProductsPage = async (req, res) => {
 
     const categories = await Category.find({ status: "listed" });
 
+    // ✅ Category filter
     if (category && category !== "all") {
       filter.category = category;
     }
 
+    // ✅ Search filter (using TEXT INDEX 🚀)
+    if (query && query.trim() !== "") {
+      filter.$text = { $search: query };
+    }
+
+    // ✅ Sorting
     switch (sort) {
       case "newest":
         sortOption = { createdAt: -1 };
@@ -70,15 +78,25 @@ exports.getProductsPage = async (req, res) => {
       case "price_low":
         sortOption = { actualPrice: 1 };
         break;
+      case "popular":
+        sortOption = { popularity: -1 };
+        break;
+      case "rating":
+        sortOption = { avgRating: -1 };
+        break;
+      default:
+        sortOption = { createdAt: -1 };
     }
 
+    // ✅ Fetch products
     let products = await Product.find(filter)
       .populate("category")
       .sort(sortOption)
       .skip(skip)
       .limit(limit);
 
-    const totalProducts = await Product.countDocuments();
+    // ❗ FIX: Apply filter here also
+    const totalProducts = await Product.countDocuments(filter);
     const totalPages = Math.ceil(totalProducts / limit);
 
     return res
@@ -88,6 +106,7 @@ exports.getProductsPage = async (req, res) => {
         categories,
         selectedCategory: category,
         selectedSort: sort,
+        query, // ✅ send back to UI
         currentPage: page,
         totalPages,
         hasNextPage: page < totalPages,
@@ -160,7 +179,7 @@ async function processImage(file) {
 async function saveImage(buffer, variantIndex, imageIndex) {
   if (!buffer) {
     console.log(
-      `Skipping invalid image for variant ${variantIndex}, image ${imageIndex}`
+      `Skipping invalid image for variant ${variantIndex}, image ${imageIndex}`,
     );
     return null;
   }
@@ -169,7 +188,7 @@ async function saveImage(buffer, variantIndex, imageIndex) {
   const filePath = path.join(
     __dirname,
     "../../public/images/products/",
-    fileName
+    fileName,
   );
   console.log("filepath : ", filePath);
   await fs.writeFile(filePath, buffer);
@@ -219,7 +238,7 @@ exports.addProductController = async (req, res) => {
     for (let i = 0; i < parsedVariants.length; i++) {
       const variant = parsedVariants[i];
       const variantImages = req.files.filter(
-        (file) => file.fieldname === `variants[${i}][images][]`
+        (file) => file.fieldname === `variants[${i}][images][]`,
       );
 
       const processedImages = [];
@@ -285,7 +304,7 @@ exports.listProduct = async (req, res) => {
     const product = await Product.findByIdAndUpdate(
       id,
       { status: true },
-      { new: true }
+      { new: true },
     );
 
     if (!product) {
@@ -313,7 +332,7 @@ exports.unlistProduct = async (req, res) => {
     const product = await Product.findByIdAndUpdate(
       id,
       { status: false },
-      { new: true }
+      { new: true },
     );
 
     if (!product) {
@@ -420,7 +439,7 @@ exports.editProductController = async (req, res) => {
             if (
               !deletedImageSet.has(img.url) &&
               !processedVariant.images.some(
-                (existing) => existing.url === img.url
+                (existing) => existing.url === img.url,
               )
             ) {
               processedVariant.images.push(img);
@@ -447,13 +466,13 @@ exports.editProductController = async (req, res) => {
 
             // Find and remove the image being replaced at this position
             const replacedImageIndex = processedVariant.images.findIndex(
-              (img) => img.position === replacePosition
+              (img) => img.position === replacePosition,
             );
 
             if (replacedImageIndex !== -1) {
               // Delete the old image file
               await deleteImageFile(
-                processedVariant.images[replacedImageIndex].url
+                processedVariant.images[replacedImageIndex].url,
               );
               // Replace with new image
               processedVariant.images[replacedImageIndex] = {
@@ -476,7 +495,7 @@ exports.editProductController = async (req, res) => {
           .slice(0, 3);
 
         return processedVariant;
-      })
+      }),
     );
     // const productCategory = await Category.findOne({ category });
     // if (!productCategory) {
@@ -490,14 +509,14 @@ exports.editProductController = async (req, res) => {
     const updatedProduct = await Product.findByIdAndUpdate(
       productId,
       {
-        name:lowercaseName,
+        name: lowercaseName,
         brand,
         actualPrice,
-        category:category._id,
+        category: category._id,
         status: status === "true",
         variants: processedVariants,
       },
-      { new: true }
+      { new: true },
     );
 
     return res.status(200).json({

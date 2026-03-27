@@ -1,17 +1,27 @@
 const Category = require("../../models/Category");
 const statusCodes = require("../../services/statusCodes");
 
-// --- Get categories page ---
 exports.getCategoriesPage = async (req, res) => {
   try {
-    const { status, sort } = req.query;
+    const { status, sort, query } = req.query;
 
     let filter = {};
     let sortOption = {};
 
+    // ✅ Status filter
     if (status && status !== "") {
       filter.status = status;
     }
+
+    // ✅ Search query filter
+    if (query && query.trim() !== "") {
+      filter.$or = [
+        { name: { $regex: query, $options: "i" } }, // search in name
+        { tags: { $regex: query, $options: "i" } }, // search in tags array
+      ];
+    }
+
+    // ✅ Sorting
     switch (sort) {
       case "desc":
         sortOption = { createdAt: -1 };
@@ -20,21 +30,23 @@ exports.getCategoriesPage = async (req, res) => {
         sortOption = { createdAt: 1 };
         break;
     }
-    const limit = parseInt(req.query.limit) || 10; // Default limit 10
+
+    const limit = parseInt(req.query.limit) || 10;
     const currentPage = parseInt(req.query.page) || 1;
     const skip = (currentPage - 1) * limit;
 
-    const totalCategories = await Category.countDocuments();
+    // ❗ IMPORTANT: apply filter here also
+    const totalCategories = await Category.countDocuments(filter);
+
     const categories = await Category.find(filter)
       .sort(sortOption)
       .skip(skip)
       .limit(limit);
 
     const totalPages = Math.ceil(totalCategories / limit);
+
     const hasPrevPage = currentPage > 1;
     const hasNextPage = currentPage < totalPages;
-    const prevPage = currentPage - 1;
-    const nextPage = currentPage + 1;
 
     return res
       .status(statusCodes.SUCCESS)
@@ -44,19 +56,18 @@ exports.getCategoriesPage = async (req, res) => {
         totalPages,
         selectedStatus: status,
         selectedSort: sort,
+        query, // ✅ send back to UI
         limit,
         hasPrevPage,
         hasNextPage,
-        prevPage,
-        nextPage,
+        prevPage: currentPage - 1,
+        nextPage: currentPage + 1,
       });
   } catch (err) {
     console.error("Category page get method error : ", err);
     return res.status(statusCodes.SERVER_ERROR);
   }
 };
-
-//--- Get add category page ---
 
 exports.getAddCategoriesPage = (req, res) => {
   try {
@@ -68,8 +79,6 @@ exports.getAddCategoriesPage = (req, res) => {
     return res.status(statusCodes.SERVER_ERROR);
   }
 };
-
-// --- Get edit category page ---
 
 exports.getEditCategoryPage = async (req, res) => {
   try {
@@ -83,8 +92,6 @@ exports.getEditCategoryPage = async (req, res) => {
     return res.status(statusCodes.SERVER_ERROR);
   }
 };
-
-// --- Add category controller ---
 
 exports.addCategoryController = async (req, res) => {
   console.log("Category controller working");
@@ -147,7 +154,7 @@ exports.unlistCategory = async (req, res) => {
     const category = await Category.findByIdAndUpdate(
       id,
       { status: "unlisted" },
-      { new: true }
+      { new: true },
     );
 
     if (!category) {
@@ -173,7 +180,7 @@ exports.listCategory = async (req, res) => {
     const category = await Category.findByIdAndUpdate(
       id,
       { status: "listed" },
-      { new: true }
+      { new: true },
     );
 
     if (!category) {

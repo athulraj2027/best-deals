@@ -38,86 +38,89 @@ const OrderItemSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-const orderSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
-  orderId: { type: String, unique: true, required: true },
-  status: {
-    type: String,
-    enum: [
-      "pending",
-      "processing",
-      "delivered",
-      "cancelled",
-      "paid",
-      "return requested",
-      "return accepted",
-      "returned",
-    ],
-    default: "pending",
-  },
-  grandTotal: {
-    type: Number,
-    required: true,
-    default: 0,
-  },
-  payment_status: {
-    type: String,
-    enum: ["pending", "paid", "refunded", "failed"],
-    default: "pending",
-  },
-  coupon: {
-    code: String,
-    discountAmount: Number,
-  },
-  paymentMethod: {
-    type: String,
-    required: true,
-  },
-  addressId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Address",
-    required: true,
-  },
-  orderDate: {
-    type: Date,
-    default: Date.now,
-  },
-  items: [OrderItemSchema],
-  razorpay: {
-    orderId: {
-      type: String,
-      // This stores the Razorpay order ID returned when creating an order
+const orderSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
-    paymentId: {
+    orderId: { type: String, unique: true, required: true },
+    status: {
       type: String,
-      // This stores the Razorpay payment ID after successful payment
+      enum: [
+        "pending",
+        "processing",
+        "delivered",
+        "cancelled",
+        "paid",
+        "return requested",
+        "return accepted",
+        "returned",
+      ],
+      default: "pending",
     },
-    signature: {
-      type: String,
-      // This stores the Razorpay signature for payment verification
-    },
-    amount: {
+    grandTotal: {
       type: Number,
-      // Amount in smallest currency unit (e.g., paise for INR, cents for USD)
+      required: true,
+      default: 0,
     },
-    currency: {
+    payment_status: {
       type: String,
-      default: "INR",
+      enum: ["pending", "paid", "refunded", "failed"],
+      default: "pending",
     },
-    receipt: {
+    coupon: {
+      code: String,
+      discountAmount: Number,
+    },
+    paymentMethod: {
       type: String,
-      // Optional: Razorpay receipt ID (could be your internal order ID)
+      required: true,
     },
-    paymentDate: {
+    addressId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Address",
+      required: true,
+    },
+    orderDate: {
       type: Date,
+      default: Date.now,
     },
+    items: [OrderItemSchema],
+    razorpay: {
+      orderId: {
+        type: String,
+        // This stores the Razorpay order ID returned when creating an order
+      },
+      paymentId: {
+        type: String,
+        // This stores the Razorpay payment ID after successful payment
+      },
+      signature: {
+        type: String,
+        // This stores the Razorpay signature for payment verification
+      },
+      amount: {
+        type: Number,
+        // Amount in smallest currency unit (e.g., paise for INR, cents for USD)
+      },
+      currency: {
+        type: String,
+        default: "INR",
+      },
+      receipt: {
+        type: String,
+        // Optional: Razorpay receipt ID (could be your internal order ID)
+      },
+      paymentDate: {
+        type: Date,
+      },
+    },
+    // originalPrice: { type: Number, required: true },
+    tax: { type: Number, default: 0 },
   },
-  // originalPrice: { type: Number, required: true },
-  tax: { type: Number, default: 0 },
-});
+  { timestamps: true },
+);
 
 module.exports = mongoose.model("Order", orderSchema);
