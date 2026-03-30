@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const mongoose = require("mongoose");
 const User = require("../../models/User");
 const Cart = require("../../models/Cart");
 const Address = require("../../models/Address");
@@ -7,30 +8,31 @@ const Product = require("../../models/Product");
 const Coupon = require("../../models/Coupon");
 const Razorpay = require("razorpay");
 const Offer = require("../../models/Offer");
+const determineBestOffer = require("../../services/offers/determineBestOffer");
 const { calculateCartTotal } = require("../../services/pricingService");
 
-// helper function
-// return new Promise((resolve, reject) => {
-var instance = new Razorpay({
-  key_id: "rzp_test_tTcfsqC1bRVLSi",
-  key_secret: "GmoWj3uV9ZKKDB9T5hJwU6Sn",
-});
+// // helper function
+// // return new Promise((resolve, reject) => {
+// var instance = new Razorpay({
+//   key_id: "rzp_test_tTcfsqC1bRVLSi",
+//   key_secret: "GmoWj3uV9ZKKDB9T5hJwU6Sn",
 // });
-async function generateRazorpay(orderId, total) {
-  var options = {
-    amount: Math.round(parseFloat(total) * 100), // Razorpay expects amount in paise (multiply by 100)
-    currency: "INR",
-    receipt: orderId,
-  };
+// // });
+// async function generateRazorpay(orderId, total) {
+//   var options = {
+//     amount: Math.round(parseFloat(total) * 100), // Razorpay expects amount in paise (multiply by 100)
+//     currency: "INR",
+//     receipt: orderId,
+//   };
 
-  try {
-    const order = await instance.orders.create(options);
-    return order.id; // Return Razorpay order ID
-  } catch (error) {
-    console.error(error);
-    throw new Error("Failed to create Razorpay order");
-  }
-}
+//   try {
+//     const order = await instance.orders.create(options);
+//     return order.id; // Return Razorpay order ID
+//   } catch (error) {
+//     console.error(error);
+//     throw new Error("Failed to create Razorpay order");
+//   }
+// }
 
 exports.getCheckoutPage = async (req, res) => {
   try {
@@ -43,7 +45,10 @@ exports.getCheckoutPage = async (req, res) => {
       });
     }
 
-    const cart = await Cart.findById(cartId).populate("items.productId");
+    const cart = await Cart.findById(cartId).populate({
+      path: "items.productId",
+      populate: { path: "category" },
+    });
 
     if (!cart) {
       return res.status(400).json({
@@ -59,32 +64,27 @@ exports.getCheckoutPage = async (req, res) => {
     for (let item of cart.items) {
       const product = item.productId;
 
-      // ❌ product deleted or unlisted
       if (!product || !product.status) {
         removedItems.push(item.name);
         continue;
       }
 
-      // ❌ category unlisted
       if (!product.category || product.category.status !== "listed") {
         removedItems.push(item.name + " (category unavailable)");
         continue;
       }
-      
+
       const variant = product.variants.id(item.variantId);
 
-      // ❌ variant missing or out of stock
       if (!variant || variant.quantity <= 0) {
         removedItems.push(item.name);
         continue;
       }
 
-      // ❌ quantity exceeds stock
       if (item.quantity > variant.quantity) {
         item.quantity = variant.quantity; // auto fix
       }
 
-      // ✅ recalc price
       const bestOffer = await determineBestOffer(product, variant.price);
 
       let finalPrice = variant.price;
@@ -98,7 +98,6 @@ exports.getCheckoutPage = async (req, res) => {
       validItems.push(item);
     }
 
-    // ✅ update cart
     cart.items = validItems;
     cart.subtotal = subtotal;
     cart.tax = subtotal * 0.1;
@@ -124,7 +123,12 @@ exports.getCheckoutPage = async (req, res) => {
       $or: [
         { appliedProducts: { $in: productIds } },
         { appliedCategories: { $in: categoryIds } },
-        { appliedProducts: { $size: 0 }, appliedCategories: { $size: 0 } },
+        {
+          $and: [
+            { appliedProducts: { $exists: true, $size: 0 } },
+            { appliedCategories: { $exists: true, $size: 0 } },
+          ],
+        },
       ],
     }).lean();
 
@@ -173,8 +177,27 @@ exports.checkoutController = async (req, res) => {
       const coupon = await Coupon.findOne({ code: couponCode });
 
       if (coupon) {
+        if (!coupon.active || coupon.expiryDate < new Date()) {
+          throw new Error("Coupon expired");
+        }
         cart.appliedCoupon = coupon._id;
         await cart.save();
+      }
+
+      if (cart.subtotal < coupon.minPurchase) {
+        return res.json({
+          success: false,
+          message: "Minimum purchase not met",
+        });
+      }
+    }
+
+    for (let item of cart.items) {
+      const product = item.productId;
+      const variant = product.variants.id(item.variantId);
+
+      if (!variant || variant.quantity < item.quantity) {
+        throw new Error(`${item.name} is out of stock`);
       }
     }
 
@@ -187,12 +210,7 @@ exports.checkoutController = async (req, res) => {
     );
 
     // Deduct wallet
-    if (pricing.walletDeduction > 0) {
-      user.wallet -= pricing.walletDeduction;
-      await user.save();
-    }
 
-    // Prepare order items
     const orderItems = pricing.items.map((item) => ({
       productId: item.cartItem.productId._id,
       variantId: item.cartItem.variantId,
@@ -227,6 +245,22 @@ exports.checkoutController = async (req, res) => {
       orderId,
     });
 
+    if (pricing.walletDeduction > 0) {
+      const session = await mongoose.startSession();
+      session.startTransaction();
+
+      try {
+        user.wallet -= pricing.walletDeduction;
+        await user.save({ session });
+
+        await order.save({ session });
+
+        await session.commitTransaction();
+      } catch (err) {
+        await session.abortTransaction();
+      }
+    }
+
     // Wallet-only payment
     if (pricing.finalTotal === 0) {
       order.payment_status = "paid";
@@ -234,10 +268,19 @@ exports.checkoutController = async (req, res) => {
 
     await order.save();
 
-    // Clear cart
-    cart.items = [];
-    cart.appliedCoupon = null;
-    await cart.save();
+    if (coupon) {
+      coupon.usageCount += 1;
+      await coupon.save();
+    }
+
+    if (paymentMethod === "cod" || pricing.finalTotal === 0) {
+      cart.items = [];
+      cart.appliedCoupon = null;
+      cart.discountAmount = 0;
+      cart.walletApplied = false;
+      cart.walletAmount = 0;
+      await cart.save();
+    }
 
     return res.json({
       status: "success",
@@ -266,6 +309,24 @@ exports.applyCouponController = async (req, res) => {
       .status(400)
       .json({ success: false, message: "Coupon not found" });
 
+  if (!coupon.active) {
+    return res.json({ success: false, message: "Coupon inactive" });
+  }
+
+  if (coupon.startDate > new Date()) {
+    return res.json({ success: false, message: "Coupon not started" });
+  }
+
+  if (cart.subtotal < coupon.minPurchase) {
+    return res.json({ success: false, message: "Minimum purchase not met" });
+  }
+  if (coupon.expiryDate < new Date()) {
+    return res.json({ success: false, message: "Coupon expired" });
+  }
+
+  if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit) {
+    return res.json({ success: false, message: "Coupon limit reached" });
+  }
   cart.appliedCoupon = coupon._id;
   await cart.save();
 
@@ -300,7 +361,15 @@ exports.removeCouponController = async (req, res) => {
     }
 
     // Restore original total
-    let newTotal = cart.originalTotal || cart.total;
+    const user = await User.findById(cart.userId);
+
+    const pricing = await calculateCartTotal(cart, user, false);
+
+    cart.appliedCoupon = undefined;
+    cart.discountAmount = 0;
+    cart.total = pricing.finalTotal;
+
+    await cart.save();
 
     // If wallet was applied, subtract wallet amount
     if (cart.walletApplied && cart.walletAmount > 0) {
@@ -364,7 +433,7 @@ exports.addDeliveryAddressController = async (req, res) => {
       });
     }
     if (!country) {
-      return res.status(400).jsosn({
+      return res.status(400).json({
         status: "error",
         title: "Error",
         message: "Add country",
@@ -441,6 +510,10 @@ exports.addDeliveryAddressController = async (req, res) => {
         message: "User not found or something wrong in adding address",
       });
     }
+
+    await User.findByIdAndUpdate(userId, {
+      $push: { address: newAddress._id },
+    });
 
     return res.status(200).json({
       status: "success",

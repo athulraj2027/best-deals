@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Category = require("../../models/Category");
 const statusCodes = require("../../services/statusCodes");
 
@@ -6,22 +7,16 @@ exports.getCategoriesPage = async (req, res) => {
     const { status, sort, query } = req.query;
 
     let filter = {};
-    let sortOption = {};
-
-    // ✅ Status filter
+    let sortOption = { createdAt: -1 }; // default latest first
     if (status && status !== "") {
       filter.status = status;
     }
-
-    // ✅ Search query filter
     if (query && query.trim() !== "") {
       filter.$or = [
         { name: { $regex: query, $options: "i" } }, // search in name
         { tags: { $regex: query, $options: "i" } }, // search in tags array
       ];
     }
-
-    // ✅ Sorting
     switch (sort) {
       case "desc":
         sortOption = { createdAt: -1 };
@@ -35,7 +30,6 @@ exports.getCategoriesPage = async (req, res) => {
     const currentPage = parseInt(req.query.page) || 1;
     const skip = (currentPage - 1) * limit;
 
-    // ❗ IMPORTANT: apply filter here also
     const totalCategories = await Category.countDocuments(filter);
 
     const categories = await Category.find(filter)
@@ -43,7 +37,7 @@ exports.getCategoriesPage = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    const totalPages = Math.ceil(totalCategories / limit);
+    const totalPages = Math.max(1, Math.ceil(totalCategories / limit));
 
     const hasPrevPage = currentPage > 1;
     const hasNextPage = currentPage < totalPages;
@@ -56,7 +50,7 @@ exports.getCategoriesPage = async (req, res) => {
         totalPages,
         selectedStatus: status,
         selectedSort: sort,
-        query, // ✅ send back to UI
+        query,
         limit,
         hasPrevPage,
         hasNextPage,
@@ -65,7 +59,7 @@ exports.getCategoriesPage = async (req, res) => {
       });
   } catch (err) {
     console.error("Category page get method error : ", err);
-    return res.status(statusCodes.SERVER_ERROR);
+    return res.status(statusCodes.SERVER_ERROR).send("Server Error");
   }
 };
 
@@ -83,13 +77,16 @@ exports.getAddCategoriesPage = (req, res) => {
 exports.getEditCategoryPage = async (req, res) => {
   try {
     const categoryId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+      return res.status(400).send("Invalid ID");
+    }
     const category = await Category.findOne({ _id: categoryId });
     return res.render("adminPages/CategoryPages/adminEditCategory", {
       category,
     });
   } catch (error) {
     console.error(error);
-    return res.status(statusCodes.SERVER_ERROR);
+    return res.status(statusCodes.SERVER_ERROR).send("Server Error");
   }
 };
 
@@ -98,6 +95,12 @@ exports.addCategoryController = async (req, res) => {
   const { categoryName, status } = req.body;
 
   const categoryImage = req.file;
+  if (!categoryImage) {
+    return res.status(400).json({
+      status: "error",
+      message: "Category image is required",
+    });
+  }
   try {
     const trimmedName = categoryName.trim();
     const isValidCategoryName = /^[a-zA-Z0-9 ]{3,}$/.test(trimmedName);
@@ -126,7 +129,6 @@ exports.addCategoryController = async (req, res) => {
     const newCategory = new Category({
       name: lowercaseName,
       status: mappedStatus,
-      categoryTags: typeof tags === "string" ? JSON.parse(tags) : [],
       imageUrl,
     });
 
@@ -138,6 +140,9 @@ exports.addCategoryController = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
+    if (err.code === 11000) {
+      return res.status(400).json({ message: "Category already exists" });
+    }
     return res.status(statusCodes.SERVER_ERROR).json({
       status: "error",
       title: "Error in adding product",
@@ -230,8 +235,18 @@ exports.editCategory = async (req, res) => {
 
     const lowercaseName = trimmedName.toLowerCase();
 
-    category.name = lowercaseName;
-    category.status = status;
+    const existing = await Category.findOne({
+      name: lowercaseName,
+      _id: { $ne: categoryId },
+    });
+
+    if (existing) {
+      return res.status(400).json({
+        message: "Category name already exists",
+      });
+    }
+    const mappedStatus = status === "on" ? "listed" : "unlisted";
+    category.status = mappedStatus;
     // category.tags = tags.split(','.map())
 
     if (req.file) {

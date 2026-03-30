@@ -18,7 +18,6 @@ const categorySchema = new mongoose.Schema(
       type: String,
       enum: ["listed", "unlisted"],
     },
-    tags: { type: Array, required: true },
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt fields

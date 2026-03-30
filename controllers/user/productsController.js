@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Product = require("../../models/Product");
 const User = require("../../models/User");
 const Cart = require("../../models/Cart");
@@ -12,7 +13,11 @@ exports.getProductViewPage = async (req, res) => {
       return res.status(statusCodes.BAD_REQUEST).redirect("/");
     }
 
-    if (!product.status || product.category.status !== "listed") {
+    if (
+      !product.status ||
+      !product.category ||
+      product.category.status !== "listed"
+    ) {
       return res.status(statusCodes.BAD_REQUEST).redirect("/");
     }
 
@@ -22,17 +27,13 @@ exports.getProductViewPage = async (req, res) => {
       active: true,
       status: "active",
       expiryDate: { $gte: now },
+      $or: [
+        { appliedProducts: product._id },
+        { appliedCategories: product.category._id },
+      ],
     });
+    const applicableOffers = offers;
 
-    // STEP 2: Find applicable offers (compare ObjectIds safely)
-    const applicableOffers = offers.filter((offer) => {
-      return (
-        offer.appliedProducts.some((id) => id.equals(product._id)) ||
-        offer.appliedCategories.some((id) => id.equals(product.category._id))
-      );
-    });
-
-    // STEP 3: Calculate best offer
     let bestOffer = null;
     let maxSavings = 0;
 
@@ -65,25 +66,30 @@ exports.getProductViewPage = async (req, res) => {
 
     // STEP 4: Attach discounted price to each variant for frontend
     const productObj = product.toObject();
-    productObj.best_offer = bestOffer;
     productObj.variants = productObj.variants.map((v) => {
-      let savings = 0;
-      let discountedPrice = v.price;
+      let best = null;
+      let maxSavings = 0;
 
-      if (bestOffer) {
-        if (bestOffer.discount_type === "percentage") {
-          savings = (v.price * bestOffer.discount_value) / 100;
-        } else {
-          savings = bestOffer.discount_value;
+      applicableOffers.forEach((offer) => {
+        let savings =
+          offer.offerType === "percentage"
+            ? (v.price * offer.offerValue) / 100
+            : Math.min(offer.offerValue, v.price);
+
+        if (savings > maxSavings) {
+          maxSavings = savings;
+          best = offer;
         }
-        discountedPrice = Math.max(v.price - savings, 0);
-      }
+      });
+
+      const discountedPrice = Math.max(v.price - maxSavings, 0);
 
       return { ...v, discountedPrice };
     });
     // STEP 5: Related products
     const relatedProducts = await Product.find({
       category: product.category._id,
+      status: true,
       _id: { $ne: product._id },
     }).limit(4);
 
@@ -117,6 +123,10 @@ exports.addtoWishlistController = async (req, res) => {
         message: "Error in request body of wishlist item",
       });
     }
+
+    if (!mongoose.Types.ObjectId.isValid(wishlistItem.variantId)) {
+      return res.status(400).json({ message: "Invalid variant" });
+    }
     let wishlist = await Wishlist.findOne({ user: userId });
     if (!wishlist) {
       wishlist = new Wishlist({ user: userId, items: [] });
@@ -130,20 +140,29 @@ exports.addtoWishlistController = async (req, res) => {
         message: "Product not found",
       });
     }
-    if (product.status === false || product.quantity < quantity) {
-      return res.status(400).json({
-        status: "error",
-        title: "Error",
-        message: "Product is unavailable",
-      });
+    if (!product.status) {
+      return res.json({ message: "Product unavailable" });
+    }
+    const variant = product.variants.id(wishlistItem.variantId);
+
+    if (!variant || variant.quantity <= 0) {
+      return res.json({ message: "Out of stock" });
     }
     const existingItem = wishlist.items.find(
       (item) => item.variantId.toString() === wishlistItem.variantId,
     );
     if (existingItem) {
-      existingItem.quantity += wishlistItem.quantity;
+      return res.json({ message: "Already in wishlist" });
     } else {
-      wishlist.items.push(wishlistItem);
+      wishlist.items.push({
+        productId: product._id,
+        variantId: variant._id,
+        name: product.name,
+        color: variant.color,
+        size: variant.size,
+        price: variant.price,
+        image: variant.images?.[0]?.url || "",
+      });
     }
 
     await wishlist.save();
@@ -151,7 +170,7 @@ exports.addtoWishlistController = async (req, res) => {
     return res.status(200).json({
       status: "success",
       title: "Success",
-      message: "Added to cart",
+      message: "Added to wishlist",
     });
   } catch (err) {
     console.error(err);
@@ -191,12 +210,10 @@ exports.addtoCartController = async (req, res) => {
         message: "Product not found",
       });
     }
-    if (product.status === false || product.quantity < cartItem.quantity) {
-      return res.status(400).json({
-        status: "error",
-        title: "Error",
-        message: "Product is unavailable",
-      });
+    const variant = product.variants.id(cartItem.variantId);
+
+    if (!variant || variant.quantity < cartItem.quantity) {
+      return res.json({ message: "Insufficient stock" });
     }
     let cart = await Cart.findOne({ userId });
     if (!cart) {
@@ -207,12 +224,20 @@ exports.addtoCartController = async (req, res) => {
     );
 
     if (existingItem) {
+      if (existingItem.quantity + cartItem.quantity > variant.quantity) {
+        return res.json({ message: "Stock exceeded" });
+      }
+
       existingItem.quantity += cartItem.quantity;
     } else {
-      cart.items.push(cartItem);
-    }
+      const price = variant.price;
 
-    cart.subtotal += cartItem.price;
+      cart.items.push({
+        ...cartItem,
+        price,
+      });
+    }
+    cart.subtotal += cartItem.price * cartItem.quantity;
     cart.tax += cartItem.price * 0.1;
     cart.total = cart.subtotal + cart.tax;
 
@@ -229,83 +254,6 @@ exports.addtoCartController = async (req, res) => {
       status: "error",
       title: "Error",
       message: "Something went wrong ",
-    });
-  }
-};
-
-exports.addToCart = async (req, res) => {
-  try {
-    // Extract cart item details from request body
-    const {
-      productId,
-      variantId,
-      name,
-      color,
-      size,
-      price,
-      quantity = 1,
-      image,
-    } = req.body;
-
-    // Check if user is authenticated (adjust based on your auth middleware)
-    if (!req.user) {
-      return res.status(401).json({
-        status: "error",
-        message: "User not authenticated",
-      });
-    }
-
-    // Find or create user's cart
-    let cart = await Cart.findOne({ userId: req.user._id, status: "active" });
-
-    if (!cart) {
-      cart = new Cart({ userId: req.user._id });
-    }
-
-    // Check if item already exists in cart
-    const existingItemIndex = cart.items.findIndex(
-      (item) =>
-        item.productId.toString() === productId &&
-        item.variantId.toString() === variantId,
-    );
-
-    if (existingItemIndex > -1) {
-      // Update quantity if item exists
-      cart.items[existingItemIndex].quantity += quantity;
-    } else {
-      // Add new item to cart
-      cart.items.push({
-        productId,
-        variantId,
-        name,
-        color,
-        size,
-        price,
-        quantity,
-        image,
-      });
-    }
-
-    // Save the cart
-    await cart.save();
-
-    // Recalculate totals (using pre-save middleware in the model)
-    // cart.calculateSubtotal();
-    cart.subtotal += price;
-    await cart.save();
-
-    res.status(200).json({
-      status: "success",
-      message: "Item added to cart",
-      // cartCount: cart.getItemCount(),
-      cart: cart,
-    });
-  } catch (error) {
-    console.error("Add to Cart Error:", error);
-    res.status(500).json({
-      status: "error",
-      message: "Failed to add item to cart",
-      error: error.message,
     });
   }
 };

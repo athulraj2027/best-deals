@@ -11,7 +11,13 @@ exports.getWishlistPage = async (req, res) => {
         message: "Please login to go to wishlist",
       });
     }
-    const wishlist = await Wishlist.findOne({ user: userId });
+    const wishlist = await Wishlist.findOne({ user: userId }).populate(
+      "items.productId",
+    );
+
+    if (!wishlist) {
+      wishlist = await Wishlist.create({ user: userId, items: [] });
+    }
     return res.status(200).render("userPages/wishlistPage", { wishlist });
   } catch (err) {
     console.error("Error in loading wishlist page : ", err);
@@ -34,7 +40,10 @@ exports.clearWishlistController = async (req, res) => {
       });
     }
 
-    const wishlist = await Wishlist.findOne({ _id: wishlistId });
+    const wishlist = await Wishlist.findOne({
+      _id: wishlistId,
+      user: req.session.userId,
+    });
     if (!wishlist) {
       return res.status(400).json({
         status: "error",
@@ -145,7 +154,7 @@ exports.addAllToCartController = async (req, res) => {
       });
     }
     const wishlist = await Wishlist.findOne({ user: req.session.userId });
-    console.log("Wishlist : ",wishlist)
+    console.log("Wishlist : ", wishlist);
     if (!wishlist) {
       return res.status(400).json({
         status: "error",
@@ -161,10 +170,18 @@ exports.addAllToCartController = async (req, res) => {
         message: "Cart  not found",
       });
     }
-    console.log(wishlist.items)
+    console.log(wishlist.items);
     wishlist.items.forEach((item) => {
-      cart.items.push(item);
-      
+      cart.items.push({
+        productId: item.productId,
+        variantId: item.variantId,
+        name: item.name,
+        color: item.color,
+        size: item.size,
+        price: item.price,
+        quantity: 1, // REQUIRED
+        image: item.image,
+      });
     });
     wishlist.items = [];
 

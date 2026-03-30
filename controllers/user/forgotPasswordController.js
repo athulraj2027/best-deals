@@ -25,13 +25,13 @@ exports.verifyEmailPageController = async (req, res) => {
     const existingUser = await User.findOne({ email });
 
     if (!existingUser) {
-      return res.status(statusCodes.NOT_FOUND).json({
-        title: "error",
-        message: "Invalid email address",
+      return res.status(200).json({
+        status: "success",
+        message: "If this email exists, OTP has been sent",
       });
     }
 
-    const otp = otpServices.generateOTP();
+    const otp = await otpServices.generateOTP();
     otpServices.saveOTP(email, otp);
     otpServices.sendOTP(email, otp);
 
@@ -148,9 +148,9 @@ exports.setNewPasswordController = async (req, res) => {
     const user = await User.findOne({ email }).select("_id");
     const userId = user ? user._id.toString() : null;
     await User.findByIdAndUpdate(
-      userId ,
+      userId,
       { $set: { password: hashedPassword } }, // Update password
-      { new: true }
+      { new: true },
     );
     console.log("New password set!!!!");
 

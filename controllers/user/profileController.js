@@ -222,7 +222,10 @@ exports.deleteAddressController = async (req, res) => {
       });
     }
 
-    const deleteAddress = await Address.findByIdAndDelete({ _id: addressId });
+    const deleteAddress = await Address.findOneAndDelete({
+      _id: addressId,
+      userId: req.session.userId,
+    });
     if (!deleteAddress) {
       return res.status(400).json({
         status: "error",
@@ -250,7 +253,10 @@ exports.getEditAddressPage = async (req, res) => {
   try {
     const addressId = req.params.id;
     const userId = req.session.userId;
-    const address = await Address.findById(addressId);
+    const address = await Address.findOne({
+      _id: addressId,
+      userId,
+    });
 
     const user = await User.findOne({ _id: userId });
     if (!user)
@@ -367,7 +373,7 @@ exports.editAddressController = async (req, res) => {
       });
     }
 
-    const updatedAddress = await Address.findByIdAndUpdate(
+    await Address.findByIdAndUpdate(
       addressId,
       {
         type,
@@ -379,15 +385,7 @@ exports.editAddressController = async (req, res) => {
       },
       { new: true },
     );
-    if (!updatedAddress) {
-      return res.status(400).json({
-        status: "error",
-        title: "Error",
-        message: "There is something wrong in the field data",
-      });
-    }
 
-    await updatedAddress.save();
     return res.status(200).json({
       status: "success",
       title: "Success",
@@ -402,7 +400,7 @@ exports.getOrdersPage = async (req, res) => {
   try {
     const userId = req.session.userId;
     const user = await User.findById(userId);
-    const orders = await Order.find({ userId });
+    const orders = await Order.find({ userId }).sort({ createdAt: -1 });
     if (!orders) {
       return res.status(400).json({
         status: "error",
@@ -444,13 +442,9 @@ exports.cancelOrderController = async (req, res) => {
       });
     }
 
-    // if (order.status === "delivered" || order.status === "cancelled") {
-    //   return res.status(400).json({
-    //     status: "error",
-    //     title: "error",
-    //     message: "Order cannot be cancelled",
-    //   });
-    // }
+    if (["delivered", "cancelled"].includes(order.status)) {
+      return res.status(400).json({ message: "Order cannot be cancelled" });
+    }
 
     const items = order.items;
     for (const item of items) {
@@ -587,7 +581,10 @@ exports.resetPasswordController = async (req, res) => {
       });
     }
 
-    const isPasswordValid = bcrypt.compare(currentPassword, user.password);
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password,
+    );
     if (!isPasswordValid) {
       return res.status(400).json({
         status: "error",
@@ -630,7 +627,7 @@ exports.returnOrderController = async (req, res) => {
     const cancelledOrder = await Order.findByIdAndUpdate(
       orderId,
       {
-        status: "return requested",
+        status: "return_requested",
       },
       { new: true },
     );
@@ -715,9 +712,15 @@ exports.cancelItemController = async (req, res) => {
     if (allItemsCancelled) {
       order.status = "cancelled";
     }
-
-    await order.save();
-
+    await Product.findOneAndUpdate(
+      {
+        _id: productId,
+        "variants._id": variantId,
+      },
+      {
+        $inc: { "variants.$.quantity": item.quantity },
+      },
+    );
     await order.save();
 
     res.json({
@@ -760,22 +763,22 @@ exports.returnItemController = async (req, res) => {
       });
     }
 
-    if (item.status !== "active" && item.status !== "delivered") {
+    if (item.status === "delivered") {
+      item.status = "return_requested";
+      item.returnReason = reason;
+
+      await order.save();
+
+      res.json({
+        status: "success",
+        message: "Return request submitted",
+      });
+    } else {
       return res.status(400).json({
         status: "failed",
         message: "Item cannot be returned",
       });
     }
-
-    item.status = "return_requested";
-    item.returnReason = reason;
-
-    await order.save();
-
-    res.json({
-      status: "success",
-      message: "Return request submitted",
-    });
   } catch (error) {
     console.error("Return item error:", error);
     res.status(500).json({

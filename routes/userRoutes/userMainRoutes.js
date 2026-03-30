@@ -110,7 +110,7 @@ router.get("/thank-you", userGuestMiddleware, async (req, res) => {
       tax: order.tax || 0,
       isDelivered: order.status === "delivered",
       isCancelled: order.status === "cancelled",
-      isReturning: ["return requested", "return accepted", "returned"].includes(
+      isReturning: ["return_requested", "return_accepted", "returned"].includes(
         order.status,
       ),
     };
@@ -443,6 +443,7 @@ router.post("/verify-payment", async (req, res) => {
     // Find order by Razorpay order ID
     const order = await Order.findOne({
       "razorpay.orderId": razorpay_order_id,
+      userId: req.session.userId,
     });
 
     if (!order) {
@@ -453,9 +454,9 @@ router.post("/verify-payment", async (req, res) => {
     }
 
     // Update order payment details
-    order.payment_status = "paid";
     order.grandTotal = order.razorpay.amount / 100;
-    order.status = "paid";
+    order.payment_status = "paid";
+    order.status = "processing";
     order.razorpay.paymentId = razorpay_payment_id;
     order.razorpay.signature = razorpay_signature;
 
@@ -480,9 +481,10 @@ router.post("/verify-payment", async (req, res) => {
 
     // Clear the cart
     if (cartId) {
-      await Cart.findByIdAndUpdate(cartId, {
-        $set: { items: [], subtotal: 0, tax: 0, shipping: 0, total: 0 },
-      });
+      await Cart.findOneAndUpdate(
+        { userId: order.userId },
+        { $set: { items: [], subtotal: 0, tax: 0, total: 0 } },
+      );
     }
     console.log("Verified order : ", order);
     return res.status(200).json({

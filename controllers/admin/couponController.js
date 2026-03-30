@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Coupon = require("../../models/Coupon");
 const Category = require("../../models/Category");
 const Product = require("../../models/Product");
@@ -126,7 +127,13 @@ exports.addCouponController = async (req, res) => {
       appliedCategories,
     } = req.body;
 
-    console.log(appliedProducts);
+    const cleanArray = (arr) => (Array.isArray(arr) ? arr.filter(Boolean) : []);
+
+    if (discountType === "percentage" && discountValue > 100) {
+      return res.status(400).json({
+        message: "Percentage cannot exceed 100",
+      });
+    }
     const existingCoupon = await Coupon.findOne({ code: code.toUpperCase() });
     if (existingCoupon) {
       return res.status(409).json({
@@ -140,18 +147,24 @@ exports.addCouponController = async (req, res) => {
     const parsedStartDate = startDate ? new Date(startDate) : currentDate;
     const parsedExpiryDate = new Date(expiryDate);
 
+    if (parsedStartDate >= parsedExpiryDate) {
+      return res.status(400).json({
+        message: "Expiry date must be after start date",
+      });
+    }
+
     const newCoupon = new Coupon({
       code: code.toUpperCase(),
       description,
-      appliedCategories,
-      appliedProducts,
+      appliedProducts: cleanArray(appliedProducts),
+      appliedCategories: cleanArray(appliedCategories),
       discountType,
       discountValue: Number(discountValue),
       minPurchase: minPurchase ? Number(minPurchase) : 0,
       startDate: parsedStartDate,
       expiryDate: parsedExpiryDate,
       usageLimit: usageLimit ? Number(usageLimit) : null,
-      active: active !== undefined ? active : true,
+      active: active === "true" || active === true,
     });
 
     await newCoupon.save();
@@ -173,6 +186,9 @@ exports.addCouponController = async (req, res) => {
 
 exports.getEditCouponPage = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).send("Invalid ID");
+    }
     const coupon = await Coupon.findOne({ _id: req.params.id });
     return res
       .status(200)
@@ -201,20 +217,37 @@ exports.editCouponController = async (req, res) => {
       usageLimit,
     } = req.body;
 
+    const existing = await Coupon.findOne({
+      code: code.toUpperCase(),
+      _id: { $ne: req.params.id },
+    });
+
+    if (existing) {
+      return res.status(409).json({
+        status: "error",
+        message: "Coupon code already exists",
+      });
+    }
+
+    if (parsedStartDate >= parsedExpiryDate) {
+      return res.status(400).json({
+        message: "Expiry date must be after start date",
+      });
+    }
     const editedCoupon = await Coupon.findByIdAndUpdate(
       req.params.id,
       {
-        code,
+        code: code.toUpperCase(),
         discountType,
         discountValue,
         minPurchase,
         description,
         startDate,
         expiryDate,
-        active,
+        active: active === "true" || active === true,
         usageLimit,
       },
-      { new: true }
+      { new: true },
     );
     if (!editedCoupon) {
       return res.status(404).json({
@@ -223,8 +256,6 @@ exports.editCouponController = async (req, res) => {
         message: "Coupon couldn't update",
       });
     }
-    await editedCoupon.save();
-
     return res.status(200).json({
       status: "success",
       title: "Success",
@@ -243,26 +274,13 @@ exports.editCouponController = async (req, res) => {
 exports.deActivateCouponController = async (req, res) => {
   try {
     console.log(req.params.id);
-    const deActivatedCoupon = await Coupon.findByIdAndUpdate(
+    await Coupon.findByIdAndUpdate(
       req.params.id,
       {
         active: false,
       },
-      { new: true }
+      { new: true },
     );
-    // if (!deActivatedCoupon) {
-    //   return res.status(400).json({
-    //     status: "error",
-    //     title: "Error",
-    //     message: "Couldn't deactivate Coupon",
-    //   });
-    // }
-
-    // return res.status(200).json({
-    //   status: "success",
-    //   message: "Coupon deactivated Successfully",
-    //   title: "Success",
-    // });
 
     return res.status(200).redirect("/admin/coupons");
   } catch (err) {
@@ -278,26 +296,13 @@ exports.deActivateCouponController = async (req, res) => {
 exports.activateCouponController = async (req, res) => {
   try {
     console.log(req.params.id);
-    const ActivatedCoupon = await Coupon.findByIdAndUpdate(
+    await Coupon.findByIdAndUpdate(
       req.params.id,
       {
         active: true,
       },
-      { new: true }
+      { new: true },
     );
-    // if (!ActivatedCoupon) {
-    //   return res.status(400).json({
-    //     status: "error",
-    //     title: "Error",
-    //     message: "Couldn't deactivate Coupon",
-    //   });
-    // }
-
-    // return res.status(200).json({
-    //   status: "success",
-    //   message: "Coupon Activated Successfully",
-    //   title: "Success",
-    // });
 
     return res.status(200).redirect("/admin/coupons");
   } catch (err) {

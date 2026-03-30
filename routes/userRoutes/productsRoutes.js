@@ -4,7 +4,6 @@ const productsController = require("../../controllers/user/productsController");
 
 router.route("/:id").get(productsController.getProductViewPage);
 router.route("/cart/add/:id").post(productsController.addtoCartController);
-router.route("/cart/add").post(productsController.addToCart);
 
 router
   .route("/wishlist/add/:id")

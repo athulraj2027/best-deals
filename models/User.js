@@ -31,9 +31,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       // required: true,
     },
-    address: [
-      { type: mongoose.Schema.Types.ObjectId, ref: "Address", required: true },
-    ],
+    address: [{ type: mongoose.Schema.Types.ObjectId, ref: "Address" }],
     isActive: {
       type: Boolean,
       default: false,

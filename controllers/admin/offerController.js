@@ -19,7 +19,7 @@ exports.getOffersPage = async (req, res) => {
 
     if (query) {
       filter.$or = [
-        { code: { $regex: query, $options: "i" } },
+        { name: { $regex: query, $options: "i" } },
         { description: { $regex: query, $options: "i" } },
       ];
     }
@@ -118,7 +118,7 @@ exports.addOfferController = async (req, res) => {
   console.log(req.body);
   try {
     const {
-      code,
+      code: name,
       description,
       offerType,
       offerValue,
@@ -130,7 +130,7 @@ exports.addOfferController = async (req, res) => {
     } = req.body;
 
     console.log(appliedProducts);
-    const existingOffer = await Offer.findOne({ name: code });
+    const existingOffer = await Offer.findOne({ name });
     if (existingOffer) {
       return res.status(409).json({
         status: "error",
@@ -141,22 +141,36 @@ exports.addOfferController = async (req, res) => {
 
     const currentDate = new Date();
     const parsedStartDate = startDate ? new Date(startDate) : currentDate;
+    if (!expiryDate || isNaN(new Date(expiryDate))) {
+      return res.status(400).json({ message: "Invalid expiry date" });
+    }
     const parsedExpiryDate = new Date(expiryDate);
 
+    if (parsedExpiryDate <= parsedStartDate) {
+      return res.status(400).json({
+        message: "Expiry date must be after start date",
+      });
+    }
+
+    if (isNaN(Number(offerValue))) {
+      return res.status(400).json({ message: "Invalid offer value" });
+    }
     const newOffer = new Offer({
-      name: code,
+      name,
       description,
-      appliedCategories,
-      appliedProducts,
+      appliedProducts: Array.isArray(appliedProducts) ? appliedProducts : [],
+      appliedCategories: Array.isArray(appliedCategories)
+        ? appliedCategories
+        : [],
       offerType,
       offerValue: Number(offerValue),
       startDate: parsedStartDate,
       expiryDate: parsedExpiryDate,
-
-      active: active !== undefined ? active : true,
+      active: active === "false" ? false : true,
     });
-
     await newOffer.save();
+
+    await updateProductsForOffer(newOffer); // 🔥 important
 
     res.status(201).json({
       status: "success",
@@ -202,19 +216,47 @@ exports.editOfferController = async (req, res) => {
       active,
     } = req.body;
 
+    if (isNaN(Number(offerValue))) {
+      return res.status(400).json({ message: "Invalid offer value" });
+    }
+
+    const existingOffer = await Offer.findOne({
+      name: code,
+      _id: { $ne: req.params.id },
+    });
+
+    if (existingOffer) {
+      return res.status(409).json({
+        message: "Offer name already exists",
+      });
+    }
+
+    if (!existingOffer)
+      return res.status(400).json({ message: "Offer not found" });
+    const currentDate = new Date();
+    const parsedStartDate = startDate ? new Date(startDate) : currentDate;
+    if (!expiryDate || isNaN(new Date(expiryDate))) {
+      return res.status(400).json({ message: "Invalid expiry date" });
+    }
+    const parsedExpiryDate = new Date(expiryDate);
+
+    if (parsedExpiryDate <= parsedStartDate) {
+      return res.status(400).json({
+        message: "Expiry date must be after start date",
+      });
+    }
     const editedOffer = await Offer.findByIdAndUpdate(
       req.params.id,
       {
         name: code,
         offerType,
-        offerValue,
-
+        offerValue: Number(offerValue),
         description,
-        startDate,
-        expiryDate,
-        active,
+        startDate: startDate ? new Date(startDate) : undefined,
+        expiryDate: expiryDate ? new Date(expiryDate) : undefined,
+        active: active === "false" ? false : true,
       },
-      { new: true }
+      { new: true },
     );
     if (!editedOffer) {
       return res.status(404).json({
@@ -223,8 +265,7 @@ exports.editOfferController = async (req, res) => {
         message: "Offer couldn't update",
       });
     }
-    await editedOffer.save();
-
+    await updateProductsForOffer(editedOffer);
     return res.status(200).json({
       status: "success",
       title: "Success",
@@ -248,22 +289,12 @@ exports.deActivateOfferController = async (req, res) => {
       {
         active: false,
       },
-      { new: true }
+      { new: true },
     );
-    // if (!deActivatedCoupon) {
-    //   return res.status(400).json({
-    //     status: "error",
-    //     title: "Error",
-    //     message: "Couldn't deactivate Coupon",
-    //   });
-    // }
-
-    // return res.status(200).json({
-    //   status: "success",
-    //   message: "Coupon deactivated Successfully",
-    //   title: "Success",
-    // });
-
+    if (!deActivatedOffer) {
+      return res.status(404).send("Offer not found");
+    }
+    await updateProductsForOffer(deActivatedOffer);
     return res.status(200).redirect("/admin/offers");
   } catch (err) {
     console.error(err);
@@ -283,21 +314,13 @@ exports.activateOfferController = async (req, res) => {
       {
         active: true,
       },
-      { new: true }
+      { new: true },
     );
-    // if (!ActivatedCoupon) {
-    //   return res.status(400).json({
-    //     status: "error",
-    //     title: "Error",
-    //     message: "Couldn't deactivate Coupon",
-    //   });
-    // }
+    if (!ActivatedOffer) {
+      return res.status(404).send("Offer not found");
+    }
 
-    // return res.status(200).json({
-    //   status: "success",
-    //   message: "Coupon Activated Successfully",
-    //   title: "Success",
-    // });
+    await updateProductsForOffer(ActivatedOffer);
 
     return res.status(200).redirect("/admin/offers");
   } catch (err) {

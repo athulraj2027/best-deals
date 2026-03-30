@@ -75,7 +75,7 @@ exports.getCartPage = async (req, res) => {
         "category",
       );
 
-      if (!product || !product.status) {
+      if (!product || !product.status || !product.inStock) {
         removedItems.push(item.name);
         continue;
       }
@@ -102,16 +102,21 @@ exports.getCartPage = async (req, res) => {
       item.price = finalPrice;
       item.offer = bestOffer ? bestOffer.name : null;
 
+      if (item.quantity > variant.quantity) {
+        item.quantity = variant.quantity;
+      }
       subtotal += finalPrice * item.quantity;
 
       validItems.push(item);
     }
 
     cart.items = validItems;
+    cart.markModified("items");
 
     cart.subtotal = Number(subtotal.toFixed(2));
     cart.tax = Number((cart.subtotal * 0.1).toFixed(2));
     cart.total = Number((cart.subtotal + cart.tax).toFixed(2));
+    cart.updatedTotal = cart.total - cart.discountAmount - cart.walletAmount;
 
     await cart.save();
 
@@ -217,7 +222,7 @@ exports.updateQuantityController = async (req, res) => {
     } else if (action === "decrease") {
       newQuantity = Math.max(cartItem.quantity - 1, 1);
     } else {
-      newQuantity = Math.max(1, Math.min(parseInt(quantity), 5));
+      newQuantity = Math.max(1, Math.min(parseInt(quantity), variant.quantity));
     }
 
     if (newQuantity > variant.quantity) {
@@ -254,6 +259,10 @@ exports.updateQuantityController = async (req, res) => {
     cart.tax = Number((cart.subtotal * 0.1).toFixed(2));
 
     cart.total = Number((cart.subtotal + cart.tax).toFixed(2));
+    cart.updatedTotal = Math.max(
+      0,
+      cart.total - (cart.discountAmount || 0) - (cart.walletAmount || 0),
+    );
 
     await cart.save();
 
@@ -344,6 +353,10 @@ exports.deleteItemController = async (req, res) => {
     cart.tax = Number((cart.subtotal * 0.1).toFixed(2));
 
     cart.total = Number((cart.subtotal + cart.tax).toFixed(2));
+    cart.updatedTotal = Math.max(
+      0,
+      cart.total - (cart.discountAmount || 0) - (cart.walletAmount || 0),
+    );
 
     await cart.save();
 
@@ -376,7 +389,10 @@ exports.clearCartController = async (req, res) => {
       });
     }
 
-    const cart = await Cart.findOne({ _id: cartId });
+    const cart = await Cart.findOne({
+      _id: cartId,
+      userId: req.session.userId,
+    });
     if (!cart) {
       return res.status(400).json({
         status: "error",
@@ -384,11 +400,13 @@ exports.clearCartController = async (req, res) => {
         message: "Cart not found",
       });
     }
-
     cart.items = [];
-    cart.subtotal = 0;
-    cart.tax = 0;
-    cart.walletApplied = false;
+    if (cart.items.length === 0) {
+      cart.subtotal = 0;
+      cart.tax = 0;
+      cart.total = 0;
+      cart.updatedTotal = 0;
+    }
 
     await cart.save();
 
