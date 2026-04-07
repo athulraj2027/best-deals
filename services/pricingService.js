@@ -11,7 +11,7 @@ async function calculateCartTotal(
   let offerDiscount = 0;
   let couponDiscount = 0;
   let walletDeduction = 0;
-
+  let totalRealPrice = 0;
   const items = [];
 
   // 1️⃣ Calculate subtotal
@@ -22,6 +22,7 @@ async function calculateCartTotal(
     const itemSubtotal = price * quantity;
 
     subtotal += itemSubtotal;
+    totalRealPrice += itemSubtotal;
 
     items.push({
       cartItem: item,
@@ -70,7 +71,7 @@ async function calculateCartTotal(
   }
 
   // 5️⃣ Tax
-  const tax = total * 0.1;
+  const tax = totalRealPrice * 0.1;
   total += tax;
 
   // 6️⃣ Calculate final paid amount per item

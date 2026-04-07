@@ -22,7 +22,7 @@
         <!-- Wishlist Items -->
         <div class="lg:w-2/3 space-y-6">
           <% wishlist.items.forEach(item => { %>
-          <div id="item-<%= item._id %>" class="bg-white rounded-xl shadow-md p-6 flex flex-col sm:flex-row items-center hover:shadow-lg transition-shadow">
+          <div id="item-<%= item.productId._id %>" class="bg-white rounded-xl shadow-md p-6 flex flex-col sm:flex-row items-center hover:shadow-lg transition-shadow">
             <!-- Image -->
             <div class="w-24 h-24 flex-shrink-0 mb-4 sm:mb-0">
               <img src="<%= item.image %>" alt="<%= item.name %>" class="w-full h-full object-cover rounded-lg" />
@@ -33,7 +33,13 @@
               <div>
                 <h2 class="text-lg font-semibold text-gray-800"><%= item.name %></h2>
                 <p class="text-gray-500 mt-1 text-sm">Color: <%= item.color %> | Size: <%= item.size %></p>
-                <p class="text-green-600 font-bold mt-2 text-lg">₹<%= item.price.toFixed(2) %></p>
+         <p class="text-gray-500 line-through mt-2 text-md">
+  ₹<%= item.price.toFixed(2) %>
+</p>
+
+<p class="text-green-600 font-bold text-lg">
+  ₹<%= item.finalPrice.toFixed(2) %>
+</p>
               </div>
 
               <!-- Actions -->
@@ -41,7 +47,7 @@
                 <button
                   type="button"
                   class="add-to-cart-btn bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg flex items-center gap-2 transition"
-                  data-product-id="<%= item.productId %>"
+                  data-product-id="<%= item.productId._id %>"
                   data-variant-id="<%= item.variantId %>"
                 >
                   <i class="fas fa-shopping-cart"></i> Add to Cart
@@ -91,7 +97,7 @@
               <div class="flex justify-between text-gray-600">
                 <span>Total Value</span>
                 <span id="wishlist-total-value" class="font-medium">
-                  ₹<%= wishlist.getTotalValue ? wishlist.getTotalValue().toFixed(2) : wishlist.items.reduce((sum, item) => sum + item.price, 0).toFixed(2) %>
+                  ₹<%= wishlist.getTotalValue ? wishlist.getTotalValue().toFixed(2) : wishlist.items.reduce((sum, item) => sum + item.finalPrice, 0).toFixed(2) %>
                 </span>
               </div>
 
@@ -193,9 +199,9 @@
           const image = itemElement.find("img").attr("src");
           const productId = $(this).data("product-id");
           const variantId = $(this).data("variant-id");
-
+          console.log('product id : ',productId)
           const cartItem = { productId, variantId, name, color, size, price, quantity: 1, image };
-          fetch(`/product/cart/add`, {
+          fetch(`/product/cart/add/${productId}}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(cartItem)
@@ -204,7 +210,7 @@
               Swal.fire({
                 icon: "success",
                 title: "Added to Cart",
-                html: `1 x ${name}<br>(${color}, ${size})`,
+                // html: `1 x ${name}<br>(${color}, ${size})`,
                 showConfirmButton: true,
                 confirmButtonText: "View Cart",
                 showCancelButton: true,

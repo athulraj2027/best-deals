@@ -341,6 +341,12 @@ exports.changeStatusController = async (req, res) => {
       });
     }
 
+    if (status === "delivered") {
+      return res
+        .status(400)
+        .json({ message: "The order has been already delivered" });
+    }
+
     const updatedOrder = await Order.findByIdAndUpdate(
       orderId,
       { status: status },

@@ -8,31 +8,10 @@ const Product = require("../../models/Product");
 const Coupon = require("../../models/Coupon");
 const Razorpay = require("razorpay");
 const Offer = require("../../models/Offer");
-const determineBestOffer = require("../../services/offers/determineBestOffer");
+const {
+  determineBestOffer,
+} = require("../../services/offers/determineBestOffer");
 const { calculateCartTotal } = require("../../services/pricingService");
-
-// // helper function
-// // return new Promise((resolve, reject) => {
-// var instance = new Razorpay({
-//   key_id: "rzp_test_tTcfsqC1bRVLSi",
-//   key_secret: "GmoWj3uV9ZKKDB9T5hJwU6Sn",
-// });
-// // });
-// async function generateRazorpay(orderId, total) {
-//   var options = {
-//     amount: Math.round(parseFloat(total) * 100), // Razorpay expects amount in paise (multiply by 100)
-//     currency: "INR",
-//     receipt: orderId,
-//   };
-
-//   try {
-//     const order = await instance.orders.create(options);
-//     return order.id; // Return Razorpay order ID
-//   } catch (error) {
-//     console.error(error);
-//     throw new Error("Failed to create Razorpay order");
-//   }
-// }
 
 exports.getCheckoutPage = async (req, res) => {
   try {
@@ -158,6 +137,7 @@ exports.checkoutController = async (req, res) => {
   try {
     const userId = req.session.userId;
     console.log("req body ; ", req.body);
+    let coupon = null;
 
     const cart = await Cart.findOne({ userId }).populate("items.productId");
     const user = await User.findById(userId);
@@ -174,7 +154,7 @@ exports.checkoutController = async (req, res) => {
 
     // Apply coupon
     if (couponCode) {
-      const coupon = await Coupon.findOne({ code: couponCode });
+      coupon = await Coupon.findOne({ code: couponCode });
 
       if (coupon) {
         if (!coupon.active || coupon.expiryDate < new Date()) {
@@ -209,8 +189,15 @@ exports.checkoutController = async (req, res) => {
       paymentMethod,
     );
 
+    console.log("pricing : ", pricing);
     // Deduct wallet
 
+    if (pricing.finalTotal > 1000 && paymentMethod === "cod")
+      return res
+        .status(400)
+        .json({ message: "The order cannot be done with cash on delivery" });
+
+    // return;
     const orderItems = pricing.items.map((item) => ({
       productId: item.cartItem.productId._id,
       variantId: item.cartItem.variantId,

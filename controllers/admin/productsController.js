@@ -210,6 +210,27 @@ exports.addProductController = async (req, res) => {
       variants,
     } = req.body;
     let categoryId;
+
+    if (!name || name.trim().length === 0)
+      return res.status(400).json({ message: "Please give a proper name" });
+    if (!description || description.trim().length === 0)
+      return res
+        .status(400)
+        .json({ message: "Please give a proper description" });
+    if (!brand || brand.trim().length === 0)
+      return res
+        .status(400)
+        .json({ message: "Please give a proper brand name" });
+
+    if (!actualPrice || actualPrice < 0)
+      return res.status(400).json({ message: "Please give a proper price" });
+    if (!category)
+      return res.status(400).json({ message: "Please give a proper category" });
+
+    if (!variants)
+      return res.status(400).json({ message: "Please give variants" });
+    if (!status) return res.status(400).json({ message: "Please give status" });
+    
     const existingProduct = await Product.findOne({ name });
     if (existingProduct) {
       console.log(existingProduct);

@@ -1,8 +1,14 @@
 const Wishlist = require("../../models/Wishlist");
 const Cart = require("../../models/Cart");
+const Product = require("../../models/Product");
+const Category = require("../../models/Category");
+const {
+  determineBestOffer,
+} = require("../../services/offers/determineBestOffer");
 
 exports.getWishlistPage = async (req, res) => {
   const userId = req.session.userId;
+
   try {
     if (!userId) {
       return res.status(400).json({
@@ -11,14 +17,74 @@ exports.getWishlistPage = async (req, res) => {
         message: "Please login to go to wishlist",
       });
     }
-    const wishlist = await Wishlist.findOne({ user: userId }).populate(
+
+    let wishlist = await Wishlist.findOne({ user: userId }).populate(
       "items.productId",
     );
 
     if (!wishlist) {
       wishlist = await Wishlist.create({ user: userId, items: [] });
     }
-    return res.status(200).render("userPages/wishlistPage", { wishlist });
+
+    let updatedItems = [];
+    let removedItems = [];
+
+    for (let item of wishlist.items) {
+      console.log("hi : ", item.productId);
+
+      const product = await Product.findById(item.productId._id.toString());
+
+      if (!product || !product.status || !product.inStock) {
+        console.log("hi2");
+        removedItems.push(item.name);
+        continue;
+      }
+
+      console.log("category ; ", product.category);
+      const category = await Category.findById(product.category.toString());
+      if (!category ||category.status !== "listed") {
+        console.log("hi3");
+        removedItems.push(item.name + " (category unavailable)");
+        continue;
+      }
+
+      const variant = product.variants.id(item.variantId);
+
+      if (!variant || variant.quantity <= 0) {
+        console.log("hi4");
+        removedItems.push(item.name);
+        continue;
+      }
+
+      // 🔥 Apply offer logic
+      const bestOffer = await determineBestOffer(product, variant.price);
+
+      let finalPrice = variant.price;
+      let offerName = null;
+
+      console.log("best offer applied");
+      if (bestOffer) {
+        finalPrice = bestOffer.discounted_price;
+        offerName = bestOffer.name;
+      }
+
+      updatedItems.push({
+        ...item.toObject(),
+        originalPrice: variant.price,
+        finalPrice,
+        offer: offerName,
+      });
+    }
+
+    const w = { ...wishlist.toObject(), items: updatedItems };
+    console.log("w : ", w);
+    return res.status(200).render("userPages/wishlistPage", {
+      wishlist: {
+        ...wishlist.toObject(),
+        items: updatedItems,
+      },
+      removedItems,
+    });
   } catch (err) {
     console.error("Error in loading wishlist page : ", err);
     return res.status(500).json({

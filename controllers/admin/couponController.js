@@ -134,6 +134,12 @@ exports.addCouponController = async (req, res) => {
         message: "Percentage cannot exceed 100",
       });
     }
+
+    if (discountValue > minPurchase)
+      return res
+        .status(400)
+        .json({ message: "Discount value must be less than minimum purchase" });
+        
     const existingCoupon = await Coupon.findOne({ code: code.toUpperCase() });
     if (existingCoupon) {
       return res.status(409).json({
@@ -229,6 +235,8 @@ exports.editCouponController = async (req, res) => {
       });
     }
 
+    const parsedStartDate = new Date(startDate);
+    const parsedExpiryDate = new Date(expiryDate);
     if (parsedStartDate >= parsedExpiryDate) {
       return res.status(400).json({
         message: "Expiry date must be after start date",

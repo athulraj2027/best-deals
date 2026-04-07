@@ -23,9 +23,12 @@ exports.getShopPage = async (req, res) => {
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
     const skip = (pageNum - 1) * limitNum;
-
-    // Build base query - this will be for direct find() operation
     let query = { status: true };
+
+    const listedCategories = await Category.find({ status: "listed" }).select(
+      "_id",
+    );
+    query.category = { $in: listedCategories.map((c) => c._id) };
 
     // Handle search
     if (search && search.trim() !== "") {
@@ -39,10 +42,10 @@ exports.getShopPage = async (req, res) => {
     // Handle category
     if (category && category !== "all" && category !== "") {
       try {
-        const categoryObj = await Category.findOne({ name: category });
-        if (categoryObj) {
-          query.category = categoryObj._id;
-        }
+        const categoryObj = await Category.findOne({
+          name: category,
+          status: "listed",
+        });
       } catch (error) {
         console.error("Error finding category:", error);
       }

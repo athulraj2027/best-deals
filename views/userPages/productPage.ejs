@@ -213,7 +213,7 @@
 
   <script>
     const product = <%- JSON.stringify(product) %>;
-    const bestOffer = product.best_offer || null;
+    const bestOffer = product.bestOffer || null;
 
     let selectedVariant = null;
     let selectedColor = null;
@@ -230,18 +230,23 @@
      * - If a best_offer exists AND the variant has a discountedPrice, use it.
      * - Otherwise show the variant's base price with no strikethrough.
      */
-    function getPricing(variant) {
-      if (!variant) return { display: 0, original: null, badge: null };
-      const original = variant.price;
-      if (bestOffer && variant.discountedPrice != null) {
-        const discounted = Number(variant.discountedPrice);
-        const badge = bestOffer.discount_type === 'percentage'
-          ? bestOffer.discount_value + '% OFF'
-          : 'Save ₹' + (original - discounted).toFixed(2);
-        return { display: discounted, original, badge };
-      }
-      return { display: original, original: null, badge: null };
-    }
+ function getPricing(variant) {
+  if (!variant) return { display: 0, original: null, badge: null };
+
+  const original = variant.price;
+
+  if (variant.discountedPrice != null && variant.discountedPrice < original) {
+    const discounted = Number(variant.discountedPrice);
+
+    return {
+      display: discounted,
+      original,
+      badge: 'Offer Applied'
+    };
+  }
+
+  return { display: original, original: null, badge: null };
+}
 
     function updatePriceUI() {
       const p = getPricing(selectedVariant);

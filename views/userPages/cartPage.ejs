@@ -28,7 +28,7 @@
       <% cart.items.forEach(item => { %>
       <div
         class="cart-item bg-white rounded-xl shadow p-6 flex gap-6"
-        id="item-<%= item._id %>"
+        id="item-<%=  item._id.toString() %>"
         data-price="<%= item.price %>"
       >
 
@@ -54,7 +54,7 @@
 
             <form
   class="quantity-form flex items-center gap-2"
-  data-item-id="<%= item._id %>"
+  data-item-id="<%=  item._id.toString() %>"
   data-product-id="<%= item.productId %>"
   data-variant-id="<%= item.variantId %>"
 >
@@ -90,7 +90,7 @@
 
             <button
               class="delete-item-btn text-red-500 mt-2"
-              data-item-id="<%= item._id %>"
+              data-item-id="<%= item._id.toString() %>"
               data-product-id="<%= item.productId %>"
   data-variant-id="<%= item.variantId %>">
               
@@ -210,7 +210,7 @@ $(".quantity-btn").click(function () {
 
   const form = $(this).closest(".quantity-form");
   const id = form.data("item-id");
-  const item = $("#item-" + id);
+  const item = $(this).closest(".cart-item");
   const action = $(this).data("action");
   const input = form.find(".quantity-input");
 
@@ -257,8 +257,8 @@ $(".quantity-btn").click(function () {
   })
 
   .done(function (res) {
-
-    if (!res.success) {
+    console.log("res : ",res)
+    if (res.status !== 'success') {
       // ❌ rollback if backend rejects
       input.val(oldQty);
       updateItemTotal(item);
@@ -283,7 +283,7 @@ $(".quantity-btn").click(function () {
   })
 
   .fail(function (xhr) {
-
+console.log('hi')
     // ❌ rollback on error
     input.val(oldQty);
     updateItemTotal(item);

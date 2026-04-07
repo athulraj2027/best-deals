@@ -184,6 +184,14 @@ exports.updateQuantityController = async (req, res) => {
       });
     }
 
+    if (variant.quantity < quantity) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Max availability reached",
+      });
+    }
+
     /* ---------------- CART ---------------- */
 
     const cart = await Cart.findOne({

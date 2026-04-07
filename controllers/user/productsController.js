@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Product = require("../../models/Product");
 const User = require("../../models/User");
+const Category = require("../../models/Category");
 const Cart = require("../../models/Cart");
 const Wishlist = require("../../models/Wishlist");
 const statusCodes = require("../../services/statusCodes");
@@ -215,6 +216,14 @@ exports.addtoCartController = async (req, res) => {
     if (!variant || variant.quantity < cartItem.quantity) {
       return res.json({ message: "Insufficient stock" });
     }
+
+    if (product.status === "unlisted")
+      return res.status(400).json({ message: "Product unavailable" });
+
+    const category = await Category.findById(product.category);
+    if (!category || category.status === "unlisted") {
+      return res.status(400).json({ message: "Product unavailable" });
+    }
     let cart = await Cart.findOne({ userId });
     if (!cart) {
       cart = new Cart({ userId, items: [] });
@@ -224,9 +233,16 @@ exports.addtoCartController = async (req, res) => {
     );
 
     if (existingItem) {
+      let newQuantity;
       if (existingItem.quantity + cartItem.quantity > variant.quantity) {
         return res.json({ message: "Stock exceeded" });
       }
+
+      console.log("q", existingItem.quantity);
+      if (existingItem.quantity >= 5)
+        return res
+          .status(400)
+          .json({ message: "Max limit already added to cart" });
 
       existingItem.quantity += cartItem.quantity;
     } else {

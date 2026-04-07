@@ -5,274 +5,697 @@
     <title>Admin Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- FontAwesome -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    />
-
-    <!-- Google Font -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
+      :root {
+        --bg: #fdfdfd00;
+        --surface: #161a24;
+        --surface2: #1e2333;
+        --border: rgba(255,255,255,0.07);
+        --text: #e8eaf0;
+        --muted: #6b7280;
+        --accent: #6ee7b7;
+        --accent2: #38bdf8;
+        --accent3: #f472b6;
+        --accent4: #fb923c;
+        --accent5: #a78bfa;
+        --danger: #f87171;
+        --radius: 16px;
+        --font-display: 'Syne', sans-serif;
+        --font-body: 'DM Sans', sans-serif;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
       body {
-        font-family: "Poppins", sans-serif;
+        font-family: var(--font-body);
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+      }
+
+      /* ── Layout ── */
+      .dash-wrap {
+        margin-left: 250px;
+        padding: 2rem 2.5rem;
+        max-width: calc(100% - 250px);
+      }
+
+      /* ── Header ── */
+      .dash-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .dash-header h1 {
+        font-family: var(--font-display);
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(120deg, var(--accent), var(--accent2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .dash-header .date-badge {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        padding: 0.5rem 1.2rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+
+      /* ── Stat Cards ── */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+      }
+
+      .stat-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s, border-color 0.2s;
+        animation: fadeUp 0.5s both;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(255,255,255,0.15);
+      }
+
+      .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0; right: 0;
+        width: 80px; height: 80px;
+        border-radius: 50%;
+        opacity: 0.12;
+        filter: blur(20px);
+      }
+
+      .stat-card.c1::before { background: var(--accent);  top:-20px; right:-20px; }
+      .stat-card.c2::before { background: var(--accent2); top:-20px; right:-20px; }
+      .stat-card.c3::before { background: var(--accent4); top:-20px; right:-20px; }
+      .stat-card.c4::before { background: var(--accent5); top:-20px; right:-20px; }
+      .stat-card.c5::before { background: var(--accent3); top:-20px; right:-20px; }
+      .stat-card.c6::before { background: var(--accent);  top:-20px; right:-20px; }
+      .stat-card.c7::before { background: var(--accent2); top:-20px; right:-20px; }
+      .stat-card.c8::before { background: var(--danger);  top:-20px; right:-20px; }
+
+      .stat-card .icon {
+        width: 40px; height: 40px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .stat-card.c1 .icon { background: rgba(110,231,183,0.15); color: var(--accent); }
+      .stat-card.c2 .icon { background: rgba(56,189,248,0.15);  color: var(--accent2); }
+      .stat-card.c3 .icon { background: rgba(251,146,60,0.15);  color: var(--accent4); }
+      .stat-card.c4 .icon { background: rgba(167,139,250,0.15); color: var(--accent5); }
+      .stat-card.c5 .icon { background: rgba(244,114,182,0.15); color: var(--accent3); }
+      .stat-card.c6 .icon { background: rgba(110,231,183,0.15); color: var(--accent); }
+      .stat-card.c7 .icon { background: rgba(56,189,248,0.15);  color: var(--accent2); }
+      .stat-card.c8 .icon { background: rgba(248,113,113,0.15); color: var(--danger); }
+
+      .stat-card .label {
+        font-size: 0.78rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 0.4rem;
+      }
+
+      .stat-card .value {
+        font-family: var(--font-display);
+        font-size: 1.9rem;
+        font-weight: 800;
+        line-height: 1;
+      }
+
+      .stat-card.c1 .value { color: var(--accent); }
+      .stat-card.c2 .value { color: var(--accent2); }
+      .stat-card.c3 .value { color: var(--accent4); }
+      .stat-card.c4 .value { color: var(--accent5); }
+      .stat-card.c5 .value { color: var(--accent3); }
+      .stat-card.c6 .value { color: var(--accent); }
+      .stat-card.c7 .value { color: var(--accent2); }
+      .stat-card.c8 .value { color: var(--danger); }
+
+      /* ── Cards (charts, tables) ── */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.75rem;
+        animation: fadeUp 0.5s both;
+      }
+
+      .card-title {
+        font-family: var(--font-display);
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+
+      .card-title i { color: var(--accent); font-size: 0.9rem; }
+
+      /* ── Row layout ── */
+      .row-2-1 {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1.25rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .row-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        margin-bottom: 1.25rem;
+      }
+
+      /* ── Table ── */
+      .dash-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.88rem;
+      }
+
+      .dash-table th {
+        text-align: left;
+        padding: 0.6rem 1rem;
+        color: var(--muted);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .dash-table td {
+        padding: 0.85rem 1rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+      }
+
+      .dash-table tr:last-child td { border-bottom: none; }
+
+      .dash-table tr:hover td { background: var(--surface2); }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+
+      .badge-danger  { background: rgba(248,113,113,0.15); color: var(--danger); }
+      .badge-success { background: rgba(110,231,183,0.15); color: var(--accent); }
+      .badge-info    { background: rgba(56,189,248,0.15);  color: var(--accent2); }
+
+      /* ── Rank bubble ── */
+      .rank {
+        display: inline-flex;
+        width: 24px; height: 24px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-size: 0.75rem;
+        font-weight: 700;
+        background: var(--surface2);
+        color: var(--muted);
+      }
+
+      .rank.gold   { background: rgba(251,191,36,0.15); color: #fbbf24; }
+      .rank.silver { background: rgba(156,163,175,0.15); color: #9ca3af; }
+      .rank.bronze { background: rgba(180,83,9,0.15); color: #b45309; }
+
+      /* ── Progress bar ── */
+      .progress-bar-track {
+        height: 5px;
+        background: var(--surface2);
+        border-radius: 999px;
+        overflow: hidden;
+        margin-top: 0.4rem;
+      }
+
+      .progress-bar-fill {
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--accent), var(--accent2));
+      }
+
+      /* ── Coupon card ── */
+      .info-row {
+        display: flex;
+        gap: 1.25rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .info-card {
+        flex: 1;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        animation: fadeUp 0.5s both;
+      }
+
+      .info-card .big-icon {
+        width: 52px; height: 52px;
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.3rem;
+        flex-shrink: 0;
+      }
+
+      .info-card.coupon .big-icon { background: rgba(167,139,250,0.15); color: var(--accent5); }
+      .info-card.returns .big-icon { background: rgba(251,146,60,0.15); color: var(--accent4); }
+
+      .info-card .info-label {
+        font-size: 0.78rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 0.3rem;
+      }
+
+      .info-card .info-value {
+        font-family: var(--font-display);
+        font-size: 1.6rem;
+        font-weight: 800;
+      }
+
+      .info-card.coupon .info-value { color: var(--accent5); }
+      .info-card.returns .info-value { color: var(--accent4); }
+
+      /* ── Animations ── */
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(18px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      .stat-card:nth-child(1)  { animation-delay: 0.05s; }
+      .stat-card:nth-child(2)  { animation-delay: 0.10s; }
+      .stat-card:nth-child(3)  { animation-delay: 0.15s; }
+      .stat-card:nth-child(4)  { animation-delay: 0.20s; }
+      .stat-card:nth-child(5)  { animation-delay: 0.25s; }
+      .stat-card:nth-child(6)  { animation-delay: 0.30s; }
+      .stat-card:nth-child(7)  { animation-delay: 0.35s; }
+      .stat-card:nth-child(8)  { animation-delay: 0.40s; }
+
+      /* ── Scrollable table ── */
+      .table-scroll { max-height: 320px; overflow-y: auto; }
+      .table-scroll::-webkit-scrollbar { width: 4px; }
+      .table-scroll::-webkit-scrollbar-track { background: transparent; }
+      .table-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+      /* ── Empty state ── */
+      .empty { color: var(--muted); font-size: 0.88rem; text-align: center; padding: 2rem 0; }
+
+      @media (max-width: 1100px) {
+        .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        .row-2-1, .row-3, .row-2 { grid-template-columns: 1fr; }
+        .dash-wrap { margin-left: 0; max-width: 100%; padding: 1.25rem; }
       }
     </style>
   </head>
 
-  <body class="bg-gray-100">
-    <!-- Sidebar -->
+  <body>
     <%- include('./partials/menu') %>
 
-    <!-- Main -->
-    <div class="ml-[250px] p-6 max-w-[calc(100%-250px)]">
-      <!-- Header -->
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">Admin Dashboard</h2>
+    <div class="dash-wrap">
 
-        <div class="relative">
-          <button class="p-2 bg-white rounded-lg shadow">
-            <i class="fa-solid fa-ellipsis-vertical"></i>
-          </button>
+      <!-- HEADER -->
+      <div class="dash-header">
+        <h1>Dashboard</h1>
+        <span class="date-badge">
+          <i class="fa fa-calendar-alt" style="margin-right:6px; color:var(--accent)"></i>
+          <script>document.write(new Date().toLocaleDateString('en-IN',{weekday:'short',year:'numeric',month:'short',day:'numeric'}))</script>
+        </span>
+      </div>
+
+      <!-- STATS GRID -->
+      <div class="stats-grid">
+        <div class="stat-card c1">
+          <div class="icon"><i class="fa fa-users"></i></div>
+          <div class="label">Total Users</div>
+          <div class="value"><%= totalUsers %></div>
+        </div>
+
+        <div class="stat-card c2">
+          <div class="icon"><i class="fa fa-indian-rupee-sign"></i></div>
+          <div class="label">Total Revenue</div>
+          <div class="value">₹<%= Number(totalRevenue).toLocaleString('en-IN') %></div>
+        </div>
+
+        <div class="stat-card c3">
+          <div class="icon"><i class="fa fa-bolt"></i></div>
+          <div class="label">Today's Sales</div>
+          <div class="value">₹<%= Number(todaySales).toLocaleString('en-IN') %></div>
+        </div>
+
+        <div class="stat-card c4">
+          <div class="icon"><i class="fa fa-box"></i></div>
+          <div class="label">Total Products</div>
+          <div class="value"><%= totalProducts %></div>
+        </div>
+
+        <div class="stat-card c5">
+          <div class="icon"><i class="fa fa-shopping-bag"></i></div>
+          <div class="label">Total Orders</div>
+          <div class="value"><%= totalOrders %></div>
+        </div>
+
+        <div class="stat-card c6">
+          <div class="icon"><i class="fa fa-clock"></i></div>
+          <div class="label">Pending Orders</div>
+          <div class="value"><%= pendingOrders %></div>
+        </div>
+
+        <div class="stat-card c7">
+          <div class="icon"><i class="fa fa-circle-check"></i></div>
+          <div class="label">Delivered Orders</div>
+          <div class="value"><%= deliveredOrders %></div>
+        </div>
+
+        <div class="stat-card c8">
+          <div class="icon"><i class="fa fa-xmark"></i></div>
+          <div class="label">Cancelled Orders</div>
+          <div class="value"><%= cancelledOrders %></div>
         </div>
       </div>
 
-      <!-- STAT CARDS -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- USERS -->
-        <div
-          class="bg-gradient-to-r from-indigo-600 to-blue-500 text-white rounded-2xl p-5 relative shadow"
-        >
-          <i
-            class="fa-solid fa-users absolute right-5 top-5 text-5xl opacity-40"
-          ></i>
-          <p>Total Users</p>
-          <h2 class="text-3xl font-bold"><%= totalUsers %></h2>
+      <!-- INFO ROW: Coupons + Returns -->
+      <div class="info-row">
+        <div class="info-card coupon">
+          <div class="big-icon"><i class="fa fa-ticket"></i></div>
+          <div>
+            <div class="info-label">Coupons Used</div>
+            <div class="info-value"><%= totalCouponUsed %></div>
+          </div>
         </div>
-
-        <!-- SALES -->
-        <div
-          class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl p-5 relative shadow"
-        >
-          <i
-            class="fa-solid fa-chart-line absolute right-5 top-5 text-5xl opacity-40"
-          ></i>
-          <p>Total Sales</p>
-          <h2 class="text-3xl font-bold">₹ <%= totalSales %></h2>
-        </div>
-
-        <!-- PENDING -->
-        <div
-          class="bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-2xl p-5 relative shadow"
-        >
-          <i
-            class="fa-solid fa-list-check absolute right-5 top-5 text-5xl opacity-40"
-          ></i>
-          <p>Pending Orders</p>
-          <h2 class="text-3xl font-bold"><%= pendingOrders %></h2>
-        </div>
-
-        <!-- PRODUCTS -->
-        <div
-          class="bg-gradient-to-r from-indigo-800 to-violet-700 text-white rounded-2xl p-5 relative shadow"
-        >
-          <i
-            class="fa-solid fa-box absolute right-5 top-5 text-5xl opacity-40"
-          ></i>
-          <p>Total Products</p>
-          <h2 class="text-3xl font-bold"><%= totalProducts %></h2>
+        <div class="info-card returns">
+          <div class="big-icon"><i class="fa fa-rotate-left"></i></div>
+          <div>
+            <div class="info-label">Return Requests</div>
+            <div class="info-value"><%= returnRequests %></div>
+          </div>
         </div>
       </div>
 
-      <!-- CONTENT -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-        <!-- REPORT FORM -->
-        <div class="bg-white rounded-2xl shadow p-6">
-          <h3 class="font-bold mb-4">Generate Sales Report</h3>
-
-          <form action="/admin/sales-report" method="get" class="space-y-4">
-            <select
-              name="type"
-              id="report-type"
-              class="w-full p-2 border rounded"
-            >
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-              <option value="yearly">Yearly</option>
-              <option value="custom">Custom</option>
-            </select>
-
-            <!-- DAILY -->
-            <div id="daily-input" class="hidden">
-              <input
-                type="date"
-                name="date"
-                class="w-full p-2 border rounded"
-              />
-            </div>
-
-            <!-- WEEKLY -->
-            <div id="weekly-input" class="hidden">
-              <input
-                type="date"
-                name="start_date"
-                class="w-full p-2 border rounded"
-              />
-            </div>
-
-            <!-- MONTHLY -->
-            <div id="monthly-input" class="hidden flex gap-3">
-              <input
-                type="number"
-                name="year"
-                placeholder="Year"
-                class="w-full p-2 border rounded"
-              />
-              <input
-                type="number"
-                name="month"
-                placeholder="Month"
-                class="w-full p-2 border rounded"
-              />
-            </div>
-
-            <!-- YEARLY -->
-            <div id="yearly-input" class="hidden">
-              <input
-                type="number"
-                name="year"
-                placeholder="Year"
-                class="w-full p-2 border rounded"
-              />
-            </div>
-
-            <!-- CUSTOM -->
-            <div id="custom-input" class="hidden flex gap-3">
-              <input
-                type="date"
-                name="start_date"
-                class="w-full p-2 border rounded"
-              />
-              <input
-                type="date"
-                name="end_date"
-                class="w-full p-2 border rounded"
-              />
-            </div>
-
-            <select name="download" class="w-full p-2 border rounded">
-              <option value="">View</option>
-              <option value="pdf">PDF</option>
-              <option value="excel">Excel</option>
-            </select>
-
-            <button
-              id="submitBtn"
-              disabled
-              class="w-full bg-indigo-600 text-white py-2 rounded transition disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-700"
-            >
-              Generate Report
-            </button>
-          </form>
+      <!-- SALES CHART + TOP PRODUCTS TABLE -->
+      <div class="row-2-1">
+        <div class="card" style="animation-delay:0.1s">
+          <div class="card-title"><i class="fa fa-chart-line"></i> Last 7 Days Sales</div>
+          <canvas id="salesChart" height="110"></canvas>
         </div>
 
-        <!-- CHART -->
-        <div class="lg:col-span-2 bg-white rounded-2xl shadow p-6">
-          <h3 class="font-bold mb-4">Sales Overview</h3>
-          <canvas id="salesChart" height="120"></canvas>
+        <div class="card" style="animation-delay:0.2s">
+          <div class="card-title"><i class="fa fa-fire"></i> Top Products</div>
+          <% if (!topProducts || topProducts.length === 0) { %>
+            <div class="empty">No data available</div>
+          <% } else { %>
+            <div class="table-scroll">
+              <% const maxSold = topProducts[0]?.totalSold || 1; %>
+              <% topProducts.forEach((p, i) => { %>
+                <div style="margin-bottom:1rem;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.3rem;">
+                    <div style="display:flex; align-items:center; gap:0.6rem; font-size:0.85rem; font-weight:500;">
+                      <span class="rank <%= i===0?'gold':i===1?'silver':i===2?'bronze':'' %>"><%= i+1 %></span>
+                      <%= p.name %>
+                    </div>
+                    <span style="font-size:0.8rem; color:var(--muted);"><%= p.totalSold %> sold</span>
+                  </div>
+                  <div class="progress-bar-track">
+                    <div class="progress-bar-fill" style="width:<%= Math.round((p.totalSold/maxSold)*100) %>%"></div>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+          <% } %>
         </div>
       </div>
-    </div>
 
-    <!-- ChartJS -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <!-- CHARTS ROW: Products, Categories, Brands -->
+      <div class="row-3">
+        <div class="card" style="animation-delay:0.15s">
+          <div class="card-title"><i class="fa fa-box-open"></i> Top Products</div>
+          <canvas id="topProductsChart" height="200"></canvas>
+        </div>
 
+        <div class="card" style="animation-delay:0.2s">
+          <div class="card-title"><i class="fa fa-tags"></i> Top Categories</div>
+          <canvas id="categoryChart" height="200"></canvas>
+        </div>
+
+        <div class="card" style="animation-delay:0.25s">
+          <div class="card-title"><i class="fa fa-trademark"></i> Top Brands</div>
+          <canvas id="brandChart" height="200"></canvas>
+        </div>
+      </div>
+
+      <!-- BOTTOM ROW: Top Categories Table + Low Stock -->
+      <div class="row-2">
+        <div class="card" style="animation-delay:0.3s">
+          <div class="card-title"><i class="fa fa-list"></i> Category Performance</div>
+          <% if (!topCategories || topCategories.length === 0) { %>
+            <div class="empty">No data available</div>
+          <% } else { %>
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Category</th>
+                  <th>Units Sold</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% topCategories.forEach((c, i) => { %>
+                  <tr>
+                    <td><span class="rank <%= i===0?'gold':i===1?'silver':i===2?'bronze':'' %>"><%= i+1 %></span></td>
+                    <td><%= c.name %></td>
+                    <td><span class="badge badge-success"><%= c.totalSold %></span></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          <% } %>
+        </div>
+
+        <div class="card" style="animation-delay:0.35s">
+          <div class="card-title"><i class="fa fa-triangle-exclamation"></i> Low Stock Alert</div>
+          <% if (!lowStockProducts || lowStockProducts.length === 0) { %>
+            <div class="empty"><i class="fa fa-circle-check" style="color:var(--accent)"></i>&nbsp; All products are well-stocked</div>
+          <% } else { %>
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Brand</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% lowStockProducts.forEach(p => { %>
+                  <tr>
+                    <td><%= p.name %></td>
+                    <td style="color:var(--muted)"><%= p.brand %></td>
+                    <td><span class="badge badge-danger"><i class="fa fa-circle-exclamation"></i> Low Stock</span></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- TOP BRANDS TABLE -->
+      <div class="card" style="animation-delay:0.4s; margin-bottom:2rem;">
+        <div class="card-title"><i class="fa fa-award"></i> Brand Performance</div>
+        <% if (!topBrands || topBrands.length === 0) { %>
+          <div class="empty">No data available</div>
+        <% } else { %>
+          <table class="dash-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Brand</th>
+                <th>Units Sold</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% topBrands.forEach((b, i) => { %>
+                <tr>
+                  <td><span class="rank <%= i===0?'gold':i===1?'silver':i===2?'bronze':'' %>"><%= i+1 %></span></td>
+                  <td><%= b.brand %></td>
+                  <td><span class="badge badge-info"><%= b.totalSold %></span></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
+
+    </div><!-- /dash-wrap -->
+
+    <!-- ═══════════════ CHARTS ═══════════════ -->
     <script>
-      document
-        .getElementById("report-type")
-        .addEventListener("change", function () {
-          ["daily", "weekly", "monthly", "yearly", "custom"].forEach((id) => {
-            document.getElementById(id + "-input")?.classList.add("hidden");
-          });
-          document
-            .getElementById(this.value + "-input")
-            ?.classList.remove("hidden");
-        });
+      const ACCENT  = '#6ee7b7';
+      const ACCENT2 = '#38bdf8';
+      const ACCENT3 = '#f472b6';
+      const ACCENT4 = '#fb923c';
+      const ACCENT5 = '#a78bfa';
 
-      const ctx = document.getElementById("salesChart");
-      new Chart(ctx, {
-        type: "line",
+      Chart.defaults.color = '#6b7280';
+      Chart.defaults.font.family = "'DM Sans', sans-serif";
+
+      const gridColor = 'rgba(255,255,255,0.06)';
+
+      // ── Sales Line Chart ──
+      const salesData = <%- JSON.stringify(salesChart) %>;
+
+      new Chart(document.getElementById('salesChart'), {
+        type: 'line',
         data: {
-          labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-          datasets: [
-            {
-              label: "Sales",
-              data: [1200, 1500, 1100, 1800, 1400, 2000],
-              borderColor: "#4f46e5",
-              tension: 0.4,
-            },
-          ],
+          labels: salesData.labels,
+          datasets: [{
+            label: 'Sales (₹)',
+            data: salesData.data,
+            borderColor: ACCENT,
+            backgroundColor: 'rgba(110,231,183,0.08)',
+            borderWidth: 2.5,
+            pointBackgroundColor: ACCENT,
+            pointBorderColor: '#0d0f14',
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            tension: 0.4,
+            fill: true,
+          }]
         },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: gridColor }, ticks: { color: '#6b7280' } },
+            y: {
+              grid: { color: gridColor },
+              ticks: {
+                color: '#6b7280',
+                callback: v => '₹' + v.toLocaleString('en-IN')
+              }
+            }
+          }
+        }
       });
-    </script>
-    <script>
-      const submitBtn = document.getElementById("submitBtn");
-      const typeSelect = document.getElementById("report-type");
 
-      function validateForm() {
-        const type = typeSelect.value;
-        let valid = false;
+      // ── Top Products Bar ──
+      const prodData = <%- JSON.stringify(topProductsChart) %>;
 
-        if (type === "daily") {
-          valid = !!document.querySelector("input[name='date']").value;
+      new Chart(document.getElementById('topProductsChart'), {
+        type: 'bar',
+        data: {
+          labels: prodData.labels,
+          datasets: [{
+            label: 'Units Sold',
+            data: prodData.data,
+            backgroundColor: 'rgba(110,231,183,0.75)',
+            borderRadius: 6,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: gridColor }, ticks: { color: '#6b7280' } },
+            y: { grid: { display: false }, ticks: { color: '#e8eaf0', font: { size: 11 } } }
+          }
         }
+      });
 
-        if (type === "weekly") {
-          valid = !!document.querySelector("input[name='start_date']").value;
+      // ── Category Doughnut ──
+      const catData = <%- JSON.stringify(categoryChart) %>;
+
+      new Chart(document.getElementById('categoryChart'), {
+        type: 'doughnut',
+        data: {
+          labels: catData.labels,
+          datasets: [{
+            data: catData.data,
+            backgroundColor: [ACCENT, ACCENT2, ACCENT3, ACCENT4, ACCENT5,
+              '#34d399','#60a5fa','#f9a8d4','#fcd34d','#c084fc'],
+            borderColor: '#161a24',
+            borderWidth: 3,
+            hoverOffset: 8,
+          }]
+        },
+        options: {
+          responsive: true,
+          cutout: '65%',
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 12, padding: 14, color: '#9ca3af' } }
+          }
         }
+      });
 
-        if (type === "monthly") {
-          const year = document.querySelector(
-            "#monthly-input input[name='year']",
-          ).value;
-          const month = document.querySelector(
-            "#monthly-input input[name='month']",
-          ).value;
+      // ── Brands Bar ──
+      const brandData = <%- JSON.stringify(brandChart) %>;
 
-          valid = !!year && !!month;
+      new Chart(document.getElementById('brandChart'), {
+        type: 'bar',
+        data: {
+          labels: brandData.labels,
+          datasets: [{
+            label: 'Units Sold',
+            data: brandData.data,
+            backgroundColor: 'rgba(167,139,250,0.75)',
+            borderRadius: 6,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: gridColor }, ticks: { color: '#6b7280' } },
+            y: { grid: { display: false }, ticks: { color: '#e8eaf0', font: { size: 11 } } }
+          }
         }
-
-        if (type === "yearly") {
-          valid = !!document.querySelector("#yearly-input input[name='year']")
-            .value;
-        }
-
-        if (type === "custom") {
-          const start = document.querySelector(
-            "#custom-input input[name='start_date']",
-          ).value;
-          const end = document.querySelector(
-            "#custom-input input[name='end_date']",
-          ).value;
-
-          valid = !!start && !!end;
-        }
-
-        submitBtn.disabled = !valid;
-      }
-
-      // Listen for input changes
-      document.querySelectorAll("input, select").forEach((el) => {
-        el.addEventListener("input", validateForm);
-        el.addEventListener("change", validateForm);
       });
     </script>
   </body>

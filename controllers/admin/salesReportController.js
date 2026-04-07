@@ -2,502 +2,395 @@ const Order = require("../../models/Order");
 const PDFDocument = require("pdfkit");
 const ExcelJS = require("exceljs");
 
-exports.getSalesReport = async (req, res) => {
+/**
+ * GENERATE EXCEL REPORT
+ * Professional formatting with auto-filters and styling
+ */
+async function generateExcel(data, res) {
   try {
-    let { type, date, start_date, end_date, month, year, download } = req.query;
+    const workbook = new ExcelJS.Workbook();
 
-    console.log("Request query: ", req.query);
+    // 1. SUMMARY SHEET
+    const summary = workbook.addWorksheet("Summary");
+    summary.columns = [
+      { header: "Metric", key: "metric", width: 30 },
+      { header: "Value", key: "value", width: 25 },
+    ];
+    summary.addRows([
+      {
+        metric: "Report Period",
+        value: `${data.start_date_formatted} - ${data.end_date_formatted}`,
+      },
+      { metric: "Total Orders", value: data.sales_count },
+      { metric: "Gross Revenue", value: data.total_sales_amount },
+      { metric: "Total Discount", value: data.total_discount },
+      {
+        metric: "Net Revenue",
+        value: data.total_sales_amount - data.total_discount,
+      },
+      { metric: "Total Items Sold", value: data.total_items_sold },
+      { metric: "Average Order Value", value: data.average_order_value },
+    ]);
 
-    // Handle array parameters (common in form submissions)
-    date = Array.isArray(date) ? date[0] : date;
-    start_date = Array.isArray(start_date) ? start_date[0] : start_date;
-    end_date = Array.isArray(end_date) ? end_date[0] : end_date;
-    month = Array.isArray(month) ? month[0] : month;
-    year = Array.isArray(year) ? year[0] : year;
-    download = Array.isArray(download) ? download[0] : download;
-    type = Array.isArray(type) ? type[0] : type;
+    // Style summary headers
+    summary.getRow(1).font = { bold: true };
+    summary.getColumn("value").numFmt = "₹#,##0.00";
 
-    // Validate inputs
-    if (!type) {
-      return res.status(400).send("Report type is required");
-    }
-
-    let params = { date, start_date, end_date, month, year };
-    let { start_date: startDate, end_date: endDate } = getDateRange(
-      type,
-      params,
-    );
-
-    // Ensure valid date range
-    if (!startDate || !endDate) {
-      return res.status(400).send("Invalid date range parameters");
-    }
-
-    console.log(
-      `Using date range: ${startDate.toISOString()} to ${endDate.toISOString()}`,
-    );
-
-    // Get orders within date range - populate address for better reporting
-    let orders = await Order.find({
-      orderDate: { $gte: startDate, $lt: endDate },
-    })
-      .populate("userId", "name email")
-      .populate("addressId")
-      .sort({ orderDate: -1 });
-
-    // Calculate metrics
-    let sales_count = orders.length;
-    let total_sales_amount = orders.reduce(
-      (sum, order) => sum + order.grandTotal,
-      0,
-    );
-
-    // Track product sales and calculate item totals
-    let productSales = {};
-    let total_items_sold = 0;
-
-    orders.forEach((order) => {
-      order.items.forEach((item) => {
-        total_items_sold += item.quantity;
-
-        // Track product sales
-        const productKey = item.productId.toString();
-        if (productSales[productKey]) {
-          productSales[productKey].quantity += item.quantity;
-          productSales[productKey].revenue += item.price * item.quantity;
-        } else {
-          productSales[productKey] = {
-            name: item.name || "Unknown Product",
-            color: item.color,
-            size: item.size,
-            quantity: item.quantity,
-            revenue: item.price * item.quantity,
-          };
-        }
-      });
-    });
-
-    // Get top 10 products by revenue
-    let topProducts = Object.values(productSales)
-      .sort((a, b) => b.revenue - a.revenue)
-      .slice(0, 10);
-
-    // Get top 10 products by quantity
-    let topProductsByQuantity = Object.values(productSales)
-      .sort((a, b) => b.quantity - a.quantity)
-      .slice(0, 10);
-
-    // Daily sales for the period (for chart)
-    let dailySales = {};
-    let currentDate = new Date(startDate);
-
-    // Initialize all dates in range
-    while (currentDate < endDate) {
-      let dateStr = currentDate.toISOString().split("T")[0];
-      dailySales[dateStr] = { revenue: 0, orders: 0 };
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-
-    // Fill in sales data
-    orders.forEach((order) => {
-      let orderDateStr = new Date(order.orderDate).toISOString().split("T")[0];
-      if (dailySales[orderDateStr] !== undefined) {
-        dailySales[orderDateStr].revenue += order.grandTotal;
-        dailySales[orderDateStr].orders += 1;
-      }
-    });
-
-    // Orders by status
-    let ordersByStatus = {};
-    orders.forEach((order) => {
-      ordersByStatus[order.status] = (ordersByStatus[order.status] || 0) + 1;
-    });
-
-    // Orders by payment method
-    let ordersByPaymentMethod = {};
-    orders.forEach((order) => {
-      ordersByPaymentMethod[order.paymentMethod] =
-        (ordersByPaymentMethod[order.paymentMethod] || 0) + 1;
-    });
-
-    // Payment status breakdown
-    let ordersByPaymentStatus = {};
-    orders.forEach((order) => {
-      ordersByPaymentStatus[order.payment_status] =
-        (ordersByPaymentStatus[order.payment_status] || 0) + 1;
-    });
-
-    // Calculate average order value
-    let average_order_value =
-      sales_count > 0 ? total_sales_amount / sales_count : 0;
-
-    // Get revenue by payment status
-    let revenueByPaymentStatus = {};
-    orders.forEach((order) => {
-      revenueByPaymentStatus[order.payment_status] =
-        (revenueByPaymentStatus[order.payment_status] || 0) + order.grandTotal;
-    });
-
-    // Prepare data for the view
-    let data = {
-      type,
-      date,
-      start_date: start_date || "",
-      end_date: end_date || "",
-      month: month || "",
-      year: year || "",
-      start_date_formatted: startDate.toDateString(),
-      end_date_formatted: endDate.toDateString(),
-      sales_count,
-      total_sales_amount,
-      total_items_sold,
-      average_order_value,
-      dailySales: JSON.stringify(dailySales),
-      ordersByStatus: JSON.stringify(ordersByStatus),
-      ordersByPaymentMethod: JSON.stringify(ordersByPaymentMethod),
-      ordersByPaymentStatus: JSON.stringify(ordersByPaymentStatus),
-      revenueByPaymentStatus: JSON.stringify(revenueByPaymentStatus),
-      topProducts: JSON.stringify(topProducts),
-      topProductsByQuantity: JSON.stringify(topProductsByQuantity),
-      orders: orders.slice(0, 10), // Get latest 10 orders for quick review
-    };
-
-    // Handle different output formats
-    if (download === "pdf") {
-      generatePDF(data, res);
-    } else if (download === "excel") {
-      generateExcel(data, res);
-    } else {
-      res.render("adminPages/SalesReportPages/adminSalesReport", data);
-    }
-  } catch (error) {
-    console.error("Error generating sales report:", error);
-    res.status(500).send("Error generating sales report: " + error.message);
-  }
-};
-
-function getDateRange(type, params) {
-  let start_date, end_date;
-
-  try {
-    if (type === "daily") {
-      if (!params.date) {
-        // Default to today if no date provided
-        params.date = new Date().toISOString().split("T")[0];
-      }
-      start_date = new Date(params.date);
-      start_date.setHours(0, 0, 0, 0);
-      end_date = new Date(params.date);
-      end_date.setHours(23, 59, 59, 999);
-    } else if (type === "weekly") {
-      if (!params.start_date) {
-        // Default to start of current week if no date provided
-        let today = new Date();
-        let dayOfWeek = today.getDay();
-        let startOfWeek = new Date(today);
-        startOfWeek.setDate(today.getDate() - dayOfWeek);
-        params.start_date = startOfWeek.toISOString().split("T")[0];
-      }
-      start_date = new Date(params.start_date);
-      start_date.setHours(0, 0, 0, 0);
-      end_date = new Date(params.start_date);
-      end_date.setDate(end_date.getDate() + 6);
-      end_date.setHours(23, 59, 59, 999);
-    } else if (type === "monthly") {
-      let year = parseInt(params.year) || new Date().getFullYear();
-      let month = params.month
-        ? parseInt(params.month) - 1
-        : new Date().getMonth();
-      start_date = new Date(year, month, 1, 0, 0, 0, 0);
-      end_date = new Date(year, month + 1, 0, 23, 59, 59, 999);
-    } else if (type === "yearly") {
-      let year = parseInt(params.year) || new Date().getFullYear();
-      start_date = new Date(year, 0, 1, 0, 0, 0, 0);
-      end_date = new Date(year, 11, 31, 23, 59, 59, 999);
-    } else if (type === "custom") {
-      if (!params.start_date || !params.end_date) {
-        throw new Error("Start and end dates are required for custom reports");
-      }
-      start_date = new Date(params.start_date);
-      start_date.setHours(0, 0, 0, 0);
-      end_date = new Date(params.end_date);
-      end_date.setHours(23, 59, 59, 999);
-    } else {
-      throw new Error("Invalid report type");
-    }
-
-    return { start_date, end_date };
-  } catch (error) {
-    console.error("Error calculating date range:", error);
-    throw error;
-  }
-}
-
-function generatePDF(data, res) {
-  try {
-    const doc = new PDFDocument({ margin: 50, size: "A4" });
-
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename=sales_report_${Date.now()}.pdf`,
-    );
-
-    doc.pipe(res);
-
-    // Header with company info
-    doc
-      .fontSize(24)
-      .font("Helvetica-Bold")
-      .text("Sales Report", { align: "center" });
-    doc.moveDown(0.5);
-    doc
-      .fontSize(12)
-      .font("Helvetica")
-      .text(
-        `Period: ${data.start_date_formatted} to ${data.end_date_formatted}`,
-        { align: "center" },
-      );
-    doc.moveDown(2);
-
-    // Summary Statistics Section
-    doc.fontSize(16).font("Helvetica-Bold").text("Summary Statistics");
-    doc.moveDown(1);
-
-    const summaryData = [
-      ["Total Orders", data.sales_count.toString()],
-      ["Total Revenue", `₹${data.total_sales_amount.toFixed(2)}`],
-      ["Total Items Sold", data.total_items_sold.toString()],
-      ["Average Order Value", `₹${data.average_order_value.toFixed(2)}`],
+    // 2. DETAILED ORDERS SHEET
+    const ordersSheet = workbook.addWorksheet("Orders Detail");
+    ordersSheet.columns = [
+      { header: "Order ID", key: "id", width: 20 },
+      { header: "Date", key: "date", width: 20 },
+      { header: "Customer", key: "user", width: 25 },
+      { header: "Payment", key: "payment", width: 15 },
+      { header: "Status", key: "status", width: 15 },
+      { header: "Discount", key: "discount", width: 15 },
+      { header: "Total Amount", key: "amount", width: 15 },
     ];
 
-    // Draw summary table
-    const startY = doc.y;
-    const colWidth = 250;
-
-    summaryData.forEach((row, index) => {
-      const y = startY + index * 25;
-      doc
-        .fontSize(11)
-        .font("Helvetica-Bold")
-        .text(row[0], 70, y, { width: colWidth });
-      doc
-        .fontSize(11)
-        .font("Helvetica")
-        .text(row[1], 320, y, { width: colWidth });
-
-      // Add subtle line
-      doc
-        .strokeColor("#EEEEEE")
-        .lineWidth(0.5)
-        .moveTo(70, y + 20)
-        .lineTo(500, y + 20)
-        .stroke();
+    data.orders.forEach((o) => {
+      ordersSheet.addRow({
+        id: o.orderId,
+        date: new Date(o.orderDate).toLocaleDateString(),
+        user: o.userId?.name || "N/A",
+        payment: o.paymentMethod,
+        status: o.status,
+        discount: o.coupon?.discountAmount || 0,
+        amount: o.grandTotal,
+      });
     });
 
-    doc.moveDown(4);
-
-    // Order Status Breakdown
-    const ordersByStatus = JSON.parse(data.ordersByStatus);
-    if (Object.keys(ordersByStatus).length > 0) {
-      doc.fontSize(16).font("Helvetica-Bold").text("Orders by Status");
-      doc.moveDown(0.5);
-
-      Object.entries(ordersByStatus).forEach(([status, count]) => {
-        doc
-          .fontSize(11)
-          .font("Helvetica")
-          .text(
-            `${status.charAt(0).toUpperCase() + status.slice(1)}: ${count} orders`,
-            70,
-          );
-      });
-      doc.moveDown(1.5);
-    }
-
-    // Payment Method Breakdown
-    const ordersByPaymentMethod = JSON.parse(data.ordersByPaymentMethod);
-    if (Object.keys(ordersByPaymentMethod).length > 0) {
-      doc.fontSize(16).font("Helvetica-Bold").text("Payment Methods");
-      doc.moveDown(0.5);
-
-      Object.entries(ordersByPaymentMethod).forEach(([method, count]) => {
-        doc
-          .fontSize(11)
-          .font("Helvetica")
-          .text(`${method}: ${count} orders`, 70);
-      });
-      doc.moveDown(1.5);
-    }
-
-    // Top Products
-    const topProducts = JSON.parse(data.topProducts);
-    if (topProducts.length > 0) {
-      doc.addPage();
-      doc.fontSize(16).font("Helvetica-Bold").text("Top Products by Revenue");
-      doc.moveDown(1);
-
-      topProducts.slice(0, 5).forEach((product, index) => {
-        doc
-          .fontSize(11)
-          .font("Helvetica-Bold")
-          .text(`${index + 1}. ${product.name}`, 70);
-        doc
-          .fontSize(10)
-          .font("Helvetica")
-          .text(
-            `   Revenue: ₹${product.revenue.toFixed(2)} | Quantity Sold: ${product.quantity}`,
-            70,
-          );
-        doc.moveDown(0.5);
-      });
-    }
-
-    // Footer
-    doc
-      .fontSize(9)
-      .font("Helvetica")
-      .text(
-        `Generated on ${new Date().toLocaleString()}`,
-        50,
-        doc.page.height - 50,
-        {
-          align: "center",
-        },
-      );
-
-    doc.end();
-  } catch (error) {
-    console.error("Error generating PDF:", error);
-    res.status(500).send("Error generating PDF: " + error.message);
-  }
-}
-
-function generateExcel(data, res) {
-  try {
-    const wb = new ExcelJS.Workbook();
-    wb.creator = "Admin Dashboard";
-    wb.created = new Date();
-
-    // Summary Sheet
-    const summarySheet = wb.addWorksheet("Summary");
-
-    // Title
-    summarySheet.mergeCells("A1:D1");
-    summarySheet.getCell("A1").value = "Sales Report";
-    summarySheet.getCell("A1").font = { size: 18, bold: true };
-    summarySheet.getCell("A1").alignment = {
-      horizontal: "center",
-      vertical: "middle",
+    // Add Table Styling
+    ordersSheet.getRow(1).font = { bold: true, color: { argb: "FFFFFF" } };
+    ordersSheet.getRow(1).fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "4472C4" },
     };
-    summarySheet.getRow(1).height = 30;
+    ordersSheet.getColumn("amount").numFmt = "₹#,##0.00";
+    ordersSheet.getColumn("discount").numFmt = "₹#,##0.00";
+    ordersSheet.autoFilter = "A1:G1";
 
-    // Date Range
-    summarySheet.mergeCells("A2:D2");
-    summarySheet.getCell("A2").value =
-      `Period: ${data.start_date_formatted} to ${data.end_date_formatted}`;
-    summarySheet.getCell("A2").alignment = { horizontal: "center" };
-    summarySheet.getCell("A2").font = { size: 12 };
-
-    // Summary Statistics
-    summarySheet.addRow([]);
-    summarySheet.addRow(["Summary Statistics"]);
-    summarySheet.getCell("A4").font = { size: 14, bold: true };
-
-    summarySheet.addRow([]);
-    summarySheet.addRow(["Metric", "Value"]);
-    summarySheet.getRow(6).font = { bold: true };
-
-    summarySheet.addRow(["Total Orders", data.sales_count]);
-    summarySheet.addRow(["Total Revenue", data.total_sales_amount]);
-    summarySheet.addRow(["Total Items Sold", data.total_items_sold]);
-    summarySheet.addRow(["Average Order Value", data.average_order_value]);
-
-    // Format currency
-    summarySheet.getCell("B8").numFmt = "₹#,##0.00";
-    summarySheet.getCell("B10").numFmt = "₹#,##0.00";
-
-    // Order Status
-    const ordersByStatus = JSON.parse(data.ordersByStatus);
-    summarySheet.addRow([]);
-    summarySheet.addRow(["Order Status Breakdown"]);
-    summarySheet.getCell(`A${summarySheet.lastRow.number}`).font = {
-      size: 14,
-      bold: true,
-    };
-
-    summarySheet.addRow([]);
-    summarySheet.addRow(["Status", "Count"]);
-    summarySheet.getRow(summarySheet.lastRow.number).font = { bold: true };
-
-    Object.entries(ordersByStatus).forEach(([status, count]) => {
-      summarySheet.addRow([
-        status.charAt(0).toUpperCase() + status.slice(1),
-        count,
-      ]);
-    });
-
-    // Top Products Sheet
-    const topProducts = JSON.parse(data.topProducts);
-    if (topProducts.length > 0) {
-      const productsSheet = wb.addWorksheet("Top Products");
-
-      productsSheet.addRow(["Top Products by Revenue"]);
-      productsSheet.getCell("A1").font = { size: 14, bold: true };
-
-      productsSheet.addRow([]);
-      productsSheet.addRow([
-        "Rank",
-        "Product Name",
-        "Quantity Sold",
-        "Revenue",
-      ]);
-      productsSheet.getRow(3).font = { bold: true };
-
-      topProducts.forEach((product, index) => {
-        productsSheet.addRow([
-          index + 1,
-          product.name,
-          product.quantity,
-          product.revenue,
-        ]);
+    // 3. TOP PRODUCTS SHEET
+    const productSheet = workbook.addWorksheet("Product Performance");
+    productSheet.columns = [
+      { header: "Product Name", key: "name", width: 35 },
+      { header: "Quantity Sold", key: "qty", width: 15 },
+      { header: "Revenue Generated", key: "revenue", width: 20 },
+    ];
+    data.topProducts.forEach((p) => {
+      productSheet.addRow({
+        name: p.name,
+        qty: p.quantity,
+        revenue: p.revenue,
       });
-
-      // Format revenue column
-      for (let i = 4; i <= topProducts.length + 3; i++) {
-        productsSheet.getCell(`D${i}`).numFmt = "₹#,##0.00";
-      }
-
-      // Auto-fit columns
-      productsSheet.columns.forEach((column) => {
-        column.width = 25;
-      });
-    }
-
-    // Auto-fit summary sheet columns
-    summarySheet.columns.forEach((column) => {
-      column.width = 25;
     });
+    productSheet.getRow(1).font = { bold: true };
 
-    // Set response headers
     res.setHeader(
       "Content-Type",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     );
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename=sales_report_${Date.now()}.xlsx`,
+      `attachment; filename=Sales_Report_${Date.now()}.xlsx`,
     );
 
-    wb.xlsx.write(res).then(() => {
-      res.end();
-    });
-  } catch (error) {
-    console.error("Error generating Excel:", error);
-    res.status(500).send("Error generating Excel: " + error.message);
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (err) {
+    console.error("Excel Gen Error:", err);
+    res.status(500).send("Excel generation failed");
   }
 }
 
+/**
+ * GENERATE PDF REPORT
+ * Clean, tabular layout in Landscape mode
+ */
+function generatePDF(data, res) {
+  try {
+    const doc = new PDFDocument({
+      margin: 30,
+      size: "A4",
+      layout: "landscape",
+    });
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=Sales_Report_${Date.now()}.pdf`,
+    );
+    doc.pipe(res);
+
+    // Header
+    doc
+      .fillColor("#444444")
+      .fontSize(20)
+      .text("SALES ANALYTICS REPORT", { align: "center" });
+    doc
+      .fontSize(10)
+      .text(`${data.start_date_formatted} to ${data.end_date_formatted}`, {
+        align: "center",
+      });
+    doc.moveDown();
+
+    // Stats Grid
+    const startX = 30;
+    let currentY = doc.y;
+
+    doc.rect(startX, currentY, 780, 50).fill("#f9f9f9").stroke();
+    doc.fillColor("#000").fontSize(12).font("Helvetica-Bold");
+
+    doc.text("Total Orders", 50, currentY + 10);
+    doc.text("Gross Revenue", 200, currentY + 10);
+    doc.text("Total Discount", 400, currentY + 10);
+    doc.text("Avg Order Value", 600, currentY + 10);
+
+    doc.font("Helvetica").fontSize(11);
+    doc.text(data.sales_count, 50, currentY + 30);
+    doc.text(
+      `₹${data.total_sales_amount.toLocaleString()}`,
+      200,
+      currentY + 30,
+    );
+    doc.text(`₹${data.total_discount.toLocaleString()}`, 400, currentY + 30);
+    doc.text(
+      `₹${data.average_order_value.toLocaleString()}`,
+      600,
+      currentY + 30,
+    );
+
+    doc.moveDown(4);
+
+    // Table Header
+    const tableTop = doc.y;
+    doc.font("Helvetica-Bold").fontSize(10);
+    doc.text("Order ID", 30, tableTop);
+    doc.text("Customer", 150, tableTop);
+    doc.text("Date", 350, tableTop);
+    doc.text("Payment", 450, tableTop);
+    doc.text("Status", 550, tableTop);
+    doc.text("Amount", 700, tableTop, { align: "right" });
+
+    doc
+      .moveTo(30, tableTop + 15)
+      .lineTo(790, tableTop + 15)
+      .stroke();
+
+    // Table Rows
+    let rowY = tableTop + 25;
+    doc.font("Helvetica").fontSize(9);
+
+    data.orders.forEach((o) => {
+      if (rowY > 500) {
+        doc.addPage({ layout: "landscape" });
+        rowY = 50;
+      }
+      const maskedId = "*****" + o.orderId.slice(-5);
+
+      doc.text(maskedId, 30, rowY);
+      doc.text(o.userId?.name || "Guest", 150, rowY);
+      doc.text(new Date(o.orderDate).toLocaleDateString(), 350, rowY);
+      doc.text(o.paymentMethod, 450, rowY);
+      doc.text(o.status, 550, rowY);
+      doc.text(`₹${o.grandTotal.toLocaleString()}`, 700, rowY, {
+        align: "right",
+      });
+      rowY += 20;
+    });
+
+    doc.end();
+  } catch (err) {
+    console.error("PDF Gen Error:", err);
+    res.status(500).send("PDF generation failed");
+  }
+}
+
+/**
+ * ANALYTICS ENGINE
+ * Aggregates all necessary data in one DB pass
+ */
+async function generateSalesData(startDate, endDate) {
+  const orders = await Order.find({
+    orderDate: { $gte: startDate, $lte: endDate },
+    status: { $nin: ["cancelled"] },
+  })
+    .populate("userId", "name email")
+    .sort({ orderDate: -1 });
+
+  let stats = {
+    totalRevenue: 0,
+    totalDiscount: 0,
+    totalItems: 0,
+    productSales: {},
+    dailySales: {},
+    ordersByStatus: {},
+    ordersByPayment: {},
+  };
+
+  orders.forEach((order) => {
+    const dateKey = order.orderDate.toISOString().split("T")[0];
+
+    // Basic Stats
+    stats.totalRevenue += order.grandTotal;
+    stats.totalDiscount += order.coupon?.discountAmount || 0;
+
+    // Daily breakdown
+    if (!stats.dailySales[dateKey])
+      stats.dailySales[dateKey] = { revenue: 0, count: 0 };
+    stats.dailySales[dateKey].revenue += order.grandTotal;
+    stats.dailySales[dateKey].count++;
+
+    // Status/Payment breakdown
+    stats.ordersByStatus[order.status] =
+      (stats.ordersByStatus[order.status] || 0) + 1;
+    stats.ordersByPayment[order.paymentMethod] =
+      (stats.ordersByPayment[order.paymentMethod] || 0) + 1;
+
+    // Product Logic
+    order.items.forEach((item) => {
+      if (item.status === "returned" || item.status === "cancelled") return;
+
+      stats.totalItems += item.quantity;
+      const pId = item.productId.toString();
+      if (!stats.productSales[pId]) {
+        stats.productSales[pId] = { name: item.name, quantity: 0, revenue: 0 };
+      }
+      stats.productSales[pId].quantity += item.quantity;
+      stats.productSales[pId].revenue += item.price * item.quantity;
+    });
+  });
+
+  return { orders, ...stats };
+}
+
+/**
+ * MAIN CONTROLLER
+ */
+exports.getSalesReport = async (req, res) => {
+  console.log("req body : ", req.body);
+  console.log("req params : ", req.params);
+  console.log("req query : ", req.query);
+  try {
+    const { type = "daily", start_date, end_date, download } = req.query;
+
+    const range = getDateRange(type, req.query);
+    console.log("range : ", range);
+    const report = await generateSalesData(range.start_date, range.end_date);
+
+    const topProducts = Object.values(report.productSales)
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 10);
+
+    const data = {
+      start_date_formatted: range.start_date.toDateString(),
+      end_date_formatted: range.end_date.toDateString(),
+      sales_count: report.orders.length,
+      total_sales_amount: report.totalRevenue,
+      total_discount: report.totalDiscount,
+      total_items_sold: report.totalItems,
+      average_order_value:
+        report.orders.length > 0
+          ? (report.totalRevenue / report.orders.length).toFixed(2)
+          : 0,
+      orders: report.orders,
+      topProducts,
+      dailySales: report.dailySales,
+      ordersByStatus: report.ordersByStatus,
+      ordersByPaymentMethod: report.ordersByPayment,
+    };
+
+    if (download === "pdf") return generatePDF(data, res);
+    if (download === "excel") return generateExcel(data, res);
+
+    res.render("adminPages/salesReport", data);
+  } catch (error) {
+    console.error("Main Report Error:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+/**
+ * HELPER: DATE CALCULATOR
+ */
+function getDateRange(type, params) {
+  let start_date = new Date();
+  let end_date = new Date();
+
+  switch (type) {
+    case "daily": {
+      const d = params.date ? new Date(params.date) : new Date();
+
+      start_date = new Date(d);
+      start_date.setHours(0, 0, 0, 0);
+
+      end_date = new Date(start_date);
+      end_date.setDate(start_date.getDate() + 1); // next day 00:00
+      break;
+    }
+
+    case "weekly": {
+      const base = params.start_date ? new Date(params.start_date) : new Date();
+
+      start_date = new Date(base);
+      start_date.setHours(0, 0, 0, 0);
+
+      // optional: align to week start (Sunday)
+      const day = start_date.getDay();
+      start_date.setDate(start_date.getDate() - day);
+
+      end_date = new Date(start_date);
+      end_date.setDate(start_date.getDate() + 7); // +7 days
+      break;
+    }
+
+    case "monthly": {
+      const month = params.month
+        ? parseInt(params.month) - 1
+        : new Date().getMonth();
+
+      const year = params.year
+        ? parseInt(params.year)
+        : new Date().getFullYear();
+
+      start_date = new Date(year, month, 1);
+      start_date.setHours(0, 0, 0, 0);
+
+      end_date = new Date(year, month + 1, 1); // next month start
+      break;
+    }
+
+    case "yearly": {
+      const year = params.year
+        ? parseInt(params.year)
+        : new Date().getFullYear();
+
+      start_date = new Date(year, 0, 1);
+      start_date.setHours(0, 0, 0, 0);
+
+      end_date = new Date(year + 1, 0, 1); // next year start
+      break;
+    }
+
+    case "custom": {
+      start_date = new Date(params.start_date);
+      start_date.setHours(0, 0, 0, 0);
+
+      end_date = new Date(params.end_date);
+      end_date.setHours(0, 0, 0, 0);
+
+      end_date.setDate(end_date.getDate() + 1); // make it exclusive
+      break;
+    }
+  }
+
+  return { start_date, end_date };
+}
+
+/* =========================
+   ORDERS API (FIXED)
+========================= */
 exports.getOrdersData = async (req, res) => {
   try {
     const { period = "week" } = req.query;
@@ -517,55 +410,55 @@ exports.getOrdersData = async (req, res) => {
     } else if (period === "year") {
       startDate = new Date();
       startDate.setFullYear(startDate.getFullYear() - 1);
-    } else {
-      return res.status(400).json({ error: "Invalid period" });
     }
 
-    const orders = await Order.find({
-      orderDate: { $gte: startDate, $lt: endDate },
-    })
-      .populate("userId", "name email")
-      .sort({ orderDate: -1 });
+    const report = await generateSalesData(startDate, endDate);
 
-    const orderCount = orders.length;
-    const totalRevenue = orders.reduce(
-      (sum, order) => sum + order.grandTotal,
-      0,
-    );
-
-    // Sales by day
-    const salesByDay = {};
-    orders.forEach((order) => {
-      const dateStr = new Date(order.orderDate).toISOString().split("T")[0];
-      salesByDay[dateStr] = (salesByDay[dateStr] || 0) + order.grandTotal;
-    });
-
-    const chartData = Object.keys(salesByDay)
-      .map((date) => ({
+    const chartData = Object.entries(report.dailySales)
+      .map(([date, val]) => ({
         date,
-        revenue: salesByDay[date],
+        revenue: val.revenue,
       }))
       .sort((a, b) => a.date.localeCompare(b.date));
 
     res.json({
       success: true,
       data: {
-        orderCount,
-        totalRevenue,
+        orderCount: report.orders.length,
+        totalRevenue: report.totalRevenue,
         chartData,
-        recentOrders: orders.slice(0, 5),
+        recentOrders: report.orders.slice(0, 5),
       },
     });
   } catch (error) {
-    console.error("Error fetching orders data:", error);
     res.status(500).json({ error: "Failed to fetch orders data" });
   }
 };
 
+/* =========================
+   SALES REPORT PAGE FIX
+========================= */
 exports.getSalesReportPage = async (req, res) => {
   try {
-    res.render("adminPages/salesReport")
+    const { start_date, end_date } = getDateRange("monthly", {});
+
+    const report = await generateSalesData(start_date, end_date);
+
+    // console.log("report : ", report);
+
+    res.render("adminPages/salesReport", {
+      sales_count: report.orders.length,
+      total_sales_amount: report.totalRevenue,
+      total_items_sold: report.totalItems,
+      dailySales: JSON.stringify(report.dailySales),
+      topProducts: JSON.stringify(
+        Object.values(report.productSales)
+          .sort((a, b) => b.revenue - a.revenue)
+          .slice(0, 10),
+      ),
+      orders: report.orders.slice(0, 10),
+    });
   } catch (error) {
-    
+    res.status(500).send("Error loading report page");
   }
 };
