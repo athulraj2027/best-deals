@@ -302,10 +302,8 @@ function formatPaymentStatus(status) {
 }
 //
 // Razorpay credentials
-const RAZORPAY_KEY_ID =
-  process.env.RAZORPAY_KEY_ID || "rzp_test_tTcfsqC1bRVLSi";
-const RAZORPAY_KEY_SECRET =
-  process.env.RAZORPAY_KEY_SECRET || "GmoWj3uV9ZKKDB9T5hJwU6Sn";
+const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID;
+const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
 
 // Initialize Razorpay
 const razorpay = new Razorpay({
@@ -313,11 +311,6 @@ const razorpay = new Razorpay({
   key_secret: RAZORPAY_KEY_SECRET,
 });
 
-/**
- * @route   POST /order/create-razorpay
- * @desc    Create a new Razorpay order
- * @access  Private (requires authentication)
- */
 router.post("/order/create-razorpay", async (req, res) => {
   try {
     const { cartId, amount, addressId } = req.body;

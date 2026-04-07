@@ -465,6 +465,8 @@ exports.cancelOrderController = async (req, res) => {
           message: `Error updating stock for product ${item.name}`,
         });
       }
+
+      item.status = "cancelled";
     }
 
     const user = await User.findById(order.userId);
@@ -680,7 +682,7 @@ exports.cancelItemController = async (req, res) => {
       });
     }
 
-    if (item.status !== "active") {
+    if (item.status !== "pending") {
       return res.status(400).json({
         status: "failed",
         message: "Item cannot be cancelled",

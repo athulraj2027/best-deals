@@ -341,7 +341,14 @@ exports.changeStatusController = async (req, res) => {
       });
     }
 
-    if (status === "delivered") {
+    const order = await Order.findById(orderId);
+    if (!order) return res.status(400).json({ message: "No order found" });
+
+    if (
+      (order.status === "delivered" && status === "pending") ||
+      status === "processing" ||
+      status === "cancelled"
+    ) {
       return res
         .status(400)
         .json({ message: "The order has been already delivered" });
@@ -349,7 +356,10 @@ exports.changeStatusController = async (req, res) => {
 
     const updatedOrder = await Order.findByIdAndUpdate(
       orderId,
-      { status: status },
+      {
+        status: status,
+        "items.$[].status": status, // 🔥 all items updated
+      },
       { new: true },
     );
 

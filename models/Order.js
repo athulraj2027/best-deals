@@ -18,13 +18,14 @@ const OrderItemSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: [
-        "active",
+        "pending",
+        "delivered",
         "cancelled",
         "return_requested",
         "return_accepted",
         "returned",
       ],
-      default: "active",
+      default: "pending",
     },
 
     returnReason: {
@@ -53,7 +54,6 @@ const orderSchema = new mongoose.Schema(
         "processing",
         "delivered",
         "cancelled",
-        "paid",
         "return_requested",
         "return_accepted",
         "returned",

@@ -463,7 +463,7 @@
   <div class="modal-item-price">₹<%= lineTotal %></div>
 
   <!-- Action Buttons -->
-  <% if(item.status === "active" && order.status !== 'delivered') { %>
+  <% if(item.status === "pending" && order.status !== 'delivered') { %>
 
     <button 
       class="cancel-item-btn meta-chip"
@@ -602,6 +602,71 @@
       }
     });
 
+    // ── Shared reason HTML builders ──────────────────────────────────────────
+    function cancelReasonHtml() {
+      return `
+        <div style="text-align:left;margin-top:14px;display:flex;flex-direction:column;gap:10px;">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 14px;border-radius:10px;border:1.5px solid #e5e7eb;font-weight:500;">
+            <input type="checkbox" id="cr1" style="width:16px;height:16px;">
+            <span><i class="fas fa-exchange-alt" style="color:#2563eb;margin-right:6px;"></i>Changed my mind</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 14px;border-radius:10px;border:1.5px solid #e5e7eb;font-weight:500;">
+            <input type="checkbox" id="cr2" style="width:16px;height:16px;">
+            <span><i class="fas fa-clock" style="color:#d97706;margin-right:6px;"></i>Delivery taking too long</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 14px;border-radius:10px;border:1.5px solid #e5e7eb;font-weight:500;">
+            <input type="checkbox" id="cr3" style="width:16px;height:16px;">
+            <span><i class="fas fa-tag" style="color:#16a34a;margin-right:6px;"></i>Found a better price elsewhere</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 14px;border-radius:10px;border:1.5px solid #e5e7eb;font-weight:500;">
+            <input type="checkbox" id="cr4" style="width:16px;height:16px;">
+            <span><i class="fas fa-times-circle" style="color:#dc2626;margin-right:6px;"></i>Ordered by mistake</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 14px;border-radius:10px;border:1.5px solid #e5e7eb;font-weight:500;">
+            <input type="checkbox" id="cr5" style="width:16px;height:16px;">
+            <span><i class="fas fa-ellipsis-h" style="color:#6b7280;margin-right:6px;"></i>Other</span>
+          </label>
+        </div>`;
+    }
+
+    function cancelReasonPreConfirm() {
+      const reasons = [];
+      if (document.getElementById('cr1').checked) reasons.push("Changed my mind");
+      if (document.getElementById('cr2').checked) reasons.push("Delivery taking too long");
+      if (document.getElementById('cr3').checked) reasons.push("Found a better price elsewhere");
+      if (document.getElementById('cr4').checked) reasons.push("Ordered by mistake");
+      if (document.getElementById('cr5').checked) reasons.push("Other");
+      if (!reasons.length) { Swal.showValidationMessage("Please select at least one reason"); return false; }
+      return reasons;
+    }
+
+    function returnReasonHtml() {
+      return `
+        <div style="text-align:left;margin-top:14px;display:flex;flex-direction:column;gap:10px;">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 14px;border-radius:10px;border:1.5px solid #e5e7eb;font-weight:500;">
+            <input type="checkbox" id="rr1" style="width:16px;height:16px;">
+            <span><i class="fas fa-exclamation-triangle" style="color:#dc2626;margin-right:6px;"></i>Item is defective</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 14px;border-radius:10px;border:1.5px solid #e5e7eb;font-weight:500;">
+            <input type="checkbox" id="rr2" style="width:16px;height:16px;">
+            <span><i class="fas fa-thumbs-down" style="color:#d97706;margin-right:6px;"></i>Cheap quality</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 14px;border-radius:10px;border:1.5px solid #e5e7eb;font-weight:500;">
+            <input type="checkbox" id="rr3" style="width:16px;height:16px;">
+            <span><i class="fas fa-exchange-alt" style="color:#2563eb;margin-right:6px;"></i>Different product received</span>
+          </label>
+        </div>`;
+    }
+
+    function returnReasonPreConfirm() {
+      const reasons = [];
+      if (document.getElementById('rr1').checked) reasons.push("Item is defective");
+      if (document.getElementById('rr2').checked) reasons.push("Cheap quality");
+      if (document.getElementById('rr3').checked) reasons.push("Different product");
+      if (!reasons.length) { Swal.showValidationMessage("Please select at least one reason"); return false; }
+      return reasons;
+    }
+
     // ── Cancel order ─────────────────────────────────────────────────────────
     $(document).ready(function () {
       $(".order-cancel-form").on("submit", function (e) {
@@ -610,16 +675,18 @@
         const action = form.attr("action");
         Swal.fire({
           title: "Cancel this order?",
-          text: "This action cannot be undone.",
+          text: "Please tell us why you're cancelling:",
           icon: "warning",
           showCancelButton: true,
           confirmButtonColor: "#dc2626",
           cancelButtonColor: "#6b7280",
           confirmButtonText: "Yes, cancel it",
           cancelButtonText: "Keep order",
+          html: cancelReasonHtml(),
+          preConfirm: cancelReasonPreConfirm
         }).then(result => {
           if (result.isConfirmed) {
-            $.post(action, function (response) {
+            $.post(action, { reasons: result.value }, function (response) {
               Swal.fire({ title: response.title, text: response.message, icon: 'success' })
                 .then(() => window.location.reload());
             });
@@ -639,30 +706,8 @@
           confirmButtonColor: "#ea580c",
           cancelButtonColor: "#6b7280",
           confirmButtonText: "Submit Return",
-          html: `
-            <div style="text-align:left;margin-top:14px;display:flex;flex-direction:column;gap:10px;">
-              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 14px;border-radius:10px;border:1.5px solid #e5e7eb;font-weight:500;">
-                <input type="checkbox" id="reasonDefective" style="width:16px;height:16px;">
-                <span><i class="fas fa-exclamation-triangle" style="color:#dc2626;margin-right:6px;"></i>Item is defective</span>
-              </label>
-              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 14px;border-radius:10px;border:1.5px solid #e5e7eb;font-weight:500;">
-                <input type="checkbox" id="reasonQuality" style="width:16px;height:16px;">
-                <span><i class="fas fa-thumbs-down" style="color:#d97706;margin-right:6px;"></i>Cheap quality</span>
-              </label>
-              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 14px;border-radius:10px;border:1.5px solid #e5e7eb;font-weight:500;">
-                <input type="checkbox" id="reasonDifferent" style="width:16px;height:16px;">
-                <span><i class="fas fa-exchange-alt" style="color:#2563eb;margin-right:6px;"></i>Different product received</span>
-              </label>
-            </div>
-          `,
-          preConfirm: () => {
-            const reasons = [];
-            if (document.getElementById('reasonDefective').checked) reasons.push("Item is defective");
-            if (document.getElementById('reasonQuality').checked)   reasons.push("Cheap quality");
-            if (document.getElementById('reasonDifferent').checked) reasons.push("Different product");
-            if (!reasons.length) { Swal.showValidationMessage("Please select at least one reason"); return false; }
-            return reasons;
-          }
+          html: returnReasonHtml(),
+          preConfirm: returnReasonPreConfirm
         }).then(result => {
           if (result.isConfirmed) {
             $.ajax({
@@ -681,94 +726,74 @@
       });
     });
   </script>
-<script>
 
-function handleOrderAction(button, url, title, text, confirmText, successText, badgeHtml) {
+  <script>
+    function handleOrderAction(button, url, title, html, preConfirm, confirmText, successText, badgeHtml) {
+      const productId = button.data("product-id");
+      const variantId = button.data("variant-id");
+      const orderId   = button.data("order-id");
 
-  const productId = button.data("product-id");
-  const variantId = button.data("variant-id");
-  const orderId = button.data("order-id");
+      Swal.fire({
+        title: title,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#ef4444",
+        cancelButtonColor: "#6b7280",
+        confirmButtonText: confirmText,
+        html: html,
+        preConfirm: preConfirm
+      }).then((result) => {
+        if (!result.isConfirmed) return;
 
-  Swal.fire({
-    title: title,
-    text: text,
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#ef4444",
-    cancelButtonColor: "#6b7280",
-    confirmButtonText: confirmText
-  }).then((result) => {
-
-    if (!result.isConfirmed) return;
-
-    $.ajax({
-      url: url,
-      method: "POST",
-      data: { productId, variantId, orderId },
-
-      success: function () {
-
-        Swal.fire({
-          icon: "success",
-          title: successText,
-          timer: 1500,
-          showConfirmButton: false
+        $.ajax({
+          url: url,
+          method: "POST",
+          data: { productId, variantId, orderId, reasons: result.value },
+          success: function () {
+            Swal.fire({
+              icon: "success",
+              title: successText,
+              timer: 1500,
+              showConfirmButton: false
+            });
+            button.replaceWith(badgeHtml);
+          },
+          error: function () {
+            Swal.fire("Error", "Something went wrong", "error");
+          }
         });
+      });
+    }
 
-        button.replaceWith(badgeHtml);
-
-      },
-
-      error: function () {
-        Swal.fire("Error", "Something went wrong", "error");
-      }
-
+    /* CANCEL ITEM */
+    $(document).on("click", ".cancel-item-btn", function () {
+      const button = $(this);
+      handleOrderAction(
+        button,
+        "/profile/orders/cancel-item",
+        "Cancel this item?",
+        cancelReasonHtml(),
+        cancelReasonPreConfirm,
+        "Yes, cancel it",
+        "Item cancelled",
+        `<span class="meta-chip" style="background:#fee2e2;color:#b91c1c;">Cancelled</span>`
+      );
     });
 
-  });
-
-}
-
-
-/* CANCEL ITEM */
-$(document).on("click", ".cancel-item-btn", function () {
-
-  const button = $(this);
-
-  handleOrderAction(
-    button,
-    "/profile/orders/cancel-item",
-    "Cancel this item?",
-    "This action cannot be undone.",
-    "Yes, cancel it",
-    "Item cancelled",
-    `<span class="meta-chip" style="background:#fee2e2;color:#b91c1c;">
-        Cancelled
-     </span>`
-  );
-
-});
-
-
-/* RETURN ITEM */
-$(document).on("click", ".return-item-btn", function () {
-
-  const button = $(this);
-
-  handleOrderAction(
-    button,
-    "/profile/orders/return-item",
-    "Return this item?",
-    "A return request will be submitted.",
-    "Request Return",
-    "Return requested",
-    `<span class="meta-chip" style="background:#fef3c7;color:#92400e;">
-        Return Requested
-     </span>`
-  );
-
-});
-
-</script>
+    /* RETURN ITEM */
+    $(document).on("click", ".return-item-btn", function () {
+      const button = $(this);
+      handleOrderAction(
+        button,
+        "/profile/orders/return-item",
+        "Return this item?",
+        returnReasonHtml(),
+        returnReasonPreConfirm,
+        "Request Return",
+        "Return requested",
+        `<span class="meta-chip" style="background:#fef3c7;color:#92400e;">Return Requested</span>`
+      );
+    });
+  </script>
 </body>
 </html>
