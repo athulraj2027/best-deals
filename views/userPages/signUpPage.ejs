@@ -140,6 +140,16 @@ $(document).ready(function () {
     const passwordRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
 
+
+     if (!name || !email || !password |!confirmPassword) {
+      Swal.fire({
+        title: "Error",
+        text: "All fields are required!",
+        icon: "error"
+      });
+      return;
+    }
+
     if (!passwordRegex.test(password)) {
       Swal.fire({
         title: "Error",

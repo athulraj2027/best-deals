@@ -54,9 +54,20 @@ exports.verifyOtpController = async (req, res) => {
               message: "Referral code not valid",
             });
 
-          await User.findByIdAndUpdate(referredUser._id, {
-            $inc: { wallet: 100 }, // Add 100 to wallet
-          });
+          await User.findByIdAndUpdate(
+            referredUser._id,
+            {
+              $inc: { wallet: 100 },
+              $push: {
+                walletTransactions: {
+                  type: "credit",
+                  amount: 100,
+                  description: "Referral bonus",
+                },
+              },
+            },
+            { new: true },
+          );
         }
         const newUser = new User({
           name,

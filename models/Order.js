@@ -29,9 +29,11 @@ const OrderItemSchema = new mongoose.Schema(
     },
 
     returnReason: {
-      type: String,
+      type: [String],
     },
-
+    cancelReason: {
+      type: [String],
+    },
     returnedAt: {
       type: Date,
     },
@@ -77,6 +79,12 @@ const orderSchema = new mongoose.Schema(
     paymentMethod: {
       type: String,
       required: true,
+    },
+    returnReason: {
+      type: [String],
+    },
+    cancelReason: {
+      type: [String],
     },
     addressId: {
       type: mongoose.Schema.Types.ObjectId,

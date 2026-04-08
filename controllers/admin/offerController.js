@@ -231,8 +231,8 @@ exports.editOfferController = async (req, res) => {
       });
     }
 
-    if (!existingOffer)
-      return res.status(400).json({ message: "Offer not found" });
+    // if (!existingOffer)
+    //   return res.status(400).json({ message: "Offer not found" });
     const currentDate = new Date();
     const parsedStartDate = startDate ? new Date(startDate) : currentDate;
     if (!expiryDate || isNaN(new Date(expiryDate))) {
@@ -258,13 +258,7 @@ exports.editOfferController = async (req, res) => {
       },
       { new: true },
     );
-    if (!editedOffer) {
-      return res.status(404).json({
-        status: "error",
-        title: "Error",
-        message: "Offer couldn't update",
-      });
-    }
+
     await updateProductsForOffer(editedOffer);
     return res.status(200).json({
       status: "success",

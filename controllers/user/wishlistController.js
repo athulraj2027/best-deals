@@ -30,10 +30,7 @@ exports.getWishlistPage = async (req, res) => {
     let removedItems = [];
 
     for (let item of wishlist.items) {
-      console.log("hi : ", item.productId);
-
       const product = await Product.findById(item.productId._id.toString());
-
       if (!product || !product.status || !product.inStock) {
         console.log("hi2");
         removedItems.push(item.name);
@@ -49,7 +46,6 @@ exports.getWishlistPage = async (req, res) => {
       }
 
       const variant = product.variants.id(item.variantId);
-
       if (!variant || variant.quantity <= 0) {
         console.log("hi4");
         removedItems.push(item.name);

@@ -6,6 +6,9 @@ const User = require("../../models/User");
 const Product = require("../../models/Product");
 const Cart = require("../../models/Cart");
 
+const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID;
+const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
+
 const signInRoutes = require("./signInRoutes");
 const signUpRoutes = require("./signUpRoutes");
 const verifyOtpRoutes = require("./verifyOtpRoutes");
@@ -23,8 +26,6 @@ const checkBlockedUserMiddleware = require("../../middlewares/checkBlockedUserMi
 const Razorpay = require("razorpay");
 const userGuestMiddleware = require("../../middlewares/userGuestMiddleware");
 const { generateOrderId } = require("../../config/generate-order");
-
-const secret_key = "1234567890";
 
 router.use((req, res, next) => {
   res.locals.userId = req.session.userId || null;
@@ -300,12 +301,7 @@ function formatPaymentStatus(status) {
   };
   return map[status] || status;
 }
-//
-// Razorpay credentials
-const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID;
-const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
 
-// Initialize Razorpay
 const razorpay = new Razorpay({
   key_id: RAZORPAY_KEY_ID,
   key_secret: RAZORPAY_KEY_SECRET,
@@ -326,7 +322,6 @@ router.post("/order/create-razorpay", async (req, res) => {
       });
     }
 
-    // Fetch cart
     const cart = await Cart.findById(cartId);
     if (!cart) {
       return res.status(404).json({
@@ -335,7 +330,6 @@ router.post("/order/create-razorpay", async (req, res) => {
       });
     }
 
-    // Create options for Razorpay order
     const options = {
       amount: amount * 100, // Converting to paise
       currency: "INR",
@@ -363,9 +357,9 @@ router.post("/order/create-razorpay", async (req, res) => {
       paymentMethod: "razorpay",
       payment_status: "pending",
       status: "pending",
-      grandTotal: cart.total, // ✅ this should exist in cart
+      grandTotal: cart.total,
       razorpay: {
-        orderId: response.id, // ✅ this is the field you're querying later
+        orderId: response.id,
         amount: response.amount,
         currency: response.currency,
         receipt: response.receipt,
@@ -373,11 +367,8 @@ router.post("/order/create-razorpay", async (req, res) => {
     });
 
     await pendingOrder.save();
-    console.log("Pending order", pendingOrder);
     const order = await Order.find({ userId: userId });
-    console.log("order : ", order);
 
-    // Return order details to client
     return res.status(200).json({
       status: "success",
       id: response.id,
@@ -395,11 +386,6 @@ router.post("/order/create-razorpay", async (req, res) => {
   }
 });
 
-/**
- * @route   POST /verify-payment
- * @desc    Verify Razorpay payment
- * @access  Private
- */
 router.post("/verify-payment", async (req, res) => {
   try {
     const {
@@ -408,8 +394,6 @@ router.post("/verify-payment", async (req, res) => {
       razorpay_signature,
       cartId,
     } = req.body;
-
-    console.log("Verify payment request body:", req.body);
 
     // Validate required fields
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
@@ -466,7 +450,6 @@ router.post("/verify-payment", async (req, res) => {
           `Error updating inventory for product ${item.productId}:`,
           err,
         );
-        // Continue with other products even if one fails
       }
     }
 
@@ -479,7 +462,6 @@ router.post("/verify-payment", async (req, res) => {
         { $set: { items: [], subtotal: 0, tax: 0, total: 0 } },
       );
     }
-    console.log("Verified order : ", order);
     return res.status(200).json({
       status: "success",
       message: "Payment verified successfully",
@@ -495,11 +477,6 @@ router.post("/verify-payment", async (req, res) => {
   }
 });
 
-/**
- * @route   POST /order
- * @desc    Create a new Razorpay order (simplified version)
- * @access  Public
- */
 router.route("/order").post(async (req, res) => {
   console.log("Request body:", req.body);
   const { amount } = req.body;
@@ -513,7 +490,6 @@ router.route("/order").post(async (req, res) => {
 
   try {
     const response = await razorpay.orders.create(options);
-    console.log("Response of order creation:", response);
 
     res.json({
       id: response.id,
@@ -530,11 +506,6 @@ router.route("/order").post(async (req, res) => {
   }
 });
 
-/**
- * @route   POST /refund
- * @desc    Process refund for a payment
- * @access  Private (Admin only)
- */
 router.post("/refund", async (req, res) => {
   try {
     // Validate the payment ID and amount
@@ -587,7 +558,6 @@ router.post("/refund", async (req, res) => {
 });
 
 router.route("/use-wallet").post(async (req, res) => {
-  console.log("calculating wallet preview");
   try {
     const { cartId } = req.body;
     const userId = req.session.userId;
@@ -622,10 +592,7 @@ router.route("/use-wallet").post(async (req, res) => {
       });
     }
 
-    // Use stored originalTotal if available
     const cartTotal = cart.originalTotal ?? cart.total;
-
-    // Calculate base amount after coupon (if any)
     let baseAmount = cartTotal;
     if (cart.appliedCoupon && cart.discountAmount) {
       baseAmount -= cart.discountAmount;

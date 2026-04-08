@@ -8,6 +8,4 @@ router
   .get(userAuthMiddleware, verifyOtpController.getVerifyOtpPage)
   .post(verifyOtpController.verifyOtpController);
 
-// router.route("/verify-otp").post(verifyOtpController.);
-
 module.exports = router;

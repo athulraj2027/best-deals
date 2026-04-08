@@ -8,7 +8,13 @@ const bcrypt = require("bcrypt");
 exports.getUserProfilePage = async (req, res) => {
   try {
     const userId = req.session.userId;
-    console.log(userId.userId);
+    if (!userId) {
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "No userId found",
+      });
+    }
     const user = await User.findById(userId);
     return res.render("userPages/profilePages/profilePage", { user });
   } catch (err) {
@@ -409,8 +415,6 @@ exports.getOrdersPage = async (req, res) => {
       });
     }
 
-    console.log("orders : ", orders);
-
     orders.forEach((order) => console.log("items ; ", order.items));
 
     return res
@@ -424,6 +428,7 @@ exports.getOrdersPage = async (req, res) => {
 
 exports.cancelOrderController = async (req, res) => {
   try {
+    console.log("req body : ", req.body);
     const orderId = req.params.id;
     const order = await Order.findById(orderId);
     if (!order) {
@@ -467,6 +472,7 @@ exports.cancelOrderController = async (req, res) => {
       }
 
       item.status = "cancelled";
+      item.cancelReason = req.body.reasons;
     }
 
     const user = await User.findById(order.userId);
@@ -630,6 +636,7 @@ exports.returnOrderController = async (req, res) => {
       orderId,
       {
         status: "return_requested",
+        cancelReason: req.body.reasons,
       },
       { new: true },
     );
@@ -690,6 +697,7 @@ exports.cancelItemController = async (req, res) => {
     }
 
     item.status = "cancelled";
+    item.cancelReason = req.body.reasons;
 
     // refund logic if prepaid
     if (order.payment_status === "paid") {
@@ -741,7 +749,7 @@ exports.cancelItemController = async (req, res) => {
 
 exports.returnItemController = async (req, res) => {
   try {
-    const { variantId, productId, orderId, reason } = req.body;
+    const { variantId, productId, orderId, reasons } = req.body;
 
     const order = await Order.findById(orderId);
 
@@ -767,7 +775,7 @@ exports.returnItemController = async (req, res) => {
 
     if (item.status === "delivered") {
       item.status = "return_requested";
-      item.returnReason = reason;
+      item.returnReason = reasons;
 
       await order.save();
 

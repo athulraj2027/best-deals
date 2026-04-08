@@ -1,9 +1,6 @@
 const Offer = require("../../models/Offer");
 const Product = require("../../models/Product");
 
-/**
- * Determine the best offer for a product
- */
 async function determineBestOffer(product, variantPrice) {
   const now = new Date();
 
@@ -31,7 +28,6 @@ async function determineBestOffer(product, variantPrice) {
       discountAmount = offer.offerValue;
     }
 
-    // Cap discount to product price
     discountAmount = Math.min(discountAmount, variantPrice);
 
     if (discountAmount > maxSavings) {

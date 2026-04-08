@@ -56,11 +56,7 @@ async function calculateCartTotal(
   if ((useWallet && user.wallet > 0) || paymentMethod === "wallet") {
     walletDeduction = Math.min(user.wallet, total);
     total -= walletDeduction;
-
-    // ✅ Deduct from wallet
     user.wallet -= walletDeduction;
-
-    // ✅ Add transaction
     user.walletTransactions.push({
       type: "debit",
       amount: walletDeduction,
@@ -70,11 +66,9 @@ async function calculateCartTotal(
     await user.save();
   }
 
-  // 5️⃣ Tax
   const tax = totalRealPrice * 0.1;
   total += tax;
 
-  // 6️⃣ Calculate final paid amount per item
   for (let item of items) {
     const afterCoupon = item.itemSubtotal - item.couponShare;
 

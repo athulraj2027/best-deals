@@ -25,7 +25,7 @@ exports.verifyOTP = (email, otp) => {
 const transporter = nodemailer.createTransport({
   service: "Gmail",
   auth: {
-    user: process.env.EMAIL || "athulraj2027@gmail.com",
+    user: process.env.EMAIL,
     pass: process.env.EMAIL_PASSWORD ,
   },
 });
