@@ -2,6 +2,7 @@ const Offer = require("../../models/Offer");
 const Product = require("../../models/Product");
 
 async function determineBestOffer(product, variantPrice) {
+  console.log("vPrice", variantPrice);
   const now = new Date();
 
   const offers = await Offer.find({
@@ -127,6 +128,7 @@ async function updateProductsForOffer(offerId) {
     await Product.bulkWrite(bulkOps);
   }
 
+  console.log("bulkops ; ", bulkOps);
   return bulkOps.length;
 }
 
@@ -139,7 +141,7 @@ async function updateOfferStatuses() {
   // Update expired offers
   await Offer.updateMany(
     { endDate: { $lt: now }, status: { $ne: "expired" } },
-    { $set: { status: "expired", active: false } }
+    { $set: { status: "expired", active: false } },
   );
 
   // Update active offers
@@ -149,13 +151,13 @@ async function updateOfferStatuses() {
       endDate: { $gte: now },
       status: { $ne: "active" },
     },
-    { $set: { status: "active" } }
+    { $set: { status: "active" } },
   );
 
   // Update upcoming offers
   await Offer.updateMany(
     { startDate: { $gt: now }, status: { $ne: "upcoming" } },
-    { $set: { status: "upcoming" } }
+    { $set: { status: "upcoming" } },
   );
 }
 

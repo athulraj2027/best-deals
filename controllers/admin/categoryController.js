@@ -78,7 +78,7 @@ exports.getEditCategoryPage = async (req, res) => {
   try {
     const categoryId = req.params.id;
     if (!mongoose.Types.ObjectId.isValid(categoryId)) {
-      return res.status(400).send("Invalid ID");
+      return res.status(statusCodes.BAD_REQUEST).send("Invalid ID");
     }
     const category = await Category.findOne({ _id: categoryId });
     return res.render("adminPages/CategoryPages/adminEditCategory", {

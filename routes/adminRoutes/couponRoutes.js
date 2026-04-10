@@ -16,5 +16,5 @@ router
   .route("/edit/:id")
   .get(guestMiddleware, couponController.getEditCouponPage)
   .put(couponController.editCouponController);
-  
+
 module.exports = router;

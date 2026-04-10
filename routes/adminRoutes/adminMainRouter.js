@@ -9,24 +9,22 @@ const dashboardController = require("../../controllers/admin/dashboardController
 const guestMiddleware = require("../../middlewares/guestMiddleware");
 const orderRoutes = require("./orderRoutes");
 const couponRoutes = require("./couponRoutes");
-const salesReportRoutes = require('./salesReportRoutes')
-const offerRoutes = require('./offerRoutes')
+const salesReportRoutes = require("./salesReportRoutes");
+const offerRoutes = require("./offerRoutes");
 
 router.use("/categories", categoryRoutes);
 router.use("/products", productRoutes);
 router.use("/customers", usersRoutes);
 router.use("/orders", orderRoutes);
 router.use("/coupons", couponRoutes);
-router.use("/offers",offerRoutes)
+router.use("/offers", offerRoutes);
 router.use(
   "/dashboard",
   guestMiddleware,
-  dashboardController.getAdminDashboard
+  dashboardController.getAdminDashboard,
 );
 
-router.use('/sales-report',salesReportRoutes)
-
-router.use("/", authRoutes);
+router.use("/sales-report", salesReportRoutes);
 
 router.post("/logout", (req, res) => {
   console.log("hi");
@@ -34,5 +32,7 @@ router.post("/logout", (req, res) => {
   res.clearCookie("auth_token");
   return res.redirect("/admin");
 });
+
+router.use("/", authRoutes);
 
 module.exports = router;

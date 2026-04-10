@@ -4,7 +4,7 @@ const router = express.Router();
 
 router.get(
   "/auth/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
+  passport.authenticate("google", { scope: ["profile", "email"] }),
 );
 
 router.get(
@@ -24,7 +24,7 @@ router.get(
     }
     console.log(req.session.email);
     return res.redirect("/");
-  }
+  },
 );
 
 module.exports = router;

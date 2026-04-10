@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const offerController = require("../../controllers/admin/offerController");
 const guestMiddleware = require("../../middlewares/guestMiddleware");
-const offerStatusUpdater = require('../../middlewares/offerStatusUpdater')
+const offerStatusUpdater = require("../../middlewares/offerStatusUpdater");
 
 router.use(offerStatusUpdater);
 router.route("/").get(guestMiddleware, offerController.getOffersPage);

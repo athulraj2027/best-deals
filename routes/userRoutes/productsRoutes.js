@@ -8,5 +8,5 @@ router.route("/cart/add/:id").post(productsController.addtoCartController);
 router
   .route("/wishlist/add/:id")
   .post(productsController.addtoWishlistController);
-  
+
 module.exports = router;

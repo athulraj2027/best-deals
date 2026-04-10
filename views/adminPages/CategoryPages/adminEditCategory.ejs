@@ -1,692 +1,258 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Edit Category</title>
+    <title>Edit Category | Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-      :root {
-        --primary-color: #4361ee;
-        --secondary-color: #3f37c9;
-        --accent-color: #4895ef;
-        --success-color: #4cc9f0;
-        --text-color: #2b2d42;
-        --bg-color: #f8f9fa;
-        --card-bg: #ffffff;
-        --border-radius: 12px;
-        --transition: all 0.3s ease;
-      }
-
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: "Segoe UI", system-ui, sans-serif;
-      }
-
-      body {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        color: var(--text-color);
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 2rem;
-      }
-
-      .container {
-        width: 100%;
-        max-width: 800px;
-        background: var(--card-bg);
-        padding: 2rem;
-        border-radius: var(--border-radius);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-      }
-
-      .header {
-        text-align: center;
-        margin-bottom: 2rem;
-      }
-
-      .header h1 {
-        font-size: 2.5rem;
-        color: var(--primary-color);
-        margin-bottom: 0.5rem;
-      }
-
-      .header p {
-        color: #6c757d;
-        font-size: 1.1rem;
-      }
-
-      .form-section {
-        background: var(--bg-color);
-        padding: 1.5rem;
-        border-radius: var(--border-radius);
-        margin-bottom: 1.5rem;
-      }
-
-      .form-section h3 {
-        color: var(--secondary-color);
-        margin-bottom: 1.5rem;
-        font-size: 1.2rem;
-      }
-
-      .form-group {
-        margin-bottom: 1.5rem;
-      }
-
-      label {
-        display: block;
-        margin-bottom: 0.5rem;
-        color: var(--text-color);
-        font-weight: 500;
-      }
-
-      input,
-      select,
-      textarea {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 2px solid #e9ecef;
-        border-radius: 8px;
-        font-size: 1rem;
-        transition: var(--transition);
-      }
-
-      input:focus,
-      select:focus,
-      textarea:focus {
-        border-color: var(--accent-color);
-        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
-        outline: none;
-      }
-
-      textarea {
-        min-height: 120px;
-        resize: vertical;
-      }
-
-      .file-upload {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-      }
-
-      .file-upload-label {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 2rem;
-        background: #f8f9fa;
-        border: 2px dashed #ced4da;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: var(--transition);
-      }
-
-      .file-upload-label:hover {
-        background: #e9ecef;
-        border-color: var(--accent-color);
-      }
-
-      .file-upload-label svg {
-        width: 48px;
-        height: 48px;
-        margin-bottom: 1rem;
-        color: var(--primary-color);
-      }
-
-      .file-upload input[type="file"] {
-        display: none;
-      }
-
-      .preview-container {
-        margin-top: 1rem;
-        display: block;
-        text-align: center;
-        position: relative;
-      }
-
-      .preview-container img {
-        max-width: 200px;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      }
-
-      .remove-image {
-        position: absolute;
-        top: 5px;
-        right: calc(50% - 110px);
-        background: rgba(255, 0, 0, 0.7);
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        font-size: 1.2rem;
-        transition: var(--transition);
-      }
-
-      .remove-image:hover {
-        background: rgba(255, 0, 0, 0.9);
-        transform: scale(1.1);
-      }
-
-      .submit-btn {
-        background: var(--primary-color);
-        color: white;
-        border: none;
-        padding: 1rem 2rem;
-        border-radius: 8px;
-        font-size: 1.1rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: var(--transition);
-        width: 100%;
-        margin-top: 1rem;
-      }
-
-      .submit-btn:hover {
-        background: var(--secondary-color);
-        transform: translateY(-2px);
-      }
-
-      .cancel-btn {
-        background: #dc3545;
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        font-size: 1.1rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: var(--transition);
-        width: 100%;
-        margin-top: 1rem;
-        max-width: 150px;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-      }
-
-      .cancel-btn:hover {
-        background: #c82333;
-        transform: translateY(-2px);
-      }
-
-      .status-toggle {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 0.5rem;
-        background: #f8f9fa;
-        border-radius: 8px;
-      }
-
-      .status-toggle label {
-        margin: 0;
-        cursor: pointer;
-      }
-
-      .toggle-switch {
-        position: relative;
-        display: inline-block;
-        width: 60px;
-        height: 34px;
-      }
-
-      .toggle-switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-
-      .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #ccc;
-        transition: 0.4s;
-        border-radius: 34px;
-      }
-
-      .slider:before {
-        position: absolute;
-        content: "";
-        height: 26px;
-        width: 26px;
-        left: 4px;
-        bottom: 4px;
-        background-color: white;
-        transition: 0.4s;
-        border-radius: 50%;
-      }
-
-      input:checked + .slider {
-        background-color: var(--success-color);
-      }
-
-      input:checked + .slider:before {
-        transform: translateX(26px);
-      }
-
-      @media (max-width: 768px) {
-        .container {
-          padding: 1rem;
-        }
-
-        .header h1 {
-          font-size: 2rem;
-        }
-      }
+        body { font-family: 'Inter', sans-serif; }
+        .cropper-view-box, .cropper-face { border-radius: 8px; }
+        .hide-input { display: none !important; }
     </style>
-  </head>
-  <body>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased min-h-screen">
     <%- include('../partials/menu') %>
-    <div class="container">
-      <div class="header">
-        <h1>Edit Category</h1>
-        <p>Update your product category details</p>
-      </div>
 
-      <form id="editCategoryForm" enctype="multipart/form-data">
-        <div class="form-section">
-          <h3>Basic Information</h3>
-          <div class="form-group">
-            <label for="categoryName">Category Name</label>
-            <input
-              type="text"
-              id="categoryName"
-              name="categoryName"
-              placeholder="Enter category name"
-              value="<%= category.name %>"
-              required
-            />
-            <div
-              id="categoryNameError"
-              class="error-message"
-              style="
-                color: #dc3545;
-                font-size: 0.875rem;
-                margin-top: 0.25rem;
-                display: none;
-              "
-            ></div>
-          </div>
-
-          <div class="form-group">
-            <label>Category Status</label>
-            <div class="status-toggle">
-              <label class="toggle-switch">
-                <input type="checkbox" name="status" id="statusToggle" <%=
-                category.status === 'listed' ? 'checked' : '' %> />
-                <span class="slider"></span>
-              </label>
-              <span id="statusText"
-                ><%= category.status === 'listed' ? 'Listed' : 'Unlisted'
-                %></span
-              >
-            </div>
-          </div>
+    <div class="max-w-3xl mx-auto py-12 px-4">
+        <div class="mb-10 text-center">
+            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Edit Category</h1>
+            <p class="text-gray-500 mt-2">Modify the details and status of your product category.</p>
         </div>
 
-        <div class="form-section">
-          <h3>Media</h3>
-          <div class="form-group">
-            <label>Category Image</label>
-            <div class="file-upload">
-              <label class="file-upload-label" id="dropZone">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="17 8 12 3 7 8" />
-                  <line x1="12" y1="3" x2="12" y2="15" />
-                </svg>
-                <span>Drag & drop a new image or click to browse</span>
-                <input
-                  type="file"
-                  id="categoryImage"
-                  name="categoryImage"
-                  accept="image/*"
-                />
-              </label>
-              <div class="preview-container">
-                <img
-                  id="imagePreview"
-                  src="/<%= category.imageUrl %>"
-                  alt="Category Preview"
-                />
-                <button type="button" class="remove-image" id="removeImageBtn">
-                  &times;
+        <form id="editCategoryForm" enctype="multipart/form-data" class="space-y-6">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                <h3 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    General Information
+                </h3>
+
+                <div class="space-y-6">
+                    <div>
+                        <label for="categoryName" class="block text-sm font-semibold text-gray-700 mb-2">Category Name</label>
+                        <input type="text" id="categoryName" name="name" value="<%= category.name %>" 
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-4 focus:ring-blue-50 focus:border-blue-400 outline-none transition-all" />
+                        <p id="categoryNameError" class="text-red-500 text-xs mt-2 hidden"></p>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                        <div>
+                            <span class="block text-sm font-bold text-gray-700">Display Status</span>
+                            <span id="statusText" class="text-xs font-medium <%= category.status === 'listed' ? 'text-green-600' : 'text-gray-500' %> uppercase tracking-wider">
+                                <%= category.status === 'listed' ? 'Listed' : 'Unlisted' %>
+                            </span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="statusToggle" class="sr-only peer" <%= category.status === 'listed' ? 'checked' : '' %>>
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                <h3 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Thumbnail Image
+                </h3>
+
+                <div class="flex flex-col items-center">
+                    <div id="dropZone" class="w-full relative group">
+                        <label for="categoryImage" class="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer bg-gray-50 hover:bg-gray-100 hover:border-blue-400 transition-all">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <svg class="w-10 h-10 mb-3 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                <p class="text-sm text-gray-500">Click to change image</p>
+                            </div>
+                            <input type="file" id="categoryImage" name="categoryImage" accept="image/*" class="hidden" />
+                        </label>
+                    </div>
+
+                    <div id="previewWrapper" class="mt-6 relative <%= category.imageUrl ? '' : 'hidden' %>">
+                        <img id="imagePreview" src="/<%= category.imageUrl %>" class="max-w-[250px] rounded-xl shadow-md border border-gray-200 object-cover aspect-square" />
+                        <button type="button" id="removeImageBtn" class="absolute -top-3 -right-3 bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600 shadow-lg transition-transform hover:scale-110">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                        <button type="button" id="cropBtn" class="w-full mt-3 py-2 text-xs font-bold text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                            Refine Crop
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-4 sm:flex-row sm:justify-end pt-4">
+                <button type="button" onclick="window.location.href='/admin/categories'" class="px-8 py-3 font-bold text-gray-600 bg-gray-200 rounded-xl hover:bg-gray-300 transition-all order-2 sm:order-1">
+                    Cancel
                 </button>
-              </div>
+                <button type="submit" class="px-10 py-3 font-bold text-white bg-blue-600 rounded-xl shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all active:scale-95 order-1 sm:order-2">
+                    Update Category
+                </button>
             </div>
-          </div>
-        </div>
-
-        <button type="submit" class="submit-btn">Update Category</button>
-      </form>
-      <form action="/admin/categories" method="get">
-        <button type="submit" class="cancel-btn">Cancel</button>
-      </form>
+        </form>
     </div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <div id="cropperModal" class="hidden fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-2xl rounded-2xl overflow-hidden flex flex-col shadow-2xl">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50">
+                <h3 class="font-bold text-gray-800">Adjust Category Image</h3>
+                <button type="button" onclick="closeCropper()" class="text-gray-400 hover:text-red-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="bg-black flex-1 max-h-[60vh] overflow-hidden">
+                <img id="cropperImage" src="" class="max-w-full block" />
+            </div>
+            <div class="p-4 border-t flex justify-end gap-3 bg-gray-50">
+                <button type="button" onclick="closeCropper()" class="px-5 py-2 font-semibold text-gray-600 bg-white border rounded-lg hover:bg-gray-100">Cancel</button>
+                <button type="button" id="saveCropBtn" class="px-6 py-2 font-bold text-white bg-green-600 rounded-lg hover:bg-green-700">Save Crop</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-      // Validation Rules Constants
-      const VALIDATION_RULES = {
-        categoryName: {
-          minLength: 3,
-          maxLength: 50,
-        },
-        image: {
-          maxSize: 5 * 1024 * 1024, // 5MB
-          allowedTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
-        },
-      };
+        let cropper = null;
+        let imageRemoved = false;
 
-      // Create error message elements
-      function createErrorElement(id) {
-        const errorDiv = document.createElement("div");
-        errorDiv.id = `${id}Error`;
-        errorDiv.className = "error-message";
-        errorDiv.style.color = "#dc3545";
-        errorDiv.style.fontSize = "0.875rem";
-        errorDiv.style.marginTop = "0.25rem";
-        errorDiv.style.display = "none";
-        return errorDiv;
-      }
+        const categoryImage = document.getElementById('categoryImage');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewWrapper = document.getElementById('previewWrapper');
+        const removeImageBtn = document.getElementById('removeImageBtn');
+        const statusToggle = document.getElementById('statusToggle');
+        const statusText = document.getElementById('statusText');
 
-      // Image upload handling
-      const dropZone = document.getElementById("dropZone");
-      const imageInput = document.getElementById("categoryImage");
-      const imagePreview = document.getElementById("imagePreview");
-      const previewContainer = document.querySelector(".preview-container");
-      const removeImageBtn = document.getElementById("removeImageBtn");
-
-      // Store original image URL for reset
-      const originalImageUrl = imagePreview.src;
-      let imageRemoved = false;
-
-      dropZone.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        dropZone.style.borderColor = "var(--accent-color)";
-        dropZone.style.background = "#e9ecef";
-      });
-
-      dropZone.addEventListener("dragleave", () => {
-        dropZone.style.borderColor = "#ced4da";
-        dropZone.style.background = "#f8f9fa";
-      });
-
-      dropZone.addEventListener("drop", (e) => {
-        e.preventDefault();
-        dropZone.style.borderColor = "#ced4da";
-        dropZone.style.background = "#f8f9fa";
-
-        const file = e.dataTransfer.files[0];
-        if (file && file.type.startsWith("image/")) {
-          handleImageUpload(file);
-        }
-      });
-
-      imageInput.addEventListener("change", (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          handleImageUpload(file);
-        }
-      });
-
-      function handleImageUpload(file) {
-        if (!validateImage(file)) return;
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          imagePreview.src = e.target.result;
-          previewContainer.style.display = "block";
-          imageRemoved = false;
-        };
-        reader.readAsDataURL(file);
-      }
-
-      removeImageBtn.addEventListener("click", confirmRemoveImage);
-
-      function confirmRemoveImage() {
-        Swal.fire({
-          title: "Remove Image",
-          text: "Are you sure you want to remove this image?",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonText: "Yes, remove it!",
-          cancelButtonText: "No, keep it",
-          reverseButtons: true,
-        }).then((result) => {
-          if (result.isConfirmed) {
-            imagePreview.src = ""; // Clear the image
-            imageInput.value = "";
-            previewContainer.style.display = "none";
-            imageRemoved = true;
-
-            // Add hidden input to signal image removal
-            const hiddenInput = document.createElement("input");
-            hiddenInput.type = "hidden";
-            hiddenInput.name = "removeImage";
-            hiddenInput.value = "true";
-            document
-              .getElementById("editCategoryForm")
-              .appendChild(hiddenInput);
-
-            Swal.fire("Removed!", "The image has been removed.", "success");
-          }
-        });
-      }
-
-      // Validation functions
-      function validateCategoryName(name) {
-        const errorElement = document.getElementById("categoryNameError");
-
-        if (!name) {
-          showError(errorElement, "Category name is required");
-          return false;
-        }
-
-        if (name.length < VALIDATION_RULES.categoryName.minLength) {
-          showError(
-            errorElement,
-            `Category name must be at least ${VALIDATION_RULES.categoryName.minLength} characters`
-          );
-          return false;
-        }
-
-        if (name.length > VALIDATION_RULES.categoryName.maxLength) {
-          showError(
-            errorElement,
-            `Category name cannot exceed ${VALIDATION_RULES.categoryName.maxLength} characters`
-          );
-          return false;
-        }
-
-        hideError(errorElement);
-        return true;
-      }
-
-      function validateImage(file) {
-        if (!file) return true; // Image is optional
-
-        if (file.size > VALIDATION_RULES.image.maxSize) {
-          Swal.fire({
-            icon: "error",
-            title: "Invalid File Size",
-            text: "Image size should not exceed 5MB",
-          });
-          return false;
-        }
-
-        if (!VALIDATION_RULES.image.allowedTypes.includes(file.type)) {
-          Swal.fire({
-            icon: "error",
-            title: "Invalid File Type",
-            text: "Please upload a valid image file (JPEG, PNG, WebP, or GIF)",
-          });
-          return false;
-        }
-
-        return true;
-      }
-
-      // Helper functions
-      function showError(element, message) {
-        element.textContent = message;
-        element.style.display = "block";
-      }
-
-      function hideError(element) {
-        element.style.display = "none";
-      }
-
-      // Status toggle handling
-      const statusToggle = document.getElementById("statusToggle");
-      const statusText = document.getElementById("statusText");
-
-      statusToggle.addEventListener("change", function () {
-        statusText.textContent = this.checked ? "Listed" : "Unlisted";
-        this.value = this.checked ? "listed" : "unlisted";
-      });
-
-      // Real-time validation
-      document
-        .getElementById("categoryName")
-        .addEventListener("input", function () {
-          validateCategoryName(this.value);
+        // Status Toggle Text Update
+        statusToggle.addEventListener('change', function() {
+            const isListed = this.checked;
+            statusText.textContent = isListed ? 'Listed' : 'Unlisted';
+            statusText.className = `text-xs font-medium uppercase tracking-wider ${isListed ? 'text-green-600' : 'text-gray-500'}`;
         });
 
-      // Form submission
-      $(document).ready(function () {
-        $("#editCategoryForm").on("submit", function (e) {
-          e.preventDefault();
-
-          // Validate all fields
-          const nameValid = validateCategoryName($("#categoryName").val());
-          const imageValid = validateImage($("#categoryImage")[0].files[0]);
-
-          if (!nameValid || !imageValid) {
-            return;
-          }
-
-          // Show loading state
-          Swal.fire({
-            title: "Updating Category...",
-            text: "Please wait while we process your request",
-            allowOutsideClick: false,
-            showConfirmButton: false,
-            willOpen: () => {
-              Swal.showLoading();
-            },
-          });
-
-          const formData = new FormData(this);
-          // Add the category name (in case the field name is different)
-          formData.set("name", $("#categoryName").val());
-
-          // Make sure status is included properly
-          formData.set("status", statusToggle.checked ? "listed" : "unlisted");
-
-          // Add remove image flag if needed
-          if (imageRemoved) {
-            formData.append("removeImage", "true");
-          }
-
-          $.ajax({
-            url: "/admin/categories/edit/<%= category._id %>",
-            type: "POST",
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function (response) {
-              if (response.status === "success") {
-                Swal.fire({
-                  icon: "success",
-                  title: "Success!",
-                  text: "Category updated successfully",
-                  showConfirmButton: true,
-                }).then((result) => {
-                  if (result.isConfirmed) {
-                    window.location.href = "/admin/categories";
-                  }
-                });
-              } else {
-                Swal.fire({
-                  icon: "error",
-                  title: "Failed!",
-                  text: response.message || "Failed to update category",
-                  showConfirmButton: true,
-                });
-              }
-            },
-            error: function (xhr, status, error) {
-              console.error("AJAX Error:", status, error);
-              console.log("Response:", xhr.responseJSON);
-
-              let errorMessage =
-                "An unexpected error occurred. Please try again.";
-
-              if (xhr.responseJSON && xhr.responseJSON.message) {
-                errorMessage = xhr.responseJSON.message;
-              } else {
-                switch (xhr.status) {
-                  case 400:
-                    errorMessage = "Invalid data. Please check your inputs.";
-                    break;
-                  case 401:
-                    errorMessage = "Please login to continue.";
-                    break;
-                  case 403:
-                    errorMessage =
-                      "You don't have permission to edit categories.";
-                    break;
-                  case 404:
-                    errorMessage = "Category not found.";
-                    break;
-                  case 413:
-                    errorMessage =
-                      "Image file is too large. Maximum size is 5MB.";
-                    break;
-                  case 415:
-                    errorMessage =
-                      "Unsupported image format. Please use JPG, PNG, or WebP.";
-                    break;
-                  case 500:
-                    errorMessage = "Server error. Please try again later.";
-                    break;
+        // Image Handling
+        categoryImage.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    return Swal.fire("Error", "Image must be less than 5MB", "error");
                 }
-              }
-
-              Swal.fire({
-                icon: "error",
-                title: "Error!",
-                text: errorMessage,
-                showConfirmButton: true,
-              });
-            },
-          });
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    initCropper(event.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
         });
-      });
+
+        function initCropper(src) {
+            const modal = document.getElementById('cropperModal');
+            const cropImg = document.getElementById('cropperImage');
+            cropImg.src = src;
+            modal.classList.remove('hidden');
+            
+            if (cropper) cropper.destroy();
+            
+            // Short delay to allow modal display for cropper initialization
+            setTimeout(() => {
+                cropper = new Cropper(cropImg, {
+                    aspectRatio: 1,
+                    viewMode: 2,
+                    background: false
+                });
+            }, 100);
+        }
+
+        document.getElementById('saveCropBtn').addEventListener('click', () => {
+            const canvas = cropper.getCroppedCanvas({ width: 400, height: 400 });
+            imagePreview.src = canvas.toDataURL('image/jpeg');
+            previewWrapper.classList.remove('hidden');
+            imageRemoved = false;
+            closeCropper();
+        });
+
+        function closeCropper() {
+            document.getElementById('cropperModal').classList.add('hidden');
+            if (cropper) cropper.destroy();
+        }
+
+        document.getElementById('cropBtn').addEventListener('click', () => {
+            initCropper(imagePreview.src);
+        });
+
+        removeImageBtn.addEventListener('click', () => {
+            Swal.fire({
+                title: "Remove image?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, remove",
+                confirmButtonColor: "#EF4444"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    imagePreview.src = '';
+                    previewWrapper.classList.add('hidden');
+                    categoryImage.value = '';
+                    imageRemoved = true;
+                }
+            });
+        });
+
+        // Validation & Form Submission
+        $('#editCategoryForm').on('submit', function(e) {
+            e.preventDefault();
+            const name = $('#categoryName').val().trim();
+            
+            if (name.length < 3) {
+                $('#categoryNameError').text('Name must be at least 3 characters').removeClass('hidden');
+                return;
+            }
+
+            Swal.fire({
+                title: 'Updating...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            const formData = new FormData(this);
+            formData.set('name', name);
+            formData.set('status', statusToggle.checked ? 'listed' : 'unlisted');
+            
+            if (imageRemoved) {
+                formData.append('removeImage', 'true');
+            }
+
+            // If user cropped a new image, replace the file input with the blob
+            if (imagePreview.src.startsWith('data:')) {
+                const base64 = imagePreview.src.split(',')[1];
+                const type = imagePreview.src.split(';')[0].split(':')[1];
+                const bin = atob(base64);
+                const buffer = new Uint8Array(bin.length);
+                for (let i = 0; i < bin.length; i++) buffer[i] = bin.charCodeAt(i);
+                const blob = new Blob([buffer.buffer], { type });
+                formData.set('categoryImage', blob, 'category.jpg');
+            }
+
+            $.ajax({
+                url: "/admin/categories/edit/<%= category._id %>",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(res) {
+                    if (res.status === 'success') {
+                        Swal.fire("Success", "Category updated!", "success").then(() => {
+                            window.location.href = "/admin/categories";
+                        });
+                    } else {
+                        Swal.fire("Error", res.message || "Update failed", "error");
+                    }
+                },
+                error: function(xhr) {
+                    Swal.fire("Error", xhr.responseJSON?.message || "Server error", "error");
+                }
+            });
+        });
     </script>
-  </body>
+</body>
 </html>

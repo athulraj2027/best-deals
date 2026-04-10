@@ -1,567 +1,293 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Admin Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+  <meta charset="UTF-8"/>
+  <title>Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg:       #f4f5f7;
+      --surface:  #ffffff;
+      --border:   #e5e7eb;
+      --text:     #111827;
+      --muted:    #6b7280;
+      --teal:     #0f6e56;
+      --teal-bg:  #e1f5ee;
+      --blue:     #185fa5;
+      --blue-bg:  #e6f1fb;
+      --amber:    #854f0b;
+      --amber-bg: #faeeda;
+      --purple:   #534ab7;
+      --purple-bg:#eeedfe;
+      --pink:     #993556;
+      --pink-bg:  #fbeaf0;
+      --green:    #3b6d11;
+      --green-bg: #eaf3de;
+      --red:      #a32d2d;
+      --red-bg:   #fcebeb;
+      --radius:   12px;
+      --font: 'DM Sans', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
 
-    <style>
-      :root {
-        --bg: #fdfdfd00;
-        --surface: #161a24;
-        --surface2: #1e2333;
-        --border: rgba(255,255,255,0.07);
-        --text: #e8eaf0;
-        --muted: #6b7280;
-        --accent: #6ee7b7;
-        --accent2: #38bdf8;
-        --accent3: #f472b6;
-        --accent4: #fb923c;
-        --accent5: #a78bfa;
-        --danger: #f87171;
-        --radius: 16px;
-        --font-display: 'Syne', sans-serif;
-        --font-body: 'DM Sans', sans-serif;
-      }
+    .dash-wrap { margin-left: 250px; padding: 2rem 2.5rem; max-width: calc(100% - 250px); }
 
-      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    /* header */
+    .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.75rem; }
+    .dash-header h1 { font-size: 22px; font-weight: 600; color: var(--text); }
+    .date-pill { font-size: 12px; color: var(--muted); background: var(--surface); border: 1px solid var(--border); padding: 5px 14px; border-radius: 999px; }
 
-      body {
-        font-family: var(--font-body);
-        background: var(--bg);
-        color: var(--text);
-        min-height: 100vh;
-      }
+    /* filter bar */
+    .filter-bar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .fg { display: flex; flex-direction: column; gap: 4px; }
+    .fg label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 500; }
+    .filter-bar select, .filter-bar input[type=date] { font-size: 13px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; background: #f9fafb; color: var(--text); outline: none; font-family: var(--font); }
+    .filter-bar select:focus, .filter-bar input:focus { border-color: #9ca3af; }
+    .btn-apply { font-size: 13px; padding: 7px 18px; border: 1px solid var(--teal); border-radius: 8px; background: var(--teal-bg); color: var(--teal); cursor: pointer; font-family: var(--font); font-weight: 500; }
+    .btn-apply:hover { background: #c9eedd; }
+    .btn-reset { font-size: 13px; padding: 7px 12px; border: none; background: none; color: var(--muted); cursor: pointer; font-family: var(--font); }
 
-      /* ── Layout ── */
-      .dash-wrap {
-        margin-left: 250px;
-        padding: 2rem 2.5rem;
-        max-width: calc(100% - 250px);
-      }
+    /* stats grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.25rem; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.25rem; }
+    .stat-card .ico { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-bottom: 10px; }
+    .stat-card .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; font-weight: 500; margin-bottom: 4px; }
+    .stat-card .val { font-size: 22px; font-weight: 600; color: var(--text); }
 
-      /* ── Header ── */
-      .dash-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2.5rem;
-        padding-bottom: 1.5rem;
-        border-bottom: 1px solid var(--border);
-      }
+    .ico-teal   { background: var(--teal-bg);   color: var(--teal);   }
+    .ico-blue   { background: var(--blue-bg);   color: var(--blue);   }
+    .ico-amber  { background: var(--amber-bg);  color: var(--amber);  }
+    .ico-purple { background: var(--purple-bg); color: var(--purple); }
+    .ico-pink   { background: var(--pink-bg);   color: var(--pink);   }
+    .ico-green  { background: var(--green-bg);  color: var(--green);  }
+    .ico-red    { background: var(--red-bg);    color: var(--red);    }
 
-      .dash-header h1 {
-        font-family: var(--font-display);
-        font-size: 2rem;
-        font-weight: 800;
-        background: linear-gradient(120deg, var(--accent), var(--accent2));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-      }
+    /* info row */
+    .info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.25rem; }
+    .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; display: flex; align-items: center; gap: 14px; }
+    .info-card .big-ico { width: 46px; height: 46px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .info-card .il { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; font-weight: 500; margin-bottom: 4px; }
+    .info-card .iv { font-size: 22px; font-weight: 600; }
 
-      .dash-header .date-badge {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        padding: 0.5rem 1.2rem;
-        border-radius: 999px;
-        font-size: 0.85rem;
-        color: var(--muted);
-      }
+    /* cards */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
+    .card-title { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+    .card-title i { color: var(--teal); }
 
-      /* ── Stat Cards ── */
-      .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1.25rem;
-        margin-bottom: 2rem;
-      }
+    /* grids */
+    .row-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 1.25rem; }
+    .row-3   { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 1.25rem; }
+    .row-2   { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.25rem; }
 
-      .stat-card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 1.5rem;
-        position: relative;
-        overflow: hidden;
-        transition: transform 0.2s, border-color 0.2s;
-        animation: fadeUp 0.5s both;
-      }
+    /* table */
+    .dash-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .dash-table th { text-align: left; padding: 6px 10px; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; border-bottom: 1px solid var(--border); font-weight: 600; }
+    .dash-table td { padding: 10px 10px; border-bottom: 1px solid var(--border); color: var(--text); }
+    .dash-table tr:last-child td { border-bottom: none; }
+    .dash-table tbody tr:hover td { background: #f9fafb; }
 
-      .stat-card:hover {
-        transform: translateY(-3px);
-        border-color: rgba(255,255,255,0.15);
-      }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .badge-success { background: var(--teal-bg);  color: var(--teal); }
+    .badge-danger  { background: var(--red-bg);   color: var(--red);  }
+    .badge-info    { background: var(--blue-bg);  color: var(--blue); }
 
-      .stat-card::before {
-        content: '';
-        position: absolute;
-        top: 0; right: 0;
-        width: 80px; height: 80px;
-        border-radius: 50%;
-        opacity: 0.12;
-        filter: blur(20px);
-      }
+    .rank { display: inline-flex; width: 22px; height: 22px; border-radius: 50%; font-size: 11px; font-weight: 600; align-items: center; justify-content: center; background: #f3f4f6; color: var(--muted); }
+    .rank.gold   { background: var(--amber-bg);  color: var(--amber); }
+    .rank.silver { background: #f3f4f6;           color: #6b7280; }
+    .rank.bronze { background: var(--pink-bg);    color: var(--pink); }
 
-      .stat-card.c1::before { background: var(--accent);  top:-20px; right:-20px; }
-      .stat-card.c2::before { background: var(--accent2); top:-20px; right:-20px; }
-      .stat-card.c3::before { background: var(--accent4); top:-20px; right:-20px; }
-      .stat-card.c4::before { background: var(--accent5); top:-20px; right:-20px; }
-      .stat-card.c5::before { background: var(--accent3); top:-20px; right:-20px; }
-      .stat-card.c6::before { background: var(--accent);  top:-20px; right:-20px; }
-      .stat-card.c7::before { background: var(--accent2); top:-20px; right:-20px; }
-      .stat-card.c8::before { background: var(--danger);  top:-20px; right:-20px; }
+    .progress-track { height: 4px; background: #f3f4f6; border-radius: 999px; overflow: hidden; margin-top: 4px; }
+    .progress-fill  { height: 100%; border-radius: 999px; background: var(--teal); }
 
-      .stat-card .icon {
-        width: 40px; height: 40px;
-        border-radius: 10px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1rem;
-        margin-bottom: 1rem;
-      }
+    .empty { color: var(--muted); font-size: 13px; text-align: center; padding: 2rem 0; }
+    .table-scroll { max-height: 300px; overflow-y: auto; }
 
-      .stat-card.c1 .icon { background: rgba(110,231,183,0.15); color: var(--accent); }
-      .stat-card.c2 .icon { background: rgba(56,189,248,0.15);  color: var(--accent2); }
-      .stat-card.c3 .icon { background: rgba(251,146,60,0.15);  color: var(--accent4); }
-      .stat-card.c4 .icon { background: rgba(167,139,250,0.15); color: var(--accent5); }
-      .stat-card.c5 .icon { background: rgba(244,114,182,0.15); color: var(--accent3); }
-      .stat-card.c6 .icon { background: rgba(110,231,183,0.15); color: var(--accent); }
-      .stat-card.c7 .icon { background: rgba(56,189,248,0.15);  color: var(--accent2); }
-      .stat-card.c8 .icon { background: rgba(248,113,113,0.15); color: var(--danger); }
+    @media (max-width: 1100px) {
+      .stats-grid, .row-2-1, .row-3, .row-2, .info-row { grid-template-columns: repeat(2, 1fr); }
+      .dash-wrap { margin-left: 0; max-width: 100%; padding: 1.25rem; }
+    }
+  </style>
+</head>
 
-      .stat-card .label {
-        font-size: 0.78rem;
-        color: var(--muted);
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        margin-bottom: 0.4rem;
-      }
+<body>
+  <%- include('./partials/menu') %>
 
-      .stat-card .value {
-        font-family: var(--font-display);
-        font-size: 1.9rem;
-        font-weight: 800;
-        line-height: 1;
-      }
+  <div class="dash-wrap">
 
-      .stat-card.c1 .value { color: var(--accent); }
-      .stat-card.c2 .value { color: var(--accent2); }
-      .stat-card.c3 .value { color: var(--accent4); }
-      .stat-card.c4 .value { color: var(--accent5); }
-      .stat-card.c5 .value { color: var(--accent3); }
-      .stat-card.c6 .value { color: var(--accent); }
-      .stat-card.c7 .value { color: var(--accent2); }
-      .stat-card.c8 .value { color: var(--danger); }
+    <div class="dash-header">
+      <h1>Dashboard</h1>
+      <span class="date-pill">
+        <i class="fa fa-calendar-alt" style="margin-right:5px;color:var(--teal)"></i>
+        <script>document.write(new Date().toLocaleDateString('en-IN',{weekday:'short',year:'numeric',month:'short',day:'numeric'}))</script>
+      </span>
+    </div>
 
-      /* ── Cards (charts, tables) ── */
-      .card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 1.75rem;
-        animation: fadeUp 0.5s both;
-      }
-
-      .card-title {
-        font-family: var(--font-display);
-        font-size: 1rem;
-        font-weight: 700;
-        color: var(--text);
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-      }
-
-      .card-title i { color: var(--accent); font-size: 0.9rem; }
-
-      /* ── Row layout ── */
-      .row-2-1 {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 1.25rem;
-        margin-bottom: 1.25rem;
-      }
-
-      .row-3 {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1.25rem;
-        margin-bottom: 1.25rem;
-      }
-
-      .row-2 {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.25rem;
-        margin-bottom: 1.25rem;
-      }
-
-      /* ── Table ── */
-      .dash-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.88rem;
-      }
-
-      .dash-table th {
-        text-align: left;
-        padding: 0.6rem 1rem;
-        color: var(--muted);
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        border-bottom: 1px solid var(--border);
-      }
-
-      .dash-table td {
-        padding: 0.85rem 1rem;
-        border-bottom: 1px solid var(--border);
-        color: var(--text);
-      }
-
-      .dash-table tr:last-child td { border-bottom: none; }
-
-      .dash-table tr:hover td { background: var(--surface2); }
-
-      .badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.3rem;
-        padding: 0.25rem 0.75rem;
-        border-radius: 999px;
-        font-size: 0.75rem;
-        font-weight: 600;
-      }
-
-      .badge-danger  { background: rgba(248,113,113,0.15); color: var(--danger); }
-      .badge-success { background: rgba(110,231,183,0.15); color: var(--accent); }
-      .badge-info    { background: rgba(56,189,248,0.15);  color: var(--accent2); }
-
-      /* ── Rank bubble ── */
-      .rank {
-        display: inline-flex;
-        width: 24px; height: 24px;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        font-size: 0.75rem;
-        font-weight: 700;
-        background: var(--surface2);
-        color: var(--muted);
-      }
-
-      .rank.gold   { background: rgba(251,191,36,0.15); color: #fbbf24; }
-      .rank.silver { background: rgba(156,163,175,0.15); color: #9ca3af; }
-      .rank.bronze { background: rgba(180,83,9,0.15); color: #b45309; }
-
-      /* ── Progress bar ── */
-      .progress-bar-track {
-        height: 5px;
-        background: var(--surface2);
-        border-radius: 999px;
-        overflow: hidden;
-        margin-top: 0.4rem;
-      }
-
-      .progress-bar-fill {
-        height: 100%;
-        border-radius: 999px;
-        background: linear-gradient(90deg, var(--accent), var(--accent2));
-      }
-
-      /* ── Coupon card ── */
-      .info-row {
-        display: flex;
-        gap: 1.25rem;
-        margin-bottom: 1.25rem;
-      }
-
-      .info-card {
-        flex: 1;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 1.25rem;
-        animation: fadeUp 0.5s both;
-      }
-
-      .info-card .big-icon {
-        width: 52px; height: 52px;
-        border-radius: 12px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1.3rem;
-        flex-shrink: 0;
-      }
-
-      .info-card.coupon .big-icon { background: rgba(167,139,250,0.15); color: var(--accent5); }
-      .info-card.returns .big-icon { background: rgba(251,146,60,0.15); color: var(--accent4); }
-
-      .info-card .info-label {
-        font-size: 0.78rem;
-        color: var(--muted);
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        margin-bottom: 0.3rem;
-      }
-
-      .info-card .info-value {
-        font-family: var(--font-display);
-        font-size: 1.6rem;
-        font-weight: 800;
-      }
-
-      .info-card.coupon .info-value { color: var(--accent5); }
-      .info-card.returns .info-value { color: var(--accent4); }
-
-      /* ── Animations ── */
-      @keyframes fadeUp {
-        from { opacity: 0; transform: translateY(18px); }
-        to   { opacity: 1; transform: translateY(0); }
-      }
-
-      .stat-card:nth-child(1)  { animation-delay: 0.05s; }
-      .stat-card:nth-child(2)  { animation-delay: 0.10s; }
-      .stat-card:nth-child(3)  { animation-delay: 0.15s; }
-      .stat-card:nth-child(4)  { animation-delay: 0.20s; }
-      .stat-card:nth-child(5)  { animation-delay: 0.25s; }
-      .stat-card:nth-child(6)  { animation-delay: 0.30s; }
-      .stat-card:nth-child(7)  { animation-delay: 0.35s; }
-      .stat-card:nth-child(8)  { animation-delay: 0.40s; }
-
-      /* ── Scrollable table ── */
-      .table-scroll { max-height: 320px; overflow-y: auto; }
-      .table-scroll::-webkit-scrollbar { width: 4px; }
-      .table-scroll::-webkit-scrollbar-track { background: transparent; }
-      .table-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-      /* ── Empty state ── */
-      .empty { color: var(--muted); font-size: 0.88rem; text-align: center; padding: 2rem 0; }
-
-      @media (max-width: 1100px) {
-        .stats-grid { grid-template-columns: repeat(2, 1fr); }
-        .row-2-1, .row-3, .row-2 { grid-template-columns: 1fr; }
-        .dash-wrap { margin-left: 0; max-width: 100%; padding: 1.25rem; }
-      }
-    </style>
-  </head>
-
-  <body>
-    <%- include('./partials/menu') %>
-
-    <div class="dash-wrap">
-
-      <!-- HEADER -->
-      <div class="dash-header">
-        <h1>Dashboard</h1>
-        <span class="date-badge">
-          <i class="fa fa-calendar-alt" style="margin-right:6px; color:var(--accent)"></i>
-          <script>document.write(new Date().toLocaleDateString('en-IN',{weekday:'short',year:'numeric',month:'short',day:'numeric'}))</script>
-        </span>
+    <!-- FILTER BAR -->
+    <form method="GET" action="/admin/dashboard" class="filter-bar">
+      <div class="fg">
+        <label>Date range</label>
+        <select name="range" id="rangeSelect" onchange="toggleCustom(this.value)">
+          <option value="" <%=!filters.range?'selected':''%>>All time</option>
+          <option value="today"  <%=filters.range==='today'?'selected':''%>>Today</option>
+          <option value="7d"     <%=filters.range==='7d'?'selected':''%>>Last 7 days</option>
+          <option value="30d"    <%=filters.range==='30d'?'selected':''%>>Last 30 days</option>
+          <option value="custom" <%=filters.range==='custom'?'selected':''%>>Custom</option>
+        </select>
       </div>
-
-      <!-- STATS GRID -->
-      <div class="stats-grid">
-        <div class="stat-card c1">
-          <div class="icon"><i class="fa fa-users"></i></div>
-          <div class="label">Total Users</div>
-          <div class="value"><%= totalUsers %></div>
+      <div class="fg" id="customDates" style="display:none;gap:12px;flex-direction:row;align-items:flex-end">
+        <div class="fg">
+          <label>From</label>
+          <input type="date" name="startDate" value="<%=filters.startDate||''%>"/>
         </div>
-
-        <div class="stat-card c2">
-          <div class="icon"><i class="fa fa-indian-rupee-sign"></i></div>
-          <div class="label">Total Revenue</div>
-          <div class="value">₹<%= Number(totalRevenue).toLocaleString('en-IN') %></div>
-        </div>
-
-        <div class="stat-card c3">
-          <div class="icon"><i class="fa fa-bolt"></i></div>
-          <div class="label">Today's Sales</div>
-          <div class="value">₹<%= Number(todaySales).toLocaleString('en-IN') %></div>
-        </div>
-
-        <div class="stat-card c4">
-          <div class="icon"><i class="fa fa-box"></i></div>
-          <div class="label">Total Products</div>
-          <div class="value"><%= totalProducts %></div>
-        </div>
-
-        <div class="stat-card c5">
-          <div class="icon"><i class="fa fa-shopping-bag"></i></div>
-          <div class="label">Total Orders</div>
-          <div class="value"><%= totalOrders %></div>
-        </div>
-
-        <div class="stat-card c6">
-          <div class="icon"><i class="fa fa-clock"></i></div>
-          <div class="label">Pending Orders</div>
-          <div class="value"><%= pendingOrders %></div>
-        </div>
-
-        <div class="stat-card c7">
-          <div class="icon"><i class="fa fa-circle-check"></i></div>
-          <div class="label">Delivered Orders</div>
-          <div class="value"><%= deliveredOrders %></div>
-        </div>
-
-        <div class="stat-card c8">
-          <div class="icon"><i class="fa fa-xmark"></i></div>
-          <div class="label">Cancelled Orders</div>
-          <div class="value"><%= cancelledOrders %></div>
+        <div class="fg">
+          <label>To</label>
+          <input type="date" name="endDate" value="<%=filters.endDate||''%>"/>
         </div>
       </div>
+      <div class="fg">
+        <label>Status</label>
+        <select name="status">
+          <option value="">All</option>
+          <option value="pending"          <%=filters.status==='pending'?'selected':''%>>Pending</option>
+          <option value="delivered"        <%=filters.status==='delivered'?'selected':''%>>Delivered</option>
+          <option value="cancelled"        <%=filters.status==='cancelled'?'selected':''%>>Cancelled</option>
+          <option value="return_requested" <%=filters.status==='return_requested'?'selected':''%>>Return requested</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-apply"><i class="fa fa-filter" style="margin-right:5px"></i>Apply</button>
+      <a href="/admin/dashboard" class="btn-reset">Reset</a>
+    </form>
 
-      <!-- INFO ROW: Coupons + Returns -->
-      <div class="info-row">
-        <div class="info-card coupon">
-          <div class="big-icon"><i class="fa fa-ticket"></i></div>
-          <div>
-            <div class="info-label">Coupons Used</div>
-            <div class="info-value"><%= totalCouponUsed %></div>
-          </div>
-        </div>
-        <div class="info-card returns">
-          <div class="big-icon"><i class="fa fa-rotate-left"></i></div>
-          <div>
-            <div class="info-label">Return Requests</div>
-            <div class="info-value"><%= returnRequests %></div>
-          </div>
+    <!-- STATS GRID -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="ico ico-teal"><i class="fa fa-users"></i></div>
+        <div class="lbl">Total users</div>
+        <div class="val"><%= totalUsers %></div>
+      </div>
+      <div class="stat-card">
+        <div class="ico ico-blue"><i class="fa fa-indian-rupee-sign"></i></div>
+        <div class="lbl">Total revenue</div>
+        <div class="val">₹<%= Number(totalRevenue).toLocaleString('en-IN') %></div>
+      </div>
+      <div class="stat-card">
+        <div class="ico ico-amber"><i class="fa fa-bolt"></i></div>
+        <div class="lbl">Today's sales</div>
+        <div class="val">₹<%= Number(todaySales).toLocaleString('en-IN') %></div>
+      </div>
+      <div class="stat-card">
+        <div class="ico ico-purple"><i class="fa fa-box"></i></div>
+        <div class="lbl">Total products</div>
+        <div class="val"><%= totalProducts %></div>
+      </div>
+      <div class="stat-card">
+        <div class="ico ico-pink"><i class="fa fa-shopping-bag"></i></div>
+        <div class="lbl">Total orders</div>
+        <div class="val"><%= totalOrders %></div>
+      </div>
+      <div class="stat-card">
+        <div class="ico ico-amber"><i class="fa fa-clock"></i></div>
+        <div class="lbl">Pending orders</div>
+        <div class="val"><%= pendingOrders %></div>
+      </div>
+      <div class="stat-card">
+        <div class="ico ico-green"><i class="fa fa-circle-check"></i></div>
+        <div class="lbl">Delivered</div>
+        <div class="val"><%= deliveredOrders %></div>
+      </div>
+      <div class="stat-card">
+        <div class="ico ico-red"><i class="fa fa-xmark"></i></div>
+        <div class="lbl">Cancelled</div>
+        <div class="val"><%= cancelledOrders %></div>
+      </div>
+    </div>
+
+    <!-- INFO ROW -->
+    <div class="info-row">
+      <div class="info-card">
+        <div class="big-ico" style="background:var(--purple-bg);color:var(--purple)"><i class="fa fa-ticket"></i></div>
+        <div>
+          <div class="il">Coupons used</div>
+          <div class="iv" style="color:var(--purple)"><%= totalCouponUsed %></div>
         </div>
       </div>
-
-      <!-- SALES CHART + TOP PRODUCTS TABLE -->
-      <div class="row-2-1">
-        <div class="card" style="animation-delay:0.1s">
-          <div class="card-title"><i class="fa fa-chart-line"></i> Last 7 Days Sales</div>
-          <canvas id="salesChart" height="110"></canvas>
+      <div class="info-card">
+        <div class="big-ico" style="background:var(--amber-bg);color:var(--amber)"><i class="fa fa-rotate-left"></i></div>
+        <div>
+          <div class="il">Return requests</div>
+          <div class="iv" style="color:var(--amber)"><%= returnRequests %></div>
         </div>
+      </div>
+    </div>
 
-        <div class="card" style="animation-delay:0.2s">
-          <div class="card-title"><i class="fa fa-fire"></i> Top Products</div>
-          <% if (!topProducts || topProducts.length === 0) { %>
-            <div class="empty">No data available</div>
-          <% } else { %>
-            <div class="table-scroll">
-              <% const maxSold = topProducts[0]?.totalSold || 1; %>
-              <% topProducts.forEach((p, i) => { %>
-                <div style="margin-bottom:1rem;">
-                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.3rem;">
-                    <div style="display:flex; align-items:center; gap:0.6rem; font-size:0.85rem; font-weight:500;">
-                      <span class="rank <%= i===0?'gold':i===1?'silver':i===2?'bronze':'' %>"><%= i+1 %></span>
-                      <%= p.name %>
-                    </div>
-                    <span style="font-size:0.8rem; color:var(--muted);"><%= p.totalSold %> sold</span>
-                  </div>
-                  <div class="progress-bar-track">
-                    <div class="progress-bar-fill" style="width:<%= Math.round((p.totalSold/maxSold)*100) %>%"></div>
-                  </div>
+    <!-- SALES + TOP PRODUCTS -->
+    <div class="row-2-1">
+      <div class="card">
+        <div class="card-title"><i class="fa fa-chart-line"></i> Last 7 days sales</div>
+        <canvas id="salesChart" height="110"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="fa fa-fire"></i> Top products</div>
+        <% if (!topProducts || topProducts.length === 0) { %>
+          <div class="empty">No data available</div>
+        <% } else { %>
+          <div class="table-scroll">
+            <% const maxSold = topProducts[0]?.totalSold || 1; %>
+            <% topProducts.forEach((p, i) => { %>
+              <div style="margin-bottom:1rem">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;font-size:13px">
+                  <span style="display:flex;align-items:center;gap:6px;font-weight:500">
+                    <span class="rank <%=i===0?'gold':i===1?'silver':i===2?'bronze':''%>"><%=i+1%></span>
+                    <%=p.name%>
+                  </span>
+                  <span style="color:var(--muted)"><%=p.totalSold%> sold</span>
                 </div>
-              <% }) %>
-            </div>
-          <% } %>
-        </div>
+                <div class="progress-track">
+                  <div class="progress-fill" style="width:<%=Math.round((p.totalSold/maxSold)*100)%>%"></div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% } %>
       </div>
+    </div>
 
-      <!-- CHARTS ROW: Products, Categories, Brands -->
-      <div class="row-3">
-        <div class="card" style="animation-delay:0.15s">
-          <div class="card-title"><i class="fa fa-box-open"></i> Top Products</div>
-          <canvas id="topProductsChart" height="200"></canvas>
-        </div>
-
-        <div class="card" style="animation-delay:0.2s">
-          <div class="card-title"><i class="fa fa-tags"></i> Top Categories</div>
-          <canvas id="categoryChart" height="200"></canvas>
-        </div>
-
-        <div class="card" style="animation-delay:0.25s">
-          <div class="card-title"><i class="fa fa-trademark"></i> Top Brands</div>
-          <canvas id="brandChart" height="200"></canvas>
-        </div>
+    <!-- CHARTS ROW -->
+    <div class="row-3">
+      <div class="card">
+        <div class="card-title"><i class="fa fa-box-open"></i> Top products</div>
+        <canvas id="topProductsChart" height="200"></canvas>
       </div>
-
-      <!-- BOTTOM ROW: Top Categories Table + Low Stock -->
-      <div class="row-2">
-        <div class="card" style="animation-delay:0.3s">
-          <div class="card-title"><i class="fa fa-list"></i> Category Performance</div>
-          <% if (!topCategories || topCategories.length === 0) { %>
-            <div class="empty">No data available</div>
-          <% } else { %>
-            <table class="dash-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Category</th>
-                  <th>Units Sold</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% topCategories.forEach((c, i) => { %>
-                  <tr>
-                    <td><span class="rank <%= i===0?'gold':i===1?'silver':i===2?'bronze':'' %>"><%= i+1 %></span></td>
-                    <td><%= c.name %></td>
-                    <td><span class="badge badge-success"><%= c.totalSold %></span></td>
-                  </tr>
-                <% }) %>
-              </tbody>
-            </table>
-          <% } %>
-        </div>
-
-        <div class="card" style="animation-delay:0.35s">
-          <div class="card-title"><i class="fa fa-triangle-exclamation"></i> Low Stock Alert</div>
-          <% if (!lowStockProducts || lowStockProducts.length === 0) { %>
-            <div class="empty"><i class="fa fa-circle-check" style="color:var(--accent)"></i>&nbsp; All products are well-stocked</div>
-          <% } else { %>
-            <table class="dash-table">
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Brand</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% lowStockProducts.forEach(p => { %>
-                  <tr>
-                    <td><%= p.name %></td>
-                    <td style="color:var(--muted)"><%= p.brand %></td>
-                    <td><span class="badge badge-danger"><i class="fa fa-circle-exclamation"></i> Low Stock</span></td>
-                  </tr>
-                <% }) %>
-              </tbody>
-            </table>
-          <% } %>
-        </div>
+      <div class="card">
+        <div class="card-title"><i class="fa fa-tags"></i> Top categories</div>
+        <canvas id="categoryChart" height="200"></canvas>
       </div>
+      <div class="card">
+        <div class="card-title"><i class="fa fa-trademark"></i> Top brands</div>
+        <canvas id="brandChart" height="200"></canvas>
+      </div>
+    </div>
 
-      <!-- TOP BRANDS TABLE -->
-      <div class="card" style="animation-delay:0.4s; margin-bottom:2rem;">
-        <div class="card-title"><i class="fa fa-award"></i> Brand Performance</div>
-        <% if (!topBrands || topBrands.length === 0) { %>
+    <!-- TABLES ROW -->
+    <div class="row-2">
+      <div class="card">
+        <div class="card-title"><i class="fa fa-list"></i> Category performance</div>
+        <% if (!topCategories || topCategories.length === 0) { %>
           <div class="empty">No data available</div>
         <% } else { %>
           <table class="dash-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Brand</th>
-                <th>Units Sold</th>
-              </tr>
-            </thead>
+            <thead><tr><th>#</th><th>Category</th><th>Units sold</th></tr></thead>
             <tbody>
-              <% topBrands.forEach((b, i) => { %>
+              <% topCategories.forEach((c, i) => { %>
                 <tr>
-                  <td><span class="rank <%= i===0?'gold':i===1?'silver':i===2?'bronze':'' %>"><%= i+1 %></span></td>
-                  <td><%= b.brand %></td>
-                  <td><span class="badge badge-info"><%= b.totalSold %></span></td>
+                  <td><span class="rank <%=i===0?'gold':i===1?'silver':i===2?'bronze':''%>"><%=i+1%></span></td>
+                  <td><%=c.name%></td>
+                  <td><span class="badge badge-success"><%=c.totalSold%></span></td>
                 </tr>
               <% }) %>
             </tbody>
@@ -569,134 +295,95 @@
         <% } %>
       </div>
 
-    </div><!-- /dash-wrap -->
+      <div class="card">
+        <div class="card-title"><i class="fa fa-triangle-exclamation"></i> Low stock alert</div>
+        <% if (!lowStockProducts || lowStockProducts.length === 0) { %>
+          <div class="empty"><i class="fa fa-circle-check" style="color:var(--teal)"></i>&nbsp; All products are well-stocked</div>
+        <% } else { %>
+          <table class="dash-table">
+            <thead><tr><th>Product</th><th>Brand</th><th>Status</th></tr></thead>
+            <tbody>
+              <% lowStockProducts.forEach(p => { %>
+                <tr>
+                  <td><%=p.name%></td>
+                  <td style="color:var(--muted)"><%=p.brand%></td>
+                  <td><span class="badge badge-danger"><i class="fa fa-circle-exclamation"></i> Low stock</span></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
+    </div>
 
-    <!-- ═══════════════ CHARTS ═══════════════ -->
-    <script>
-      const ACCENT  = '#6ee7b7';
-      const ACCENT2 = '#38bdf8';
-      const ACCENT3 = '#f472b6';
-      const ACCENT4 = '#fb923c';
-      const ACCENT5 = '#a78bfa';
+    <!-- BRAND PERFORMANCE -->
+    <div class="card" style="margin-bottom:2rem">
+      <div class="card-title"><i class="fa fa-award"></i> Brand performance</div>
+      <% if (!topBrands || topBrands.length === 0) { %>
+        <div class="empty">No data available</div>
+      <% } else { %>
+        <table class="dash-table">
+          <thead><tr><th>#</th><th>Brand</th><th>Units sold</th></tr></thead>
+          <tbody>
+            <% topBrands.forEach((b, i) => { %>
+              <tr>
+                <td><span class="rank <%=i===0?'gold':i===1?'silver':i===2?'bronze':''%>"><%=i+1%></span></td>
+                <td><%=b.brand%></td>
+                <td><span class="badge badge-info"><%=b.totalSold%></span></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+    </div>
 
-      Chart.defaults.color = '#6b7280';
-      Chart.defaults.font.family = "'DM Sans', sans-serif";
+  </div><!-- /dash-wrap -->
 
-      const gridColor = 'rgba(255,255,255,0.06)';
+  <script>
+    function toggleCustom(val) {
+      document.getElementById('customDates').style.display = val === 'custom' ? 'flex' : 'none';
+    }
+    toggleCustom(document.getElementById('rangeSelect').value);
 
-      // ── Sales Line Chart ──
-      const salesData = <%- JSON.stringify(salesChart) %>;
+    const TEAL   = '#1d9e75';
+    const BLUE   = '#378add';
+    const PURPLE = '#7f77dd';
+    const COLORS = [TEAL,'#378add','#d4537e','#ba7517','#7f77dd','#34d399','#60a5fa','#f9a8d4','#fcd34d','#c084fc'];
 
-      new Chart(document.getElementById('salesChart'), {
-        type: 'line',
-        data: {
-          labels: salesData.labels,
-          datasets: [{
-            label: 'Sales (₹)',
-            data: salesData.data,
-            borderColor: ACCENT,
-            backgroundColor: 'rgba(110,231,183,0.08)',
-            borderWidth: 2.5,
-            pointBackgroundColor: ACCENT,
-            pointBorderColor: '#0d0f14',
-            pointRadius: 5,
-            pointHoverRadius: 7,
-            tension: 0.4,
-            fill: true,
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { grid: { color: gridColor }, ticks: { color: '#6b7280' } },
-            y: {
-              grid: { color: gridColor },
-              ticks: {
-                color: '#6b7280',
-                callback: v => '₹' + v.toLocaleString('en-IN')
-              }
-            }
-          }
-        }
-      });
+    Chart.defaults.color = '#9ca3af';
+    Chart.defaults.font.family = "'DM Sans', sans-serif";
+    const grid = 'rgba(0,0,0,0.05)';
 
-      // ── Top Products Bar ──
-      const prodData = <%- JSON.stringify(topProductsChart) %>;
+    const salesData = <%- JSON.stringify(salesChart) %>;
+    new Chart(document.getElementById('salesChart'), {
+      type: 'line',
+      data: {
+        labels: salesData.labels,
+        datasets: [{ label: 'Sales (₹)', data: salesData.data, borderColor: TEAL, backgroundColor: 'rgba(29,158,117,0.08)', borderWidth: 2, pointBackgroundColor: TEAL, pointBorderColor: '#fff', pointBorderWidth: 2, pointRadius: 4, tension: 0.4, fill: true }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { grid: { color: grid } }, y: { grid: { color: grid }, ticks: { callback: v => '₹'+v.toLocaleString('en-IN') } } } }
+    });
 
-      new Chart(document.getElementById('topProductsChart'), {
-        type: 'bar',
-        data: {
-          labels: prodData.labels,
-          datasets: [{
-            label: 'Units Sold',
-            data: prodData.data,
-            backgroundColor: 'rgba(110,231,183,0.75)',
-            borderRadius: 6,
-            borderSkipped: false,
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { grid: { color: gridColor }, ticks: { color: '#6b7280' } },
-            y: { grid: { display: false }, ticks: { color: '#e8eaf0', font: { size: 11 } } }
-          }
-        }
-      });
+    const prodData = <%- JSON.stringify(topProductsChart) %>;
+    new Chart(document.getElementById('topProductsChart'), {
+      type: 'bar',
+      data: { labels: prodData.labels, datasets: [{ data: prodData.data, backgroundColor: TEAL+'bb', borderRadius: 5, borderSkipped: false }] },
+      options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } }, scales: { x: { grid: { color: grid } }, y: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#374151' } } } }
+    });
 
-      // ── Category Doughnut ──
-      const catData = <%- JSON.stringify(categoryChart) %>;
+    const catData = <%- JSON.stringify(categoryChart) %>;
+    new Chart(document.getElementById('categoryChart'), {
+      type: 'doughnut',
+      data: { labels: catData.labels, datasets: [{ data: catData.data, backgroundColor: COLORS, borderColor: '#fff', borderWidth: 3, hoverOffset: 6 }] },
+      options: { responsive: true, cutout: '62%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12, font: { size: 11 } } } } }
+    });
 
-      new Chart(document.getElementById('categoryChart'), {
-        type: 'doughnut',
-        data: {
-          labels: catData.labels,
-          datasets: [{
-            data: catData.data,
-            backgroundColor: [ACCENT, ACCENT2, ACCENT3, ACCENT4, ACCENT5,
-              '#34d399','#60a5fa','#f9a8d4','#fcd34d','#c084fc'],
-            borderColor: '#161a24',
-            borderWidth: 3,
-            hoverOffset: 8,
-          }]
-        },
-        options: {
-          responsive: true,
-          cutout: '65%',
-          plugins: {
-            legend: { position: 'bottom', labels: { boxWidth: 12, padding: 14, color: '#9ca3af' } }
-          }
-        }
-      });
-
-      // ── Brands Bar ──
-      const brandData = <%- JSON.stringify(brandChart) %>;
-
-      new Chart(document.getElementById('brandChart'), {
-        type: 'bar',
-        data: {
-          labels: brandData.labels,
-          datasets: [{
-            label: 'Units Sold',
-            data: brandData.data,
-            backgroundColor: 'rgba(167,139,250,0.75)',
-            borderRadius: 6,
-            borderSkipped: false,
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { grid: { color: gridColor }, ticks: { color: '#6b7280' } },
-            y: { grid: { display: false }, ticks: { color: '#e8eaf0', font: { size: 11 } } }
-          }
-        }
-      });
-    </script>
-  </body>
+    const brandData = <%- JSON.stringify(brandChart) %>;
+    new Chart(document.getElementById('brandChart'), {
+      type: 'bar',
+      data: { labels: brandData.labels, datasets: [{ data: brandData.data, backgroundColor: PURPLE+'bb', borderRadius: 5, borderSkipped: false }] },
+      options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } }, scales: { x: { grid: { color: grid } }, y: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#374151' } } } }
+    });
+  </script>
+</body>
 </html>

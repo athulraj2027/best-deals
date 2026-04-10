@@ -43,6 +43,7 @@ const couponSchema = new Schema(
       default: 0,
       min: 0,
     },
+    maxPurchase: { type: Number, default: 0, min: 0 },
     startDate: {
       type: Date,
       default: Date.now,
@@ -62,6 +63,7 @@ const couponSchema = new Schema(
     usageCount: {
       type: Number,
       default: 0,
+      min: 0,
     },
   },
   { timestamps: true },

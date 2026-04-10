@@ -5,12 +5,38 @@ const Product = require("../../models/Product");
 
 exports.getAdminDashboard = async (req, res) => {
   try {
-    // ================= DATE SETUP =================
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const { range, status, startDate, endDate } = req.query;
 
-    const last7Days = new Date();
-    last7Days.setDate(last7Days.getDate() - 7);
+    // ================= DATE FILTER LOGIC =================
+    let dateFilter = {};
+    if (range === "today") {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      dateFilter = { $gte: today };
+    } else if (range === "7d") {
+      const d = new Date();
+      d.setDate(d.getDate() - 7);
+      dateFilter = { $gte: d };
+    } else if (range === "30d") {
+      const d = new Date();
+      d.setDate(d.getDate() - 30);
+      dateFilter = { $gte: d };
+    } else if (range === "custom" && startDate && endDate) {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      dateFilter = { $gte: start, $lte: end };
+    }
+
+    // Use 'orderDate' to match your Schema's date field
+    let matchStage = {};
+    if (Object.keys(dateFilter).length > 0) {
+      matchStage.orderDate = dateFilter;
+    }
+    if (status) {
+      matchStage.status = status;
+    }
 
     // ================= BASIC COUNTS =================
     const [
@@ -23,18 +49,24 @@ exports.getAdminDashboard = async (req, res) => {
       returnRequests,
     ] = await Promise.all([
       User.countDocuments(),
-      Order.countDocuments(),
+      Order.countDocuments(matchStage),
       Product.countDocuments(),
-      Order.countDocuments({ status: "pending" }),
-      Order.countDocuments({ status: "delivered" }),
-      Order.countDocuments({ status: "cancelled" }),
-      Order.countDocuments({ status: "return_requested" }),
+      Order.countDocuments({ ...matchStage, status: "pending" }),
+      Order.countDocuments({ ...matchStage, status: "delivered" }),
+      Order.countDocuments({ ...matchStage, status: "cancelled" }),
+      Order.countDocuments({ ...matchStage, status: "return_requested" }),
     ]);
 
-    // ================= REVENUE =================
-    const [totalRevenueData, todaySalesData] = await Promise.all([
+    // ================= REVENUE ANALYTICS =================
+    const [revenueData, todaySalesData] = await Promise.all([
       Order.aggregate([
-        { $match: { status: "delivered", payment_status: "paid" } },
+        {
+          $match: {
+            ...matchStage,
+            status: "delivered",
+            payment_status: "paid",
+          },
+        },
         {
           $group: {
             _id: null,
@@ -42,11 +74,10 @@ exports.getAdminDashboard = async (req, res) => {
           },
         },
       ]),
-
       Order.aggregate([
         {
           $match: {
-            createdAt: { $gte: today },
+            orderDate: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) },
             status: "delivered",
           },
         },
@@ -59,22 +90,20 @@ exports.getAdminDashboard = async (req, res) => {
       ]),
     ]);
 
-    const totalRevenue = totalRevenueData[0]?.revenue || 0;
+    const totalRevenue = revenueData[0]?.revenue || 0;
     const todaySales = todaySalesData[0]?.sales || 0;
 
-    // ================= WEEKLY SALES (CHART READY) =================
-    const weeklySalesRaw = await Order.aggregate([
+    // ================= CHART DATA: SALES =================
+    const salesRaw = await Order.aggregate([
       {
         $match: {
-          createdAt: { $gte: last7Days },
+          ...matchStage,
           status: "delivered",
         },
       },
       {
         $group: {
-          _id: {
-            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
-          },
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$orderDate" } },
           sales: { $sum: "$grandTotal" },
         },
       },
@@ -82,21 +111,19 @@ exports.getAdminDashboard = async (req, res) => {
     ]);
 
     const salesChart = {
-      labels: weeklySalesRaw.map((d) => d._id),
-      data: weeklySalesRaw.map((d) => d.sales),
+      labels: salesRaw.map((d) => d._id),
+      data: salesRaw.map((d) => d.sales),
     };
 
-    // ================= TOP PRODUCTS =================
+    // ================= TOP PERFORMANCE: PRODUCTS =================
     const topProducts = await Order.aggregate([
-      { $match: { status: "delivered" } },
+      { $match: { ...matchStage, status: "delivered" } },
       { $unwind: "$items" },
       {
         $group: {
           _id: "$items.productId",
           totalSold: { $sum: "$items.quantity" },
-          revenue: {
-            $sum: { $multiply: ["$items.quantity", "$items.price"] },
-          },
+          revenue: { $sum: { $multiply: ["$items.quantity", "$items.price"] } },
         },
       },
       { $sort: { totalSold: -1 } },
@@ -110,25 +137,13 @@ exports.getAdminDashboard = async (req, res) => {
         },
       },
       { $unwind: "$product" },
-      {
-        $project: {
-          name: "$product.name",
-          totalSold: 1,
-          revenue: 1,
-        },
-      },
+      { $project: { name: "$product.name", totalSold: 1, revenue: 1 } },
     ]);
 
-    const topProductsChart = {
-      labels: topProducts.map((p) => p.name),
-      data: topProducts.map((p) => p.totalSold),
-    };
-
-    // ================= TOP CATEGORIES =================
+    // ================= TOP PERFORMANCE: CATEGORIES =================
     const topCategories = await Order.aggregate([
-      { $match: { status: "delivered" } },
+      { $match: { ...matchStage, status: "delivered" } },
       { $unwind: "$items" },
-
       {
         $lookup: {
           from: "products",
@@ -138,17 +153,14 @@ exports.getAdminDashboard = async (req, res) => {
         },
       },
       { $unwind: "$product" },
-
       {
         $group: {
           _id: "$product.category",
           totalSold: { $sum: "$items.quantity" },
         },
       },
-
       { $sort: { totalSold: -1 } },
       { $limit: 10 },
-
       {
         $lookup: {
           from: "categories",
@@ -158,25 +170,13 @@ exports.getAdminDashboard = async (req, res) => {
         },
       },
       { $unwind: "$category" },
-
-      {
-        $project: {
-          name: "$category.name",
-          totalSold: 1,
-        },
-      },
+      { $project: { name: "$category.name", totalSold: 1 } },
     ]);
 
-    const categoryChart = {
-      labels: topCategories.map((c) => c.name),
-      data: topCategories.map((c) => c.totalSold),
-    };
-
-    // ================= TOP BRANDS =================
+    // ================= TOP PERFORMANCE: BRANDS =================
     const topBrands = await Order.aggregate([
-      { $match: { status: "delivered" } },
+      { $match: { ...matchStage, status: "delivered" } },
       { $unwind: "$items" },
-
       {
         $lookup: {
           from: "products",
@@ -186,50 +186,29 @@ exports.getAdminDashboard = async (req, res) => {
         },
       },
       { $unwind: "$product" },
-
       {
         $group: {
           _id: "$product.brand",
           totalSold: { $sum: "$items.quantity" },
         },
       },
-
       { $sort: { totalSold: -1 } },
       { $limit: 10 },
-
-      {
-        $project: {
-          brand: "$_id",
-          totalSold: 1,
-        },
-      },
+      { $project: { brand: "$_id", totalSold: 1 } },
     ]);
 
-    const brandChart = {
-      labels: topBrands.map((b) => b.brand),
-      data: topBrands.map((b) => b.totalSold),
-    };
-
-    // ================= LOW STOCK =================
+    // ================= INVENTORY & COUPONS =================
     const lowStockProducts = await Product.find({
       "variants.quantity": { $lte: 5 },
     }).limit(5);
 
-    // ================= COUPON =================
     const couponStats = await Coupon.aggregate([
-      {
-        $group: {
-          _id: null,
-          totalUsed: { $sum: "$usageCount" },
-        },
-      },
+      { $group: { _id: null, totalUsed: { $sum: "$usageCount" } } },
     ]);
 
-    const totalCouponUsed = couponStats[0]?.totalUsed || 0;
-
-    // ================= RESPONSE =================
+    // ================= RENDER =================
     res.render("adminPages/adminDashboard", {
-      // counts
+      filters: { range, status, startDate, endDate },
       totalUsers,
       totalOrders,
       totalProducts,
@@ -237,27 +216,29 @@ exports.getAdminDashboard = async (req, res) => {
       deliveredOrders,
       cancelledOrders,
       returnRequests,
-
-      // money
       totalRevenue: totalRevenue.toFixed(2),
       todaySales: todaySales.toFixed(2),
-
-      // charts
       salesChart,
-      topProductsChart,
-      categoryChart,
-      brandChart,
-
-      // raw data
+      topProductsChart: {
+        labels: topProducts.map((p) => p.name),
+        data: topProducts.map((p) => p.totalSold),
+      },
+      categoryChart: {
+        labels: topCategories.map((c) => c.name),
+        data: topCategories.map((c) => c.totalSold),
+      },
+      brandChart: {
+        labels: topBrands.map((b) => b.brand),
+        data: topBrands.map((b) => b.totalSold),
+      },
       topProducts,
       topCategories,
       topBrands,
-
       lowStockProducts,
-      totalCouponUsed,
+      totalCouponUsed: couponStats[0]?.totalUsed || 0,
     });
   } catch (err) {
-    console.error(err);
+    console.error("Dashboard Error:", err);
     res.status(500).send("Dashboard error");
   }
 };

@@ -8,7 +8,7 @@ router.route("/remove-coupon").post(checkOutController.removeCouponController);
 router
   .route("/add-delivery-address")
   .post(checkOutController.addDeliveryAddressController);
-  
+
 router
   .route("/:id")
   .get(userGuestMiddleware, checkOutController.getCheckoutPage)

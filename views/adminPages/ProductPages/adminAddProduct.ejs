@@ -1,784 +1,304 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Add Product</title>
+    <title>Add Product | Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.1/sweetalert2.all.min.js"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-      :root {
-        --primary-color: #4a90e2;
-        --secondary-color: #2c3e50;
-        --accent-color: #e74c3c;
-        --success-color: #2ecc71;
-        --background-color: #f5f7fa;
-        --card-background: #ffffff;
-        --border-radius: 12px;
-        --box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-      }
-
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      }
-
-      body {
-        background: linear-gradient(135deg, #f6f8fa 0%, #e9ecef 100%);
-        color: var(--secondary-color);
-        min-height: 100vh;
-        padding: 2rem;
-      }
-
-      .container {
-        max-width: 900px;
-        margin: 0 auto;
-        background: var(--card-background);
-        border-radius: var(--border-radius);
-        box-shadow: var(--box-shadow);
-        padding: 2rem;
-        /* float: right; */
-      }
-
-      .page-header {
-        text-align: center;
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid #eee;
-      }
-
-      .form-section {
-        background: #f8f9fa;
-        padding: 1.5rem;
-        border-radius: var(--border-radius);
-        border: 1px solid #e9ecef;
-        margin-bottom: 2rem;
-      }
-
-      .form-group {
-        margin-bottom: 1.5rem;
-      }
-
-      label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 500;
-      }
-
-      input,
-      select,
-      textarea {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 2px solid #e9ecef;
-        border-radius: 8px;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-      }
-
-      .variant-container {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 8px;
-        margin-bottom: 1rem;
-        border: 1px solid #e9ecef;
-        position: relative;
-      }
-
-      .variant-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-      }
-
-      .btn {
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: 8px;
-        font-size: 1rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease;
-      }
-
-      .btn-primary {
-        background: var(--primary-color);
-        color: white;
-      }
-      .btn-danger {
-        background: var(--accent-color);
-        color: white;
-      }
-      .btn-success {
-        background: var(--success-color);
-        color: white;
-      }
-
-      .image-preview-container {
-        margin-top: 1rem;
-        width: 100%;
-        max-width: 300px;
-        border-radius: 8px;
-        overflow: hidden;
-        background: #f8f9fa;
-        border: 2px dashed #ced4da;
-      }
-
-      .image-preview {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-        display: none;
-      }
-
-      .cropper-modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.8);
-        z-index: 1000;
-        padding: 2rem;
-      }
-
-      .remove-variant {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-      }
-
-      .actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 1rem;
-        margin-top: 2rem;
-      }
-
-      @media (max-width: 768px) {
-        .container {
-          padding: 1rem;
-        }
-        .form-section {
-          padding: 1rem;
-        }
-      }
-      .variant-images-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-        margin-top: 1rem;
-      }
-
-      .variant-image-wrapper {
-        background: #f8f9fa;
-        padding: 1rem;
-        border-radius: 8px;
-        border: 1px solid #e9ecef;
-      }
-
-      .variant-image-wrapper h5 {
-        margin-bottom: 1rem;
-        color: #2c3e50;
-        font-size: 0.9rem;
-      }
-
-      .preview-placeholder {
-        width: 100%;
-        height: 200px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #f8f9fa;
-        color: #6c757d;
-        border: 2px dashed #ced4da;
-        border-radius: 8px;
-      }
-
-      .image-preview {
-        display: none;
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-        border-radius: 8px;
-      }
-
-      .btn-group {
-        display: flex;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
-      }
-      .cropper-modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.85);
-        z-index: 1000;
-        padding: 2rem;
-      }
-
-      .cropper-container {
-        background: white;
-        max-width: 900px;
-        width: 90%;
-        height: 90vh;
-        margin: 0 auto;
-        border-radius: 12px;
-        display: flex;
-        flex-direction: column;
-        position: relative;
-        top: 50%;
-        transform: translateY(-50%);
-      }
-
-      .cropper-header {
-        padding: 1rem;
-        border-bottom: 1px solid #e9ecef;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .cropper-header h3 {
-        margin: 0;
-        color: #2c3e50;
-      }
-
-      .btn-close {
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        cursor: pointer;
-        padding: 0.5rem;
-        color: #666;
-      }
-
-      .cropper-content {
-        flex: 1;
-        padding: 1rem;
-        background: #f8f9fa;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .cropper-img-container {
-        height: 100%;
-        background: #000;
-      }
-
-      .cropper-img-container img {
-        max-width: 100%;
-        max-height: 100%;
-      }
-
-      .cropper-controls {
-        padding: 1rem;
-        border-top: 1px solid #e9ecef;
-        display: flex;
-        justify-content: flex-end;
-        gap: 1rem;
-      }
-
-      /* Cropper.js custom styles */
-      .cropper-view-box,
-      .cropper-face {
-        border-radius: 8px;
-      }
-
-      .cropper-point {
-        width: 10px;
-        height: 10px;
-        background-color: #4a90e2;
-      }
+        body { font-family: 'Inter', sans-serif; }
+        .cropper-view-box, .cropper-face { border-radius: 4px; }
+        /* Fix for translucent cropper */
+        .cropper-container { direction: ltr; font-size: 0; line-height: 0; position: relative; touch-action: none; user-select: none; }
     </style>
-  </head>
-  <body>
+</head>
+
+<body class="bg-gray-50 text-gray-800 antialiased">
     <%- include('../partials/menu') %>
-    <div class="container ">
-      <div class="page-header">
-        <h1>Add New Product</h1>
-        <p>Create a new product with variants and images</p>
-      </div>
 
-      <form id="addProductForm">
-        <!-- Basic Information Section -->
-        <div class="form-section">
-          <h3>Basic Information</h3>
-          <div class="form-group">
-            <label for="productName">Product Name</label>
-            <input type="text" id="productName" name="name"  />
-          </div>
-          <div class="form-group">
-            <label for="productDescription">Product Description</label>
-            <input
-              type="text"
-              id="productDescription"
-              name="description"
-              
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="brand">Brand</label>
-            <input type="text" id="brand" name="brand"  />
-          </div>
-
-          <div class="form-group">
-            <label for="actualPrice">Base Price</label>
-            <input
-              type="number"
-              id="actualPrice"
-              name="actualPrice"
-              min="0.01"
-              step="0.01"
-            
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="category">Category</label>
-            <select id="category" name="category" >
-              <option value="">Select Category</option>
-              <% categories.forEach(category => { %>
-              <option value="<%= category.name %>"><%= category.name %></option>
-              <% }) %>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="status">Status</label>
-            <select id="status" name="status" >
-              <option value="">Select Status</option>
-              <option value="true">Listed</option>
-              <option value="false">Unlisted</option>
-            </select>
-          </div>
+    <div class="max-w-5xl mx-auto py-10 px-4">
+        <div class="mb-10 text-center">
+            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Add New Product</h1>
+            <p class="text-gray-500 mt-2">Manage your inventory by adding new products and variants.</p>
         </div>
 
-        <!-- Variants Section -->
-        <div class="form-section">
-          <div class="variant-header">
-            <h3>Product Variants</h3>
-            <button
-              type="button"
-              class="btn btn-primary"
-              onclick="addVariant()"
-            >
-              Add Variant
-            </button>
-          </div>
+        <form id="addProductForm" class="space-y-8">
+            <section class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                <div class="flex items-center gap-2 mb-6 border-b border-gray-50 pb-4">
+                    <div class="p-2 bg-blue-50 rounded-lg text-blue-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800">Basic Information</h3>
+                </div>
 
-          <div id="variants"></div>
-        </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="col-span-full">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Product Name</label>
+                        <input type="text" name="name" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-4 focus:ring-blue-50 focus:border-blue-400 outline-none transition-all" placeholder="Enter product name" />
+                    </div>
 
-        <div class="actions">
-          <button
-            type="button"
-            class="btn btn-danger"
-            onclick="window.location.href='/admin/products'"
-          >
-            Cancel
-          </button>
-          <button type="submit" class="btn btn-success">Save Product</button>
-        </div>
-      </form>
+                    <div class="col-span-full">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                        <textarea name="description" rows="3" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-4 focus:ring-blue-50 focus:border-blue-400 outline-none transition-all" placeholder="Enter detailed description"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Brand</label>
+                        <input type="text" name="brand" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-4 focus:ring-blue-50 focus:border-blue-400 outline-none transition-all" placeholder="e.g. Logitech" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Base Price (₹)</label>
+                        <input type="number" name="actualPrice" step="0.01" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-4 focus:ring-blue-50 focus:border-blue-400 outline-none transition-all" placeholder="0.00" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+                        <select name="category" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-4 focus:ring-blue-50 focus:border-blue-400 outline-none transition-all appearance-none bg-white">
+                            <option value="">Select Category</option>
+                            <% categories.forEach(category => { %>
+                                <option value="<%= category.name %>"><%= category.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+                        <select name="status" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-4 focus:ring-blue-50 focus:border-blue-400 outline-none transition-all appearance-none bg-white">
+                            <option value="true">Listed</option>
+                            <option value="false">Unlisted</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                    <div class="flex items-center gap-2">
+                        <div class="p-2 bg-purple-50 rounded-lg text-purple-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800">Product Variants</h3>
+                    </div>
+                    <button type="button" onclick="addVariant()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-md shadow-purple-100 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        Add Variant
+                    </button>
+                </div>
+
+                <div id="variants" class="space-y-6">
+                    </div>
+            </section>
+
+            <div class="flex items-center justify-end gap-4 pt-6 border-t border-gray-200">
+                <button type="button" onclick="window.location.href='/admin/products'" class="px-8 py-3 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all">
+                    Cancel
+                </button>
+                <button type="submit" class="px-10 py-3 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-100 transition-all active:scale-95">
+                    Save Product
+                </button>
+            </div>
+        </form>
     </div>
 
-    <div class="cropper-modal" id="cropperModal">
-      <div class="cropper-container">
-        <div class="cropper-header">
-          <h3>Crop Image</h3>
-          <button type="button" class="btn-close" onclick="cancelCrop()">
-            &times;
-          </button>
+    <div id="cropperModal" class="hidden fixed inset-0 z-[9999] bg-black/95 flex flex-col items-center justify-center p-4">
+        <div class="bg-white w-full max-w-4xl h-[90vh] rounded-2xl overflow-hidden flex flex-col relative shadow-2xl">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50">
+                <h3 class="font-bold text-lg text-gray-800">Crop Product Image</h3>
+                <button type="button" onclick="cancelCrop()" class="text-gray-400 hover:text-red-500 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="flex-1 bg-black relative flex items-center justify-center overflow-hidden">
+                <img id="cropperImage" src="" alt="Crop Area" class="max-w-full block" />
+            </div>
+
+            <div class="p-4 bg-gray-50 border-t flex justify-end gap-3">
+                <button type="button" onclick="cancelCrop()" class="px-6 py-2.5 font-bold text-gray-600 bg-white border rounded-xl hover:bg-gray-50">Cancel</button>
+                <button type="button" onclick="saveCrop()" class="px-8 py-2.5 font-bold text-white bg-green-600 rounded-xl hover:bg-green-700 shadow-md">Apply Crop</button>
+            </div>
         </div>
-        <div class="cropper-content">
-          <div class="cropper-img-container">
-            <img src="" alt="Crop preview" id="cropperImage" />
-          </div>
-        </div>
-        <div class="cropper-controls">
-          <button type="button" class="btn btn-danger" onclick="cancelCrop()">
-            Cancel
-          </button>
-          <button type="button" class="btn btn-success" onclick="saveCrop()">
-            Save Crop
-          </button>
-        </div>
-      </div>
     </div>
 
     <script>
-      let variantCount = 0;
-      let currentCropper = null;
-      let currentImageElement = null;
+        let variantCount = 0;
+        let currentCropper = null;
+        let currentImageElement = null;
 
-      // Add initial variant on page load
-      document.addEventListener("DOMContentLoaded", () => {
-        addVariant();
-      });
+        document.addEventListener("DOMContentLoaded", () => addVariant());
 
-      function addVariant() {
-        const variantContainer = document.createElement("div");
-        variantContainer.className = "variant-container";
-        variantContainer.id = `variant-${variantCount}`;
+        function addVariant() {
+            const container = document.createElement("div");
+            container.className = "variant-container bg-gray-50 p-6 rounded-2xl border-2 border-dashed border-gray-200 relative group transition-all hover:border-blue-200 hover:bg-blue-50/20";
+            container.id = `variant-${variantCount}`;
 
-        variantContainer.innerHTML = `
-                <button type="button" class="btn btn-danger remove-variant" onclick="removeVariant(${variantCount})">
-                    Remove
-                </button>
-                <h4>Variant ${variantCount + 1}</h4>
-                
-                <div class="form-group">
-                    <label>Color</label>
-                    <select name="variants[${variantCount}][color]" >
-                        <option value="">Select Color</option>
-                        <option value="red">Red</option>
-                        <option value="blue">Blue</option>
-                        <option value="black">Black</option>
-                        <option value="white">White</option>
-                    </select>
+            container.innerHTML = `
+                <div class="flex justify-between items-start mb-6">
+                    <h4 class="text-lg font-bold text-gray-700 flex items-center gap-2">
+                        <span class="w-7 h-7 bg-white rounded-full flex items-center justify-center text-xs border border-gray-200 shadow-sm">${variantCount + 1}</span>
+                        Variant Details
+                    </h4>
+                    <button type="button" onclick="removeVariant(${variantCount})" class="p-2 text-gray-400 hover:text-red-600 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
                 </div>
 
-                <div class="form-group">
-                    <label>Size</label>
-                    <select name="variants[${variantCount}][size]" >
-                        <option value="">Select Size</option>
-                        <option value="65%">65% </option>
-                        <option value="75%">75%</option>
-                        <option value="Tenkeyless">Tenkeyless</option>
-                        <option value="Fullsize">Fullsize</option>
-                    </select>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Color</label>
+                        <select name="variants[${variantCount}][color]" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white focus:ring-2 focus:ring-blue-400 outline-none">
+                            <option value="red">Red</option><option value="blue">Blue</option><option value="black">Black</option><option value="white">White</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Size</label>
+                        <select name="variants[${variantCount}][size]" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white focus:ring-2 focus:ring-blue-400 outline-none">
+                            <option value="65%">65%</option><option value="75%">75%</option><option value="Tenkeyless">TKL</option><option value="Fullsize">Full Size</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Price (₹)</label>
+                        <input type="number" name="variants[${variantCount}][price]" step="0.01" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white focus:ring-2 focus:ring-blue-400 outline-none" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Stock</label>
+                        <input type="number" name="variants[${variantCount}][quantity]" class="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white focus:ring-2 focus:ring-blue-400 outline-none" />
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Price</label>
-                    <input type="number" name="variants[${variantCount}][price]" 
-                           min="0.01" step="0.01" >
-                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    ${[0, 1, 2].map(imgIdx => `
+                        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-3">${imgIdx === 0 ? 'Primary' : 'Additional'} Image</label>
+                            <input type="file" class="hidden" id="input-${variantCount}-${imgIdx}" accept="image/*" onchange="handleImageInput(event, ${variantCount}, ${imgIdx})" name="variants[${variantCount}][images][]" />
+                            
+                            <div class="aspect-square w-full rounded-lg border-2 border-dashed border-gray-100 bg-gray-50 flex flex-col items-center justify-center overflow-hidden relative group/img">
+                                <img src="" id="preview-${variantCount}-${imgIdx}" class="hidden w-full h-full object-cover z-10" />
+                                <div id="placeholder-${variantCount}-${imgIdx}" class="flex flex-col items-center gap-2 text-gray-400">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    <span class="text-[10px] font-bold">CLICK TO UPLOAD</span>
+                                </div>
+                                <button type="button" onclick="document.getElementById('input-${variantCount}-${imgIdx}').click()" class="absolute inset-0 z-20"></button>
+                            </div>
 
-                <div class="form-group">
-                    <label>Stock Quantity</label>
-                    <input type="number" name="variants[${variantCount}][quantity]" 
-                           min="1" >
+                            <div class="flex gap-2 mt-3">
+                                <button type="button" onclick="openCropper(${variantCount}, ${imgIdx})" class="flex-1 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold hover:bg-blue-100 transition-colors">Crop</button>
+                                <button type="button" onclick="removeImage(${variantCount}, ${imgIdx})" class="p-1.5 text-gray-400 hover:text-red-600 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
                 </div>
-<div class="form-group">
-    <label>Variant Images (Select up to 3 images)</label>
-    <div class="variant-images-container">
-        <!-- Image 1 -->
-        <div class="variant-image-wrapper">
-            <h5>Primary Image</h5>
-            <input type="file" 
-                   name="variants[${variantCount}][images][]" 
-                   class="variant-image" 
-                   accept="image/*"
-                   onchange="handleImageInput(event, ${variantCount}, 0)" 
-                   >
-            
-            <div class="image-preview-container">
-                <img src="" 
-                     alt="Preview" 
-                     id="preview-${variantCount}-0" 
-                     class="image-preview">
-                <div class="preview-placeholder" id="placeholder-${variantCount}-0">
-                    <span>No image selected</span>
-                </div>
-            </div>
-            
-            <div class="btn-group mt-2">
-                <button type="button" 
-                        class="btn btn-primary btn-sm" 
-                        onclick="openCropper(${variantCount}, 0)">Crop</button>
-                <button type="button" 
-                        class="btn btn-danger btn-sm" 
-                        onclick="removeImage(${variantCount}, 0)">Remove</button>
-            </div>
-        </div>
-
-        <!-- Image 2 -->
-        <div class="variant-image-wrapper">
-            <h5>Secondary Image</h5>
-            <input type="file" 
-                   name="variants[${variantCount}][images][]" 
-                   class="variant-image" 
-                   accept="image/*"
-                   onchange="handleImageInput(event, ${variantCount}, 1)">
-            
-            <div class="image-preview-container">
-                <img src="" 
-                     alt="Preview" 
-                     id="preview-${variantCount}-1" 
-                     class="image-preview">
-                <div class="preview-placeholder" id="placeholder-${variantCount}-1">
-                    <span>No image selected</span>
-                </div>
-            </div>
-            
-            <div class="btn-group mt-2">
-                <button type="button" 
-                        class="btn btn-primary btn-sm" 
-                        onclick="openCropper(${variantCount}, 1)">Crop</button>
-                <button type="button" 
-                        class="btn btn-danger btn-sm" 
-                        onclick="removeImage(${variantCount}, 1)">Remove</button>
-            </div>
-        </div>
-
-        <!-- Image 3 -->
-        <div class="variant-image-wrapper">
-            <h5>Additional Image</h5>
-            <input type="file" 
-                   name="variants[${variantCount}][images][]" 
-                   class="variant-image" 
-                   accept="image/*"
-                   onchange="handleImageInput(event, ${variantCount}, 2)">
-            
-            <div class="image-preview-container">
-                <img src="" 
-                     alt="Preview" 
-                     id="preview-${variantCount}-2" 
-                     class="image-preview">
-                <div class="preview-placeholder" id="placeholder-${variantCount}-2">
-                    <span>No image selected</span>
-                </div>
-            </div>
-            
-            <div class="btn-group mt-2">
-                <button type="button" 
-                        class="btn btn-primary btn-sm" 
-                        onclick="openCropper(${variantCount}, 2)">Crop</button>
-                <button type="button" 
-                        class="btn btn-danger btn-sm" 
-                        onclick="removeImage(${variantCount}, 2)">Remove</button>
-            </div>
-        </div>
-    </div>
-</div>
             `;
-
-        document.getElementById("variants").appendChild(variantContainer);
-        variantCount++;
-      }
-
-      function removeVariant(index) {
-        Swal.fire({
-          title: "Remove Variant?",
-          text: "This action cannot be undone",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#d33",
-          cancelButtonColor: "#3085d6",
-          confirmButtonText: "Yes, remove it",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            document.getElementById(`variant-${index}`).remove();
-          }
-        });
-      }
-
-      function handleImageInput(event, variantIndex, imageIndex) {
-        const file = event.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            const preview = document.getElementById(
-              `preview-${variantIndex}-${imageIndex}`
-            );
-            const placeholder = document.getElementById(
-              `placeholder-${variantIndex}-${imageIndex}`
-            );
-            preview.src = e.target.result;
-            preview.style.display = "block";
-            placeholder.style.display = "none";
-          };
-          reader.readAsDataURL(file);
-        }
-      }
-
-      function openCropper(variantIndex, imageIndex) {
-        const preview = document.getElementById(
-          `preview-${variantIndex}-${imageIndex}`
-        );
-        if (!preview.src) {
-          Swal.fire({
-            icon: "warning",
-            title: "No Image",
-            text: "Please select an image first",
-          });
-          return;
+            document.getElementById("variants").appendChild(container);
+            variantCount++;
         }
 
-        document.getElementById("cropperModal").style.display = "block";
-        document.getElementById("cropperImage").src = preview.src;
-        currentImageElement = preview;
-
-        if (currentCropper) currentCropper.destroy();
-
-        currentCropper = new Cropper(document.getElementById("cropperImage"), {
-          aspectRatio: 1,
-          viewMode: 2,
-          dragMode: "move",
-          autoCropArea: 1,
-          restore: false,
-          guides: true,
-          center: true,
-          highlight: false,
-          cropBoxMovable: true,
-          cropBoxResizable: true,
-          toggleDragModeOnDblclick: false,
-        });
-      }
-
-      function removeImage(variantIndex, imageIndex) {
-        const preview = document.getElementById(
-          `preview-${variantIndex}-${imageIndex}`
-        );
-        const placeholder = document.getElementById(
-          `placeholder-${variantIndex}-${imageIndex}`
-        );
-        const input = document.querySelector(
-          `input[name="variants[${variantIndex}][images][]"]`
-        );
-
-        preview.src = "";
-        preview.style.display = "none";
-        placeholder.style.display = "flex";
-        input.value = "";
-      }
-
-      function cancelCrop() {
-        document.getElementById("cropperModal").style.display = "none";
-        if (currentCropper) {
-          currentCropper.destroy();
-          currentCropper = null;
-        }
-      }
-
-      function saveCrop() {
-        if (!currentCropper || !currentImageElement) return;
-
-        const canvas = currentCropper.getCroppedCanvas();
-        currentImageElement.src = canvas.toDataURL("image/jpeg");
-
-        cancelCrop();
-      }
-
-      function removeImage(variantIndex, imageIndex) {
-        const preview = document.getElementById(
-          `preview-${variantIndex}-${imageIndex}`
-        );
-        const placeholder = document.getElementById(
-          `placeholder-${variantIndex}-${imageIndex}`
-        );
-        const input = document.querySelector(
-          `input[name="variants[${variantIndex}][images][]"]`
-        );
-
-        preview.src = "";
-        preview.style.display = "none";
-        placeholder.style.display = "flex";
-        input.value = "";
-      }
-      $("#addProductForm").submit(function (e) {
-        e.preventDefault();
-
-        // Show loading state
-        Swal.fire({
-          title: "Adding Product...",
-          text: "Please wait while we process your request",
-          allowOutsideClick: false,
-          showConfirmButton: false,
-          willOpen: () => {
-            Swal.showLoading();
-          },
-        });
-        const formData = new FormData(this);
-        $.ajax({
-          url: "/admin/products/add",
-          type: "POST",
-          data: formData,
-          processData: false,
-          contentType: false,
-          success: function (response) {
-            if (response.success) {
-              Swal.fire({
-                icon: "success",
-                title: "Success!",
-                text: "Product added successfully",
-                showConfirmButton: true,
-              }).then((result) => {
-                if (result.isConfirmed) {
-                  window.location.href = "/admin/products";
-                }
-              });
-            } else {
-              Swal.fire({
-                icon: "error",
-                title: "Failed!",
-                text: response.message || "Failed to add product",
-                showConfirmButton: true,
-              });
-            }
-          },
-          error: function (xhr, status, error) {
-            console.error("AJAX Error:", status, error);
-            console.log("Response:", xhr.responseJSON);
-
-            let errorMessage =
-              "An unexpected error occurred. Please try again.";
-
-            if (xhr.responseJSON && xhr.responseJSON.message) {
-              errorMessage = xhr.responseJSON.message;
-            } else {
-              // Handle specific HTTP status codes
-              switch (xhr.status) {
-                case 400:
-                  errorMessage = "Invalid data or product already exists.";
-                  break;
-                case 401:
-                  errorMessage = "Please login to continue.";
-                  break;
-                case 403:
-                  errorMessage =
-                    "You don't have permission to perform this action.";
-                  break;
-                case 404:
-                  errorMessage = "Resource not found.";
-                  break;
-                case 413:
-                  errorMessage =
-                    "Files are too large. Please reduce image sizes.";
-                  break;
-                case 500:
-                  errorMessage = "Server error. Please try again later.";
-                  break;
-              }
-            }
-
+        function removeVariant(index) {
             Swal.fire({
-              icon: "error",
-              title: "Error!",
-              text: errorMessage,
-              showConfirmButton: true,
+                title: "Remove Variant?",
+                text: "Information for this variant will be lost.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#EF4444",
+                confirmButtonText: "Yes, remove",
+                customClass: { confirmButton: 'rounded-xl', cancelButton: 'rounded-xl' }
+            }).then((result) => {
+                if (result.isConfirmed) document.getElementById(`variant-${index}`).remove();
             });
-          },
-          complete: function () {
-            // Additional cleanup if needed
-          },
+        }
+
+        function handleImageInput(event, vIdx, iIdx) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const preview = document.getElementById(`preview-${vIdx}-${iIdx}`);
+                    const placeholder = document.getElementById(`placeholder-${vIdx}-${iIdx}`);
+                    preview.src = e.target.result;
+                    preview.classList.remove("hidden");
+                    placeholder.classList.add("hidden");
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function openCropper(vIdx, iIdx) {
+            const preview = document.getElementById(`preview-${vIdx}-${iIdx}`);
+            if (!preview.src) {
+                return Swal.fire("Notice", "Please select an image first", "info");
+            }
+
+            const modal = document.getElementById("cropperModal");
+            const image = document.getElementById("cropperImage");
+            
+            image.src = preview.src;
+            currentImageElement = preview;
+            modal.classList.remove("hidden");
+
+            if (currentCropper) currentCropper.destroy();
+
+            // Set a timeout to ensure image is loaded in DOM for cropper
+            setTimeout(() => {
+                currentCropper = new Cropper(image, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    background: false, // Disables the checkboard background
+                });
+            }, 50);
+        }
+
+        function saveCrop() {
+            if (!currentCropper) return;
+            const canvas = currentCropper.getCroppedCanvas({ width: 800, height: 800 });
+            currentImageElement.src = canvas.toDataURL("image/jpeg");
+            cancelCrop();
+        }
+
+        function cancelCrop() {
+            document.getElementById("cropperModal").classList.add("hidden");
+            if (currentCropper) currentCropper.destroy();
+        }
+
+        function removeImage(vIdx, iIdx) {
+            document.getElementById(`preview-${vIdx}-${iIdx}`).src = "";
+            document.getElementById(`preview-${vIdx}-${iIdx}`).classList.add("hidden");
+            document.getElementById(`placeholder-${vIdx}-${iIdx}`).classList.remove("hidden");
+            document.getElementById(`input-${vIdx}-${iIdx}`).value = "";
+        }
+
+        $("#addProductForm").submit(function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Saving Product...',
+                didOpen: () => Swal.showLoading(),
+                allowOutsideClick: false
+            });
+
+            const formData = new FormData(this);
+            $.ajax({
+                url: "/admin/products/add",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: (res) => {
+                    if (res.success) {
+                        Swal.fire("Success", "Product added!", "success").then(() => window.location.href = "/admin/products");
+                    } else {
+                        Swal.fire("Error", res.message || "Failed to save", "error");
+                    }
+                },
+                error: (xhr) => Swal.fire("Error", xhr.responseJSON?.message || "Server Error", "error")
+            });
         });
-      });
     </script>
-  </body>
+</body>
 </html>

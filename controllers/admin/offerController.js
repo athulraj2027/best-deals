@@ -170,7 +170,7 @@ exports.addOfferController = async (req, res) => {
     });
     await newOffer.save();
 
-    await updateProductsForOffer(newOffer); // 🔥 important
+    await updateProductsForOffer(newOffer._id); // 🔥 important
 
     res.status(201).json({
       status: "success",
@@ -259,7 +259,7 @@ exports.editOfferController = async (req, res) => {
       { new: true },
     );
 
-    await updateProductsForOffer(editedOffer);
+    await updateProductsForOffer(editedOffer._id);
     return res.status(200).json({
       status: "success",
       title: "Success",

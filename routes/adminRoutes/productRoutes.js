@@ -25,5 +25,5 @@ router
   .route("/:id/add-variant")
   .get(guestMiddleware, productsController.getAddVariantPage)
   .post(uploadProductImages.any(), productsController.addVariantController);
-  
+
 module.exports = router;

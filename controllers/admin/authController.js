@@ -2,8 +2,6 @@ const Admin = require("../../models/Admin");
 const statusCodes = require("../../services/statusCodes");
 const bcrypt = require('bcrypt')
 
-// --- Get controller ---
-
 exports.getAdminLoginPage = (req, res) => {
   try {
     res.render("adminPages/signInPage");
@@ -12,8 +10,6 @@ exports.getAdminLoginPage = (req, res) => {
     return res.status(statusCodes.SERVER_ERROR);
   }
 };
-
-// --- Post controller ---
 
 exports.adminLoginController = async (req, res) => {
   const { email, password } = req.body;

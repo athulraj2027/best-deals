@@ -11,7 +11,7 @@ router
 router
   .route("/:orderId/items/:itemId/change-status")
   .post(orderController.changeItemStatus);
-  
+
 router.route("/:id").get(guestMiddleware, orderController.getOrderDetails);
 router.route("/update-status/:id").post(orderController.changeStatusController);
 
