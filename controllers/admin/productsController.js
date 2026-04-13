@@ -1,49 +1,16 @@
 const Product = require("../../models/Product");
 const Category = require("../../models/Category");
-const cloudinary = require("../../config/cloudinary");
 const DatauriParser = require("datauri/parser");
 const mongoose = require("mongoose");
-const parser = new DatauriParser();
 const sharp = require("sharp");
 const path = require("path");
 const statusCodes = require("../../services/statusCodes");
 const fs = require("fs").promises;
 
-const bufferToDataURI = (fileFormat, buffer) => {
-  parser.format(fileFormat, buffer);
-};
-
-// const uploadToCloudinary = async (file) => {
-//   try {
-//     const fileFormat = file.mimetype.split("/")[1];
-//     const { base64 } = bufferToDataURI(fileFormat, file.buffer);
-
-//     const uploadResponse = await cloudinary.uploader.upload(
-//       `data:image/${fileFormat};base64,${base64}`,
-//       {
-//         folder: "products",
-//         resource_type: "auto",
-//         transformation: [
-//           { width: 800, height: 800, crop: "limit" },
-//           { quality: "auto" },
-//           { fetch_format: "auto" },
-//         ],
-//       }
-//     );
-//     return {
-//       url: uploadResponse.secure_url,
-//       publicId: uploadResponse.public_id,
-//     };
-//   } catch (err) {
-//     throw new Error(`Failed to upload image : ${error.message}`);
-//   }
-// };
-
-// --- Get products page
-
 exports.getProductsPage = async (req, res) => {
   try {
-    const { category, sort } = req.query;
+    const { category, sort, query } = req.query;
+
     let filter = {};
     let sortOption = {};
 
@@ -57,6 +24,11 @@ exports.getProductsPage = async (req, res) => {
       filter.category = category;
     }
 
+    if (query && query.trim() !== "") {
+      filter.$text = { $search: query };
+    }
+
+    // ✅ Sorting
     switch (sort) {
       case "newest":
         sortOption = { createdAt: -1 };
@@ -64,21 +36,25 @@ exports.getProductsPage = async (req, res) => {
       case "oldest":
         sortOption = { createdAt: 1 };
         break;
-      case "price_high":
-        sortOption = { actualPrice: -1 };
+      case "popular":
+        sortOption = { popularity: -1 };
         break;
-      case "price_low":
-        sortOption = { actualPrice: 1 };
+      case "rating":
+        sortOption = { avgRating: -1 };
         break;
+      default:
+        sortOption = { createdAt: -1 };
     }
 
+    // ✅ Fetch products
     let products = await Product.find(filter)
       .populate("category")
       .sort(sortOption)
       .skip(skip)
       .limit(limit);
 
-    const totalProducts = await Product.countDocuments();
+    // ❗ FIX: Apply filter here also
+    const totalProducts = await Product.countDocuments(filter);
     const totalPages = Math.ceil(totalProducts / limit);
 
     return res
@@ -87,7 +63,8 @@ exports.getProductsPage = async (req, res) => {
         products,
         categories,
         selectedCategory: category,
-        selectedSort:sort,
+        selectedSort: sort,
+        query,
         currentPage: page,
         totalPages,
         hasNextPage: page < totalPages,
@@ -160,7 +137,7 @@ async function processImage(file) {
 async function saveImage(buffer, variantIndex, imageIndex) {
   if (!buffer) {
     console.log(
-      `Skipping invalid image for variant ${variantIndex}, image ${imageIndex}`
+      `Skipping invalid image for variant ${variantIndex}, image ${imageIndex}`,
     );
     return null;
   }
@@ -169,7 +146,7 @@ async function saveImage(buffer, variantIndex, imageIndex) {
   const filePath = path.join(
     __dirname,
     "../../public/images/products/",
-    fileName
+    fileName,
   );
   console.log("filepath : ", filePath);
   await fs.writeFile(filePath, buffer);
@@ -181,15 +158,30 @@ async function saveImage(buffer, variantIndex, imageIndex) {
 exports.addProductController = async (req, res) => {
   try {
     // console.log("Hi the addproductController is working");
-    const {
-      name,
-      description,
-      brand,
-      actualPrice,
-      category,
-      status,
-      variants,
-    } = req.body;
+    const { name, description, brand, category, status, variants } = req.body;
+    let categoryId;
+
+    console.log(
+      "Fieldnames received:",
+      req.files.map((f) => f.fieldname),
+    );
+    if (!name || name.trim().length === 0)
+      return res.status(400).json({ message: "Please give a proper name" });
+    if (!description || description.trim().length === 0)
+      return res
+        .status(400)
+        .json({ message: "Please give a proper description" });
+    if (!brand || brand.trim().length === 0)
+      return res
+        .status(400)
+        .json({ message: "Please give a proper brand name" });
+    if (!category)
+      return res.status(400).json({ message: "Please give a proper category" });
+
+    if (!variants)
+      return res.status(400).json({ message: "Please give variants" });
+    if (!status) return res.status(400).json({ message: "Please give status" });
+
     const existingProduct = await Product.findOne({ name });
     if (existingProduct) {
       console.log(existingProduct);
@@ -209,16 +201,15 @@ exports.addProductController = async (req, res) => {
       }
       categoryId = categoryDoc._id;
     }
-    console.log(req.files);
+
     const parsedVariants =
       typeof variants === "string" ? JSON.parse(variants) : variants;
     const processedVariants = [];
-    console.log(req.files);
 
     for (let i = 0; i < parsedVariants.length; i++) {
       const variant = parsedVariants[i];
       const variantImages = req.files.filter(
-        (file) => file.fieldname === `variants[${i}][images][]`
+        (file) => file.fieldname === `variants[${i}][images][]`,
       );
 
       const processedImages = [];
@@ -235,7 +226,6 @@ exports.addProductController = async (req, res) => {
           }
         }
       }
-      console.log("processedImages : ", processedImages);
 
       if (processedImages.length > 0) {
         processedVariants.push({
@@ -254,7 +244,6 @@ exports.addProductController = async (req, res) => {
       name,
       description,
       brand,
-      actualPrice: parseFloat(actualPrice),
       category: categoryId,
       status: status === "true",
       variants: processedVariants,
@@ -284,7 +273,7 @@ exports.listProduct = async (req, res) => {
     const product = await Product.findByIdAndUpdate(
       id,
       { status: true },
-      { new: true }
+      { new: true },
     );
 
     if (!product) {
@@ -312,7 +301,7 @@ exports.unlistProduct = async (req, res) => {
     const product = await Product.findByIdAndUpdate(
       id,
       { status: false },
-      { new: true }
+      { new: true },
     );
 
     if (!product) {
@@ -348,7 +337,7 @@ async function deleteImageFile(imageUrl) {
 exports.editProductController = async (req, res) => {
   try {
     const productId = req.params.id;
-    const { name, brand, actualPrice, category, status, variants } = req.body;
+    const { name, brand, category, status, variants } = req.body;
 
     const product = await Product.findById(productId);
     if (!product) {
@@ -357,6 +346,17 @@ exports.editProductController = async (req, res) => {
         message: "Product not found",
       });
     }
+
+    const nameRegex = /^[a-zA-Z0-9][a-zA-Z0-9\s&.,'-]{2,99}$/;
+    const trimmedName = name.trim();
+    const lowercaseName = trimmedName.toLowerCase();
+    const isNameValid = nameRegex.test(lowercaseName);
+    if (!isNameValid)
+      return res.status(400).json({
+        status: "error",
+        title: "Error",
+        message: "Name syntax invalid",
+      });
 
     const processedVariants = await Promise.all(
       variants.map(async (variant, variantIndex) => {
@@ -408,7 +408,7 @@ exports.editProductController = async (req, res) => {
             if (
               !deletedImageSet.has(img.url) &&
               !processedVariant.images.some(
-                (existing) => existing.url === img.url
+                (existing) => existing.url === img.url,
               )
             ) {
               processedVariant.images.push(img);
@@ -435,13 +435,13 @@ exports.editProductController = async (req, res) => {
 
             // Find and remove the image being replaced at this position
             const replacedImageIndex = processedVariant.images.findIndex(
-              (img) => img.position === replacePosition
+              (img) => img.position === replacePosition,
             );
 
             if (replacedImageIndex !== -1) {
               // Delete the old image file
               await deleteImageFile(
-                processedVariant.images[replacedImageIndex].url
+                processedVariant.images[replacedImageIndex].url,
               );
               // Replace with new image
               processedVariant.images[replacedImageIndex] = {
@@ -464,21 +464,19 @@ exports.editProductController = async (req, res) => {
           .slice(0, 3);
 
         return processedVariant;
-      })
+      }),
     );
-    const productCategory = await Category.find({ category });
 
-    const updatedProduct = await Product.findByIdAndUpdate(
+    await Product.findByIdAndUpdate(
       productId,
       {
-        name,
+        name: lowercaseName,
         brand,
-        actualPrice,
-        productCategory,
+        category: category._id,
         status: status === "true",
         variants: processedVariants,
       },
-      { new: true }
+      { new: true },
     );
 
     return res.status(200).json({
@@ -580,7 +578,6 @@ exports.addVariantController = async (req, res) => {
     // Add variant to product
     product.variants.push(newVariant);
     await product.save();
-    console.log("New variant added");
     return res.status(200).redirect(`/admin/products`);
   } catch (error) {
     console.error("Error adding variant:", error);

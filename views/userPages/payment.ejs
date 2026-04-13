@@ -1,0 +1,35 @@
+<html>
+  <head>
+    <title>Payment</title>
+  </head>
+  <body>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+      const options = {
+        key: '<%= key %>', // Your Razorpay key ID
+        amount: '<%= order.grandTotal * 100 %>', // In paise
+        currency: 'USD',
+        name: 'Your Company',
+        description: 'Order payment',
+        order_id: '<%= razorpayOrderId %>',
+        callback_url: '/payment/callback', // Endpoint for payment confirmation
+        prefill: {
+          name: 'Customer Name',
+          email: 'customer@email.com',
+          contact: '9999999999',
+        },
+        handler: function (response) {
+          // On payment success, send to server for verification
+          fetch('/payment/callback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(response),
+          }).then(() => window.location.href = '/order-success');
+        },
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.open();
+    </script>
+  </body>
+</html>

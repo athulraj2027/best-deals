@@ -15,7 +15,7 @@ exports.getSignUpPage = (req, res) => {
 };
 
 exports.signUpController = async (req, res) => {
-  const { name, email, password, confirmPassword } = req.body;
+  const { name, email, password, confirmPassword, referralCode } = req.body;
   console.log(req.body);
   try {
     if (!name || !email || !password || !confirmPassword) {
@@ -27,7 +27,7 @@ exports.signUpController = async (req, res) => {
       });
     }
 
-    const existingUser = await User.findOne( {email} );
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       console.log("existing user");
       return res.status(statusCodes.BAD_REQUEST).json({
@@ -51,13 +51,33 @@ exports.signUpController = async (req, res) => {
         },
       });
     }
+
+    if (referralCode && referralCode.trim() !== "") {
+      const isReferralValid = await User.findOne({ referralCode });
+      if (!isReferralValid)
+        return res.status(statusCodes.BAD_REQUEST).json({
+          status: "error",
+          title: "Error",
+          message: "Invalid referral Code",
+          errors: {
+            password: "Invalid referral Code",
+            confirmPassword: "Invalid referral Code",
+          },
+        });
+    }
+
     const otp = otpServices.generateOTP();
-    await otpServices.saveOTP(email, otp);
-    await otpServices.sendOTP(email, otp);
+    otpServices.saveOTP(email, otp);
+    otpServices.sendOTP(email, otp);
 
     req.session.name = name;
     req.session.email = email;
     req.session.password = password;
+    if (referralCode) {
+      req.session.referral = referralCode;
+    } else {
+      delete req.session.referral;
+    }
 
     req.session.save();
     console.log(req.session);

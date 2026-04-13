@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Offer | Tech Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .status-badge { @apply inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border; }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen">
+    <%- include('../partials/menu') %>
+
+    <div class="max-w-4xl mx-auto py-12 px-6">
+        <div class="mb-10 text-center">
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight italic">Edit Campaign <span class="text-indigo-600">Parameters</span></h1>
+            <p class="text-slate-500 mt-2 font-medium">Modify existing offer logic and validity settings.</p>
+        </div>
+
+        <form id="editOfferForm" class="space-y-8">
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mb-8 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                        <i class="fas fa-pen-nib"></i>
+                    </div>
+                    Campaign Details
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+                    <div class="form-group">
+                        <label for="code" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Offer Name</label>
+                        <input type="text" id="code" name="code" value="<%= offer.name %>" placeholder="Enter campaign name"
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-bold uppercase tracking-widest" />
+                        <p id="codeError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="offerType" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Discount Model</label>
+                        <select id="offerType" name="offerType" class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:border-indigo-400 appearance-none cursor-pointer text-sm font-bold">
+                            <option value="percentage" <%= offer.offerType === 'percentage' ? 'selected' : '' %>>Percentage (%)</option>
+                            <option value="fixed" <%= offer.offerType === 'fixed' ? 'selected' : '' %>>Fixed Amount (₹)</option>
+                        </select>
+                        <p id="offerTypeError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="form-group">
+                        <label for="offerValue" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Offer Value</label>
+                        <input type="number" id="offerValue" name="offerValue" value="<%= offer.offerValue %>" step="0.01"
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-black" />
+                        <p id="offerValueError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                        <div class="text-[10px] text-slate-400 mt-2 italic font-medium ml-1" id="offerValueHelp">
+                            <%= offer.offerType === 'percentage' ? 'Value as percentage (e.g., 10 for 10% off)' : 'Direct currency deduction amount' %>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Marketing Description</label>
+                        <textarea id="description" name="description" rows="1" class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-medium"><%= offer.description %></textarea>
+                        <p id="descriptionError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mb-8 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    Active Window
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div class="form-group">
+                        <label for="startDate" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Activation Date</label>
+                        <input type="datetime-local" id="startDate" name="startDate" value="<%= new Date(offer.startDate).toISOString().slice(0, 16) %>"
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 text-sm font-bold" />
+                        <p id="startDateError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
+                    <div class="form-group">
+                        <label for="expiryDate" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Termination Date</label>
+                        <input type="datetime-local" id="expiryDate" name="expiryDate" value="<%= new Date(offer.expiryDate).toISOString().slice(0, 16) %>"
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 text-sm font-bold" />
+                        <p id="expiryDateError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between p-6 bg-slate-900 rounded-3xl border border-slate-800 shadow-xl shadow-indigo-900/10 gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-white backdrop-blur-md border border-white/10">
+                            <i class="fas fa-signal"></i>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-black uppercase tracking-widest text-slate-500">Live Status Override</span>
+                            <span id="statusText" class="text-xs font-black uppercase tracking-tighter <%= offer.active ? 'text-emerald-400' : 'text-slate-400' %>">
+                                <%= offer.active ? 'Campaign Online' : 'Campaign Offline' %>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-6">
+                        <% 
+                            const statusColorMap = {
+                                active: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+                                expired: 'bg-red-500/10 text-red-400 border-red-500/20',
+                                upcoming: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+                                inactive: 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+                            };
+                        %>
+                        <div class="px-4 py-2 rounded-xl border <%= statusColorMap[offer.status] %> text-[10px] font-black uppercase tracking-widest">
+                            Current: <%= offer.status %>
+                        </div>
+                        
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="active" id="statusToggle" class="sr-only peer" <%= offer.active ? 'checked' : '' %> />
+                            <div class="w-14 h-7 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-end gap-4 pt-4">
+                <a href="/admin/offers" class="w-full sm:w-auto px-10 py-4 font-bold text-slate-400 hover:text-slate-600 uppercase tracking-widest text-xs transition-all text-center">
+                    Discard Changes
+                </a>
+                <button type="submit" class="w-full sm:w-auto px-12 py-4 font-black text-white bg-indigo-600 rounded-2xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 uppercase tracking-widest text-xs">
+                    Apply Updates
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        const VALIDATION_RULES = {
+            code: { minLength: 3, maxLength: 15, pattern: /^[A-Z0-9_-]+$/ },
+            description: { minLength: 5, maxLength: 200 },
+            offerValue: { percentage: { min: 1, max: 100 }, fixed: { min: 0.01 } }
+        };
+
+        const statusToggle = document.getElementById("statusToggle");
+        const statusText = document.getElementById("statusText");
+
+        statusToggle.addEventListener("change", function () {
+            statusText.textContent = this.checked ? "Campaign Online" : "Campaign Offline";
+            statusText.className = `text-xs font-black uppercase tracking-tighter ${this.checked ? 'text-emerald-400' : 'text-slate-500'}`;
+        });
+
+        const offerType = document.getElementById("offerType");
+        const offerValueHelp = document.getElementById("offerValueHelp");
+
+        offerType.addEventListener("change", function() {
+            offerValueHelp.textContent = this.value === "percentage" 
+                ? "Value as percentage (e.g., 10 for 10% off)" 
+                : "Direct currency deduction amount";
+        });
+
+        $("#editOfferForm").on("submit", function(e) {
+            e.preventDefault();
+            
+            const codeInput = $('#code');
+            const codeVal = codeInput.val().toUpperCase().trim();
+            codeInput.val(codeVal);
+
+            let isValid = true;
+            $('.text-red-500').addClass('hidden');
+
+            // Validations
+            if (codeVal.length < VALIDATION_RULES.code.minLength) {
+                $('#codeError').text(`Min ${VALIDATION_RULES.code.minLength} characters`).removeClass('hidden');
+                isValid = false;
+            }
+            
+            const offerVal = parseFloat($('#offerValue').val());
+            if (offerType.value === 'percentage' && (offerVal < 1 || offerVal > 100)) {
+                $('#offerValueError').text('Must be between 1-100%').removeClass('hidden');
+                isValid = false;
+            }
+
+            const start = new Date($('#startDate').val());
+            const end = new Date($('#expiryDate').val());
+            if (end <= start) {
+                $('#expiryDateError').text('Expiry must be after activation').removeClass('hidden');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                return Swal.fire({ icon: 'error', title: 'Data Invalid', text: 'Please correct the highlighted fields.' });
+            }
+
+            Swal.fire({
+                title: 'Synchronizing...',
+                background: '#ffffff',
+                didOpen: () => Swal.showLoading(),
+                allowOutsideClick: false
+            });
+
+            const formData = {
+                code: codeVal,
+                offerType: offerType.value,
+                offerValue: offerVal,
+                description: $('#description').val().trim(),
+                startDate: $('#startDate').val(),
+                expiryDate: $('#expiryDate').val(),
+                active: statusToggle.checked
+            };
+
+            fetch('/admin/offers/edit/<%= offer._id %>', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success'){
+                    Swal.fire({ icon: 'success', title: 'Updated', text: data.message, confirmButtonColor: '#4f46e5' })
+                    .then(() => window.location.href = '/admin/offers');
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Update Failed', text: data.message });
+                }
+            })
+            .catch(() => Swal.fire({ icon: 'error', title: 'Network Error', text: 'Server connection failed.' }));
+        });
+    </script>
+</body>
+</html>

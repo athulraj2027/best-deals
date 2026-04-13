@@ -33,6 +33,8 @@ exports.getHomePage = async (req, res) => {
         }
       }
 
+      console.log("imageurl : ", imageUrl);
+
       return {
         _id: product._id,
         name: product.name,
@@ -46,6 +48,7 @@ exports.getHomePage = async (req, res) => {
 
     const categories = await Category.find({ status: "listed" });
     const isLoggedIn = req.isAuthenticated();
+    console.log("products ; ", products);
 
     return res.status(statusCodes.SUCCESS).render("userPages/homePage", {
       products,
@@ -55,6 +58,8 @@ exports.getHomePage = async (req, res) => {
     });
   } catch (err) {
     console.log("Error in loading home page: ", err);
-    return res.status(statusCodes.SERVER_ERROR).render("error");
+    return res.status(statusCodes.SERVER_ERROR).render("serverError", {
+      error: err.message || "Failed to load home page",
+    });
   }
 };

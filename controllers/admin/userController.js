@@ -3,7 +3,6 @@ const statusCodes = require("../../services/statusCodes");
 
 exports.viewUser = async (req, res) => {
   try {
-    
     const customerId = req.params.id;
     const user = await User.findById(customerId);
     return res
@@ -19,8 +18,10 @@ exports.viewUser = async (req, res) => {
 
 exports.viewUsersPage = async (req, res) => {
   try {
-    const { sort } = req.query;
+    const { sort, query } = req.query;
+
     let sortOption = {};
+    let filter = {};
 
     switch (sort) {
       case "desc":
@@ -35,14 +36,29 @@ exports.viewUsersPage = async (req, res) => {
       case "name_asc":
         sortOption = { name: 1 };
         break;
+      default:
+        sortOption = { createdAt: -1 };
     }
-    
-    const page = parseInt(req.query.page) || 1; // Default to page 1
-    const limit = parseInt(req.query.limit) || 10; // Default to 10 users per page
+
+    if (query && query.trim() !== "") {
+      filter.$or = [
+        { name: { $regex: query, $options: "i" } },
+        { email: { $regex: query, $options: "i" } },
+        { phone: { $regex: query, $options: "i" } },
+        { referralCode: { $regex: query, $options: "i" } },
+      ];
+    }
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const customers = await User.find().sort(sortOption).skip(skip).limit(limit);
-    const totalCustomers = await User.countDocuments(); // Total users count
+    const customers = await User.find(filter)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limit);
+
+    const totalCustomers = await User.countDocuments(filter);
     const totalPages = Math.ceil(totalCustomers / limit);
 
     return res
@@ -50,7 +66,8 @@ exports.viewUsersPage = async (req, res) => {
       .render("adminPages/CustomerPages/adminCustomers", {
         customers,
         currentPage: page,
-        selectedSort : sort,
+        selectedSort: sort,
+        query, 
         totalPages,
         hasNextPage: page < totalPages,
         hasPrevPage: page > 1,
@@ -95,7 +112,7 @@ exports.blockCustomer = async (req, res) => {
               console.error("Error destroying session:", err);
             } else {
               console.log(
-                `Session ${sessionID} destroyed for blocked user ${userId}`
+                `Session ${sessionID} destroyed for blocked user ${userId}`,
               );
             }
           });
@@ -117,6 +134,104 @@ exports.unblockCustomer = async (req, res) => {
   } catch (err) {
     console.error("Error unblocking customer:", err);
     res.status(500).send("Internal Server Error");
+  }
+};
+
+exports.updateWallet = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { amount, type, description } = req.body; // type: 'credit' or 'debit'
+
+    if (!amount || !type) {
+      return res.status(400).json({
+        status: "error",
+        message: "Amount and type are required",
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    const amountNum = parseFloat(amount);
+    if (isNaN(amountNum) || amountNum <= 0) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid amount",
+      });
+    }
+
+    if (type === "credit") {
+      user.wallet += amountNum;
+    } else if (type === "debit") {
+      if (user.wallet < amountNum) {
+        return res.status(400).json({
+          status: "error",
+          message: "Insufficient wallet balance",
+        });
+      }
+      user.wallet -= amountNum;
+    } else {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid type. Use 'credit' or 'debit'",
+      });
+    }
+
+    user.walletTransactions.push({
+      type: type,
+      amount: amountNum,
+      description:
+        description ||
+        `Admin ${type === "credit" ? "added" : "deducted"} wallet balance`,
+      date: new Date(),
+    });
+
+    await user.save();
+
+    return res.status(200).json({
+      status: "success",
+      message: `Wallet ${type === "credit" ? "credited" : "debited"} successfully`,
+      newBalance: user.wallet,
+    });
+  } catch (err) {
+    console.error("Error updating wallet:", err);
+    return res.status(500).json({
+      status: "error",
+      message: "Server error",
+    });
+  }
+};
+
+exports.getWalletTransactions = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findById(userId).select(
+      "wallet walletTransactions",
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      wallet: user.wallet,
+      transactions: user.walletTransactions || [],
+    });
+  } catch (err) {
+    console.error("Error fetching wallet transactions:", err);
+    return res.status(500).json({
+      status: "error",
+      message: "Server error",
+    });
   }
 };
 

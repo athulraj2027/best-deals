@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Offer | Tech Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        select[multiple] {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 #f8fafc;
+        }
+        select[multiple]::-webkit-scrollbar { width: 6px; }
+        select[multiple]::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen">
+    <%- include('../partials/menu') %>
+
+    <div class="max-w-4xl mx-auto py-12 px-6">
+        <div class="mb-10 text-center">
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight italic">Campaign <span class="text-indigo-600">Architect</span></h1>
+            <p class="text-slate-500 mt-2 font-medium">Design and deploy high-converting promotional offers.</p>
+        </div>
+
+        <form id="addOfferForm" class="space-y-8">
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mb-8 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                        <i class="fas fa-bullhorn"></i>
+                    </div>
+                    Offer Identity
+                </h3>
+
+                <div class="space-y-6">
+                    <div>
+                        <label for="offerName" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Campaign Name</label>
+                        <input type="text" id="offerName" name="name" placeholder="e.g. MEGA_TECH_SALE_2026" 
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-bold tracking-wide" />
+                        <p id="offerNameError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
+
+                    <div>
+                        <label for="description" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Strategic Description</label>
+                        <textarea id="description" name="description" placeholder="Summarize the offer's impact..." rows="2"
+                                  class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-medium"></textarea>
+                        <p id="descriptionError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mb-8 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600">
+                        <i class="fas fa-crosshairs"></i>
+                    </div>
+                    Target Alignment
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <label for="appliedCategories" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Focus Categories</label>
+                        <select id="appliedCategories" name="appliedCategories" multiple class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 text-xs font-bold h-36">
+                            <% categories.forEach(function(category) { %>
+                                <option value="<%= category._id %>" class="py-1"><%= category.name %></option>
+                            <% }); %>
+                        </select>
+                        <p class="text-[9px] text-slate-400 mt-3 italic uppercase tracking-tighter">Multi-select enabled via Ctrl/Cmd</p>
+                    </div>
+
+                    <div>
+                        <label for="appliedProducts" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Specific Hardware</label>
+                        <select id="appliedProducts" name="appliedProducts" multiple class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 text-xs font-bold h-36">
+                            <% products.forEach(function(product) { %>
+                                <option value="<%= product._id %>" class="py-1"><%= product.name %></option>
+                            <% }); %>
+                        </select>
+                        <p class="text-[9px] text-slate-400 mt-3 italic uppercase tracking-tighter">Leave empty for site-wide deployment</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mb-8 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+                        <i class="fas fa-hand-holding-dollar"></i>
+                    </div>
+                    Value Proposition
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <label for="offerType" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Discount Logic</label>
+                        <select id="offerType" name="offerType" class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:border-indigo-400 appearance-none cursor-pointer text-sm font-bold">
+                            <option value="">Select Logic</option>
+                            <option value="percentage">Percentage Model (%)</option>
+                            <option value="fixed">Fixed Deduction (₹)</option>
+                        </select>
+                        <p id="offerTypeError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
+
+                    <div>
+                        <label for="offerValue" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Net Value</label>
+                        <input type="number" id="offerValue" name="offerValue" step="0.01" placeholder="0.00"
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-black" />
+                        <p id="offerValueError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mb-8 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600">
+                        <i class="fas fa-clock-rotate-left"></i>
+                    </div>
+                    Campaign Lifecycle
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div>
+                        <label for="startDate" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Live Sequence Start</label>
+                        <input type="datetime-local" id="startDate" name="startDate" 
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 text-sm font-bold" />
+                    </div>
+                    <div>
+                        <label for="expiryDate" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Automatic Termination</label>
+                        <input type="datetime-local" id="expiryDate" name="expiryDate" 
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 text-sm font-bold" />
+                        <p id="expiryDateError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between p-6 bg-slate-900 rounded-3xl border border-slate-800 shadow-xl shadow-indigo-900/10">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-white backdrop-blur-md border border-white/10">
+                            <i class="fas fa-bolt-lightning"></i>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-black uppercase tracking-widest text-slate-500">Initialization Status</span>
+                            <span id="statusText" class="text-xs font-black uppercase tracking-tighter text-emerald-400">Campaign Active</span>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="active" id="statusToggle" class="sr-only peer" checked>
+                        <div class="w-14 h-7 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-end gap-4 pt-4">
+                <a href="/admin/offers" class="w-full sm:w-auto px-10 py-4 font-bold text-slate-400 hover:text-slate-600 uppercase tracking-widest text-xs transition-all text-center">
+                    Abort Setup
+                </a>
+                <button type="submit" class="w-full sm:w-auto px-12 py-4 font-black text-white bg-indigo-600 rounded-2xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 uppercase tracking-widest text-xs">
+                    Authorize Campaign
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Default Time Synchronization
+        document.addEventListener("DOMContentLoaded", function () {
+            const now = new Date();
+            const localStart = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            document.getElementById("startDate").value = localStart;
+
+            const expiry = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+            const localExpiry = new Date(expiry.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            document.getElementById("expiryDate").value = localExpiry;
+        });
+
+        // Interactive UI Handlers
+        document.getElementById('statusToggle').addEventListener('change', function() {
+            const statusText = document.getElementById("statusText");
+            statusText.textContent = this.checked ? "Campaign Active" : "Campaign Offline";
+            statusText.className = `text-xs font-black uppercase tracking-tighter ${this.checked ? 'text-emerald-400' : 'text-slate-500'}`;
+        });
+
+        document.getElementById("offerType").addEventListener("change", function () {
+            const valInput = document.getElementById("offerValue");
+            if (this.value === "percentage") {
+                valInput.setAttribute("max", "100");
+                valInput.placeholder = "Enter percentage (Max 100%)";
+            } else {
+                valInput.removeAttribute("max");
+                valInput.placeholder = "Enter fixed deduction (₹)";
+            }
+        });
+
+        // Validation Logic
+        const showError = (id, msg) => {
+            $(`#${id}Error`).text(msg).removeClass('hidden').addClass('animate-bounce');
+        };
+
+        const validate = () => {
+            $('.text-red-500').addClass('hidden');
+            let valid = true;
+
+            const name = $('#offerName').val().trim();
+            const type = $('#offerType').val();
+            const val = parseFloat($('#offerValue').val());
+            const start = new Date($('#startDate').val());
+            const end = new Date($('#expiryDate').val());
+
+            if (name.length < 3) { showError('offerName', 'Campaign name too short'); valid = false; }
+            if (!type) { showError('offerType', 'Select a discount model'); valid = false; }
+            if (isNaN(val) || val <= 0) { showError('offerValue', 'Enter a valid positive value'); valid = false; }
+            if (type === 'percentage' && val > 100) { showError('offerValue', 'Limit: 100%'); valid = false; }
+            if (end <= start) { showError('expiryDate', 'Campaign must have a duration'); valid = false; }
+
+            return valid;
+        };
+
+        // Form Transmission
+        $("#addOfferForm").on("submit", function (e) {
+            e.preventDefault();
+            if (!validate()) return;
+
+            Swal.fire({
+                title: "Deploying Campaign...",
+                background: "#ffffff",
+                didOpen: () => Swal.showLoading(),
+                allowOutsideClick: false,
+            });
+
+            const formData = new FormData(this);
+            const jsonData = {};
+            
+            // Map form fields to JSON
+            formData.forEach((value, key) => {
+                if (key === 'appliedCategories' || key === 'appliedProducts') {
+                    if (!jsonData[key]) jsonData[key] = [];
+                    if (value) jsonData[key].push(value);
+                } else if (key === 'active') {
+                    jsonData[key] = true;
+                } else {
+                    jsonData[key] = value;
+                }
+            });
+            if (!jsonData.active) jsonData.active = false;
+
+            $.ajax({
+                url: "/admin/offers/add",
+                type: "POST",
+                data: JSON.stringify(jsonData),
+                contentType: "application/json",
+                success: function (res) {
+                    if (res.status === "success") {
+                        Swal.fire({ icon: "success", title: "Live!", text: "Campaign deployed successfully", confirmButtonColor: "#4f46e5" })
+                        .then(() => window.location.href = "/admin/offers");
+                    } else {
+                        Swal.fire("Failed", res.message, "error");
+                    }
+                },
+                error: (xhr) => Swal.fire("Deployment Error", xhr.responseJSON?.message || "Sync failed", "error")
+            });
+        });
+    </script>
+</body>
+</html>

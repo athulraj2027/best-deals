@@ -43,11 +43,6 @@ const productSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    actualPrice: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
@@ -58,14 +53,18 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: true, // true for Listed, false for Unlisted
     },
+    inStock: {
+      type: Boolean,
+      default: true, // Product is available in stock
+    },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields automatically
-  }
+  },
 );
 
 // Create indexes for better search performance
-productSchema.index({ name: "text", brand: "text" });
+productSchema.index({ name: "text", description: "text", brand: "text" });
 
 const Product = mongoose.model("Product", productSchema);
 

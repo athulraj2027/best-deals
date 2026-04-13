@@ -1,38 +1,63 @@
-<div class="sidebar-container">
-  <div class="account-sidebar">
-    <button class="menu-toggle">
-      <span>Account Menu</span>
-      <i class="fas fa-bars"></i>
+<div class="w-full max-w-xs lg:max-w-[280px]">
+  <div class="bg-slate-900 rounded-[2.5rem] shadow-2xl shadow-indigo-900/20 p-6 border border-slate-800">
+    
+    <div class="hidden md:flex flex-col items-center mb-8 pb-6 border-b border-slate-800">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-purple-500/20 mb-3">
+            <%= user.name.charAt(0).toUpperCase() %>
+        </div>
+        <h4 class="text-white font-bold text-sm tracking-tight"><%= user.name %></h4>
+        <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mt-1">Customer Account</p>
+    </div>
+
+    <button 
+      id="menuToggle"
+      class="md:hidden w-full flex items-center justify-between bg-slate-800/50 text-white px-5 py-4 rounded-2xl mb-2 border border-slate-700 transition-all active:scale-95"
+    >
+      <span class="text-xs font-black uppercase tracking-widest">Account Menu</span>
+      <i id="menuIcon" class="fas fa-bars text-purple-400"></i>
     </button>
-    <ul class="sidebar-menu">
-      <li class="sidebar-item">
-        <a href="/profile" class="sidebar-link">
-          <i class="fas fa-user-circle me-2"></i>Profile
+
+    <ul id="sidebarMenu" class="space-y-2 md:block hidden animate-in fade-in slide-in-from-top-4 duration-300">
+
+      <li>
+        <a href="/profile" 
+           class="nav-link flex items-center gap-4 px-5 py-3.5 rounded-2xl text-slate-400 font-bold text-sm hover:bg-slate-800 hover:text-white transition-all group">
+          <i class="fas fa-user-circle text-lg group-hover:text-purple-500 transition-colors"></i>
+          <span>Personal Info</span>
         </a>
       </li>
-      <li class="sidebar-item">
-        <a href="/profile/address" class="sidebar-link">
-          <i class="fas fa-map-marker-alt me-2"></i>Addresses
+
+      <li>
+        <a href="/profile/address" 
+           class="nav-link flex items-center gap-4 px-5 py-3.5 rounded-2xl text-slate-400 font-bold text-sm hover:bg-slate-800 hover:text-white transition-all group">
+          <i class="fas fa-map-marker-alt text-lg group-hover:text-purple-500 transition-colors"></i>
+          <span>Addresses</span>
         </a>
       </li>
-      <li class="sidebar-item">
-        <a href="/profile/orders" class="sidebar-link">
-          <i class="fas fa-shopping-bag me-2"></i>Orders
+
+      <li>
+        <a href="/profile/orders" 
+           class="nav-link flex items-center gap-4 px-5 py-3.5 rounded-2xl text-slate-400 font-bold text-sm hover:bg-slate-800 hover:text-white transition-all group">
+          <i class="fas fa-box-open text-lg group-hover:text-purple-500 transition-colors"></i>
+          <span>My Orders</span>
         </a>
       </li>
-      <li class="sidebar-item">
-        <a href="/profile/wallet" class="sidebar-link">
-          <i class="fas fa-wallet me-2"></i>Wallet
+
+      <% if(!user.googleId) { %>
+      <li>
+        <a href="/profile/password" 
+           class="nav-link flex items-center gap-4 px-5 py-3.5 rounded-2xl text-slate-400 font-bold text-sm hover:bg-slate-800 hover:text-white transition-all group">
+          <i class="fas fa-shield-halved text-lg group-hover:text-purple-500 transition-colors"></i>
+          <span>Security</span>
         </a>
       </li>
-      <li class="sidebar-item">
-        <a href="/profile/password" class="sidebar-link">
-          <i class="fas fa-key me-2"></i>Reset Password
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="/profile/reviews" class="sidebar-link">
-          <i class="fas fa-star me-2"></i>My Reviews
+      <% } %>
+
+      <li>
+        <a href="/profile/wallet-transactions" 
+           class="nav-link flex items-center gap-4 px-5 py-3.5 rounded-2xl text-slate-400 font-bold text-sm hover:bg-slate-800 hover:text-white transition-all group">
+          <i class="fas fa-wallet text-lg group-hover:text-purple-500 transition-colors"></i>
+          <span>My Wallet</span>
         </a>
       </li>
     </ul>
@@ -40,121 +65,29 @@
 </div>
 
 <script>
-  document.querySelector(".menu-toggle").addEventListener("click", function () {
-    document.querySelector(".sidebar-menu").classList.toggle("show");
+  // ── Mobile Menu Toggle ──────────────────────────────────────────────────
+  const toggleBtn = document.getElementById("menuToggle");
+  const menu = document.getElementById("sidebarMenu");
+  const icon = document.getElementById("menuIcon");
 
-    // Change icon based on menu state
-    const icon = this.querySelector("i");
-    if (document.querySelector(".sidebar-menu").classList.contains("show")) {
-      icon.className = "fas fa-times";
-    } else {
-      icon.className = "fas fa-bars";
-    }
+  toggleBtn.addEventListener("click", () => {
+    menu.classList.toggle("hidden");
+    const isHidden = menu.classList.contains("hidden");
+    icon.className = isHidden ? "fas fa-bars text-purple-400" : "fas fa-times text-pink-400";
+    toggleBtn.classList.toggle('bg-slate-800', !isHidden);
+  });
+
+  // ── Auto-Active State Logic ──────────────────────────────────────────────
+  // This automatically styles the link that matches the current URL
+  document.addEventListener("DOMContentLoaded", () => {
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll(".nav-link");
+
+    navLinks.forEach(link => {
+      if (link.getAttribute("href") === currentPath) {
+        link.classList.remove("text-slate-400", "hover:bg-slate-800");
+        link.classList.add("bg-gradient-to-r", "from-purple-600/20", "to-transparent", "text-purple-400", "border-l-4", "border-purple-600", "rounded-l-none");
+      }
+    });
   });
 </script>
-<style>
-  .sidebar-container {
-    width: 100%;
-    max-width: 250px;
-    padding: 20px 0;
-    margin: 20px;
-    transition: all 0.3s ease;
-  }
-
-  .account-sidebar {
-    background-color: #2d3540;
-    border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  }
-
-  .sidebar-menu {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .sidebar-item {
-    margin-bottom: 8px;
-  }
-
-  .sidebar-link {
-    display: block;
-    padding: 12px 15px;
-    color: #e0e0e0;
-    text-decoration: none;
-    border-radius: 6px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-  }
-
-  .sidebar-link:hover {
-    background-color: #3a4653;
-    color: #ffffff;
-  }
-
-  .sidebar-link.active {
-    background-color: #4a7bff;
-    color: #ffffff;
-  }
-
-  .menu-toggle {
-    display: none;
-    background-color: #2d3540;
-    color: #ffffff;
-    border: none;
-    border-radius: 6px;
-    padding: 10px 15px;
-    font-weight: 500;
-    cursor: pointer;
-    margin-bottom: 10px;
-    width: 100%;
-    text-align: left;
-  }
-
-  .menu-toggle i {
-    margin-right: 8px;
-  }
-
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .sidebar-container {
-      max-width: 100%;
-      margin: 10px;
-    }
-
-    .account-sidebar {
-      padding: 10px;
-    }
-
-    .menu-toggle {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .sidebar-menu {
-      display: none;
-      margin-top: 10px;
-    }
-
-    .sidebar-menu.show {
-      display: block;
-    }
-  }
-
-  @media (max-width: 576px) {
-    .sidebar-container {
-      margin: 5px;
-    }
-
-    .sidebar-item {
-      margin-bottom: 5px;
-    }
-
-    .sidebar-link {
-      padding: 8px 10px;
-      font-size: 0.85rem;
-    }
-  }
-</style>

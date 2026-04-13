@@ -8,6 +8,9 @@ router.route("/view/:id").get(guestMiddleware, usersController.viewUser);
 router.route("/list/:id").post(usersController.listingUsersController);
 router.route("/block/:id").post(usersController.blockCustomer);
 router.route("/unblock/:id").post(usersController.unblockCustomer);
-// router.route("/unlist/:id").post();
+router.route("/:id/wallet").post(guestMiddleware, usersController.updateWallet);
+router
+  .route("/:id/wallet/transactions")
+  .get(guestMiddleware, usersController.getWalletTransactions);
 
 module.exports = router;

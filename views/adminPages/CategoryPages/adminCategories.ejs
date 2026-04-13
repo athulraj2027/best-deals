@@ -1,281 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-      crossorigin="anonymous"
-    />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link rel="stylesheet" href="/adminCSS/partials/menu.css" />
-    <title>Categories</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Categories Management | Tech Admin</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
     <style>
-      :root {
-        --primary-color: #f57c00;
-        --primary-hover: #e65100;
-        --light-bg: #fff9f0;
-        --text-dark: #333;
-        --sidebar-width: 250px;
-        --sidebar-collapsed-width: 70px;
-      }
-      
-      body {
-        background-color: #f8f9fa;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        overflow-x: hidden;
-      }
-      
-      /* Main layout structure */
-      .main-content-wrapper {
-        display: flex;
-        width: 100%;
-        min-height: 100vh;
-      }
-      
-      /* Main content area that adjusts with sidebar */
-      .main-content {
-        flex: 1;
-        padding: 20px;
-        margin-left: var(--sidebar-width);
-        transition: margin-left 0.3s ease;
-        width: calc(100% - var(--sidebar-width));
-      }
-      
-      .page-title {
-        font-weight: 600;
-        color: var(--text-dark);
-        border-left: 5px solid var(--primary-color);
-        padding-left: 15px;
-      }
-      
-      .btn-primary-custom {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-        color: white;
-        transition: all 0.3s;
-      }
-      
-      .btn-primary-custom:hover {
-        background-color: var(--primary-hover);
-        border-color: var(--primary-hover);
-      }
-      
-      .card {
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-      }
-      
-      .table-header {
-        background-color: var(--primary-color);
-        color: white;
-      }
-      
-      .table-responsive {
-        border-radius: 8px;
-        overflow: hidden;
-      }
-      
-      .form-control, .form-select {
-        border-radius: 8px;
-        border: 1px solid #ced4da;
-      }
-      
-      .form-control:focus, .form-select:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.25rem rgba(245, 124, 0, 0.25);
-      }
-      
-      .filter-section {
-        background-color: var(--light-bg);
-        border-radius: 10px;
-        padding: 15px;
-        margin-bottom: 20px;
-      }
-      
-      .status-badge {
-        padding: 6px 10px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-      }
-      
-      .status-listed {
-        background-color: #e7f5ea;
-        color: #198754;
-      }
-      
-      .status-unlisted {
-        background-color: #fff3cd;
-        color: #664d03;
-      }
-      
-      /* Responsive adjustments */
-      @media (max-width: 992px) {
-        .filter-controls {
-          flex-direction: column;
-          gap: 10px;
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .main-content { margin-left: 250px; }
+        @media(max-width: 768px) { .main-content { margin-left: 0; } }
         
-        .filter-controls > form {
-          width: 100%;
-        }
-      }
-      
-      @media (max-width: 768px) {
-        .main-content {
-          margin-left: var(--sidebar-collapsed-width);
-          width: calc(100% - var(--sidebar-collapsed-width));
-        }
-        
-        body.sidebar-hidden .main-content {
-          margin-left: 0;
-          width: 100%;
-        }
-        
-        .action-buttons {
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
-          align-items: stretch;
-        }
-        
-        .action-buttons form, 
-        .action-buttons a {
-          width: 100%;
-        }
-      }
-      
-      @media (max-width: 576px) {
-        .main-content {
-          margin-left: 0;
-          width: 100%;
-        }
-        
-        body.sidebar-expanded .main-content {
-          margin-left: var(--sidebar-width);
-          width: calc(100% - var(--sidebar-width));
-        }
-      }
+        /* Custom scrollbar for table container */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
-  </head>
-  <body>
-    <div class="main-content-wrapper">
-      <!-- Include sidebar partial -->
-      <%- include('../partials/menu') %>
-      
-      <!-- Main content area -->
-      <div class="main-content">
-        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-          <h1 class="page-title mb-3 mb-md-0">Categories</h1>
-          <a href="/admin/categories/add" class="btn btn-primary-custom">
-            <i class="fas fa-plus me-2"></i>Add Category
-          </a>
-        </div>
+</head>
 
-        <!-- Filter, Sort, and Search Options -->
-        <div class="filter-section">
-          <div class="d-flex justify-content-between align-items-center filter-controls gap-3 flex-wrap">
-            <!-- Filter by Status -->
-            <form action="/admin/categories" method="GET" class="flex-grow-1">
-              <div class="input-group">
-                <span class="input-group-text bg-white">
-                  <i class="fas fa-filter text-secondary"></i>
-                </span>
-                <select name="status" class="form-select" onchange="this.form.submit()">
-                  <option value="">Filter by Status</option>
-                  <option value="listed" <%= selectedStatus === 'listed' ? 'selected' : '' %>>Active</option>
-                  <option value="unlisted" <%= selectedStatus === 'unlisted' ? 'selected' : '' %>>Inactive</option>
-              </select>
-              
-              </div>
-            </form>
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen">
+<div class="flex">
+    <%- include('../partials/menu') %>
 
-            <!-- Sort by CreatedAt -->
-            <form action="/admin/categories" method="GET" class="flex-grow-1">
-              <div class="input-group">
-                <span class="input-group-text bg-white">
-                  <i class="fas fa-sort text-secondary"></i>
-                </span>
-                <select name="sort" class="form-select" onchange="this.form.submit()">
-                  <option value="desc" <%= selectedSort === 'desc' ? 'selected' : '' %>>Newest first</option>
-    <option value="asc" <%= selectedSort === 'asc' ? 'selected' : '' %>>Oldest first</option>
-                </select>
-              </div>
-            </form>
+    <div class="main-content w-full p-6 md:p-10">
 
-            <!-- Search by Name -->
-            <!-- <form action="/admin/categories/search" method="GET" class="flex-grow-1">
-              <div class="input-group">
-                <input type="text" name="query" placeholder="Search by name" class="form-control" />
-                <button type="submit" class="btn btn-primary-custom">
-                  <i class="fas fa-search"></i>
-                </button>
-              </div>
-            </form> -->
-          </div>
-        </div>
-
-        <!-- Categories Table -->
-        <div class="card border-0">
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-hover m-0">
-                <thead class="table-header">
-                  <tr class="text-center">
-                    <th class="py-3">SI.No</th>
-                    <th class="py-3">Name</th>
-                    <th class="py-3">Status</th>
-                    <th class="py-3">Created At</th>
-                    <th class="py-3">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% categories.forEach((category, index) => { %>
-                  <tr>
-                    <td class="text-center"><%= index + 1 %></td>
-                    <td><%= category.name %></td>
-                    <td class="text-center">
-                      <span class="status-badge <%= category.status === 'listed' ? 'status-listed' : 'status-unlisted' %>">
-                        <%= category.status === 'listed' ? 'Active' : 'Inactive' %>
-                      </span>
-                    </td>
-                    <td class="text-center"><%= new Date(category.createdAt).toLocaleDateString() %></td>
-                    <td>
-                      <div class="d-flex justify-content-center gap-2 action-buttons">
-                        <a href="/admin/categories/edit/<%= category._id %>" class="btn btn-sm btn-primary-custom">
-                          <i class="fas fa-edit me-1"></i> Edit
-                        </a>
-                        <% if (category.status === 'listed') { %>
-                        <!-- Unlist Button -->
-                        <form action="/admin/categories/unlist/<%= category._id %>" method="POST" class="d-inline">
-                          <button type="submit" class="btn btn-sm btn-warning w-100">
-                            <i class="fas fa-eye-slash me-1"></i> Unlist
-                          </button>
-                        </form>
-                        <% } else { %>
-                        <!-- List Button -->
-                        <form action="/admin/categories/list/<%= category._id %>" method="POST" class="d-inline">
-                          <button type="submit" class="btn btn-sm btn-success w-100">
-                            <i class="fas fa-eye me-1"></i> List
-                          </button>
-                        </form>
-                        <% } %>
-                      </div>
-                    </td>
-                  </tr>
-                  <% }); %>
-                </tbody>
-              </table>
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight">Categories</h1>
+                <p class="text-slate-500 text-sm mt-1">Manage product classifications and visibility.</p>
             </div>
-          </div>
+            <a href="/admin/categories/add" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-indigo-200 active:scale-95">
+                <i class="fas fa-plus text-xs"></i>
+                <span>Create New Category</span>
+            </a>
         </div>
-      </div>
+
+        <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-200 mb-8">
+            <form action="/admin/categories" method="GET" class="flex flex-col lg:flex-row gap-4">
+                <div class="relative flex-1 group">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors"></i>
+                    <input type="text" name="query" value="<%= query || '' %>" placeholder="Search by name..." 
+                           class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-medium">
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <select name="status" onchange="this.form.submit()" 
+                            class="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-indigo-400 cursor-pointer">
+                        <option value="" <%= !selectedStatus ? "selected" : "" %>>All Status</option>
+                        <option value="listed" <%= selectedStatus === "listed" ? "selected" : "" %>>Active Only</option>
+                        <option value="unlisted" <%= selectedStatus === "unlisted" ? "selected" : "" %>>Inactive Only</option>
+                    </select>
+
+                    <select name="sort" onchange="this.form.submit()" 
+                            class="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-indigo-400 cursor-pointer">
+                        <option value="desc" <%= selectedSort === "desc" ? "selected" : "" %>>Newest First</option>
+                        <option value="asc" <%= selectedSort === "asc" ? "selected" : "" %>>Oldest First</option>
+                    </select>
+
+                    <button type="submit" class="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-indigo-600 transition-colors">
+                        Apply
+                    </button>
+                    <a href="/admin/categories" class="text-slate-400 hover:text-red-500 font-bold text-sm px-2">Reset</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50/80 border-b border-slate-200">
+                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Preview</th>
+                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Category Name</th>
+                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Status</th>
+                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Date Added</th>
+                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <% if (categories.length > 0) { %>
+                            <% categories.forEach((c, i) => { %>
+                            <tr class="hover:bg-slate-50/50 transition-colors group">
+                                <td class="px-6 py-4">
+                                    <div class="w-14 h-14 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200">
+                                        <img src="/<%= c.imageUrl %>" alt="<%= c.name %>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/100x100?text=No+Img'">
+                                    </div>
+                                </td>
+
+                                <td class="px-6 py-4">
+                                    <span class="text-sm font-bold text-slate-800"><%= c.name %></span>
+                                </td>
+
+                                <td class="px-6 py-4">
+                                    <% if (c.status === 'listed') { %>
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-600 border border-emerald-100">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                                            Active
+                                        </span>
+                                    <% } else { %>
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-500 border border-slate-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                            Inactive
+                                        </span>
+                                    <% } %>
+                                </td>
+
+                                <td class="px-6 py-4 text-sm text-slate-500 font-medium">
+                                    <%= new Date(c.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) %>
+                                </td>
+
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <a href="/admin/categories/edit/<%= c._id %>" class="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all" title="Edit Category">
+                                            <i class="fas fa-pen-to-square"></i>
+                                        </a>
+
+                                        <% if (c.status === 'listed') { %>
+                                            <form action="/admin/categories/unlist/<%= c._id %>" method="POST" class="inline">
+                                                <button type="submit" class="p-2.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all" title="Unlist Category">
+                                                    <i class="fas fa-eye-slash"></i>
+                                                </button>
+                                            </form>
+                                        <% } else { %>
+                                            <form action="/admin/categories/list/<%= c._id %>" method="POST" class="inline">
+                                                <button type="submit" class="p-2.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all" title="List Category">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            </form>
+                                        <% } %>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="5" class="px-6 py-20 text-center">
+                                    <div class="flex flex-col items-center">
+                                        <i class="fas fa-folder-open text-4xl text-slate-200 mb-4"></i>
+                                        <p class="text-slate-400 font-bold uppercase tracking-widest text-xs">No categories found matching your criteria</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mt-6 flex justify-end px-4">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                Showing <%= categories.length %> records
+            </p>
+        </div>
+
     </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
+</div>
+</body>
 </html>

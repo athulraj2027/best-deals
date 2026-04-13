@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Confirmed | BestDeals</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800;900&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --ink:        #0c0c0e;
+      --ink-2:      #1e1e24;
+      --surface:    #f7f6f3;
+      --card:       #ffffff;
+      --accent:     #16a34a;
+      --accent-2:   #15803d;
+      --accent-pale:#dcfce7;
+      --gold:       #d97706;
+      --gold-pale:  #fef3c7;
+      --danger:     #dc2626;
+      --muted:      #6b7280;
+      --border:     #e5e7eb;
+      --radius:     16px;
+      --shadow:     0 4px 24px rgba(0,0,0,0.07);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Manrope', sans-serif; background: var(--surface); color: var(--ink); min-height: 100vh; }
+    .syne { font-family: 'Syne', sans-serif; }
+
+    /* ── Hero ── */
+    .hero {
+      background: var(--ink-2); position: relative; overflow: hidden;
+      padding: 56px 24px 64px; text-align: center;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 80% at 20% 50%, rgba(22,163,74,0.18) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 60% at 80% 30%, rgba(217,119,6,0.12) 0%, transparent 65%);
+    }
+    .hero-confetti { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .hero-confetti span {
+      position: absolute; width: 8px; height: 8px; border-radius: 2px;
+      opacity: 0; animation: confettiFall 3.5s ease-in forwards;
+    }
+    @keyframes confettiFall {
+      0%   { opacity: 1; transform: translateY(-20px) rotate(0deg); }
+      100% { opacity: 0; transform: translateY(110vh) rotate(720deg); }
+    }
+    .hero-inner { position: relative; z-index: 1; }
+    .checkmark-ring {
+      width: 88px; height: 88px; border-radius: 50%;
+      background: var(--accent-pale); border: 3px solid var(--accent);
+      display: inline-flex; align-items: center; justify-content: center;
+      margin-bottom: 20px;
+      animation: popIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes popIn { from { transform:scale(0); opacity:0; } to { transform:scale(1); opacity:1; } }
+    .checkmark-ring i { font-size: 2.6rem; color: var(--accent); }
+    .hero h1 {
+      font-family: 'Syne', sans-serif; font-size: clamp(1.8rem,4vw,2.8rem);
+      font-weight: 900; color: #fff; letter-spacing: -0.02em; margin-bottom: 10px;
+      animation: slideUp 0.5s 0.2s ease both;
+    }
+    .hero p { color: #9ca3af; font-size: 0.95rem; margin-bottom: 20px; animation: slideUp 0.5s 0.35s ease both; }
+    @keyframes slideUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+    .order-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      color: #e5e7eb; padding: 8px 20px; border-radius: 100px;
+      font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em;
+      animation: slideUp 0.5s 0.5s ease both;
+    }
+    .order-pill .dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+      box-shadow: 0 0 8px var(--accent); animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+    /* ── Ribbon ── */
+    .status-ribbon {
+      background: var(--ink-2); border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding: 14px 24px; display: flex; align-items: center;
+      justify-content: center; gap: 32px; flex-wrap: wrap;
+    }
+    .ribbon-item { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #9ca3af; }
+    .ribbon-item strong { color: #e5e7eb; font-weight: 700; }
+    .ribbon-sep { width: 1px; height: 20px; background: rgba(255,255,255,0.1); }
+
+    /* ── Layout ── */
+    .page-wrap { max-width: 1160px; margin: 0 auto; padding: 40px 20px 80px; }
+    .main-grid { display: grid; grid-template-columns: 1fr 400px; gap: 28px; align-items: start; }
+    @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
+
+    /* ── Cards ── */
+    .card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
+    .card + .card { margin-top: 20px; }
+    .card-head { padding: 18px 22px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+    .card-head-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 0.88rem; flex-shrink: 0; }
+    .card-head-icon.green { background: var(--accent-pale); color: var(--accent); }
+    .card-head-icon.gold  { background: var(--gold-pale);   color: var(--gold); }
+    .card-head-icon.ink   { background: #f1f1f3;            color: var(--ink); }
+    .card-head-icon.blue  { background: #eff6ff;            color: #2563eb; }
+    .card-head-icon.purple{ background: #ede9fe;            color: #7c3aed; }
+    .card-title { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; }
+    .card-body  { padding: 20px 22px; }
+
+    /* ── Info rows ── */
+    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; font-size: 0.88rem; border-bottom: 1px solid var(--border); }
+    .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .info-row .lbl { color: var(--muted); font-weight: 500; }
+    .info-row .val { font-weight: 600; text-align: right; max-width: 60%; }
+
+    /* ── Badges ── */
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.03em; }
+    .badge.pending    { background:#fef3c7; color:#92400e; }
+    .badge.processing { background:#dbeafe; color:#1e40af; }
+    .badge.paid       { background:var(--accent-pale); color:var(--accent-2); }
+    .badge.delivered  { background:var(--accent-pale); color:var(--accent-2); }
+    .badge.cancelled  { background:#fee2e2; color:var(--danger); }
+    .badge.returned   { background:#f3f4f6; color:#374151; }
+
+    /* ── Address ── */
+    .address-block { background: var(--surface); border-radius: 12px; padding: 16px 18px; font-size: 0.88rem; line-height: 1.75; color: var(--ink); }
+    .addr-type { display: inline-block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; padding: 2px 8px; border-radius: 20px; margin-bottom: 8px; color: #fff; background: var(--ink); }
+    .addr-type.home  { background: #2563eb; }
+    .addr-type.work  { background: #7c3aed; }
+    .addr-type.other { background: #059669; }
+
+    /* ── Razorpay card ── */
+    .rpay-card {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      border-radius: 14px; padding: 18px 20px; color: #e2e8f0;
+      position: relative; overflow: hidden;
+    }
+    .rpay-card::before {
+      content: ''; position: absolute; top: -30px; right: -30px;
+      width: 120px; height: 120px; border-radius: 50%; background: rgba(99,102,241,0.15);
+    }
+    .rpay-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .rpay-row:last-child { border-bottom: none; }
+    .rpay-row .rl { color: #94a3b8; }
+    .rpay-row .rv { font-weight: 700; font-family: monospace; font-size: 0.79rem; color: #e2e8f0; word-break: break-all; text-align: right; max-width: 55%; }
+
+    /* ── Items ── */
+    .item-card { display: flex; gap: 14px; align-items: flex-start; padding: 16px 0; border-bottom: 1px solid var(--border); }
+    .item-card:last-child { border-bottom: none; padding-bottom: 0; }
+    .item-thumb { width: 72px; height: 72px; border-radius: 10px; object-fit: cover; flex-shrink: 0; border: 1px solid var(--border); }
+    .item-name  { font-weight: 700; font-size: 0.92rem; margin-bottom: 6px; }
+    .item-tags  { display: flex; flex-wrap: wrap; gap: 6px; }
+    .item-tag   { background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-size: 0.72rem; font-weight: 600; padding: 2px 9px; border-radius: 20px; }
+    .item-line-total { margin-left: auto; flex-shrink: 0; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1rem; color: var(--ink); white-space: nowrap; }
+
+    /* ── Price rows ── */
+    .price-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; font-size: 0.88rem; }
+    .price-row + .price-row { border-top: 1px solid var(--border); }
+    .price-row .pl { color: var(--muted); }
+    .price-row.saving { color: var(--accent); font-weight: 600; }
+    .price-row.saving .pl { color: var(--accent); }
+    .price-row.grand { border-top: 2px solid var(--ink) !important; padding-top: 14px; margin-top: 4px; font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; }
+
+    /* ── Coupon chip ── */
+    .coupon-used { display: inline-flex; align-items: center; gap: 6px; background: var(--gold-pale); border: 1.5px dashed #fbbf24; color: #92400e; border-radius: 8px; padding: 3px 10px; font-size: 0.78rem; font-weight: 700; }
+
+    /* ── Tracker ── */
+    .tracker { display: flex; align-items: flex-start; gap: 0; padding: 8px 0; }
+    .track-step { flex: 1; display: flex; flex-direction: column; align-items: center; }
+    .track-dot { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; z-index: 1; border: 2px solid var(--border); background: var(--card); color: var(--muted); }
+    .track-dot.done   { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .track-dot.active { background: var(--gold);   border-color: var(--gold);   color: #fff; }
+    .track-label { font-size: 0.68rem; color: var(--muted); margin-top: 6px; font-weight: 600; text-align: center; }
+    .track-label.done   { color: var(--accent); }
+    .track-label.active { color: var(--gold); }
+    .track-line { flex: 1; height: 2px; background: var(--border); margin-top: 14px; }
+    .track-line.done { background: var(--accent); }
+
+    /* ── CTAs ── */
+    .cta-wrap { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 36px; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--ink); color: #fff; padding: 14px 28px; border-radius: 12px; font-family: 'Syne', sans-serif; font-size: 0.92rem; font-weight: 800; text-decoration: none; transition: all 0.2s; }
+    .btn-primary:hover { background: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(22,163,74,0.3); }
+    .btn-secondary { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: var(--ink); padding: 14px 28px; border-radius: 12px; font-family: 'Syne', sans-serif; font-size: 0.92rem; font-weight: 700; text-decoration: none; border: 2px solid var(--border); transition: all 0.2s; }
+    .btn-secondary:hover { border-color: var(--ink); transform: translateY(-2px); }
+
+    /* ── Reveal animations ── */
+    .reveal { opacity: 0; transform: translateY(24px); animation: revealUp 0.5s ease forwards; }
+    @keyframes revealUp { to { opacity:1; transform:translateY(0); } }
+    .d1{animation-delay:0.1s;} .d2{animation-delay:0.2s;} .d3{animation-delay:0.3s;} .d4{animation-delay:0.4s;} .d5{animation-delay:0.5s;}
+  </style>
+</head>
+<body>
+
+<%- include('./partials/headerPartial') %>
+
+<% if (order && orderMeta) { %>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-confetti" id="confetti"></div>
+  <div class="hero-inner">
+    <div class="checkmark-ring"><i class="fas fa-check"></i></div>
+    <h1>Order Confirmed!</h1>
+    <p>
+      Thank you<% if (customerInfo && customerInfo.name && customerInfo.name !== 'Guest') { %>, <strong style="color:#fff;"><%= customerInfo.name %></strong><% } %>! Your order is on its way.
+    </p>
+    <div class="order-pill">
+      <span class="dot"></span>
+      ORDER #<%= orderMeta.orderId || order._id.toString().slice(-8).toUpperCase() %>
+    </div>
+  </div>
+</div>
+
+<!-- Info ribbon -->
+<div class="status-ribbon">
+  <div class="ribbon-item"><i class="fas fa-calendar-alt" style="color:#4b5563;"></i><span>Placed <strong><%= orderMeta.orderDateFmt %></strong></span></div>
+  <div class="ribbon-sep"></div>
+  <div class="ribbon-item"><i class="fas fa-box" style="color:#4b5563;"></i><span><strong><%= orderMeta.totalItems %></strong> item<%= orderMeta.totalItems !== 1 ? 's' : '' %></span></div>
+  <div class="ribbon-sep"></div>
+  <div class="ribbon-item"><i class="fas fa-wallet" style="color:#4b5563;"></i><span>Total <strong>₹<%= priceBreakdown.grandTotal.toFixed(2) %></strong></span></div>
+  <div class="ribbon-sep"></div>
+  <div class="ribbon-item"><i class="fas fa-credit-card" style="color:#4b5563;"></i><span><strong><%= paymentInfo.methodLabel %></strong></span></div>
+</div>
+
+<div class="page-wrap">
+  <div class="main-grid">
+
+    <!-- LEFT -->
+    <div>
+
+      <!-- Status tracker -->
+      <div class="card reveal d1">
+        <div class="card-head">
+          <div class="card-head-icon green"><i class="fas fa-route"></i></div>
+          <div class="card-title">Order Status</div>
+        </div>
+        <div class="card-body">
+          <%
+            const trackSteps  = ['pending','processing','paid','delivered'];
+            const trackLabels = ['Placed','Processing','Confirmed','Delivered'];
+            const curIdx = trackSteps.indexOf(orderMeta.status);
+          %>
+          <div class="tracker">
+            <% trackSteps.forEach((s, i) => { %>
+              <div class="track-step">
+                <div class="track-dot <%= i < curIdx ? 'done' : (i === curIdx ? 'active' : '') %>">
+                  <% if (i < curIdx) { %><i class="fas fa-check" style="font-size:0.6rem;"></i><% } else { %><%= i+1 %><% } %>
+                </div>
+                <div class="track-label <%= i < curIdx ? 'done' : (i === curIdx ? 'active' : '') %>"><%= trackLabels[i] %></div>
+              </div>
+              <% if (i < trackSteps.length - 1) { %><div class="track-line <%= i < curIdx ? 'done' : '' %>"></div><% } %>
+            <% }) %>
+          </div>
+          <div style="margin-top:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span class="badge <%= orderMeta.isCancelled ? 'cancelled' : orderMeta.isReturning ? 'returned' : orderMeta.status === 'delivered' ? 'delivered' : orderMeta.status === 'paid' ? 'paid' : orderMeta.status === 'processing' ? 'processing' : 'pending' %>">
+              <i class="fas fa-circle" style="font-size:0.45rem;"></i> <%= orderMeta.statusLabel %>
+            </span>
+            <span class="badge <%= paymentInfo.isPaid ? 'paid' : paymentInfo.isFailed ? 'cancelled' : 'pending' %>">
+              <i class="fas fa-<%= paymentInfo.isPaid ? 'check' : paymentInfo.isFailed ? 'times' : 'clock' %>" style="font-size:0.7rem;"></i>
+              <%= paymentInfo.statusLabel %>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order details -->
+      <div class="card reveal d2">
+        <div class="card-head">
+          <div class="card-head-icon ink"><i class="fas fa-receipt"></i></div>
+          <div class="card-title">Order Details</div>
+        </div>
+        <div class="card-body">
+          <div class="info-row">
+            <span class="lbl">Order ID</span>
+            <span class="val" style="font-family:monospace;font-size:0.8rem;background:#f3f4f6;padding:2px 8px;border-radius:6px;"><%= orderMeta.orderId || order._id.toString() %></span>
+          </div>
+          <div class="info-row">
+            <span class="lbl">Order Date</span>
+            <span class="val"><%= orderMeta.orderDateFmt %></span>
+          </div>
+          <div class="info-row">
+            <span class="lbl">Payment Method</span>
+            <span class="val"><%= paymentInfo.methodLabel %></span>
+          </div>
+          <div class="info-row">
+            <span class="lbl">Payment Status</span>
+            <span class="val">
+              <span class="badge <%= paymentInfo.isPaid ? 'paid' : paymentInfo.isFailed ? 'cancelled' : 'pending' %>"><%= paymentInfo.statusLabel %></span>
+            </span>
+          </div>
+          <% if (customerInfo && customerInfo.email) { %>
+          <div class="info-row">
+            <span class="lbl">Email</span>
+            <span class="val" style="font-size:0.82rem;"><%= customerInfo.email %></span>
+          </div>
+          <% } %>
+          <% if (customerInfo && customerInfo.phone) { %>
+          <div class="info-row">
+            <span class="lbl">Phone</span>
+            <span class="val"><%= customerInfo.phone %></span>
+          </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Shipping address -->
+      <div class="card reveal d3">
+        <div class="card-head">
+          <div class="card-head-icon blue"><i class="fas fa-map-marker-alt"></i></div>
+          <div class="card-title">Shipping Address</div>
+        </div>
+        <div class="card-body">
+          <div class="address-block">
+            <% if (shippingAddress.type) { %>
+            <span class="addr-type <%= shippingAddress.type.toLowerCase() %>"><%= shippingAddress.type %></span>
+            <% } %>
+            <% if (shippingAddress.name) { %><div style="font-weight:700;margin-bottom:4px;"><%= shippingAddress.name %></div><% } %>
+            <div style="color:var(--muted);font-size:0.87rem;">
+              <% if (shippingAddress.phoneNumber) { %><div style="margin-bottom:4px;"><i class="fas fa-phone" style="width:16px;color:var(--accent);"></i> <%= shippingAddress.phoneNumber %></div><% } %>
+              <div><i class="fas fa-home" style="width:16px;color:#9ca3af;"></i> <%= shippingAddress.streetAddress %></div>
+              <div style="padding-left:20px;margin-top:2px;"><%= shippingAddress.city %><% if(shippingAddress.state){%>, <%= shippingAddress.state %><% } %> <%= shippingAddress.zipCode %></div>
+              <div style="padding-left:20px;"><%= shippingAddress.country %></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Razorpay info (only if applicable) -->
+      <% if (paymentInfo.razorpay && paymentInfo.razorpay.paymentId) { %>
+      <div class="card reveal d4">
+        <div class="card-head">
+          <div class="card-head-icon purple"><i class="fas fa-bolt"></i></div>
+          <div class="card-title">Razorpay Transaction</div>
+        </div>
+        <div class="card-body">
+          <div class="rpay-card">
+            <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;color:#64748b;text-transform:uppercase;margin-bottom:12px;">Secure Payment Details</div>
+            <div class="rpay-row">
+              <span class="rl">Payment ID</span>
+              <span class="rv"><%= paymentInfo.razorpay.paymentId %></span>
+            </div>
+            <% if (paymentInfo.razorpay.orderId) { %>
+            <div class="rpay-row">
+              <span class="rl">Razorpay Order</span>
+              <span class="rv"><%= paymentInfo.razorpay.orderId %></span>
+            </div>
+            <% } %>
+            <div class="rpay-row">
+              <span class="rl">Amount Charged</span>
+              <span class="rv" style="color:#4ade80;font-family:'Manrope',sans-serif;font-size:0.88rem;">
+                ₹<%= paymentInfo.razorpay.amountINR ? paymentInfo.razorpay.amountINR.toFixed(2) : '—' %>
+                <span style="color:#475569;font-size:0.7rem;"> (<%= paymentInfo.razorpay.currency %>)</span>
+              </span>
+            </div>
+            <% if (paymentInfo.razorpay.paymentDateFmt) { %>
+            <div class="rpay-row">
+              <span class="rl">Paid On</span>
+              <span class="rv" style="font-family:'Manrope',sans-serif;"><%= paymentInfo.razorpay.paymentDateFmt %></span>
+            </div>
+            <% } %>
+            <% if (paymentInfo.razorpay.receipt) { %>
+            <div class="rpay-row">
+              <span class="rl">Receipt</span>
+              <span class="rv"><%= paymentInfo.razorpay.receipt %></span>
+            </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+      <% } %>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div>
+
+      <!-- Items -->
+      <div class="card reveal d2">
+        <div class="card-head">
+          <div class="card-head-icon gold"><i class="fas fa-box-open"></i></div>
+          <div class="card-title">Items Ordered (<%= orderMeta.totalItems %>)</div>
+        </div>
+        <div class="card-body">
+          <% itemsSummary.forEach(item => { %>
+          <div class="item-card">
+            <img src="<%= item.image %>" alt="<%= item.name %>" class="item-thumb"
+              onerror="this.src='https://placehold.co/72x72/f3f4f6/9ca3af?text=IMG'">
+            <div style="flex:1;min-width:0;">
+              <div class="item-name"><%= item.name %></div>
+              <div class="item-tags">
+                <% if (item.color) { %><span class="item-tag">🎨 <%= item.color %></span><% } %>
+                <% if (item.size)  { %><span class="item-tag">📏 <%= item.size %></span><% } %>
+                <span class="item-tag">× <%= item.quantity %></span>
+                <span class="item-tag" style="background:#fff7ed;border-color:#fed7aa;color:#c2410c;">₹<%= item.price.toFixed(2) %> each</span>
+              </div>
+            </div>
+            <div class="item-line-total">₹<%= item.lineTotal.toFixed(2) %></div>
+          </div>
+          <% }) %>
+        </div>
+      </div>
+
+      <!-- Price breakdown -->
+      <div class="card reveal d3">
+        <div class="card-head">
+          <div class="card-head-icon green"><i class="fas fa-calculator"></i></div>
+          <div class="card-title">Price Breakdown</div>
+        </div>
+        <div class="card-body">
+          <div class="price-row">
+            <span class="pl">Subtotal (<%= orderMeta.totalItems %> items)</span>
+            <span>₹<%= priceBreakdown.subtotal.toFixed(2) %></span>
+          </div>
+          <div class="price-row">
+            <span class="pl">Shipping</span>
+            <span style="color:var(--accent);font-weight:600;">Free</span>
+          </div>
+          <% if (priceBreakdown.tax > 0) { %>
+          <div class="price-row">
+            <span class="pl">Tax</span>
+            <span>₹<%= priceBreakdown.tax.toFixed(2) %></span>
+          </div>
+          <% } %>
+          <% if (couponInfo) { %>
+          <div class="price-row saving">
+            <span class="pl"><i class="fas fa-tag" style="margin-right:4px;"></i>Coupon <span class="coupon-used" style="margin-left:4px;"><%= couponInfo.code %></span></span>
+            <span>−₹<%= couponInfo.discountAmount.toFixed(2) %></span>
+          </div>
+          <% } %>
+          <% if (priceBreakdown.totalSavings > 0) { %>
+          <div style="background:var(--accent-pale);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;font-size:0.83rem;font-weight:700;color:var(--accent-2);margin-top:10px;">
+            <span><i class="fas fa-piggy-bank" style="margin-right:5px;"></i>Total Savings</span>
+            <span>−₹<%= priceBreakdown.totalSavings.toFixed(2) %></span>
+          </div>
+          <% } %>
+          <div class="price-row grand">
+            <span>Grand Total</span>
+            <span>₹<%= priceBreakdown.grandTotal.toFixed(2) %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Support card -->
+      <div class="card reveal d4" style="background:var(--ink-2);border-color:transparent;">
+        <div class="card-body" style="text-align:center;padding:26px 22px;">
+          <div style="width:46px;height:46px;background:rgba(255,255,255,0.07);border-radius:12px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;">
+            <i class="fas fa-headset" style="color:#9ca3af;font-size:1.1rem;"></i>
+          </div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;color:#e5e7eb;font-size:0.95rem;margin-bottom:6px;">Need Help?</div>
+          <div style="font-size:0.8rem;color:#6b7280;margin-bottom:16px;line-height:1.6;">Have a question about your order? Our support team is ready.</div>
+          <a href="/contact"
+            style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#e5e7eb;padding:9px 18px;border-radius:9px;font-size:0.82rem;font-weight:700;text-decoration:none;transition:background 0.2s;"
+            onmouseover="this.style.background='rgba(255,255,255,0.14)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+            <i class="fas fa-envelope"></i> Contact Support
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CTA row -->
+  <div class="cta-wrap reveal d5">
+    <a href="/profile/orders"  class="btn-secondary"><i class="fas fa-list-alt"></i> View All Orders</a>
+    <a href="/shop"    class="btn-primary"><i class="fas fa-shopping-bag"></i> Continue Shopping</a>
+  </div>
+</div>
+
+<% } else { %>
+
+<!-- Empty / Error state -->
+<div class="page-wrap">
+  <div class="card" style="text-align:center;padding:80px 24px;">
+    <div style="width:72px;height:72px;background:#fee2e2;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px;">
+      <i class="fas fa-exclamation-circle" style="font-size:2rem;color:var(--danger);"></i>
+    </div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;margin-bottom:10px;">Order Not Found</h2>
+    <p style="color:var(--muted);margin-bottom:28px;max-width:380px;margin-left:auto;margin-right:auto;">
+      <%= error || "We couldn't find your order. Please check your order history or contact support." %>
+    </p>
+    <div style="display:flex;justify-content:center;gap:14px;flex-wrap:wrap;">
+      <a href="/cart" class="btn-secondary"><i class="fas fa-shopping-cart"></i> Go to Cart</a>
+      <a href="/shop" class="btn-primary"><i class="fas fa-store"></i> Shop Now</a>
+    </div>
+  </div>
+</div>
+
+<% } %>
+
+<%- include('./partials/footer') %>
+
+<script>
+(function spawnConfetti() {
+  const colors = ['#16a34a','#d97706','#2563eb','#dc2626','#7c3aed','#0891b2','#ea580c'];
+  const container = document.getElementById('confetti');
+  if (!container) return;
+  for (let i = 0; i < 60; i++) {
+    const el = document.createElement('span');
+    el.style.cssText = [
+      `left:${Math.random()*100}%`,
+      `top:${-10 - Math.random()*40}px`,
+      `background:${colors[Math.floor(Math.random()*colors.length)]}`,
+      `width:${4 + Math.random()*8}px`,
+      `height:${4 + Math.random()*8}px`,
+      `border-radius:${Math.random() > 0.5 ? '50%' : '2px'}`,
+      `animation-delay:${Math.random()*1.5}s`,
+      `animation-duration:${2.5 + Math.random()*2}s`,
+    ].join(';');
+    container.appendChild(el);
+  }
+})();
+</script>
+</body>
+</html>

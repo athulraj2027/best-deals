@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const transactionSchema = require("./WalletTransaction");
 // Customer Schema
 const userSchema = new mongoose.Schema(
   {
@@ -31,17 +31,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       // required: true,
     },
-    address: [
-      { type: mongoose.Schema.Types.ObjectId, ref: "Address", required: true },
-    ],
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now,
-    },
+    address: [{ type: mongoose.Schema.Types.ObjectId, ref: "Address" }],
     isActive: {
       type: Boolean,
       default: false,
@@ -50,11 +40,30 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    wallet: { type: Number, default: 0, min: 0 },
+    referralCode: {
+      type: String,
+      required: true,
+      unique: true,
+      default: function () {
+        return generateReferralCode(); // Call the function below
+      },
+    },
+    walletTransactions: [transactionSchema],
   },
   {
     timestamps: true,
-  }
+  },
 );
+
+function generateReferralCode() {
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let code = "";
+  for (let i = 0; i < 6; i++) {
+    code += letters.charAt(Math.floor(Math.random() * letters.length));
+  }
+  return code;
+}
 
 // Customer model
 module.exports = mongoose.model("User", userSchema);

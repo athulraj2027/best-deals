@@ -1,432 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-      crossorigin="anonymous"
-    />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <link rel="stylesheet" href="/adminCSS/partials/menu.css" />
-    <title>Coupons</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Coupon Management | Tech Admin</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
     <style>
-      :root {
-        --primary-color: #f57c00;
-        --primary-hover: #e65100;
-        --light-bg: #fff9f0;
-        --text-dark: #333;
-        --sidebar-width: 250px;
-        --sidebar-collapsed-width: 70px;
-      }
-      
-      body {
-        background-color: #f8f9fa;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        overflow-x: hidden;
-      }
-      
-      /* Main layout structure */
-      .main-content-wrapper {
-        display: flex;
-        width: 100%;
-        min-height: 100vh;
-      }
-      
-      /* Main content area that adjusts with sidebar */
-      .main-content {
-        flex: 1;
-        padding: 20px;
-        margin-left: var(--sidebar-width);
-        transition: margin-left 0.3s ease;
-        width: calc(100% - var(--sidebar-width));
-      }
-      
-      .page-title {
-        font-weight: 600;
-        color: var(--text-dark);
-        border-left: 5px solid var(--primary-color);
-        padding-left: 15px;
-      }
-      
-      .btn-primary-custom {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-        color: white;
-        transition: all 0.3s;
-      }
-      
-      .btn-primary-custom:hover {
-        background-color: var(--primary-hover);
-        border-color: var(--primary-hover);
-      }
-      
-      .card {
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-      }
-      
-      .table-header {
-        background-color: var(--primary-color);
-        color: white;
-      }
-      
-      .table-responsive {
-        border-radius: 8px;
-        overflow: hidden;
-        max-height: 70vh;
-      }
-      
-      .form-control, .form-select {
-        border-radius: 8px;
-        border: 1px solid #ced4da;
-      }
-      
-      .form-control:focus, .form-select:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.25rem rgba(245, 124, 0, 0.25);
-      }
-      
-      .filter-section {
-        background-color: var(--light-bg);
-        border-radius: 10px;
-        padding: 15px;
-        margin-bottom: 20px;
-      }
-      
-      .status-badge {
-        padding: 6px 10px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-      }
-      
-      .status-active {
-        background-color: #e7f5ea;
-        color: #198754;
-      }
-      
-      .status-expired {
-        background-color: #f8d7da;
-        color: #dc3545;
-      }
-      
-      .status-upcoming {
-        background-color: #cfe2ff;
-        color: #0d6efd;
-      }
-      
-      .status-inactive {
-        background-color: #fff3cd;
-        color: #664d03;
-      }
-      
-      .pagination-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 12px;
-        margin: 20px 0;
-        font-size: 16px;
-      }
-      
-      .pagination-button {
-        padding: 8px 14px;
-        background-color: var(--primary-color);
-        color: white;
-        text-decoration: none;
-        border-radius: 6px;
-        transition: all 0.3s;
-        font-weight: bold;
-      }
-      
-      .pagination-button:hover {
-        background-color: var(--primary-hover);
-        color: white;
-        text-decoration: none;
-      }
-      
-      .page-info {
-        font-weight: bold;
-        color: var(--text-dark);
-      }
-      
-      .coupon-code {
-        font-family: monospace;
-        font-weight: bold;
-        background-color: #f0f0f0;
-        padding: 3px 8px;
-        border-radius: 4px;
-        letter-spacing: 1px;
-      }
-      
-      /* Responsive adjustments */
-      @media (max-width: 992px) {
-        .filter-controls {
-          flex-direction: column;
-          gap: 10px;
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .main-content { margin-left: 250px; }
+        @media(max-width: 768px) { .main-content { margin-left: 0; } }
         
-        .filter-controls > form {
-          width: 100%;
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        /* Ticket effect for coupon code */
+        .coupon-tag {
+            position: relative;
+            padding: 4px 12px;
+            background: #eef2ff;
+            color: #4f46e5;
+            font-family: monospace;
+            font-weight: 800;
+            border: 1px dashed #4f46e5;
+            border-radius: 4px;
         }
-      }
-      
-      @media (max-width: 768px) {
-        .main-content {
-          margin-left: var(--sidebar-collapsed-width);
-          width: calc(100% - var(--sidebar-collapsed-width));
-        }
-        
-        body.sidebar-hidden .main-content {
-          margin-left: 0;
-          width: 100%;
-        }
-        
-        .action-buttons {
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
-          align-items: stretch;
-        }
-        
-        .action-buttons form, 
-        .action-buttons a {
-          width: 100%;
-        }
-      }
-      
-      @media (max-width: 576px) {
-        .main-content {
-          margin-left: 0;
-          width: 100%;
-        }
-        
-        body.sidebar-expanded .main-content {
-          margin-left: var(--sidebar-width);
-          width: calc(100% - var(--sidebar-width));
-        }
-      }
     </style>
-  </head>
-  <body>
-    <div class="main-content-wrapper">
-      <!-- Include sidebar partial -->
-      <%- include('../partials/menu') %>
-      
-      <!-- Main content area -->
-      <div class="main-content">
-        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-          <h1 class="page-title mb-3 mb-md-0">Coupons</h1>
-          <a href="/admin/coupons/add" class="btn btn-primary-custom">
-            <i class="fas fa-plus me-2"></i>Add Coupon
-          </a>
-        </div>
+</head>
 
-        <!-- Filter, Sort, and Search Options -->
-        <div class="filter-section">
-          <div class="d-flex justify-content-between align-items-center filter-controls gap-3 flex-wrap">
-            <!-- Filter by Status -->
-            <form action="/admin/coupons" method="GET" class="flex-grow-1">
-              <div class="input-group">
-                <span class="input-group-text bg-white">
-                  <i class="fas fa-filter text-secondary"></i>
-                </span>
-                <select name="status" class="form-select" onchange="this.form.submit()">
-                  <option value="">Filter by Status</option>
-                  <option value="all" <%= selectedStatus === 'all' ? 'selected' : '' %>>All</option>
-                  <option value="active" <%= selectedStatus === 'active' ? 'selected' : '' %>>Active</option>
-                  <option value="expired" <%= selectedStatus === 'expired' ? 'selected' : '' %>>Expired</option>
-                  <option value="upcoming" <%= selectedStatus === 'upcoming' ? 'selected' : '' %>>Upcoming</option>
-                  <option value="inactive" <%= selectedStatus === 'inactive' ? 'selected' : '' %>>Inactive</option>
-                </select>
-              </div>
-            </form>
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen">
+<div class="flex">
+    <%- include('../partials/menu') %>
 
-            <!-- Sort Options -->
-            <form action="/admin/coupons" method="GET" class="flex-grow-1">
-              <div class="input-group">
-                <span class="input-group-text bg-white">
-                  <i class="fas fa-sort text-secondary"></i>
-                </span>
-                <select name="sort" class="form-select" onchange="this.form.submit()">
-                  <option value="">Sort By</option>
-                  <option value="expiry_asc" <%= selectedSort === 'expiry_asc' ? 'selected' : '' %>>Expiry Date (Earliest First)</option>
-                  <option value="expiry_desc" <%= selectedSort === 'expiry_desc' ? 'selected' : '' %>>Expiry Date (Latest First)</option>
-                  <option value="creation_asc" <%= selectedSort === 'creation_asc' ? 'selected' : '' %>>Creation Date (Oldest First)</option>
-                  <option value="creation_desc" <%= selectedSort === 'creation_desc' ? 'selected' : '' %>>Creation Date (Newest First)</option>
-                  <option value="discount_high" <%= selectedSort === 'discount_high' ? 'selected' : '' %>>Discount (High to Low)</option>
-                  <option value="discount_low" <%= selectedSort === 'discount_low' ? 'selected' : '' %>>Discount (Low to High)</option>
-                </select>
-              </div>
-            </form>
+    <div class="main-content w-full p-6 md:p-10">
 
-            <!-- Search by Coupon Code or Name -->
-            <form action="/admin/coupons" method="GET" class="flex-grow-1">
-              <div class="input-group">
-                <input type="text" name="query" placeholder="Search by code or description" class="form-control" value="<%= query || '' %>" />
-                <button type="submit" class="btn btn-primary-custom">
-                  <i class="fas fa-search"></i>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-
-        <!-- Coupons Table -->
-        <div class="card border-0">
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-hover m-0">
-                <thead class="table-header">
-                  <tr class="text-center">
-                    <th class="py-3">SI.No</th>
-                    <th class="py-3">Coupon Code</th>
-                    <th class="py-3">Description</th>
-                    <th class="py-3">Discount</th>
-                    <th class="py-3">Min. Purchase</th>
-                    <th class="py-3">Created On</th>
-                    <th class="py-3">Expires On</th>
-                    <th class="py-3">Status</th>
-                    <th class="py-3">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% if (coupons && coupons.length > 0) { %>
-                    <% coupons.forEach((coupon, index) => { %>
-                      <tr>
-                        <td class="text-center"><%= index + 1 %></td>
-                        <td class="text-center"><span class="coupon-code"><%= coupon.code %></span></td>
-                        <td><%= coupon.description %></td>
-                        <td class="text-center">
-                          <% if (coupon.discountType === 'percentage') { %>
-                            <%= coupon.discountValue %>%
-                          <% } else { %>
-                            $<%= coupon.discountValue.toFixed(2) %>
-                          <% } %>
-                        </td>
-                        <td class="text-center">$<%= coupon.minPurchase ? coupon.minPurchase.toFixed(2) : '0.00' %></td>
-                        <td class="text-center"><%= new Date(coupon.createdAt).toLocaleDateString() %></td>
-                        <td class="text-center"><%= new Date(coupon.expiryDate).toLocaleDateString() %></td>
-                        <td class="text-center">
-                          <% 
-                            let statusClass = 'status-inactive';
-                            let statusText = 'Inactive';
-                            
-                            if (coupon.active) {
-                              const now = new Date();
-                              const expiryDate = new Date(coupon.expiryDate);
-                              const startDate = new Date(coupon.startDate || coupon.createdAt);
-                              
-                              if (now > expiryDate) {
-                                statusClass = 'status-expired';
-                                statusText = 'Expired';
-                              } else if (now < startDate) {
-                                statusClass = 'status-upcoming';
-                                statusText = 'Upcoming';
-                              } else {
-                                statusClass = 'status-active';
-                                statusText = 'Active';
-                              }
-                            }
-                          %>
-                          <span class="status-badge <%= statusClass %>">
-                            <%= statusText %>
-                          </span>
-                        </td>
-                        <td>
-                          <div class="d-flex justify-content-center gap-2 action-buttons">
-                            <a href="/admin/coupons/edit/<%= coupon._id %>" class="btn btn-sm btn-primary-custom">
-                              <i class="fas fa-edit me-1"></i> Edit
-                            </a>
-                            
-                            <% if (coupon.active) { %>
-                              <!-- Deactivate Button -->
-                              <form action="/admin/coupons/deactivate/<%= coupon._id %>" method="post" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-warning w-100">
-                                  <i class="fas fa-ban me-1"></i> Deactivate
-                                </button>
-                              </form>
-                            <% } else { %>
-                              <!-- Activate Button -->
-                              <form action="/admin/coupons/activate/<%= coupon._id %>" method="post" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-success w-100">
-                                  <i class="fas fa-check me-1"></i> Activate
-                                </button>
-                              </form>
-                            <% } %>
-                            
-                            <!-- Delete Button with Confirmation Modal Trigger -->
-                            <!-- <button 
-                              type="button" 
-                              class="btn btn-sm btn-danger" 
-                              data-bs-toggle="modal" 
-                              data-bs-target="#deleteCouponModal<%= coupon._id %>"
-                            >
-                              <i class="fas fa-trash-alt me-1"></i> Delete
-                            </button> -->
-                            
-                            <!-- Delete Confirmation Modal -->
-                            <!-- <div class="modal fade" id="deleteCouponModal<%= coupon._id %>" tabindex="-1" aria-hidden="true">
-                              <div class="modal-dialog">
-                                <div class="modal-content">
-                                  <div class="modal-header">
-                                    <h5 class="modal-title">Confirm Delete</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                  </div>
-                                  <div class="modal-body">
-                                    Are you sure you want to delete coupon <strong><%= coupon.code %></strong>? This action cannot be undone.
-                                  </div>
-                                  <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                    <form action="/admin/coupons/delete/<%= coupon._id %>" method="POST">
-                                      <button type="submit" class="btn btn-danger">Delete</button>
-                                    </form>
-                                  </div>
-                                </div>
-                              </div>
-                            </div> -->
-                          </div>
-                        </td>
-                      </tr>
-                    <% }); %>
-                  <% } else { %>
-                    <tr>
-                      <td colspan="9" class="text-center">No coupons found.</td>
-                    </tr>
-                  <% } %>
-                </tbody>
-              </table>
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight italic">Marketing <span class="text-indigo-600">Coupons</span></h1>
+                <p class="text-slate-500 text-sm mt-1">Manage promotional discounts and campaign visibility.</p>
             </div>
-          </div>
+            <a href="/admin/coupons/add" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-indigo-200 active:scale-95 text-sm uppercase tracking-widest">
+                <i class="fas fa-plus"></i>
+                <span>Create Coupon</span>
+            </a>
         </div>
 
-        <!-- Pagination section -->
-        <div class="pagination-container">
-          <% if (hasPrevPage) { %>
-            <a href="/admin/coupons?page=<%= prevPage %>&limit=10<%= query ? '&query=' + query : '' %><%= selectedStatus ? '&status=' + selectedStatus : '' %><%= selectedSort ? '&sort=' + selectedSort : '' %>" class="pagination-button">
-              <i class="fas fa-chevron-left me-2"></i>Previous
-            </a>
-          <% } %>
+        <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-200 mb-8">
+            <div class="flex flex-col lg:flex-row gap-4">
+                <form method="GET" class="relative flex-1 group">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors"></i>
+                    <input type="text" name="query" value="<%= query || '' %>" placeholder="Search by code or description..." 
+                           class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-medium">
+                </form>
 
-          <span class="page-info">
-            Page <%= currentPage %> of <%= totalPages %>
-          </span>
+                <div class="flex flex-wrap items-center gap-3">
+                    <form method="GET">
+                        <select name="status" onchange="this.form.submit()" 
+                                class="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-indigo-400 cursor-pointer appearance-none min-w-[140px]">
+                            <option value="">All Status</option>
+                            <option value="active" <%= selectedStatus==='active'?'selected':'' %>>Active</option>
+                            <option value="expired" <%= selectedStatus==='expired'?'selected':'' %>>Expired</option>
+                            <option value="inactive" <%= selectedStatus==='inactive'?'selected':'' %>>Inactive</option>
+                        </select>
+                    </form>
 
-          <% if (hasNextPage) { %>
-            <a href="/admin/coupons?page=<%= nextPage %>&limit=10<%= query ? '&query=' + query : '' %><%= selectedStatus ? '&status=' + selectedStatus : '' %><%= selectedSort ? '&sort=' + selectedSort : '' %>" class="pagination-button">
-              Next<i class="fas fa-chevron-right ms-2"></i>
-            </a>
-          <% } %>
+                    <form method="GET">
+                        <input type="hidden" name="status" value="<%= selectedStatus || '' %>">
+                        <select name="sort" onchange="this.form.submit()" 
+                                class="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-indigo-400 cursor-pointer appearance-none min-w-[140px]">
+                            <option value="creation_desc" <%= !selectedSort || selectedSort === "creation_desc" ? "selected" : "" %>>Newest First</option>
+                            <option value="creation_asc" <%= selectedSort === "creation_asc" ? "selected" : "" %>>Oldest First</option>
+                            <option value="expiry_asc" <%= selectedSort === "expiry_asc" ? "selected" : "" %>>Expiry (Nearest)</option>
+                            <option value="expiry_desc" <%= selectedSort === "expiry_desc" ? "selected" : "" %>>Expiry (Furthest)</option>
+                        </select>
+                    </form>
+
+                    <a href="/admin/coupons" class="text-xs font-bold text-slate-400 hover:text-red-500 px-2 transition-colors uppercase">Reset</a>
+                </div>
+            </div>
         </div>
-      </div>
+
+        <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50/80 border-b border-slate-200">
+                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 text-center">#</th>
+                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Coupon Code</th>
+                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Discount</th>
+                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Threshold</th>
+                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Expiry</th>
+                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Status</th>
+                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <% if(coupons.length > 0){ %>
+                            <% coupons.forEach((coupon, index)=>{ %>
+                            <% 
+                                let statusStyles = 'bg-slate-100 text-slate-500 border-slate-200';
+                                let statusText = 'Inactive';
+
+                                if(coupon.active){
+                                    const now = new Date();
+                                    const expiry = new Date(coupon.expiryDate);
+                                    if(now > expiry){
+                                        statusStyles = 'bg-red-50 text-red-600 border-red-100';
+                                        statusText = 'Expired';
+                                    } else {
+                                        statusStyles = 'bg-emerald-50 text-emerald-600 border-emerald-100';
+                                        statusText = 'Active';
+                                    }
+                                }
+                            %>
+                            <tr class="hover:bg-slate-50/50 transition-colors group">
+                                <td class="px-6 py-5 text-center text-xs font-bold text-slate-300"><%= index+1 %></td>
+                                
+                                <td class="px-6 py-5">
+                                    <div class="flex flex-col">
+                                        <span class="coupon-tag w-fit mb-1"><%= coupon.code %></span>
+                                        <span class="text-[10px] text-slate-400 font-bold uppercase truncate max-w-[150px]"><%= coupon.description %></span>
+                                    </div>
+                                </td>
+
+                                <td class="px-6 py-5">
+                                    <span class="text-sm font-black text-slate-900">
+                                        <%= coupon.discountType === 'percentage' ? coupon.discountValue + '%' : '₹' + coupon.discountValue.toLocaleString('en-IN') %>
+                                    </span>
+                                </td>
+
+                                <td class="px-6 py-5">
+                                    <span class="text-[11px] font-bold text-slate-500 italic">Min: ₹<%= coupon.minPurchase.toLocaleString('en-IN') %></span>
+                                </td>
+
+                                <td class="px-6 py-5">
+                                    <div class="flex flex-col">
+                                        <span class="text-xs font-bold text-slate-700"><%= new Date(coupon.expiryDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) %></span>
+                                        <span class="text-[10px] text-slate-400 font-medium"><%= new Date(coupon.expiryDate).getFullYear() %></span>
+                                    </div>
+                                </td>
+
+                                <td class="px-6 py-5">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border <%= statusStyles %>">
+                                        <%= statusText %>
+                                    </span>
+                                </td>
+
+                                <td class="px-6 py-5 text-right">
+                                    <div class="flex items-center justify-end gap-1">
+                                        <a href="/admin/coupons/edit/<%= coupon._id %>" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all" title="Edit">
+                                            <i class="fas fa-edit text-xs"></i>
+                                        </a>
+
+                                        <% if(coupon.active){ %>
+                                            <form action="/admin/coupons/deactivate/<%= coupon._id %>" method="POST" class="inline">
+                                                <button type="submit" class="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all" title="Deactivate">
+                                                    <i class="fas fa-toggle-on text-xs"></i>
+                                                </button>
+                                            </form>
+                                        <% } else { %>
+                                            <form action="/admin/coupons/activate/<%= coupon._id %>" method="POST" class="inline">
+                                                <button type="submit" class="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all" title="Activate">
+                                                    <i class="fas fa-toggle-off text-xs"></i>
+                                                </button>
+                                            </form>
+                                        <% } %>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="7" class="px-6 py-20 text-center">
+                                    <i class="fas fa-ticket-alt text-4xl text-slate-200 mb-4"></i>
+                                    <p class="text-slate-400 font-bold uppercase tracking-widest text-xs">No coupons found</p>
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mt-8 flex justify-center">
+            <nav class="flex items-center gap-2 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
+                <% if(hasPrevPage){ %>
+                    <a href="?page=<%= prevPage %>&query=<%= query %>&status=<%= selectedStatus %>&sort=<%= selectedSort %>" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-600 transition-colors">
+                        <i class="fas fa-chevron-left text-xs"></i>
+                    </a>
+                <% } %>
+
+                <div class="px-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
+                    Page <%= currentPage %> <span class="text-slate-300 mx-1">/</span> <%= totalPages %>
+                </div>
+
+                <% if(hasNextPage){ %>
+                    <a href="?page=<%= nextPage %>&query=<%= query %>&status=<%= selectedStatus %>&sort=<%= selectedSort %>" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-600 transition-colors">
+                        <i class="fas fa-chevron-right text-xs"></i>
+                    </a>
+                <% } %>
+            </nav>
+        </div>
+
     </div>
-
-
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
+</div>
+</body>
 </html>

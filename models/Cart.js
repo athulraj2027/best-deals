@@ -1,4 +1,3 @@
-// models/Cart.js
 const mongoose = require("mongoose");
 
 const CartItemSchema = new mongoose.Schema(
@@ -8,176 +7,100 @@ const CartItemSchema = new mongoose.Schema(
       ref: "Product",
       required: true,
     },
-    variantId: { type: mongoose.Schema.Types.ObjectId, required: true },
-    name: { type: String, required: true },
-    color: { type: String, required: true },
-    size: { type: String, required: true },
-    price: { type: Number, required: true },
-    quantity: { type: Number, required: true, min: 1,default : 1 },
-    image: { type: String, required: true },
+    variantId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+    },
+    name: {
+      type: String,
+      required: true,
+    },
+    color: {
+      type: String,
+      required: true,
+    },
+    size: {
+      type: String,
+      required: true,
+    },
+    price: {
+      type: Number,
+      required: true,
+    },
+    quantity: {
+      type: Number,
+      // required: true,
+      min: 1,
+      default: 1,
+    },
+    image: {
+      type: String,
+      required: true,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-// Cart Schema
-const CartSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
+const cartSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    items: [CartItemSchema],
+    subtotal: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    tax: {
+      type: Number,
+      default: 0,
+    },
+    shipping: {
+      type: Number,
+      default: 0,
+    },
+    total: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    // For tracking updated total after discounts
+    updatedTotal: {
+      type: Number,
+    },
+    // Cart status
+    status: {
+      type: String,
+      enum: ["active", "completed", "abandoned"],
+      default: "active",
+    },
+    // Store original total before discounts
+    originalTotal: {
+      type: Number,
+    },
+    // Coupon details
+    appliedCoupon: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Coupon",
+    },
+    discountAmount: {
+      type: Number,
+      default: 0,
+    },
+    // Wallet details
+    walletApplied: {
+      type: Boolean,
+      default: false,
+    },
+    walletAmount: {
+      type: Number,
+      default: 0,
+    },
   },
-  items: [CartItemSchema],
-  subtotal: {
-    type: Number,
-    default: 0,
-  },
-  tax: {
-    type: Number,
-    default: 0,
-  },
-  shipping: {
-    type: Number,
-    default: 0,
-  },
-  total: {
-    type: Number,
-    default: 0,
-  },
-  status: {
-    type: String,
-    enum: ["active", "completed", "abandoned"],
-    default: "active",
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  { timestamps: true },
+);
 
-// Pre-save middleware to calculate totals
-CartSchema.pre("save", function (next) {
-  // Calculate subtotal
-  this.subtotal = this.items.reduce((acc, item) => acc + item.price, 0);
-
-  // Calculate tax (example: 10%)
-  this.tax = this.subtotal * 0.1;
-
-  // Calculate shipping (example: flat rate)
-  this.shipping = this.items.length > 0 ? 10 : 0;
-
-  // Calculate total
-  this.total = this.subtotal + this.tax + this.shipping;
-
-  // Update timestamp
-  this.updatedAt = Date.now();
-
-  next();
-});
-
-// Instance methods
-CartSchema.methods = {
-  calculateSubtotal() {
-    this.subtotal = this.items.reduce((sum, item) => {
-      return sum + item.price * item.quantity;
-    }, 0);
-    return this.subtotal;
-  },
-
-  // Add item to cart
-  async addItem(productId, quantity = 1) {
-    try {
-      const Product = mongoose.model("Product");
-      const product = await Product.findById(productId);
-
-      if (!product) {
-        throw new Error("Product not found");
-      }
-
-      const existingItem = this.items.find(
-        (item) => item.product.toString() === productId.toString()
-      );
-
-      if (existingItem) {
-        existingItem.quantity += quantity;
-        existingItem.subtotal = existingItem.price * existingItem.quantity;
-      } else {
-        this.items.push({
-          product: productId,
-          quantity: quantity,
-          price: product.price,
-          subtotal: product.price * quantity,
-        });
-      }
-
-      return await this.save();
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  // Remove item from cart
-  async removeItem(productId) {
-    this.items = this.items.filter(
-      (item) => item.product.toString() !== productId.toString()
-    );
-    return await this.save();
-  },
-
-  // Update item quantity
-  async updateItemQuantity(productId, quantity) {
-    const item = this.items.find(
-      (item) => item.product.toString() === productId.toString()
-    );
-
-    if (!item) {
-      throw new Error("Item not found in cart");
-    }
-
-    if (quantity <= 0) {
-      return await this.removeItem(productId);
-    }
-
-    item.quantity = quantity;
-    item.subtotal = item.price * quantity;
-
-    return await this.save();
-  },
-
-  // Clear cart
-  async clearCart() {
-    this.items = [];
-    return await this.save();
-  },
-
-  // Get cart total items count
-  getItemCount() {
-    return this.items.reduce((acc, item) => acc + item.quantity, 0);
-  },
-};
-
-// Static methods
-CartSchema.statics = {
-  // Find active cart for user
-  async findActiveCart(userId) {
-    return await this.findOne({
-      user: userId,
-      status: "active",
-    }).populate("items.product");
-  },
-
-  // Create new cart for user
-  async createCart(userId) {
-    return await this.create({
-      user: userId,
-      items: [],
-    });
-  },
-};
-
-const Cart = mongoose.model("Cart", CartSchema);
-
-module.exports = Cart;
+module.exports = mongoose.model("Cart", cartSchema);

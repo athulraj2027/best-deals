@@ -1,16 +1,21 @@
+const mongoose = require("mongoose");
 const Category = require("../../models/Category");
 const statusCodes = require("../../services/statusCodes");
 
-// --- Get categories page ---
 exports.getCategoriesPage = async (req, res) => {
   try {
-    const { status, sort } = req.query;
+    const { status, sort, query } = req.query;
 
     let filter = {};
-    let sortOption = {};
-
+    let sortOption = { createdAt: -1 }; // default latest first
     if (status && status !== "") {
       filter.status = status;
+    }
+    if (query && query.trim() !== "") {
+      filter.$or = [
+        { name: { $regex: query, $options: "i" } }, // search in name
+        { tags: { $regex: query, $options: "i" } }, // search in tags array
+      ];
     }
     switch (sort) {
       case "desc":
@@ -20,18 +25,22 @@ exports.getCategoriesPage = async (req, res) => {
         sortOption = { createdAt: 1 };
         break;
     }
-    const limit = parseInt(req.query.limit) || 10; // Default limit 10
+
+    const limit = parseInt(req.query.limit) || 10;
     const currentPage = parseInt(req.query.page) || 1;
     const skip = (currentPage - 1) * limit;
 
-    const totalCategories = await Category.countDocuments();
-    const categories = await Category.find(filter).sort(sortOption).skip(skip).limit(limit);
+    const totalCategories = await Category.countDocuments(filter);
 
-    const totalPages = Math.ceil(totalCategories / limit);
+    const categories = await Category.find(filter)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limit);
+
+    const totalPages = Math.max(1, Math.ceil(totalCategories / limit));
+
     const hasPrevPage = currentPage > 1;
     const hasNextPage = currentPage < totalPages;
-    const prevPage = currentPage - 1;
-    const nextPage = currentPage + 1;
 
     return res
       .status(statusCodes.SUCCESS)
@@ -41,19 +50,18 @@ exports.getCategoriesPage = async (req, res) => {
         totalPages,
         selectedStatus: status,
         selectedSort: sort,
+        query,
         limit,
         hasPrevPage,
         hasNextPage,
-        prevPage,
-        nextPage,
+        prevPage: currentPage - 1,
+        nextPage: currentPage + 1,
       });
   } catch (err) {
     console.error("Category page get method error : ", err);
-    return res.status(statusCodes.SERVER_ERROR);
+    return res.status(statusCodes.SERVER_ERROR).send("Server Error");
   }
 };
-
-//--- Get add category page ---
 
 exports.getAddCategoriesPage = (req, res) => {
   try {
@@ -66,36 +74,49 @@ exports.getAddCategoriesPage = (req, res) => {
   }
 };
 
-// --- Get edit category page ---
-
 exports.getEditCategoryPage = async (req, res) => {
   try {
     const categoryId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+      return res.status(statusCodes.BAD_REQUEST).send("Invalid ID");
+    }
     const category = await Category.findOne({ _id: categoryId });
     return res.render("adminPages/CategoryPages/adminEditCategory", {
       category,
     });
   } catch (error) {
     console.error(error);
-    return res.status(statusCodes.SERVER_ERROR);
+    return res.status(statusCodes.SERVER_ERROR).send("Server Error");
   }
 };
 
-// --- Add category controller ---
-
 exports.addCategoryController = async (req, res) => {
-  console.log("Category controller working");
   const { categoryName, status } = req.body;
-
+  console.log("req body : ", req.body);
   const categoryImage = req.file;
+  if (!categoryImage) {
+    return res.status(statusCodes.BAD_REQUEST).json({
+      status: "error",
+      message: "Category image is required",
+    });
+  }
   try {
+    const trimmedName = categoryName.trim();
+    const isValidCategoryName = /^[a-zA-Z0-9 ]{3,}$/.test(trimmedName);
+    if (!isValidCategoryName)
+      return res.status(statusCodes.BAD_REQUEST).json({
+        status: "error",
+        title: "error",
+        message: "Improper syntax for category name",
+      });
     const imageUrl = `images/categories/${categoryImage.filename}`;
-    // console.log(imageUrl);
 
-    const mappedStatus = status === "on" ? "listed" : "unlisted";
+    const mappedStatus = status === "listed" ? "listed" : "unlisted";
     console.log(mappedStatus);
 
-    const existingCategory = await Category.findOne({ name: categoryName });
+    const existingCategory = await Category.findOne({
+      name: trimmedName.toLowerCase(),
+    });
     if (existingCategory) {
       return res.status(statusCodes.BAD_REQUEST).json({
         status: "error",
@@ -104,9 +125,8 @@ exports.addCategoryController = async (req, res) => {
       });
     }
     const newCategory = new Category({
-      name: categoryName,
+      name: trimmedName.toLowerCase(),
       status: mappedStatus,
-      categoryTags: typeof tags === "string" ? JSON.parse(tags) : [],
       imageUrl,
     });
 
@@ -118,6 +138,11 @@ exports.addCategoryController = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
+    if (err.code === 11000) {
+      return res
+        .status(trimmedName.toLowerCase())
+        .json({ message: "Category already exists" });
+    }
     return res.status(statusCodes.SERVER_ERROR).json({
       status: "error",
       title: "Error in adding product",
@@ -126,15 +151,13 @@ exports.addCategoryController = async (req, res) => {
   }
 };
 
-// --- Unlist Category ---
-
 exports.unlistCategory = async (req, res) => {
   try {
     const { id } = req.params;
     const category = await Category.findByIdAndUpdate(
       id,
       { status: "unlisted" },
-      { new: true }
+      { new: true },
     );
 
     if (!category) {
@@ -160,7 +183,7 @@ exports.listCategory = async (req, res) => {
     const category = await Category.findByIdAndUpdate(
       id,
       { status: "listed" },
-      { new: true }
+      { new: true },
     );
 
     if (!category) {
@@ -183,7 +206,6 @@ exports.listCategory = async (req, res) => {
 exports.editCategory = async (req, res) => {
   const categoryId = req.params.id;
   const { name, status } = req.body;
-  // console.log("edit category controller working");
   if (!name || !status) {
     return res.status(statusCodes.BAD_REQUEST).json({
       title: "Error",
@@ -199,9 +221,29 @@ exports.editCategory = async (req, res) => {
         message: "No category found",
       });
     }
-    category.name = name;
-    category.status = status;
-    // category.tags = tags.split(','.map())
+    const trimmedName = name.trim();
+    const isValidCategoryName = /^[a-zA-Z0-9 ]{3,}$/.test(trimmedName);
+    if (!isValidCategoryName)
+      return res.status(statusCodes.BAD_REQUEST).json({
+        status: "error",
+        title: "error",
+        message: "Improper syntax for category name",
+      });
+
+    const lowercaseName = trimmedName.toLowerCase();
+
+    const existing = await Category.findOne({
+      name: lowercaseName,
+      _id: { $ne: categoryId },
+    });
+
+    if (existing) {
+      return res.status(400).json({
+        message: "Category name already exists",
+      });
+    }
+    const mappedStatus = status === "on" ? "listed" : "unlisted";
+    category.status = mappedStatus;
 
     if (req.file) {
       category.imageUrl = `images/categories/${req.file.filename}`;
@@ -211,6 +253,7 @@ exports.editCategory = async (req, res) => {
 
     return res.status(statusCodes.SUCCESS).json({
       title: "Success",
+      status: "success",
       message: "Category edited successfully",
     });
   } catch (err) {

@@ -1,210 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>User Profile</title>
-    <link rel="stylesheet" href="/styles/profile.css" />
-    <!-- Link to your CSS file -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <link rel="stylesheet" href="/userCSS/partials/headerPartial.css" />
-    <link rel="stylesheet" href="/userCSS/partials/partials_css.css" />
-    <style>
-      .profile-container {
-        max-width: 800px;
-        margin: 30px auto;
-        padding: 20px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-        background-color: #37404d;
-        color: white;
-      }
-      .profile-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 30px;
-      }
-      .profile-image {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        object-fit: cover;
-        margin-right: 20px;
-      }
-      .edit-mode-toggle {
-        margin-left: auto;
-      }
-      .edit-field {
-        display: none;
-      }
-      .view-only {
-        margin-bottom: 20px;
-      }
-      .edit-mode .edit-field {
-        display: block;
-      }
-      .edit-mode .view-only {
-        display: none;
-      }
-    </style>
-  </head>
-  <body>
-    <%- include('../partials/headerPartial') %>
-    <div class="container d-flex m-0">
-      <div class="m-35"><%- include('./partial') %></div>
-      <div class="container profile-container" id="profileContainer">
-        <div class="profile-header">
-          <div>
-            <h2 class="view-only">Profile</h2>
-            <div class="edit-field">
-              <div class="mb-3">
-                <label for="nameInput" class="form-label">Name</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="nameInput"
-                  name="name"
-                  value="<%= user.name %>"
-                />
-              </div>
-            </div>
-          </div>
-          <div class="edit-mode-toggle">
-            <button class="btn btn-outline-primary" id="editToggleBtn">
-              Edit Profile
-            </button>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-md-6">
-            <!-- <h4>Personal Information</h4> -->
-            <div class="view-only">
-              <p><strong>Name :</strong> <%= user.name %></p>
-              <p><strong>Email:</strong> <%= user.email %></p>
-              <p><strong>Phone:</strong> <%= user.phone || 'Not provided' %></p>
-            </div>
-            <form id="editProfileForm">
-              <div class="edit-field">
-                <div class="mb-3">
-                  <label for="phoneInput" class="form-label">Phone</label>
-                  <input
-                    type="tel"
-                    class="form-control"
-                    id="phoneInput"
-                    name="phone"
-                    value="<%= user.phone || '' %>"
-                  />
-                </div>
-              </div>
-
-              <div class="mt-4 edit-field">
-                <button
-                  type="submit"
-                  class="btn btn-success me-2"
-                  id="saveChangesBtn"
-                >
-                  Save Changes
-                </button>
-                <button type="button" class="btn btn-secondary" id="cancelBtn">
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-    <%-include('../partials/footer') %>
-
-    <!-- Required Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-
+    <title>My Profile | Tech Gadgets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .gradient-bg { background: linear-gradient(to right, #7c3aed, #db2777); }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen">
+    <%- include('../partials/headerPartial') %>
+
+    <div class="max-w-6xl mx-auto mt-10 px-4 pb-16 flex flex-col md:flex-row gap-8">
+        
+        <div class="w-full md:w-1/4 flex-shrink-0">
+            <%- include('./partial') %>
+        </div>
+
+        <div class="flex-1 min-w-0">
+            <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden" id="profileContainer">
+                
+                <div class="p-8 border-b border-slate-50 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 rounded-2xl gradient-bg flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-purple-200">
+                            <%= user.name.charAt(0).toUpperCase() %>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-black tracking-tight text-slate-900">Personal Information</h2>
+                            <p class="text-slate-400 text-sm font-medium">Manage your account details and security</p>
+                        </div>
+                    </div>
+                    <button id="editToggleBtn" class="px-6 py-2.5 rounded-xl border-2 border-indigo-600 text-indigo-600 font-bold text-sm hover:bg-indigo-600 hover:text-white transition-all active:scale-95">
+                        Edit Details
+                    </button>
+                </div>
+
+                <div class="p-8">
+                    <div class="view-only space-y-8 animate-in fade-in duration-500">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Full Name</label>
+                                <p class="text-lg font-bold text-slate-800"><%= user.name %></p>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Email Address</label>
+                                <p class="text-lg font-bold text-slate-800"><%= user.email %></p>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Phone Number</label>
+                                <p class="text-lg font-bold text-slate-800"><%= user.phone || 'Not provided' %></p>
+                            </div>
+                            <div class="space-y-3">
+                                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Referral Code</label>
+                                <div class="flex items-center gap-2 max-w-xs group">
+                                    <input type="text" readonly id="referralCode" value="<%= user.referralCode %>" 
+                                        class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm font-mono font-bold text-indigo-600 focus:outline-none">
+                                    <button onclick="copyReferralCode()" class="p-2.5 bg-slate-900 text-white rounded-xl hover:bg-indigo-600 transition-colors shadow-lg shadow-slate-200">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-12 p-8 rounded-[2rem] bg-slate-900 text-white relative overflow-hidden shadow-2xl shadow-indigo-200">
+                            <div class="absolute top-0 right-0 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl -mr-20 -mt-20"></div>
+                            <div class="relative z-10 flex items-center justify-between">
+                                <div>
+                                    <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">Available Balance</p>
+                                    <h3 class="text-4xl font-black tracking-tight">₹ <%= user.wallet.toLocaleString('en-IN', {minimumFractionDigits: 2}) %></h3>
+                                </div>
+                                <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center text-2xl text-purple-400 backdrop-blur-md border border-white/10">
+                                    <i class="fas fa-wallet"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="editProfileForm" class="edit-field hidden space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label for="nameInput" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Full Name</label>
+                                <input type="text" id="nameInput" name="name" value="<%= user.name %>" 
+                                    class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-bold" />
+                            </div>
+                            <div class="space-y-2">
+                                <label for="phoneInput" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Phone Number</label>
+                                <input type="tel" id="phoneInput" name="phone" value="<%= user.phone || '' %>" 
+                                    class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-bold" />
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4 mt-10 pt-6 border-t border-slate-50">
+                            <button type="submit" class="px-10 py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95">
+                                Save Updates
+                            </button>
+                            <button type="button" id="cancelBtn" class="px-8 py-4 bg-slate-100 text-slate-500 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-slate-200 transition-all">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const profileContainer = document.getElementById("profileContainer");
-        const editToggleBtn = document.getElementById("editToggleBtn");
-        const cancelBtn = document.getElementById("cancelBtn");
+        document.addEventListener("DOMContentLoaded", function () {
+            const profileContainer = document.getElementById("profileContainer");
+            const editToggleBtn = document.getElementById("editToggleBtn");
+            const cancelBtn = document.getElementById("cancelBtn");
+            const viewOnly = profileContainer.querySelector(".view-only");
+            const editField = profileContainer.querySelector(".edit-field");
 
-        // Toggle edit mode
-        editToggleBtn.addEventListener("click", function () {
-          profileContainer.classList.toggle("edit-mode");
-          editToggleBtn.textContent = profileContainer.classList.contains(
-            "edit-mode"
-          )
-            ? "View Profile"
-            : "Edit Profile";
-        });
+            editToggleBtn.addEventListener("click", function () {
+                const isEditing = !editField.classList.contains("hidden");
+                editField.classList.toggle("hidden");
+                viewOnly.classList.toggle("hidden");
+                editToggleBtn.textContent = isEditing ? "Edit Details" : "View Details";
+                if (!isEditing) editToggleBtn.classList.add('opacity-0', 'pointer-events-none');
+            });
 
-        // jQuery code for form submission
-        $(document).ready(function () {
-          $("#editProfileForm").submit(function (e) {
-            e.preventDefault();
+            cancelBtn.addEventListener("click", function () {
+                editField.classList.add("hidden");
+                viewOnly.classList.remove("hidden");
+                editToggleBtn.textContent = "Edit Details";
+                editToggleBtn.classList.remove('opacity-0', 'pointer-events-none');
+            });
 
-            let phone = $("#phoneInput").val().trim();
-            $.ajax({
-              url: "/profile",
-              type: "PATCH",
-              contentType: "application/json",
-              data: JSON.stringify({ phone }),
-              success: function (response) {
-                if (response.status === "success") {
-                  Swal.fire({
-                    status: "success",
-                    text: response.message,
-                    icon: response.status,
-                    confirmButtonText: "OK",
-                  }).then(() => {
-                    window.location.href = "/profile"; // Redirect after successful login
-                  });
-                } else {
-                  Swal.fire({
-                    title: response.title,
-                    text: response.message,
-                    icon: response.status, // 'error'
-                    confirmButtonText: "OK",
-                  });
-                }
-              },
-              error: function (xhr, status, error) {
-                console.error("AJAX Error:", status, error);
-                console.log("Error Response JSON:", xhr.responseJSON);
-
-                let errorMessage =
-                  "An unexpected error occurred. Please try again.";
-
-                if (xhr.responseJSON) {
-                  errorMessage = xhr.responseJSON.message || errorMessage;
-                }
+            $("#editProfileForm").submit(function (e) {
+                e.preventDefault();
+                let phone = $("#phoneInput").val().trim();
+                let name = $("#nameInput").val().trim();
 
                 Swal.fire({
-                  title: "Oops!",
-                  text: errorMessage,
-                  icon: "error",
-                  confirmButtonText: "OK",
+                    title: 'Updating Profile',
+                    didOpen: () => Swal.showLoading(),
+                    allowOutsideClick: false
                 });
-              },
+
+                $.ajax({
+                    url: "/profile",
+                    type: "PATCH",
+                    contentType: "application/json",
+                    data: JSON.stringify({ phone, name }),
+                    success: function (response) {
+                        if (response.status === "success") {
+                            Swal.fire({ 
+                                icon: "success", 
+                                title: "Updated!",
+                                text: response.message,
+                                confirmButtonColor: '#4f46e5'
+                            }).then(() => location.reload());
+                        } else {
+                            Swal.fire({ icon: "error", title: "Update Failed", text: response.message });
+                        }
+                    },
+                    error: function (xhr) {
+                        let errorMessage = xhr.responseJSON?.message || "Internal server error.";
+                        Swal.fire({ icon: "error", title: "Oops!", text: errorMessage });
+                    },
+                });
             });
-          });
         });
 
-        // Cancel editing
-        cancelBtn.addEventListener("click", function () {
-          profileContainer.classList.remove("edit-mode");
-          editToggleBtn.textContent = "Edit Profile";
-        });
-      });
+        function copyReferralCode() {
+            const input = document.getElementById("referralCode");
+            input.select();
+            input.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(input.value);
+            
+            Swal.fire({
+                icon: "success",
+                title: "Code Copied!",
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
+        }
     </script>
-  </body>
+</body>
 </html>
