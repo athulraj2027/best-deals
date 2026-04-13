@@ -173,12 +173,16 @@ exports.checkoutController = async (req, res) => {
     }
 
     for (let item of cart.items) {
-      const product = item.productId;
+      const product = await Product.findById(item.productId);
+      if (!product) throw new Error("No product found ");
       const variant = product.variants.id(item.variantId);
 
       if (!variant || variant.quantity < item.quantity) {
         throw new Error(`${item.name} is out of stock`);
       }
+
+      variant.quantity -= item.quantity;
+      await product.save();
     }
 
     // Calculate pricing

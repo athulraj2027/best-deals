@@ -161,6 +161,10 @@ exports.addProductController = async (req, res) => {
     const { name, description, brand, category, status, variants } = req.body;
     let categoryId;
 
+    console.log(
+      "Fieldnames received:",
+      req.files.map((f) => f.fieldname),
+    );
     if (!name || name.trim().length === 0)
       return res.status(400).json({ message: "Please give a proper name" });
     if (!description || description.trim().length === 0)

@@ -1,730 +1,259 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Edit Coupon</title>
+    <title>Edit Coupon | Tech Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
     <style>
-      :root {
-        --primary-color: #4361ee;
-        --secondary-color: #3f37c9;
-        --accent-color: #4895ef;
-        --success-color: #4cc9f0;
-        --danger-color: #dc3545;
-        --text-color: #2b2d42;
-        --bg-color: #f8f9fa;
-        --card-bg: #ffffff;
-        --border-radius: 12px;
-        --transition: all 0.3s ease;
-      }
-
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: "Segoe UI", system-ui, sans-serif;
-      }
-
-      body {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        color: var(--text-color);
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 2rem;
-      }
-
-      .container {
-        width: 100%;
-        max-width: 900px;
-        background: var(--card-bg);
-        padding: 2rem;
-        border-radius: var(--border-radius);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-        margin-top: 2rem;
-        margin-bottom: 2rem;
-      }
-
-      .header {
-        text-align: center;
-        margin-bottom: 2rem;
-      }
-
-      .header h1 {
-        font-size: 2.5rem;
-        color: var(--primary-color);
-        margin-bottom: 0.5rem;
-      }
-
-      .header p {
-        color: #6c757d;
-        font-size: 1.1rem;
-      }
-
-      .form-section {
-        background: var(--bg-color);
-        padding: 1.5rem;
-        border-radius: var(--border-radius);
-        margin-bottom: 1.5rem;
-      }
-
-      .form-section h3 {
-        color: var(--secondary-color);
-        margin-bottom: 1.5rem;
-        font-size: 1.2rem;
-      }
-
-      .form-group {
-        margin-bottom: 1.5rem;
-      }
-
-      label {
-        display: block;
-        margin-bottom: 0.5rem;
-        color: var(--text-color);
-        font-weight: 500;
-      }
-
-      input,
-      select,
-      textarea {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 2px solid #e9ecef;
-        border-radius: 8px;
-        font-size: 1rem;
-        transition: var(--transition);
-      }
-
-      input:focus,
-      select:focus,
-      textarea:focus {
-        border-color: var(--accent-color);
-        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
-        outline: none;
-      }
-
-      .status-toggle {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 0.5rem;
-        background: #f8f9fa;
-        border-radius: 8px;
-      }
-
-      .status-toggle label {
-        margin: 0;
-        cursor: pointer;
-      }
-
-      .toggle-switch {
-        position: relative;
-        display: inline-block;
-        width: 60px;
-        height: 34px;
-      }
-
-      .toggle-switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-
-      .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #ccc;
-        transition: 0.4s;
-        border-radius: 34px;
-      }
-
-      .slider:before {
-        position: absolute;
-        content: "";
-        height: 26px;
-        width: 26px;
-        left: 4px;
-        bottom: 4px;
-        background-color: white;
-        transition: 0.4s;
-        border-radius: 50%;
-      }
-
-      input:checked + .slider {
-        background-color: var(--success-color);
-      }
-
-      input:checked + .slider:before {
-        transform: translateX(26px);
-      }
-
-      .row {
-        display: flex;
-        flex-wrap: wrap;
-        margin: -0.5rem;
-      }
-
-      .col {
-        flex: 1;
-        padding: 0.5rem;
-        min-width: 200px;
-      }
-
-      .submit-btn {
-        background: var(--primary-color);
-        color: white;
-        border: none;
-        padding: 1rem 2rem;
-        border-radius: 8px;
-        font-size: 1.1rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: var(--transition);
-        width: 100%;
-        margin-top: 1rem;
-      }
-
-      .submit-btn:hover {
-        background: var(--secondary-color);
-        transform: translateY(-2px);
-      }
-
-      .cancel-btn {
-        background: var(--danger-color);
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        font-size: 1.1rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: var(--transition);
-        width: 100%;
-        margin-top: 1rem;
-        max-width: 150px;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-      }
-
-      .cancel-btn:hover {
-        background: #c82333;
-        transform: translateY(-2px);
-      }
-
-      .error-message {
-        color: var(--danger-color);
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-        display: none;
-      }
-
-      .status-badge {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
-        border-radius: 50px;
-        font-size: 0.85rem;
-        font-weight: 500;
-        margin-left: 1rem;
-      }
-      
-      .status-active {
-        background-color: rgba(25, 135, 84, 0.1);
-        color: #198754;
-      }
-      
-      .status-expired {
-        background-color: rgba(220, 53, 69, 0.1);
-        color: #dc3545;
-      }
-      
-      .status-upcoming {
-        background-color: rgba(13, 110, 253, 0.1);
-        color: #0d6efd;
-      }
-      
-      .status-inactive {
-        background-color: rgba(108, 117, 125, 0.1);
-        color: #6c757d;
-      }
-
-      .usage-stats {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1rem;
-        padding: 0.75rem;
-        background-color: rgba(72, 149, 239, 0.1);
-        border-radius: 8px;
-      }
-      
-      .usage-stat {
-        flex: 1;
-        text-align: center;
-      }
-      
-      .usage-value {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: var(--primary-color);
-        margin-bottom: 0.25rem;
-      }
-      
-      .usage-label {
-        font-size: 0.875rem;
-        color: #6c757d;
-      }
-
-      .help-text {
-        font-size: 0.875rem;
-        color: #6c757d;
-        margin-top: 0.25rem;
-      }
-
-      @media (max-width: 768px) {
-        .container {
-          padding: 1rem;
-        }
-
-        .header h1 {
-          font-size: 2rem;
-        }
-
-        .col {
-          flex: 100%;
-        }
-      }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
-  </head>
-  <body>
+</head>
+
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen">
     <%- include('../partials/menu') %>
-    <div class="container">
-      <div class="header">
-        <h1>Edit Coupon</h1>
-        <p>Update your coupon details and settings</p>
-      </div>
 
-      <form id="editCouponForm" action="/admin/coupons/edit/<%= coupon._id %>" method="PUT">
-        <div class="form-section">
-          <h3>Basic Information</h3>
-          <div class="row">
-            <div class="col">
-              <div class="form-group">
-                <label for="code">Coupon Code</label>
-                <input
-                  type="text"
-                  id="code"
-                  name="code"
-                  placeholder="Enter coupon code"
-                  value="<%= coupon.code %>"
-                  
-                />
-                <div id="codeError" class="error-message"></div>
-                <div class="help-text">Coupon code will be automatically converted to uppercase</div>
-              </div>
-            </div>
-            <div class="col">
-              <div class="form-group">
-                <label for="discountType">Discount Type</label>
-                <select id="discountType" name="discountType" >
-                  <option value="percentage" <%= coupon.discountType === 'percentage' ? 'selected' : '' %>>Percentage</option>
-                  <option value="fixed" <%= coupon.discountType === 'fixed' ? 'selected' : '' %>>Fixed Amount</option>
-                </select>
-                <div id="discountTypeError" class="error-message"></div>
-              </div>
-            </div>
-          </div>
+    <div class="max-w-4xl mx-auto py-12 px-6">
+        <div class="mb-10 text-center">
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight italic">Modify <span class="text-indigo-600">Coupon Logic</span></h1>
+            <p class="text-slate-500 mt-2 font-medium">Update configuration and validity for campaign: <span class="font-bold text-slate-700"><%= coupon.code %></span></p>
+        </div>
 
-          <div class="row">
-            <div class="col">
-              <div class="form-group">
-                <label for="discountValue">Discount Value</label>
-                <input
-                  type="number"
-                  id="discountValue"
-                  name="discountValue"
-                  placeholder="Enter discount value"
-                  value="<%= coupon.discountValue %>"
-                  
-                />
-                <div id="discountValueError" class="error-message"></div>
-                <div class="help-text" id="discountValueHelp">
-                  <%= coupon.discountType === 'percentage' ? 'Enter percentage value (e.g. 10 for 10% off)' : 'Enter fixed amount in dollars' %>
+        <form id="editCouponForm" class="space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Redemptions</p>
+                    <h4 class="text-2xl font-black text-indigo-600"><%= coupon.usageCount %></h4>
                 </div>
-              </div>
+                <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Quota Remaining</p>
+                    <h4 class="text-2xl font-black text-slate-700"><%= coupon.usageLimit !== null ? coupon.usageLimit - coupon.usageCount : '∞' %></h4>
+                </div>
+                <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Fill Velocity</p>
+                    <h4 class="text-2xl font-black text-slate-700"><%= coupon.usageLimit !== null ? Math.floor((coupon.usageCount / coupon.usageLimit) * 100) : 0 %>%</h4>
+                </div>
             </div>
-            <div class="col">
-              <div class="form-group">
-                <label for="minPurchase">Minimum Purchase</label>
-                <input
-                  type="number"
-                  id="minPurchase"
-                  name="minPurchase"
-                  placeholder="Enter minimum purchase amount"
-                  value="<%= coupon.minPurchase %>"
-                  
-                />
-                <div id="minPurchaseError" class="error-message"></div>
-                <div class="help-text">Enter 0 for no minimum purchase requirement</div>
-              </div>
-            </div>
-          </div>
 
-          <div class="form-group">
-            <label for="description">Description</label>
-            <textarea
-              id="description"
-              name="description"
-              placeholder="Enter coupon description"
-              rows="3"
-              
-            ><%= coupon.description %></textarea>
-            <div id="descriptionError" class="error-message"></div>
-          </div>
-        </div>
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mb-8 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                        <i class="fas fa-fingerprint"></i>
+                    </div>
+                    Identity & Type
+                </h3>
 
-        <div class="form-section">
-          <h3>Validity Period</h3>
-          <div class="row">
-            <div class="col">
-              <div class="form-group">
-                <label for="startDate">Start Date</label>
-                <input
-                  type="datetime-local"
-                  id="startDate"
-                  name="startDate"
-                  value="<%= new Date(coupon.startDate).toISOString().slice(0, 16) %>"
-                  
-                />
-                <div id="startDateError" class="error-message"></div>
-              </div>
-            </div>
-            <div class="col">
-              <div class="form-group">
-                <label for="expiryDate">Expiry Date</label>
-                <input
-                  type="datetime-local"
-                  id="expiryDate"
-                  name="expiryDate"
-                  value="<%= new Date(coupon.expiryDate).toISOString().slice(0, 16) %>"
-                  
-                />
-                <div id="expiryDateError" class="error-message"></div>
-              </div>
-            </div>
-          </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+                    <div>
+                        <label for="code" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Coupon Code</label>
+                        <input type="text" id="code" name="code" value="<%= coupon.code %>" placeholder="Enter code" 
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-bold uppercase tracking-widest" />
+                        <p id="codeError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
 
-          <div class="form-group">
-            <label>Coupon Status</label>
-            <div class="status-toggle">
-              <label class="toggle-switch">
-                <input type="checkbox" name="active" id="statusToggle" <%= coupon.active ? 'checked' : '' %> />
-                <span class="slider"></span>
-              </label>
-              <span id="statusText"><%= coupon.active ? 'Active' : 'Inactive' %></span>
-              
-              <!-- Display calculated status badge -->
-              <span class="status-badge status-<%= coupon.status %>">
-                <%= coupon.status.charAt(0).toUpperCase() + coupon.status.slice(1) %>
-              </span>
-            </div>
-          </div>
-        </div>
+                    <div>
+                        <label for="discountType" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Discount Model</label>
+                        <select id="discountType" name="discountType" class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:border-indigo-400 appearance-none cursor-pointer text-sm font-bold">
+                            <option value="percentage" <%= coupon.discountType === 'percentage' ? 'selected' : '' %>>Percentage (%)</option>
+                            <option value="fixed" <%= coupon.discountType === 'fixed' ? 'selected' : '' %>>Fixed Amount (₹)</option>
+                        </select>
+                    </div>
+                </div>
 
-        <div class="form-section">
-          <h3>Usage Limits</h3>
-          <div class="form-group">
-            <label for="usageLimit">Maximum Uses</label>
-            <input
-              type="number"
-              id="usageLimit"
-              name="usageLimit"
-              placeholder="Enter maximum uses"
-              value="<%= coupon.usageLimit !== null ? coupon.usageLimit : '' %>"
-            />
-            <div id="usageLimitError" class="error-message"></div>
-            <div class="help-text">Leave empty for unlimited uses</div>
-          </div>
+                <div>
+                    <label for="description" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Campaign Narrative</label>
+                    <textarea id="description" name="description" rows="2" class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-medium"><%= coupon.description %></textarea>
+                    <p id="descriptionError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                </div>
+            </div>
 
-          <div class="usage-stats">
-            <div class="usage-stat">
-              <div class="usage-value"><%= coupon.usageCount %></div>
-              <div class="usage-label">Times Used</div>
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mb-8 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    Value Parameters
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label for="discountValue" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Benefit Value</label>
+                        <input type="number" id="discountValue" name="discountValue" value="<%= coupon.discountValue %>" step="0.01"
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 text-sm font-black" />
+                        <p id="discountValueError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
+
+                    <div>
+                        <label for="minPurchase" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Min. Entry</label>
+                        <input type="number" id="minPurchase" name="minPurchase" value="<%= coupon.minPurchase %>" step="0.01"
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 text-sm font-black" />
+                        <p id="minPurchaseError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
+
+                    <div>
+                        <label for="usageLimit" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Max Quota</label>
+                        <input type="number" id="usageLimit" name="usageLimit" value="<%= coupon.usageLimit %>" placeholder="∞"
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 text-sm font-black" />
+                    </div>
+                </div>
+                <p id="discountValueHelp" class="text-[10px] text-slate-400 mt-4 italic font-medium ml-1">
+                    <%= coupon.discountType === 'percentage' ? 'Enter percentage value (e.g. 10 for 10% off)' : 'Enter fixed amount in INR' %>
+                </p>
             </div>
-            <div class="usage-stat">
-              <div class="usage-value"><%= coupon.usageLimit !== null ? coupon.usageLimit - coupon.usageCount : '∞' %></div>
-              <div class="usage-label">Remaining Uses</div>
+
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mb-8 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    Deployment Schedule
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div>
+                        <label for="startDate" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Live Date</label>
+                        <input type="datetime-local" id="startDate" name="startDate" value="<%= new Date(coupon.startDate).toISOString().slice(0, 16) %>"
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 text-sm font-bold" />
+                    </div>
+                    <div>
+                        <label for="expiryDate" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Expiration</label>
+                        <input type="datetime-local" id="expiryDate" name="expiryDate" value="<%= new Date(coupon.expiryDate).toISOString().slice(0, 16) %>"
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 text-sm font-bold" />
+                        <p id="expiryDateError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between p-6 bg-slate-900 rounded-3xl border border-slate-800 shadow-xl shadow-indigo-900/10 gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-white backdrop-blur-md border border-white/10">
+                            <i class="fas fa-power-off"></i>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-black uppercase tracking-widest text-slate-500">Execution Status</span>
+                            <span id="statusText" class="text-xs font-black uppercase tracking-tighter <%= coupon.active ? 'text-emerald-400' : 'text-slate-400' %>">
+                                <%= coupon.active ? 'Active Operation' : 'System Offline' %>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-6">
+                        <% 
+                            const statusColorMap = {
+                                active: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+                                expired: 'bg-red-500/10 text-red-400 border-red-500/20',
+                                upcoming: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+                                inactive: 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+                            };
+                        %>
+                        <div class="px-4 py-2 rounded-xl border <%= statusColorMap[coupon.status] %> text-[10px] font-black uppercase tracking-widest">
+                            Live State: <%= coupon.status %>
+                        </div>
+                        
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="active" id="statusToggle" class="sr-only peer" <%= coupon.active ? 'checked' : '' %> />
+                            <div class="w-14 h-7 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
+                        </label>
+                    </div>
+                </div>
             </div>
-            <div class="usage-stat">
-              <div class="usage-value"><%= coupon.usageLimit !== null ? Math.floor((coupon.usageCount / coupon.usageLimit) * 100) : 0 %>%</div>
-              <div class="usage-label">Usage Percentage</div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-end gap-4 pt-4">
+                <a href="/admin/coupons" class="w-full sm:w-auto px-10 py-4 font-bold text-slate-400 hover:text-slate-600 uppercase tracking-widest text-xs transition-all text-center">
+                    Cancel Sync
+                </a>
+                <button type="submit" class="w-full sm:w-auto px-12 py-4 font-black text-white bg-indigo-600 rounded-2xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 uppercase tracking-widest text-xs">
+                    Update Campaign
+                </button>
             </div>
-          </div>
-        </div>
-        
-        <button type="submit" class="submit-btn">Update Coupon</button>
-      </form>
-      <form action="/admin/coupons" method="get">
-        <button type="submit" class="cancel-btn">Cancel</button>
-      </form>
+        </form>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-      // Validation Rules Constants
-     // Validation Rules Constants
-const VALIDATION_RULES = {
-  code: {
-    minLength: 3,
-    maxLength: 15,
-    pattern: /^[A-Z0-9_-]+$/
-  },
-  description: {
-    minLength: 5,
-    maxLength: 200
-  },
-  discountValue: {
-    percentage: {
-      min: 1,
-      max: 100
-    },
-    fixed: {
-      min: 0.01
-    }
-  },
-  minPurchase: {
-    min: 0
-  },
-  usageLimit: {
-    min: 1
-  }
-};
+        const VALIDATION_RULES = {
+            code: { minLength: 3, maxLength: 15, pattern: /^[A-Z0-9_-]+$/ },
+            description: { minLength: 5, maxLength: 200 },
+            offerValue: { percentage: { min: 1, max: 100 }, fixed: { min: 0.01 } },
+            minPurchase: { min: 0 }
+        };
 
-// Status toggle handling
-const statusToggle = document.getElementById("statusToggle");
-const statusText = document.getElementById("statusText");
+        // Status logic
+        const statusToggle = document.getElementById("statusToggle");
+        const statusText = document.getElementById("statusText");
 
-statusToggle.addEventListener("change", function () {
-  statusText.textContent = this.checked ? "Active" : "Inactive";
-  this.value = this.checked ? "true" : "false";
-});
+        statusToggle.addEventListener("change", function () {
+            statusText.textContent = this.checked ? "Active Operation" : "System Offline";
+            statusText.className = `text-xs font-black uppercase tracking-tighter ${this.checked ? 'text-emerald-400' : 'text-slate-500'}`;
+        });
 
-// Discount type change handler
-const discountType = document.getElementById("discountType");
-const discountValueHelp = document.getElementById("discountValueHelp");
+        // Toggle help text
+        $('#discountType').change(function() {
+            $('#discountValueHelp').text(this.value === "percentage" 
+                ? "Enter percentage value (e.g. 10 for 10% off)" 
+                : "Enter fixed amount in INR");
+        });
 
-discountType.addEventListener("change", function() {
-  if (this.value === "percentage") {
-    discountValueHelp.textContent = "Enter percentage value (e.g. 10 for 10% off)";
-  } else {
-    discountValueHelp.textContent = "Enter fixed amount in dollars";
-  }
-});
+        // Form Submit
+        $("#editCouponForm").on("submit", function (e) {
+            e.preventDefault();
+            $('.text-red-500').addClass('hidden');
+            
+            const codeInput = $('#code');
+            const codeVal = codeInput.val().toUpperCase().trim();
+            codeInput.val(codeVal);
 
-// Form validation
-const editCouponForm = document.getElementById('editCouponForm');
+            let isValid = true;
 
-editCouponForm.addEventListener('submit', function(e) {
-  // Prevent default form submission
-  e.preventDefault();
-  
-  let isValid = true;
-  
-  // Validate coupon code
-  const codeInput = document.getElementById('code');
-  const codeError = document.getElementById('codeError');
-  const codeRules = VALIDATION_RULES.code;
-  
-  // Convert code to uppercase
-  codeInput.value = codeInput.value.toUpperCase().trim();
-  
-  if (codeInput.value.length < codeRules.minLength) {
-    codeError.textContent = `Coupon code must be at least ${codeRules.minLength} characters.`;
-    codeError.style.display = 'block';
-    isValid = false;
-  } else if (codeInput.value.length > codeRules.maxLength) {
-    codeError.textContent = `Coupon code must not exceed ${codeRules.maxLength} characters.`;
-    codeError.style.display = 'block';
-    isValid = false;
-  } else if (!codeRules.pattern.test(codeInput.value)) {
-    codeError.textContent = `Coupon code can only contain uppercase letters, numbers, hyphens and underscores.`;
-    codeError.style.display = 'block';
-    isValid = false;
-  } else {
-    codeError.style.display = 'none';
-  }
-  
-  // Validate description
-  const descriptionInput = document.getElementById('description');
-  const descriptionError = document.getElementById('descriptionError');
-  const descriptionRules = VALIDATION_RULES.description;
-  
-  if (descriptionInput.value.length < descriptionRules.minLength) {
-    descriptionError.textContent = `Description must be at least ${descriptionRules.minLength} characters.`;
-    descriptionError.style.display = 'block';
-    isValid = false;
-  } else if (descriptionInput.value.length > descriptionRules.maxLength) {
-    descriptionError.textContent = `Description must not exceed ${descriptionRules.maxLength} characters.`;
-    descriptionError.style.display = 'block';
-    isValid = false;
-  } else {
-    descriptionError.style.display = 'none';
-  }
-  
-  // Validate discount value
-  const discountValueInput = document.getElementById('discountValue');
-  const discountValueError = document.getElementById('discountValueError');
-  const discountTypeValue = discountType.value;
-  const discountValueRules = VALIDATION_RULES.discountValue[discountTypeValue];
-  
-  if (discountTypeValue === 'percentage') {
-    if (parseFloat(discountValueInput.value) < discountValueRules.min) {
-      discountValueError.textContent = `Percentage discount must be at least ${discountValueRules.min}%.`;
-      discountValueError.style.display = 'block';
-      isValid = false;
-    } else if (parseFloat(discountValueInput.value) > discountValueRules.max) {
-      discountValueError.textContent = `Percentage discount must not exceed ${discountValueRules.max}%.`;
-      discountValueError.style.display = 'block';
-      isValid = false;
-    } else {
-      discountValueError.style.display = 'none';
-    }
-  } else {
-    if (parseFloat(discountValueInput.value) < discountValueRules.min) {
-      discountValueError.textContent = `Fixed discount must be at least ${discountValueRules.min}.`;
-      discountValueError.style.display = 'block';
-      isValid = false;
-    } else {
-      discountValueError.style.display = 'none';
-    }
-  }
-  
-  // Validate min purchase
-  const minPurchaseInput = document.getElementById('minPurchase');
-  const minPurchaseError = document.getElementById('minPurchaseError');
-  const minPurchaseRules = VALIDATION_RULES.minPurchase;
-  
-  if (parseFloat(minPurchaseInput.value) < minPurchaseRules.min) {
-    minPurchaseError.textContent = `Minimum purchase cannot be negative.`;
-    minPurchaseError.style.display = 'block';
-    isValid = false;
-  } else {
-    minPurchaseError.style.display = 'none';
-  }
-  
-  // Validate usage limit (only if provided)
-  const usageLimitInput = document.getElementById('usageLimit');
-  const usageLimitError = document.getElementById('usageLimitError');
-  const usageLimitRules = VALIDATION_RULES.usageLimit;
-  
-  if (usageLimitInput.value.trim() !== '' && parseInt(usageLimitInput.value) < usageLimitRules.min) {
-    usageLimitError.textContent = `Usage limit must be at least ${usageLimitRules.min}.`;
-    usageLimitError.style.display = 'block';
-    isValid = false;
-  } else {
-    usageLimitError.style.display = 'none';
-  }
-  
-  // Validate dates
-  const startDateInput = document.getElementById('startDate');
-  const expiryDateInput = document.getElementById('expiryDate');
-  const startDateError = document.getElementById('startDateError');
-  const expiryDateError = document.getElementById('expiryDateError');
-  
-  const startDate = new Date(startDateInput.value);
-  const expiryDate = new Date(expiryDateInput.value);
-  
-  if (expiryDate <= startDate) {
-    expiryDateError.textContent = 'Expiry date must be after start date.';
-    expiryDateError.style.display = 'block';
-    isValid = false;
-  } else {
-    expiryDateError.style.display = 'none';
-  }
-  
-  if (!isValid) {
-    // Scroll to the first error
-    const firstError = document.querySelector('.error-message[style="display: block;"]');
-    if (firstError) {
-      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    
-    Swal.fire({
-      icon: 'error',
-      title: 'Validation Error',
-      text: 'Please check the form for errors.',
-    });
-  } else {
-    // Show loading state
-    Swal.fire({
-      title: 'Updating Coupon',
-      text: 'Please wait while we update your coupon...',
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-    
-    // Create FormData object
-    const formData = new FormData(editCouponForm);
-    const formObject = {};
+            if (codeVal.length < VALIDATION_RULES.code.minLength) {
+                $('#codeError').text(`Code must be at least ${VALIDATION_RULES.code.minLength} chars`).removeClass('hidden');
+                isValid = false;
+            }
 
-formData.forEach((value, key) => {
-  formObject[key] = value;
-});
+            const val = parseFloat($('#discountValue').val());
+            if ($('#discountType').val() === 'percentage' && (val < 1 || val > 100)) {
+                $('#discountValueError').text('Must be between 1-100%').removeClass('hidden');
+                isValid = false;
+            }
 
-formObject.active = statusToggle.checked;
+            if (!isValid) return Swal.fire({ icon: 'error', title: 'Data Error', text: 'Please correct highlighting errors.' });
 
-    
-    fetch('/admin/coupons/edit/<%= coupon._id %>', {
-      method: 'PUT', headers: {
-    'Content-Type': 'application/json'
-  },
-      body: JSON.stringify(formObject)
-    })
-    .then(data=>data.json())
-    .then(data => {
-      if(data.status==='success'){
-        Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: data.message || 'Coupon updated successfully',
-        confirmButtonText: 'OK'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.href = '/admin/coupons';
-        }
-      });
-      }
-      else{
-        Swal.fire({
-        icon: 'error',
-        title: 'Error!',
-        text: data.message || 'Coupon updation failed',
-        confirmButtonText: 'OK'
-      }
-        )}
-      
-    })
-    .catch(error => {
-      // Handle error
-      console.error('Error:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to update coupon. Please try again later.'
-      });
-    });
-  }
-});
+            Swal.fire({
+                title: 'Synchronizing...',
+                didOpen: () => Swal.showLoading(),
+                allowOutsideClick: false
+            });
 
-      
+            const formData = {
+                code: codeVal,
+                discountType: $('#discountType').val(),
+                discountValue: val,
+                minPurchase: parseFloat($('#minPurchase').val()),
+                description: $('#description').val().trim(),
+                startDate: $('#startDate').val(),
+                expiryDate: $('#expiryDate').val(),
+                usageLimit: $('#usageLimit').val() ? parseInt($('#usageLimit').val()) : null,
+                active: statusToggle.checked
+            };
+
+            fetch('/admin/coupons/edit/<%= coupon._id %>', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    Swal.fire({ icon: 'success', title: 'Updated', text: data.message, confirmButtonColor: '#4f46e5' })
+                    .then(() => window.location.href = '/admin/coupons');
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Sync Failed', text: data.message });
+                }
+            })
+            .catch(() => Swal.fire({ icon: 'error', title: 'Network Error', text: 'Server connection dropped.' }));
+        });
     </script>
-  </body>
+</body>
 </html>

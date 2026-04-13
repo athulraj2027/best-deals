@@ -1,3 +1,6 @@
 .env
 node_modules/
 .VSCodeCounter
+
+public/images/categories/*
+public/images/products/*

@@ -18,7 +18,7 @@
 <body class="bg-slate-50 text-slate-900 antialiased min-h-screen">
     <%- include('./partials/headerPartial') %>
 
-    <div class="max-w-7xl mx-auto py-12 px-6">
+    <div class="max-w-7xl mx-auto py-12 px-6" id="wishlist-container">
         <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
             <div>
                 <h1 class="text-4xl font-black tracking-tight text-slate-900 flex items-center gap-3">
@@ -35,10 +35,10 @@
         </div>
 
         <% if (wishlist && wishlist.items && wishlist.items.length > 0) { %>
-        <div class="flex flex-col lg:flex-row gap-10">
+        <div class="flex flex-col lg:flex-row gap-10" id="wishlist-content">
             <div class="lg:w-2/3 space-y-6">
                 <% wishlist.items.forEach((item, index) => { %>
-                <div id="item-<%= item.productId._id %>" class="group bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500 p-6 flex flex-col sm:flex-row items-center gap-8 relative overflow-hidden">
+                <div id="item-<%= item.productId._id %>" class="wishlist-item group bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500 p-6 flex flex-col sm:flex-row items-center gap-8 relative overflow-hidden">
                     
                     <div class="w-32 h-32 flex-shrink-0 relative">
                         <div class="absolute inset-0 bg-indigo-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -57,7 +57,7 @@
                             
                             <div class="text-center sm:text-right">
                                 <p class="text-xs text-slate-400 line-through font-bold">₹<%= item.price.toLocaleString('en-IN') %></p>
-                                <p class="text-2xl font-black text-slate-900">₹<%= item.finalPrice.toLocaleString('en-IN') %></p>
+                                <p class="text-2xl font-black text-slate-900 final-price-val">₹<%= item.finalPrice.toLocaleString('en-IN') %></p>
                                 <p class="text-[10px] font-black text-emerald-500 uppercase tracking-tighter mt-1">
                                     <i class="fas fa-tags"></i> Offer Applied
                                 </p>
@@ -66,7 +66,7 @@
 
                         <div class="mt-6 pt-6 border-t border-slate-50 flex items-center justify-center sm:justify-end gap-3">
                             <button class="delete-wishlist-item-btn p-3 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                                data-item-id="<%= item._id %>" title="Remove from list">
+                                data-item-id="<%= item._id %>" data-product-id="<%= item.productId._id %>" title="Remove from list">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                             <button class="add-to-cart-btn flex-1 sm:flex-none flex items-center justify-center gap-3 px-8 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-slate-200 hover:bg-indigo-600 transition-all active:scale-95"
@@ -103,12 +103,6 @@
                         </div>
                     </div>
 
-                    <div class="bg-indigo-50/50 p-5 rounded-2xl border border-indigo-100 mb-8 text-center">
-                        <p class="text-[10px] font-bold text-indigo-600 leading-relaxed uppercase tracking-wider">
-                            <i class="fas fa-info-circle mr-1"></i> Prices and availability are subject to change based on stock levels.
-                        </p>
-                    </div>
-
                     <button id="add-all-to-cart-btn" data-wishlist-id="<%= wishlist._id %>"
                         class="w-full py-5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-xl shadow-indigo-100 hover:scale-[1.02] transition-all active:scale-95">
                         Purchase Entire Setup
@@ -116,88 +110,88 @@
                 </div>
             </div>
         </div>
-        <% } else { %>
-        <div class="bg-white rounded-[3rem] p-20 text-center border border-slate-100 shadow-sm max-w-2xl mx-auto mt-10">
+        <% } %>
+
+        <div id="empty-state" class="<%= (wishlist && wishlist.items && wishlist.items.length > 0) ? 'hidden' : '' %> bg-white rounded-[3rem] p-20 text-center border border-slate-100 shadow-sm max-w-2xl mx-auto mt-10">
             <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-8 text-slate-200 text-4xl shadow-inner animate-pulse">
                 <i class="fas fa-heart"></i>
             </div>
             <h2 class="text-3xl font-black text-slate-900 tracking-tight italic">Wishlist Empty</h2>
-            <p class="text-slate-400 mt-4 mb-10 max-w-sm mx-auto font-medium">Your setup is missing its core components. Start hunting for the best tech deals now.</p>
+            <p class="text-slate-400 mt-4 mb-10 max-w-sm mx-auto font-medium">Your setup is missing its core components.</p>
             <a href="/shop" class="inline-block bg-slate-900 text-white px-12 py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl shadow-slate-200 hover:bg-indigo-600 transition-all active:scale-95">
                 Start Building
             </a>
         </div>
-        <% } %>
     </div>
 
     <%- include('./partials/footer') %>
 
     <script>
         $(document).ready(function () {
-            // Toast Notification helper
             const toast = (icon, title) => {
                 Swal.fire({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, icon, title });
             };
 
-            // Clear wishlist
-            $("#clear-wishlist-btn").on("click", function () {
-                const wishlistId = $(this).data("wishlist-id");
-                Swal.fire({
-                    title: "Flush Wishlist?",
-                    text: "This will remove all items from your saved collection.",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#0f172a",
-                    confirmButtonText: "Yes, Clear All",
-                    background: "#ffffff",
-                    customClass: { confirmButton: 'rounded-xl font-bold', cancelButton: 'rounded-xl font-bold' }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.post(`/wishlist/clear/${wishlistId}`, {}, function (res) {
-                            if (res.status === "success") {
-                                Swal.fire("Cleared", "Your wishlist is now empty.", "success").then(() => window.location.reload());
-                            } else {
-                                Swal.fire("Error", res.message, "error");
-                            }
-                        });
+            // DOM Helper to update summary and check for empty state
+            function updateWishlistUI(productId, itemPrice) {
+                // 1. Remove the element from DOM with animation
+                $(`#item-${productId}`).fadeOut(400, function() {
+                    $(this).remove();
+
+                    // 2. Update Count
+                    const countEl = $("#wishlist-item-count");
+                    let currentCount = parseInt(countEl.text());
+                    let newCount = currentCount - 1;
+                    countEl.text(newCount + " Units");
+
+                    // 3. Update Total Value
+                    const totalEl = $("#wishlist-total-value");
+                    let currentTotal = parseFloat(totalEl.text().replace(/[^\d.]/g, ''));
+                    let newTotal = Math.max(0, currentTotal - itemPrice);
+                    totalEl.text("₹" + newTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 }));
+
+                    // 4. Check if we need to show empty state
+                    if (newCount <= 0) {
+                        $("#wishlist-content").remove();
+                        $("#clear-wishlist-btn").remove();
+                        $("#empty-state").removeClass("hidden");
                     }
                 });
-            });
+            }
 
-            // Delete item
+            // DELETE ITEM
             $(".delete-wishlist-item-btn").on("click", function () {
                 const itemId = $(this).data("item-id");
-                const itemElement = $(`#item-${itemId}`);
-                
+                const productId = $(this).data("product-id");
+                const price = parseFloat($(`#item-${productId}`).find('.final-price-val').text().replace(/[^\d.]/g, ''));
+
                 $.post(`/wishlist/delete-item/${itemId}`, {}, function (res) {
                     if (res.status === "success") {
-                        itemElement.fadeOut(400, function() { 
-                            $(this).remove();
-                            if ($('[id^="item-"]').length === 0) window.location.reload();
-                        });
+                        updateWishlistUI(productId, price);
                         toast("success", "Item removed");
                     }
                 });
             });
 
-            // Add to cart
+            // ADD SINGLE TO CART
             $(".add-to-cart-btn").on("click", function () {
                 const productId = $(this).data("product-id");
                 const variantId = $(this).data("variant-id");
+                const price = parseFloat($(`#item-${productId}`).find('.final-price-val').text().replace(/[^\d.]/g, ''));
                 
                 Swal.fire({ title: 'Processing...', didOpen: () => Swal.showLoading() });
 
-                fetch(`/product/cart/add/${productId}`, {
+                fetch(`/wishlist/add-item-to-cart/${productId}`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ variantId, quantity: 1 })
+                    body: JSON.stringify({ variantId })
                 }).then(res => res.json()).then(data => {
                     Swal.close();
                     if (data.status === "success") {
+                        updateWishlistUI(productId, price);
                         Swal.fire({
                             icon: "success",
                             title: "Transferred to Cart",
-                            showConfirmButton: true,
                             confirmButtonText: "Go to Checkout",
                             confirmButtonColor: "#4f46e5",
                             showCancelButton: true,
@@ -206,29 +200,40 @@
                             if (result.isConfirmed) window.location.href = "/cart";
                         });
                     } else {
-                        Swal.fire("Error", data.message || "Failed to add", "error");
+                        Swal.fire("Error", data.message, "error");
                     }
                 });
             });
 
-            // Add all to cart
-            $("#add-all-to-cart-btn").on("click", function () {
+            // CLEAR ALL
+            $("#clear-wishlist-btn").on("click", function () {
                 const wishlistId = $(this).data("wishlist-id");
                 Swal.fire({
-                    title: "Transfer Everything?",
-                    text: "Move all wishlist items to your shopping cart.",
-                    icon: "question",
+                    title: "Flush Wishlist?",
+                    icon: "warning",
                     showCancelButton: true,
-                    confirmButtonColor: "#4f46e5",
-                    confirmButtonText: "Yes, Add All"
-                }).then(result => {
+                    confirmButtonColor: "#0f172a",
+                    confirmButtonText: "Yes, Clear All"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.post(`/wishlist/clear/${wishlistId}`, {}, function (res) {
+                            if (res.status === "success") {
+                                location.reload(); // Best to reload here to reset all state
+                            }
+                        });
+                    }
+                });
+            });
+
+            // ADD ALL TO CART
+            $("#add-all-to-cart-btn").on("click", function () {
+                const wishlistId = $(this).data("wishlist-id");
+                Swal.fire({ title: "Transfer Everything?", icon: "question", showCancelButton: true, confirmButtonColor: "#4f46e5" })
+                .then(result => {
                     if (result.isConfirmed) {
                         $.post(`/wishlist/add-all-to-cart/${wishlistId}`, {}, function (res) {
                             if (res.status === "success") {
-                                Swal.fire("Success", "All items are now in your cart.", "success")
-                                .then(() => window.location.href = "/cart");
-                            } else {
-                                Swal.fire("Error", res.message, "error");
+                                window.location.href = "/cart";
                             }
                         });
                     }

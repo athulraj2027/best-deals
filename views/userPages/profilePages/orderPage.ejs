@@ -23,9 +23,17 @@
       --border: #e5e7eb;
     }
     * { box-sizing: border-box; }
-    body { font-family: 'Manrope', sans-serif; background: var(--surface); color: var(--ink); }
-    .syne { font-family: 'Syne', sans-serif; }
+   
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.open { display: flex; }
+        .modal-box { background: #fff; border-radius: 2.5rem; width: 100%; max-width: 700px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(15px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+ 
     /* Order card */
     .order-card {
       background: var(--card); border-radius: 18px; border: 1px solid var(--border);
@@ -255,9 +263,9 @@
             const grandTotal  = order.grandTotal || 0;
             const curTrackIdx = trackSteps.indexOf(order.status);
             const isCancelled = order.status === 'cancelled';
-            const isSpecial   = ['return requested','return accepted','returned'].includes(order.status);
+            const isSpecial   = ['return_requested','return_accepted','returned'].includes(order.status);
             const showTracker = !isCancelled && !isSpecial;
-            const canCancel   = !['cancelled','delivered','return requested','return accepted','returned'].includes(order.status);
+            const canCancel   = !['cancelled','delivered','return_requested','return_accepted','returned'].includes(order.status);
             const canReturn   = order.status === 'delivered';
             const isPaid      = order.payment_status === 'paid';
           %>

@@ -11,4 +11,6 @@ router
   .route("/add-all-to-cart/:id")
   .post(wishlistController.addAllToCartController);
 
+router.route("/add-item-to-cart/:id").post(wishlistController.additemToCart);
+
 module.exports = router;

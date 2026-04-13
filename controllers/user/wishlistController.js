@@ -39,7 +39,7 @@ exports.getWishlistPage = async (req, res) => {
 
       console.log("category ; ", product.category);
       const category = await Category.findById(product.category.toString());
-      if (!category ||category.status !== "listed") {
+      if (!category || category.status !== "listed") {
         console.log("hi3");
         removedItems.push(item.name + " (category unavailable)");
         continue;
@@ -259,6 +259,113 @@ exports.addAllToCartController = async (req, res) => {
     return res.status(500).json({
       status: "error",
       title: "Error",
+      message: "Server error",
+    });
+  }
+};
+
+exports.additemToCart = async (req, res) => {
+  const { id } = req.params;
+  const { variantId } = req.body;
+  const { userId } = req.session;
+
+  try {
+    if (!userId) {
+      return res.status(401).json({
+        status: "error",
+        message: "Please log in",
+      });
+    }
+
+    // 1. Get wishlist
+    const wishlist = await Wishlist.findOne({ user: userId });
+    if (!wishlist) {
+      return res.status(404).json({
+        status: "error",
+        message: "Wishlist not found",
+      });
+    }
+
+    // 2. Get product
+    const product = await Product.findById(id);
+    if (!product || !product.status) {
+      return res.status(400).json({
+        message: "Product unavailable",
+      });
+    }
+
+    // 3. Check category
+    const category = await Category.findById(product.category);
+    if (!category || category.status === "unlisted") {
+      return res.status(400).json({
+        message: "Product unavailable",
+      });
+    }
+
+    // 4. Find variant
+    const variant = product.variants.id(variantId);
+    if (!variant || variant.quantity < 1) {
+      return res.status(400).json({
+        message: "Insufficient stock",
+      });
+    }
+
+    // 5. Check item exists in wishlist (product + variant)
+    const wishlistIndex = wishlist.items.findIndex(
+      (item) =>
+        item.productId.toString() === id &&
+        item.variantId.toString() === variantId,
+    );
+
+    if (wishlistIndex === -1) {
+      return res.status(404).json({
+        message: "Item not found in wishlist",
+      });
+    }
+
+    // 6. Get or create cart
+    let cart = await Cart.findOne({ userId });
+    if (!cart) {
+      cart = new Cart({ userId, items: [] });
+    }
+
+    // 7. Check already exists in cart
+    const existingItem = cart.items.find(
+      (item) => item.variantId.toString() === variantId,
+    );
+
+    if (existingItem) {
+      return res.status(400).json({
+        message: "Item already in cart",
+      });
+    }
+
+    // 8. Add to cart
+    cart.items.push({
+      productId: id,
+      variantId: variant._id,
+      name: product.name,
+      color: variant.color,
+      size: variant.size,
+      price: variant.price,
+      image: variant.images[0]?.url || "",
+      quantity: 1,
+    });
+
+    // 9. Remove from wishlist
+    wishlist.items.splice(wishlistIndex, 1);
+
+    // 10. Save both
+    await Promise.all([cart.save(), wishlist.save()]);
+
+    return res.status(200).json({
+      status: "success",
+      message: "Item moved to cart successfully",
+    });
+  } catch (error) {
+    console.error("Error in additemToCart:", error);
+    return res.status(500).json({
+      status: "error",
       message: "Server error",
     });
   }

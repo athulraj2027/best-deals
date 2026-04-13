@@ -10,12 +10,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.1/sweetalert2.all.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .cropper-view-box, .cropper-face { border-radius: 8px; }
-        .hide-input { display: none !important; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
@@ -27,11 +25,11 @@
     <div class="max-w-5xl mx-auto py-12 px-6">
         <div class="mb-10 flex flex-col md:flex-row justify-between items-end gap-4">
             <div>
-                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Add New Product</h1>
-                <p class="text-slate-500 mt-1 text-sm">Fill in the details to list a new item in your inventory.</p>
+                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight italic">Product <span class="text-indigo-600">Architect</span></h1>
+                <p class="text-slate-500 mt-1 text-sm font-medium">Initialize new hardware assets for the digital catalog.</p>
             </div>
             <a href="/admin/products" class="text-xs font-bold text-slate-400 hover:text-indigo-600 transition-colors uppercase tracking-widest mb-1">
-                <i class="fas fa-arrow-left mr-1"></i> Back to Products
+                <i class="fas fa-arrow-left mr-1"></i> Back to Terminal
             </a>
         </div>
 
@@ -39,41 +37,41 @@
             <section class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
                 <div class="flex items-center gap-3 mb-8">
                     <div class="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
-                        <i class="fas fa-info-circle"></i>
+                        <i class="fas fa-microchip"></i>
                     </div>
-                    <h3 class="text-lg font-bold text-slate-800">Essential Information</h3>
+                    <h3 class="text-lg font-bold text-slate-800">Core Specifications</h3>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="md:col-span-2">
-                        <label class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Product Name</label>
-                        <input type="text" name="name" required class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-medium" placeholder="e.g. Mechanical Gaming Keyboard" />
+                        <label class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Asset Designation (Name)</label>
+                        <input type="text" name="name" required class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-bold" placeholder="e.g. RTX 5090 Super Edition" />
                     </div>
 
                     <div class="md:col-span-2">
-                        <label class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Description</label>
-                        <textarea name="description" rows="3" required class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-medium" placeholder="Detailed product summary..."></textarea>
+                        <label class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Hardware Summary</label>
+                        <textarea name="description" rows="3" required class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-medium" placeholder="Technical documentation..."></textarea>
                     </div>
 
                     <div>
-                        <label class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Brand Name</label>
-                        <input type="text" name="brand" required class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-medium" placeholder="e.g. Razer" />
+                        <label class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Manufacturer (Brand)</label>
+                        <input type="text" name="brand" required class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-bold" placeholder="e.g. ASUS" />
                     </div>
 
                     <div>
-                        <label class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Category</label>
-                        <select name="category" required class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-bold appearance-none cursor-pointer">
-                            <option value="">Select Category</option>
+                        <label class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Sector (Category)</label>
+                        <select name="category" required class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-bold appearance-none cursor-pointer">
+                            <option value="">Select Sector</option>
                             <% categories.forEach(category => { %>
                                 <option value="<%= category.name %>"><%= category.name %></option>
                             <% }) %>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Initial Status</label>
-                        <select name="status" required class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-bold appearance-none cursor-pointer">
-                            <option value="true">Listed (Visible)</option>
-                            <option value="false">Unlisted (Hidden)</option>
+                        <label class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Live Status</label>
+                        <select name="status" required class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-bold appearance-none cursor-pointer">
+                            <option value="true">Sync Online (Listed)</option>
+                            <option value="false">Stay Local (Unlisted)</option>
                         </select>
                     </div>
                 </div>
@@ -85,23 +83,20 @@
                         <div class="w-10 h-10 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600">
                             <i class="fas fa-layer-group"></i>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-800">Product Variants</h3>
+                        <h3 class="text-lg font-bold text-slate-800">Variant Iterations</h3>
                     </div>
-                    <button type="button" onclick="addVariant()" class="bg-slate-900 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-2xl transition-all shadow-lg shadow-slate-200 flex items-center gap-2 text-xs uppercase tracking-widest active:scale-95">
-                        <i class="fas fa-plus"></i> Add Variant
+                    <button type="button" onclick="addVariant()" class="bg-slate-900 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-2xl transition-all shadow-lg active:scale-95 text-[10px] uppercase tracking-widest">
+                        <i class="fas fa-plus mr-1"></i> New Variation
                     </button>
                 </div>
 
-                <div id="variants" class="space-y-10">
-                    </div>
+                <div id="variants" class="space-y-10"></div>
             </section>
 
             <div class="flex items-center justify-end gap-4 pt-6">
-                <button type="button" onclick="window.location.href='/admin/products'" class="px-8 py-4 text-xs font-bold text-slate-400 hover:text-slate-600 uppercase tracking-widest transition-all">
-                    Discard Changes
-                </button>
+                <a href="/admin/products" class="px-8 py-4 text-xs font-bold text-slate-400 hover:text-slate-600 uppercase tracking-widest transition-all">Discard Build</a>
                 <button type="submit" class="px-12 py-4 text-xs font-black text-white bg-indigo-600 hover:bg-indigo-700 rounded-2xl shadow-xl shadow-indigo-100 transition-all active:scale-95 uppercase tracking-[0.2em]">
-                    Save Product
+                    Finalize Deployment
                 </button>
             </div>
         </form>
@@ -110,19 +105,17 @@
     <div id="cropperModal" class="hidden fixed inset-0 z-[9999] bg-slate-900/90 flex flex-col items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white w-full max-w-4xl h-[85vh] rounded-[2.5rem] overflow-hidden flex flex-col relative shadow-2xl">
             <div class="p-6 border-b flex justify-between items-center bg-slate-50">
-                <h3 class="font-bold text-lg text-slate-800">Perfect Your Image</h3>
-                <button type="button" onclick="cancelCrop()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-red-500 transition-all shadow-sm">
+                <h3 class="font-bold text-lg text-slate-800 tracking-tight">Image Optimization</h3>
+                <button type="button" onclick="cancelCrop()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-red-500 transition-all">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            
             <div class="flex-1 bg-slate-900 relative flex items-center justify-center overflow-hidden">
                 <img id="cropperImage" src="" alt="Crop Area" class="max-w-full block" />
             </div>
-
             <div class="p-6 bg-slate-50 border-t flex justify-end gap-3">
                 <button type="button" onclick="cancelCrop()" class="px-8 py-3 text-xs font-bold text-slate-500 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 uppercase tracking-widest">Cancel</button>
-                <button type="button" onclick="saveCrop()" class="px-10 py-3 text-xs font-black text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 shadow-lg shadow-emerald-100 uppercase tracking-widest">Apply Crop</button>
+                <button type="button" onclick="saveCrop()" class="px-10 py-3 text-xs font-black text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 shadow-lg shadow-emerald-100 uppercase tracking-widest">Save Frame</button>
             </div>
         </div>
     </div>
@@ -131,45 +124,44 @@
         let variantCount = 0;
         let currentCropper = null;
         let currentImageElement = null;
-        let currentPreviewBlob = null;
 
         document.addEventListener("DOMContentLoaded", () => addVariant());
 
         function addVariant() {
             const container = document.createElement("div");
-            container.className = "variant-card bg-slate-50/50 p-8 rounded-[2rem] border border-slate-100 relative group transition-all hover:bg-white hover:shadow-xl hover:shadow-slate-200/40";
+            container.className = "variant-card bg-slate-50/50 p-8 rounded-[2rem] border border-slate-100 relative group transition-all hover:bg-white hover:shadow-xl hover:shadow-slate-200/40 animate-in fade-in slide-in-from-top-4 duration-300";
             container.id = `variant-${variantCount}`;
 
             container.innerHTML = `
                 <div class="flex justify-between items-start mb-8">
-                    <h4 class="text-sm font-black text-indigo-600 uppercase tracking-[0.2em] flex items-center gap-3">
-                        <span class="w-8 h-8 bg-indigo-600 text-white rounded-xl flex items-center justify-center text-[10px] shadow-lg shadow-indigo-100">0${variantCount + 1}</span>
-                        Variant Configuration
+                    <h4 class="text-xs font-black text-indigo-600 uppercase tracking-[0.2em] flex items-center gap-3">
+                        <span class="w-8 h-8 bg-indigo-600 text-white rounded-xl flex items-center justify-center text-[10px] shadow-lg shadow-indigo-100">${variantCount + 1}</span>
+                        Build Iteration
                     </h4>
-                    <button type="button" onclick="removeVariant(${variantCount})" class="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-red-500 transition-all">
+                    <button type="button" onclick="removeVariant(${variantCount})" class="text-slate-300 hover:text-red-500 transition-all p-1">
                         <i class="fas fa-trash-alt text-sm"></i>
                     </button>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Color Way</label>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Color Palette</label>
                         <select name="variants[${variantCount}][color]" class="w-full px-4 py-3.5 rounded-xl border border-slate-100 bg-white outline-none focus:ring-2 focus:ring-indigo-400 text-sm font-bold">
                             <option value="red">Red</option><option value="blue">Blue</option><option value="black">Black</option><option value="white">White</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Size/Model</label>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Factor (Size)</label>
                         <select name="variants[${variantCount}][size]" class="w-full px-4 py-3.5 rounded-xl border border-slate-100 bg-white outline-none focus:ring-2 focus:ring-indigo-400 text-sm font-bold">
-                            <option value="65%">65% Compact</option><option value="75%">75% TKL</option><option value="Tenkeyless">TKL Edition</option><option value="Fullsize">Full Size</option>
+                            <option value="65%">65% Compact</option><option value="75%">75% TKL</option><option value="Tenkeyless">Tenkeyless</option><option value="Fullsize">Full Size</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Pricing (₹)</label>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Unit Price (₹)</label>
                         <input type="number" name="variants[${variantCount}][price]" step="0.01" class="w-full px-4 py-3.5 rounded-xl border border-slate-100 bg-white outline-none focus:ring-2 focus:ring-indigo-400 text-sm font-bold" placeholder="0.00" />
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Available Stock</label>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Stock Quota</label>
                         <input type="number" name="variants[${variantCount}][quantity]" class="w-full px-4 py-3.5 rounded-xl border border-slate-100 bg-white outline-none focus:ring-2 focus:ring-indigo-400 text-sm font-bold" placeholder="0" />
                     </div>
                 </div>
@@ -177,21 +169,21 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
                     ${[0, 1, 2].map(imgIdx => `
                         <div class="bg-white p-5 rounded-2xl border border-slate-50 shadow-sm group/img">
-                            <label class="block text-[9px] font-black text-slate-300 uppercase tracking-widest mb-4">${imgIdx === 0 ? 'Hero Display' : 'Detail View ' + imgIdx}</label>
+                            <label class="block text-[9px] font-black text-slate-300 uppercase tracking-widest mb-4">${imgIdx === 0 ? 'Primary Interface' : 'Detail View ' + imgIdx}</label>
                             
                             <div class="aspect-square w-full rounded-2xl border-2 border-dashed border-slate-100 bg-slate-50/50 flex flex-col items-center justify-center overflow-hidden relative transition-all group-hover/img:border-indigo-200">
                                 <img src="" id="preview-${variantCount}-${imgIdx}" class="hidden w-full h-full object-cover z-10" />
                                 <div id="placeholder-${variantCount}-${imgIdx}" class="flex flex-col items-center gap-3 text-slate-300 transition-all group-hover/img:text-indigo-400">
                                     <i class="fas fa-cloud-upload-alt text-2xl"></i>
-                                    <span class="text-[9px] font-black uppercase tracking-tighter">Choose Image</span>
+                                    <span class="text-[9px] font-black uppercase tracking-tighter">Add Photo</span>
                                 </div>
                                 <input type="file" class="hidden" id="input-${variantCount}-${imgIdx}" accept="image/*" onchange="handleImageInput(event, ${variantCount}, ${imgIdx})" name="variants[${variantCount}][images][]" />
                                 <button type="button" onclick="document.getElementById('input-${variantCount}-${imgIdx}').click()" class="absolute inset-0 z-20 cursor-pointer"></button>
                             </div>
 
                             <div class="flex gap-2 mt-4 opacity-0 group-hover/img:opacity-100 transition-all">
-                                <button type="button" onclick="openCropper(${variantCount}, ${imgIdx})" class="flex-1 py-2 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all">Crop</button>
-                                <button type="button" onclick="removeImage(${variantCount}, ${imgIdx})" class="px-3 py-2 bg-slate-50 text-slate-400 rounded-lg text-[10px] hover:text-red-500 transition-all">
+                                <button type="button" onclick="openCropper(${variantCount}, ${imgIdx})" class="flex-1 py-2 bg-indigo-50 text-indigo-600 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all">Format</button>
+                                <button type="button" onclick="removeImage(${variantCount}, ${imgIdx})" class="px-3 py-2 bg-slate-50 text-slate-300 rounded-lg text-xs hover:text-red-500 transition-all">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -205,17 +197,13 @@
 
         function removeVariant(index) {
             Swal.fire({
-                title: "Delete Variant?",
-                text: "All associated images and data will be lost.",
+                title: "De-initialize Build?",
+                text: "Removing this variant will purge all associated image buffers.",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#0f172a",
-                cancelButtonColor: "#f1f5f9",
-                confirmButtonText: "Yes, delete",
-                customClass: { confirmButton: 'rounded-xl', cancelButton: 'rounded-xl !text-slate-600' }
-            }).then((result) => {
-                if (result.isConfirmed) document.getElementById(`variant-${index}`).remove();
-            });
+                confirmButtonText: "Yes, Purge"
+            }).then((res) => { if (res.isConfirmed) document.getElementById(`variant-${index}`).remove(); });
         }
 
         function handleImageInput(event, vIdx, iIdx) {
@@ -235,24 +223,17 @@
 
         function openCropper(vIdx, iIdx) {
             const preview = document.getElementById(`preview-${vIdx}-${iIdx}`);
-            if (!preview.src) return Swal.fire("Select Image", "Please upload a photo first.", "info");
+            if (!preview.src) return Swal.fire("Input Required", "Upload image first.", "info");
 
             const modal = document.getElementById("cropperModal");
             const image = document.getElementById("cropperImage");
-            
             image.src = preview.src;
             currentImageElement = preview;
             modal.classList.remove("hidden");
 
             if (currentCropper) currentCropper.destroy();
-
             setTimeout(() => {
-                currentCropper = new Cropper(image, {
-                    aspectRatio: 1,
-                    viewMode: 1,
-                    dragMode: 'move',
-                    background: false,
-                });
+                currentCropper = new Cropper(image, { aspectRatio: 1, viewMode: 1, background: false });
             }, 50);
         }
 
@@ -276,23 +257,29 @@
             document.getElementById(`input-${vIdx}-${iIdx}`).value = "";
         }
 
-        // Handle AJAX submission with base64 to Blob conversion
+        // 🚀 FORM SUBMISSION LOGIC (CLEAN)
         $("#addProductForm").submit(async function(e) {
             e.preventDefault();
-            Swal.fire({ title: 'Finalizing Product...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+            Swal.fire({ title: 'Deploying Asset...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
 
             const formData = new FormData(this);
             
-            // Convert any cropped Base64 strings to Blobs for clean upload
+            // 🚨 THE FIX: Remove automatic file entries to prevent duplication (3 images becoming 6)
+            const keys = Array.from(formData.keys());
+            keys.forEach(key => { if(key.includes('[images][]')) formData.delete(key); });
+
+            // 📸 PROCESS CROPPED PREVIEWS
             const imgPreviews = document.querySelectorAll('img[id^="preview-"]');
             for (let img of imgPreviews) {
-                if (img.src.startsWith('data:')) {
+                // Only process visible, valid images
+                if (img.src && img.src.startsWith('data:') && !img.classList.contains('hidden')) {
                     const res = await fetch(img.src);
                     const blob = await res.blob();
+                    
                     const inputId = img.id.replace('preview-', 'input-');
-                    // Find field name used by input
                     const fieldName = document.getElementById(inputId).name;
-                    formData.append(fieldName, blob, 'variant_image.jpg');
+                    
+                    formData.append(fieldName, blob, `variant_asset_${Date.now()}.jpg`);
                 }
             }
 
@@ -303,10 +290,10 @@
                 processData: false,
                 contentType: false,
                 success: (res) => {
-                    if (res.success) Swal.fire("Product Live", "Product has been successfully listed.", "success").then(() => window.location.href = "/admin/products");
-                    else Swal.fire("Submission Failed", res.message, "error");
+                    if (res.success) Swal.fire("Asset Finalized", "Hardware listing is now live.", "success").then(() => window.location.href = "/admin/products");
+                    else Swal.fire("Failed", res.message, "error");
                 },
-                error: (xhr) => Swal.fire("Server Error", xhr.responseJSON?.message || "Internal server error.", "error")
+                error: (xhr) => Swal.fire("Fatal Error", xhr.responseJSON?.message || "Cloud connection failure.", "error")
             });
         });
     </script>

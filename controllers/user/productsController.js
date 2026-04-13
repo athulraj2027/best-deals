@@ -189,7 +189,7 @@ exports.addtoWishlistController = async (req, res) => {
 exports.addtoCartController = async (req, res) => {
   const userId = req.session.userId;
   const cartItem = req.body;
-  console.log("cartItem : ", cartItem);
+  const { id } = req.params;
   try {
     if (!userId) {
       return res.status(400).json({
@@ -206,7 +206,9 @@ exports.addtoCartController = async (req, res) => {
       });
     }
 
-    const product = await Product.findById(cartItem.productId);
+    console.log("id : ", id);
+    const product = await Product.findOne({ "variants._id": id });
+    console.log("product  :", product);
     if (!product) {
       return res.status(400).json({
         status: "error",

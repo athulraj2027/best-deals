@@ -324,130 +324,152 @@ exports.getOrderDetails = async (req, res) => {
 };
 
 exports.changeStatusController = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
-    const params = req.params.id;
-    const orderId = new mongoose.Types.ObjectId(params);
+    const orderId = new mongoose.Types.ObjectId(req.params.id);
+    const newStatus = req.body.status;
 
-    // Make sure status is being received correctly
-    const status = req.body.status;
-    console.log("Request body:", req.body);
-    console.log("Status to set:", status);
+    const allowedStatuses = [
+      "pending",
+      "processing",
+      "delivered",
+      "cancelled",
+      "return_requested",
+      "return_accepted",
+      "returned",
+    ];
 
-    if (!status) {
-      return res.status(400).json({
-        status: "error",
-        title: "Error",
-        message: "Status value is missing",
-      });
+    if (!allowedStatuses.includes(newStatus)) {
+      throw new Error("Invalid status");
     }
 
-    const order = await Order.findById(orderId);
-    if (!order) return res.status(400).json({ message: "No order found" });
-
-    const permanentStatuses = ["cancelled", "returned"];
-
-    if (permanentStatuses.includes(order.status))
-      return res.status(400).json({ message: "This  order cannot be changed" });
+    const order = await Order.findById(orderId).session(session);
+    if (!order) throw new Error("Order not found");
 
     if (
-      (order.status === "delivered" && status === "pending") ||
-      status === "processing" ||
-      status === "cancelled"
+      order.payment_status === "refunded" &&
+      ["cancelled", "returned"].includes(newStatus)
     ) {
-      return res
-        .status(400)
-        .json({ message: "This  order has been already delivered" });
+      throw new Error("Refund already processed");
     }
 
-    const updatedOrder = await Order.findByIdAndUpdate(
-      orderId,
-      {
-        status: status,
-        "items.$[].status": status, // 🔥 all items updated
-      },
-      { new: true },
-    );
+    const validTransitions = {
+      pending: ["processing"],
+      processing: ["delivered"],
+      delivered: [],
+      return_requested: ["return_accepted"],
+      return_accepted: ["returned"],
+      cancelled: [],
+      returned: [],
+    };
 
-    if (!updatedOrder) {
-      return res.status(400).json({
-        status: "error",
-        title: "Error",
-        message: "Could not update the order",
-      });
+    if (!validTransitions[order.status].includes(newStatus)) {
+      throw new Error(
+        `Invalid status transition from ${order.status} to ${newStatus}`,
+      );
     }
 
-    if (status === "delivered" && updatedOrder.paymentMethod === "cod") {
-      updatedOrder.payment_status = "paid";
-      await updatedOrder.save();
-    }
-    // Handle cancellation - restore stock and refund
+    order.status = newStatus;
+    order.items.forEach((item) => {
+      item.status = newStatus;
+    });
+
     if (
-      updatedOrder.status === "cancelled" &&
-      updatedOrder.payment_status === "paid"
+      newStatus === "delivered" &&
+      order.paymentMethod === "cod" &&
+      order.payment_status !== "paid"
     ) {
-      // Restore stock for all items
-      for (const item of updatedOrder.items) {
+      order.payment_status = "paid";
+    }
+
+    if (newStatus === "cancelled" && order.payment_status === "paid") {
+      // Restore stock
+      for (const item of order.items) {
         await Product.updateOne(
-          { _id: item.productId, "variants._id": item.variantId },
-          { $inc: { "variants.$.quantity": item.quantity } },
+          {
+            _id: item.productId,
+            "variants._id": item.variantId,
+          },
+          {
+            $inc: { "variants.$.quantity": item.quantity },
+          },
+          { session },
         );
       }
 
-      // Refund to wallet
-      const user = await User.findById(updatedOrder.userId);
-      if (user) {
-        const refundAmount = updatedOrder.grandTotal;
-        user.wallet += refundAmount;
+      // Refund wallet (atomic)
+      await User.updateOne(
+        { _id: order.userId },
+        {
+          $inc: { wallet: order.grandTotal },
+          $push: {
+            walletTransactions: {
+              type: "credit",
+              amount: order.grandTotal,
+              description: `Refund for cancelled order #${order.orderId}`,
+              date: new Date(),
+            },
+          },
+        },
+        { session },
+      );
 
-        user.walletTransactions.push({
-          type: "credit",
-          amount: refundAmount,
-          description: `Refund for cancelled order #${updatedOrder.orderId}`,
-          date: new Date(),
-        });
-
-        updatedOrder.payment_status = "refunded";
-        await user.save();
-      }
+      order.payment_status = "refunded";
     }
 
-    // Handle return - refund to wallet
-    if (updatedOrder.status === "returned") {
-      const user = await User.findById(updatedOrder.userId);
-      if (user) {
-        const refundAmount = updatedOrder.grandTotal;
+    if (newStatus === "returned") {
+      order.items.forEach(async (item) => {
+        const product = await Product.findById(item.productId);
+        const variant = product.variants.find(
+          (v) => v._id.toString() === item.variantId.toString(),
+        );
+        if (!variant)
+          return res.status(400).json({ message: "Variant not found" });
+        variant.quantity += item.quantity;
 
-        // Update wallet balance
-        user.wallet += refundAmount;
+        await product.save();
+      });
+    }
+    if (newStatus === "returned" && order.payment_status === "paid") {
+      await User.updateOne(
+        { _id: order.userId },
+        {
+          $inc: { wallet: order.grandTotal },
+          $push: {
+            walletTransactions: {
+              type: "credit",
+              amount: order.grandTotal,
+              description: `Refund for returned order #${order.orderId}`,
+              date: new Date(),
+            },
+          },
+        },
+        { session },
+      );
 
-        // Add transaction
-        user.walletTransactions.push({
-          type: "credit",
-          amount: refundAmount,
-          description: `Refund for returned order #${updatedOrder.orderId}`,
-          date: new Date(),
-        });
-
-        // Update order payment status
-        updatedOrder.payment_status = "refunded";
-
-        await updatedOrder.save();
-        await user.save();
-      }
+      order.payment_status = "refunded";
     }
 
-    await updatedOrder.save();
+    await order.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
+
     return res.status(200).json({
       status: "success",
-      title: "Success",
       message: "Order updated successfully",
     });
   } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+
     console.error(err);
-    return res.status(500).json({
+
+    return res.status(400).json({
       status: "error",
-      title: "Error",
-      message: "Something went wrong",
+      message: err.message || "Something went wrong",
     });
   }
 };
@@ -513,28 +535,13 @@ exports.changeItemStatus = async (req, res) => {
   const { status } = req.body;
 
   try {
-    // 1. Validate input
-    if (!status) {
-      return res.status(400).json({ message: "Status is required" });
-    }
-
-    // 2. Find order
-    const order = await Order.findById(orderId);
-
-    if (!order) {
-      return res.status(404).json({ message: "Order not found" });
-    }
-
-    // 3. Find item
-    const item = order.items.id(itemId);
-
-    if (!item) {
-      return res.status(404).json({ message: "Item not found" });
-    }
+    if (!status) return res.status(400).json({ message: "Status is required" });
 
     // 4. Allowed transitions (IMPORTANT)
     const allowedTransitions = {
-      active: ["cancelled", "return_requested"],
+      pending: ["processing"],
+      processing: ["delivered"],
+      delivered: [],
       return_requested: ["return_accepted"],
       return_accepted: ["returned"],
       returned: [],
@@ -546,25 +553,40 @@ exports.changeItemStatus = async (req, res) => {
         message: `Invalid status transition from ${item.status} to ${status}`,
       });
     }
+    const order = await Order.findById(orderId);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+    const item = order.items.id(itemId);
+    if (!item) return res.status(404).json({ message: "Item not found" });
 
-    // 5. Update item status
     item.status = status;
 
     // 6. Handle special cases
     if (status === "returned") {
       item.returnedAt = new Date();
-
       const user = await User.findById(order.userId);
-      user.wallet += item.paidAmount;
+      user.wallet += item.paidAmount.toFixed(2);
+      user.walletTransactions.push({
+        type: "credit",
+        amount: item.paidAmount,
+        description: `Refund for returned item in order #${order.id}`,
+        date: new Date(),
+      });
       await user.save();
+      const product = await Product.findById(item.productId);
+      const variant = product.variants.find(
+        (v) => v._id.toString() === item.variantId.toString(),
+      );
+      if (!variant)
+        return res.status(400).json({ message: "Variant not found" });
+      variant.quantity += item.quantity;
+
+      await product.save();
     }
 
     // 7. Update order-level status (smart aggregation)
     const statuses = order.items.map((i) => i.status);
 
-    if (statuses.every((s) => s === "cancelled")) {
-      order.status = "cancelled";
-    } else if (statuses.every((s) => s === "returned")) {
+    if (statuses.every((s) => s === "returned")) {
       order.status = "returned";
       order.payment_status = "refunded"; // optional
     } else if (statuses.some((s) => s === "return_requested")) {
@@ -573,7 +595,6 @@ exports.changeItemStatus = async (req, res) => {
       order.status = "return_accepted";
     }
 
-    // 8. Save
     await order.save();
 
     return res.status(200).json({

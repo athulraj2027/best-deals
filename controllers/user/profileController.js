@@ -1,10 +1,10 @@
 const PDFDocument = require("pdfkit");
+const bcrypt = require("bcrypt");
+const mongoose = require("mongoose");
 const User = require("../../models/User");
 const Address = require("../../models/Address");
 const Order = require("../../models/Order");
-const mongoose = require("mongoose");
 const Product = require("../../models/Product");
-const bcrypt = require("bcrypt");
 
 exports.getUserProfilePage = async (req, res) => {
   try {
@@ -723,7 +723,6 @@ exports.cancelItemController = async (req, res) => {
       const user = await User.findById(order.userId);
       const refundAmount = item.paidAmount;
       user.wallet += refundAmount;
-      console.log("item : ", item);
       const walletTransaction = {
         type: "credit",
         description: `Order cancellation refund for Order #${order.orderId} item`,
