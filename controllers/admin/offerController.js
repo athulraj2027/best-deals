@@ -118,7 +118,7 @@ exports.addOfferController = async (req, res) => {
   console.log(req.body);
   try {
     const {
-      code: name,
+       name,
       description,
       offerType,
       offerValue,
@@ -169,8 +169,6 @@ exports.addOfferController = async (req, res) => {
       active: active === "false" ? false : true,
     });
     await newOffer.save();
-
-    await updateProductsForOffer(newOffer._id); // 🔥 important
 
     res.status(201).json({
       status: "success",

@@ -368,6 +368,11 @@
 
               <div class="modal-body">
 
+                  <button 
+    onclick="downloadInvoice('<%= order._id %>')" 
+    class="text-xs font-bold text-indigo-600 hover:underline">
+    Download Invoice
+  </button>
                 <!-- Progress tracker -->
                 <% if (showTracker) { %>
                 <div class="modal-section-title">Order Progress</div>
@@ -427,6 +432,8 @@
                   <% } %>
                 </div>
 
+                <td class="px-6 py-4">
+</td>
                 <!-- Items -->
                 <div class="modal-section-title">Items Ordered (<%= itemCount %>)</div>
                 <% if (order.items && order.items.length > 0) { %>
@@ -580,6 +587,9 @@
   <%- include('../partials/footer') %>
 
   <script>
+    function downloadInvoice(orderId) {
+  window.open(`/profile/orders/invoice/${orderId}`, "_blank");
+}
     // ── Modal helpers ────────────────────────────────────────────────────────
     function openModal(id) {
       const el = document.getElementById('modal-' + id);

@@ -60,7 +60,7 @@ exports.getShopPage = async (req, res) => {
     const minPriceVal = parseInt(minPrice);
     const maxPriceVal = parseInt(maxPrice);
     if (!isNaN(minPriceVal) && !isNaN(maxPriceVal)) {
-      query.actualPrice = {
+      query["variants.price"] = {
         $gte: minPriceVal,
         $lte: maxPriceVal,
       };
@@ -147,10 +147,6 @@ exports.getShopPage = async (req, res) => {
         }
         return productObj;
       }),
-    );
-
-    console.log(
-      `Found ${products.length} products out of ${totalProducts} total matches`,
     );
 
     // Get categories for filter section

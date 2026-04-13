@@ -33,6 +33,8 @@ exports.getHomePage = async (req, res) => {
         }
       }
 
+      console.log("imageurl : ", imageUrl);
+
       return {
         _id: product._id,
         name: product.name,
@@ -44,10 +46,9 @@ exports.getHomePage = async (req, res) => {
       };
     });
 
-    
-
     const categories = await Category.find({ status: "listed" });
     const isLoggedIn = req.isAuthenticated();
+    console.log("products ; ", products);
 
     return res.status(statusCodes.SUCCESS).render("userPages/homePage", {
       products,

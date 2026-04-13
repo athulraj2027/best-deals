@@ -1,329 +1,285 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shopping Cart</title>
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    rel="stylesheet"
-  />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shopping Cart | Tech Gadgets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .qty-btn:active { transform: scale(0.9); }
+    </style>
 </head>
 
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen">
 
 <%- include('./partials/headerPartial') %>
 
-<div class="container mx-auto py-10 px-4">
-  <h1 class="text-3xl font-bold mb-10">Shopping Cart</h1>
-
-  <% if (cart && cart.items.length > 0) { %>
-  <div class="flex flex-col lg:flex-row gap-8">
-
-    <!-- CART ITEMS -->
-    <div class="lg:w-2/3 space-y-6">
-
-      <% cart.items.forEach(item => { %>
-      <div
-        class="cart-item bg-white rounded-xl shadow p-6 flex gap-6"
-        id="item-<%=  item._id.toString() %>"
-        data-price="<%= item.price %>"
-      >
-
-        <!-- IMAGE -->
-        <img src="<%= item.image %>"
-          class="w-28 h-28 rounded-lg object-cover"/>
-
-        <!-- DETAILS -->
-        <div class="flex-1 flex justify-between">
-
-          <div>
-            <h2 class="font-semibold"><%= item.name %></h2>
-            <p class="text-gray-500 text-sm">
-              Color: <%= item.color %> | Size: <%= item.size %>
-            </p>
-            <p class="font-medium mt-1">
-              ₹ <%= item.price.toFixed(2) %>
-            </p>
-          </div>
-
-          <!-- QTY -->
-          <div class="text-right">
-
-            <form
-  class="quantity-form flex items-center gap-2"
-  data-item-id="<%=  item._id.toString() %>"
-  data-product-id="<%= item.productId %>"
-  data-variant-id="<%= item.variantId %>"
->
-
-  <button
-    type="button"
-    class="quantity-btn bg-gray-200 px-3 rounded"
-    data-action="decrease">
-    -
-  </button>
-
-  <input
-    class="quantity-input w-12 text-center border rounded"
-    value="<%= item.quantity %>"
-    readonly
-  />
-
-  <button
-    type="button"
-    class="quantity-btn bg-gray-200 px-3 rounded"
-    data-action="increase">
-    +
-  </button>
-
-</form>
-
-
-            <p class="item-total font-semibold mt-2">
-              ₹ <span class="item-total-price">
-              <%= (item.price * item.quantity).toFixed(2) %>
-              </span>
-            </p>
-
-            <button
-              class="delete-item-btn text-red-500 mt-2"
-              data-item-id="<%= item._id.toString() %>"
-              data-product-id="<%= item.productId %>"
-  data-variant-id="<%= item.variantId %>">
-              
-              <i class="fas fa-trash"></i>
-            </button>
-
-          </div>
-        </div>
-      </div>
-      <% }) %>
-
-      <!-- FOOTER -->
-      <div class="flex justify-between mt-6">
-        <a href="/shop" class="text-blue-600">
-          ← Continue Shopping
-        </a>
-
-        <button id="clear-cart-btn"
-          data-cart-id="<%= cart._id %>"
-          class="text-red-600">
-          Clear Cart
-        </button>
-      </div>
-
+<div class="max-w-7xl mx-auto py-12 px-6">
+    <div class="mb-10">
+        <h1 class="text-4xl font-black tracking-tight text-slate-900 flex items-center gap-4">
+            <i class="fas fa-shopping-cart text-indigo-600"></i> Shopping Cart
+        </h1>
+        <p class="text-slate-500 mt-2 font-medium italic">Review your hardware selection before finalizing the build.</p>
     </div>
 
-    <!-- SUMMARY -->
-    <div class="lg:w-1/3">
-      <div class="bg-white rounded-xl shadow p-6 sticky top-10">
+    <% if (cart && cart.items.length > 0) { %>
+    <div class="flex flex-col lg:flex-row gap-10">
 
-        <h2 class="font-semibold mb-4">Order Summary</h2>
+        <div class="lg:w-2/3 space-y-6">
+            <% cart.items.forEach(item => { %>
+            <div class="cart-item group bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500 p-6 flex flex-col sm:flex-row items-center gap-8 relative overflow-hidden" 
+                 id="item-<%= item._id.toString() %>" data-price="<%= item.price %>">
+                
+                <div class="w-32 h-32 flex-shrink-0 relative">
+                    <div class="absolute inset-0 bg-indigo-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <img src="<%= item.image %>" class="w-full h-full object-cover rounded-2xl shadow-sm group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://placehold.co/150x150'"/>
+                </div>
 
-        <div class="space-y-2">
-          <div class="flex justify-between">
-            <span>Subtotal</span>
-            <span>₹ <span id="subtotal">0</span></span>
-          </div>
+                <div class="flex-1 flex flex-col sm:flex-row justify-between items-center sm:items-start w-full gap-6">
+                    <div class="text-center sm:text-left">
+                        <h2 class="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors"><%= item.name %></h2>
+                        <div class="flex items-center justify-center sm:justify-start gap-2 mt-1">
+                            <span class="px-2.5 py-1 bg-slate-100 text-slate-500 rounded-lg text-[10px] font-black uppercase tracking-widest"><%= item.color %></span>
+                            <span class="px-2.5 py-1 bg-slate-100 text-slate-500 rounded-lg text-[10px] font-black uppercase tracking-widest"><%= item.size %></span>
+                        </div>
+                        <p class="text-lg font-black text-slate-900 mt-4">₹ <%= item.price.toLocaleString('en-IN') %></p>
+                    </div>
 
-          <div class="flex justify-between">
-            <span>Tax (10%)</span>
-            <span>₹ <span id="tax">0</span></span>
-          </div>
+                    <div class="flex flex-col items-center sm:items-end gap-3">
+                        <div class="quantity-form flex items-center bg-slate-50 rounded-2xl p-1 border border-slate-100" 
+                             data-item-id="<%= item._id.toString() %>" data-product-id="<%= item.productId %>" data-variant-id="<%= item.variantId %>">
+                            
+                            <button type="button" class="quantity-btn qty-btn w-10 h-10 flex items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm hover:text-indigo-600 transition-all" data-action="decrease">
+                                <i class="fas fa-minus text-xs"></i>
+                            </button>
 
-          <div class="flex justify-between">
-            <span>Shipping</span>
-            <span>Free</span>
-          </div>
+                            <input class="quantity-input w-12 text-center bg-transparent font-black text-sm text-slate-900 focus:outline-none" value="<%= item.quantity %>" readonly />
+
+                            <button type="button" class="quantity-btn qty-btn w-10 h-10 flex items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm hover:text-indigo-600 transition-all" data-action="increase">
+                                <i class="fas fa-plus text-xs"></i>
+                            </button>
+                        </div>
+
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Item Total</p>
+                            <p class="item-total text-xl font-black text-indigo-600 italic">
+                                ₹ <span class="item-total-price"><%= (item.price * item.quantity).toLocaleString('en-IN') %></span>
+                            </p>
+                        </div>
+
+                        <button class="delete-item-btn p-3 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all" 
+                                data-item-id="<%= item._id.toString() %>" data-product-id="<%= item.productId %>" data-variant-id="<%= item.variantId %>">
+                            <i class="fas fa-trash-alt text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <% }) %>
+
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-6 pt-6">
+                <a href="/shop" class="text-sm font-bold text-slate-400 hover:text-indigo-600 transition-all group">
+                    <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i> Continue Shopping
+                </a>
+
+                <button id="clear-cart-btn" data-cart-id="<%= cart._id %>" 
+                        class="px-8 py-3 bg-red-50 text-red-600 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all border border-red-100">
+                    <i class="fas fa-broom mr-2"></i> Clear Entire Cart
+                </button>
+            </div>
         </div>
 
-        <hr class="my-4">
+        <div class="lg:w-1/3">
+            <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-100 p-8 sticky top-32">
+                <h2 class="text-2xl font-black text-slate-900 mb-8 tracking-tight italic">Order Breakdown</h2>
 
-        <div class="flex justify-between font-bold">
-          <span>Total</span>
-          <span>₹ <span id="grand-total">0</span></span>
+                <div class="space-y-4 text-sm font-bold text-slate-500">
+                    <div class="flex justify-between items-center">
+                        <span class="uppercase tracking-widest text-[10px]">Net Subtotal</span>
+                        <span class="text-slate-900 font-black">₹ <span id="subtotal">0</span></span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="uppercase tracking-widest text-[10px]">Processing Tax (10%)</span>
+                        <span class="text-slate-900 font-black">₹ <span id="tax">0</span></span>
+                    </div>
+
+                    <div class="flex justify-between items-center border-t border-slate-50 pt-4">
+                        <span class="uppercase tracking-widest text-[10px]">Shipping</span>
+                        <span class="text-emerald-500 font-black tracking-widest uppercase text-[10px]">Complimentary</span>
+                    </div>
+                </div>
+
+                <div class="mt-10 mb-8 p-6 bg-slate-900 rounded-3xl text-white relative overflow-hidden shadow-2xl shadow-indigo-900/20">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-indigo-500/20 rounded-full blur-2xl -mr-12 -mt-12"></div>
+                    <div class="relative z-10">
+                        <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">Grand Total</p>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-3xl font-black italic tracking-tighter text-indigo-400">₹</span>
+                            <span id="grand-total" class="text-4xl font-black tracking-tight">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="/checkout/<%= cart._id %>" 
+                   class="block w-full py-5 bg-indigo-600 hover:bg-indigo-700 text-white text-center rounded-[1.5rem] font-black text-xs uppercase tracking-[0.3em] shadow-xl shadow-indigo-100 transition-all active:scale-95">
+                    Proceed to Checkout <i class="fas fa-shield-check ml-2"></i>
+                </a>
+                
+                <p class="mt-6 text-center text-[9px] font-bold text-slate-300 uppercase tracking-widest">
+                    <i class="fas fa-lock mr-1"></i> Secure 256-Bit SSL Encrypted Payment
+                </p>
+            </div>
         </div>
 
-        <a href="/checkout/<%= cart._id %>"
-          class="block bg-blue-600 text-white text-center py-3 rounded mt-4">
-          Checkout
+    </div>
+    <% } else { %>
+
+    <div class="max-w-xl mx-auto bg-white rounded-[3rem] p-20 text-center border border-slate-100 shadow-sm mt-10">
+        <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-8 text-slate-200 text-4xl shadow-inner animate-bounce">
+            <i class="fas fa-shopping-cart"></i>
+        </div>
+        <h2 class="text-3xl font-black text-slate-900 tracking-tight italic">Cart Is Offline</h2>
+        <p class="text-slate-400 mt-4 mb-10 max-w-sm mx-auto font-medium leading-relaxed">It looks like you haven't synchronized any gadgets to your collection yet.</p>
+        <a href="/shop" class="inline-block bg-slate-900 text-white px-12 py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl shadow-slate-200 hover:bg-indigo-600 transition-all active:scale-95">
+            Synchronize Now
         </a>
-
-      </div>
     </div>
 
-  </div>
-  <% } else { %>
-
-  <!-- EMPTY -->
-  <div class="bg-white p-10 rounded text-center">
-    <i class="fas fa-shopping-cart text-6xl text-gray-400 mb-4"></i>
-    <h2 class="text-xl font-semibold">Cart Empty</h2>
-    <a href="/shop"
-      class="inline-block bg-blue-600 text-white px-6 py-2 rounded mt-4">
-      Shop Now
-    </a>
-  </div>
-
-  <% } %>
+    <% } %>
 </div>
 
 <%- include('./partials/footer') %>
 
-<!-- JS -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 $(document).ready(function () {
-
-function updateItemTotal(item) {
-  const price = parseFloat(item.data("price"));
-  const qty = parseInt(item.find(".quantity-input").val());
-
-  const total = price * qty;
-  item.find(".item-total-price")
-      .text(total.toFixed(2));
-}
-
-function updateCartSummary() {
-  let subtotal = 0;
-
-  $(".cart-item").each(function () {
-    const price = parseFloat($(this).data("price"));
-    const qty = parseInt($(this)
-      .find(".quantity-input").val());
-    subtotal += price * qty;
-  });
-
-  const tax = subtotal * 0.1;
-  const total = subtotal + tax;
-
-  $("#subtotal").text(subtotal.toFixed(2));
-  $("#tax").text(tax.toFixed(2));
-  $("#grand-total").text(total.toFixed(2));
-}
-$(".quantity-btn").click(function () {
-
-  const form = $(this).closest(".quantity-form");
-  const id = form.data("item-id");
-  const item = $(this).closest(".cart-item");
-  const action = $(this).data("action");
-  const input = form.find(".quantity-input");
-
-  const productId = form.data("product-id");
-  const variantId = form.data("variant-id");
-
-  let oldQty = parseInt(input.val());
-  let newQty = oldQty;
-
-  // 🚨 LIMIT CHECK
-  if (action === "increase" && oldQty >= 5) {
-    Swal.fire({
-      icon: "warning",
-      title: "Max limit reached",
-      text: "Only 5 items allowed"
-    });
-    return;
-  }
-
-  if (action === "decrease" && oldQty <= 1) {
-    Swal.fire({
-      icon: "warning",
-      title: "Minimum limit",
-      text: "Quantity cannot be less than 1"
-    });
-    return;
-  }
-
-  // calculate new qty
-  if (action === "increase") newQty++;
-  else newQty--;
-
-  // ✅ OPTIMISTIC UI UPDATE
-  input.val(newQty);
-  updateItemTotal(item);
-  updateCartSummary();
-
-  // 🚀 API CALL
-  $.post(`/cart/quantity-update/${id}`, {
-    quantity: newQty,
-    productId,
-    variantId,
-    action
-  })
-
-  .done(function (res) {
-    console.log("res : ",res)
-    if (res.status !== 'success') {
-      // ❌ rollback if backend rejects
-      input.val(oldQty);
-      updateItemTotal(item);
-      updateCartSummary();
-
-      Swal.fire({
-        icon: "warning",
-        title: res.message || "Update failed"
-      });
-    } else {
-      // ✅ success toast (clean UX)
-      Swal.fire({
-        toast: true,
-        position: "top-end",
-        icon: "success",
-        title: res.message || "Updated",
-        showConfirmButton: false,
-        timer: 1200
-      });
+    // ─── Formatting Helper ──────────────────────────────────────────────────
+    function formatPrice(val) {
+        return parseFloat(val).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-  })
+    // ─── Update Visuals ─────────────────────────────────────────────────────
+    function updateItemTotal(item) {
+        const price = parseFloat(item.data("price"));
+        const qty = parseInt(item.find(".quantity-input").val());
+        const total = price * qty;
+        item.find(".item-total-price").text(formatPrice(total));
+    }
 
-  .fail(function (xhr) {
-console.log('hi')
-    // ❌ rollback on error
-    input.val(oldQty);
-    updateItemTotal(item);
-    updateCartSummary();
+    function updateCartSummary() {
+        let subtotal = 0;
+        $(".cart-item").each(function () {
+            const price = parseFloat($(this).data("price"));
+            const qty = parseInt($(this).find(".quantity-input").val());
+            subtotal += price * qty;
+        });
 
-    let message = xhr.responseJSON?.message || "Server error";
+        const tax = subtotal * 0.1;
+        const total = subtotal + tax;
 
-    Swal.fire({
-      icon: "error",
-      title: "Update Failed",
-      text: message
+        $("#subtotal").text(formatPrice(subtotal));
+        $("#tax").text(formatPrice(tax));
+        $("#grand-total").text(formatPrice(total));
+    }
+
+    // ─── Quantity Logic ─────────────────────────────────────────────────────
+    $(".quantity-btn").click(function () {
+        const form = $(this).closest(".quantity-form");
+        const id = form.data("item-id");
+        const item = $(this).closest(".cart-item");
+        const action = $(this).data("action");
+        const input = form.find(".quantity-input");
+        const productId = form.data("product-id");
+        const variantId = form.data("variant-id");
+
+        let oldQty = parseInt(input.val());
+        let newQty = oldQty;
+
+        if (action === "increase" && oldQty >= 5) {
+            return Swal.fire({ icon: "warning", title: "Max limit reached", text: "Maximum 5 items allowed per variant", confirmButtonColor: '#4f46e5' });
+        }
+        if (action === "decrease" && oldQty <= 1) {
+            return Swal.fire({ icon: "warning", title: "Minimum limit", text: "Quantity cannot be less than 1", confirmButtonColor: '#4f46e5' });
+        }
+
+        newQty = (action === "increase") ? oldQty + 1 : oldQty - 1;
+
+        // Optimistic UI
+        input.val(newQty);
+        updateItemTotal(item);
+        updateCartSummary();
+
+        $.post(`/cart/quantity-update/${id}`, { quantity: newQty, productId, variantId, action })
+        .done(function (res) {
+            if (res.status !== 'success') {
+                rollback();
+                Swal.fire({ icon: "error", title: res.message || "Sync failed", confirmButtonColor: '#4f46e5' });
+            } else {
+                Swal.fire({ toast: true, position: "top-end", icon: "success", title: "Cart Updated", showConfirmButton: false, timer: 1200 });
+            }
+        })
+        .fail(function (xhr) {
+            rollback();
+            Swal.fire({ icon: "error", title: "Network Error", text: xhr.responseJSON?.message || "Server rejected update", confirmButtonColor: '#4f46e5' });
+        });
+
+        function rollback() {
+            input.val(oldQty);
+            updateItemTotal(item);
+            updateCartSummary();
+        }
     });
 
-  });
+    // ─── Delete Item ────────────────────────────────────────────────────────
+    $(".delete-item-btn").click(function () {
+        const id = $(this).data("item-id");
+        const productId = $(this).data("product-id");
+        const variantId = $(this).data("variant-id");
 
-});
-$(".delete-item-btn").click(function () {
-  const id = $(this).data("item-id");
-  const productId = $(this).data("product-id");
-  const variantId = $(this).data("variant-id");
+        Swal.fire({
+            title: "De-synchronize Item?",
+            text: "This gadget will be removed from your build.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#ef4444",
+            confirmButtonText: "Yes, Remove"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post(`/cart/delete-item/${id}`, { productId, variantId }, () => {
+                    $(`#item-${id}`).fadeOut(400, function() {
+                        $(this).remove();
+                        if ($(".cart-item").length === 0) location.reload();
+                        updateCartSummary();
+                    });
+                });
+            }
+        });
+    });
 
+    // ─── Clear Cart ─────────────────────────────────────────────────────────
+    $("#clear-cart-btn").click(function () {
+        const id = $(this).data("cart-id");
+        Swal.fire({
+            title: "Wipe Entire Cart?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#0f172a",
+            confirmButtonText: "Yes, Reset Everything"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post(`/cart/clear/${id}`, () => location.reload());
+            }
+        });
+    });
 
-  $.post(`/cart/delete-item/${id}`,{
-    productId: productId,
-    variantId: variantId
-  }, () => {
-    $("#item-"+id).remove();
+    // Initial Run
     updateCartSummary();
-  });
-});
-
-$("#clear-cart-btn").click(function () {
-  const id = $(this).data("cart-id");
-
-  $.post(`/cart/clear/${id}`, () => {
-    location.reload();
-  });
-});
-
-updateCartSummary();
 });
 </script>
 

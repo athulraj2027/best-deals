@@ -1,45 +1,11 @@
 const Product = require("../../models/Product");
 const Category = require("../../models/Category");
-const cloudinary = require("../../config/cloudinary");
 const DatauriParser = require("datauri/parser");
 const mongoose = require("mongoose");
-const parser = new DatauriParser();
 const sharp = require("sharp");
 const path = require("path");
 const statusCodes = require("../../services/statusCodes");
 const fs = require("fs").promises;
-
-const bufferToDataURI = (fileFormat, buffer) => {
-  parser.format(fileFormat, buffer);
-};
-
-// const uploadToCloudinary = async (file) => {
-//   try {
-//     const fileFormat = file.mimetype.split("/")[1];
-//     const { base64 } = bufferToDataURI(fileFormat, file.buffer);
-
-//     const uploadResponse = await cloudinary.uploader.upload(
-//       `data:image/${fileFormat};base64,${base64}`,
-//       {
-//         folder: "products",
-//         resource_type: "auto",
-//         transformation: [
-//           { width: 800, height: 800, crop: "limit" },
-//           { quality: "auto" },
-//           { fetch_format: "auto" },
-//         ],
-//       }
-//     );
-//     return {
-//       url: uploadResponse.secure_url,
-//       publicId: uploadResponse.public_id,
-//     };
-//   } catch (err) {
-//     throw new Error(`Failed to upload image : ${error.message}`);
-//   }
-// };
-
-// --- Get products page
 
 exports.getProductsPage = async (req, res) => {
   try {
@@ -54,12 +20,10 @@ exports.getProductsPage = async (req, res) => {
 
     const categories = await Category.find({ status: "listed" });
 
-    // ✅ Category filter
     if (category && category !== "all") {
       filter.category = category;
     }
 
-    // ✅ Search filter (using TEXT INDEX 🚀)
     if (query && query.trim() !== "") {
       filter.$text = { $search: query };
     }
@@ -71,12 +35,6 @@ exports.getProductsPage = async (req, res) => {
         break;
       case "oldest":
         sortOption = { createdAt: 1 };
-        break;
-      case "price_high":
-        sortOption = { actualPrice: -1 };
-        break;
-      case "price_low":
-        sortOption = { actualPrice: 1 };
         break;
       case "popular":
         sortOption = { popularity: -1 };
@@ -106,7 +64,7 @@ exports.getProductsPage = async (req, res) => {
         categories,
         selectedCategory: category,
         selectedSort: sort,
-        query, // ✅ send back to UI
+        query,
         currentPage: page,
         totalPages,
         hasNextPage: page < totalPages,
@@ -200,15 +158,7 @@ async function saveImage(buffer, variantIndex, imageIndex) {
 exports.addProductController = async (req, res) => {
   try {
     // console.log("Hi the addproductController is working");
-    const {
-      name,
-      description,
-      brand,
-      actualPrice,
-      category,
-      status,
-      variants,
-    } = req.body;
+    const { name, description, brand, category, status, variants } = req.body;
     let categoryId;
 
     if (!name || name.trim().length === 0)
@@ -221,16 +171,13 @@ exports.addProductController = async (req, res) => {
       return res
         .status(400)
         .json({ message: "Please give a proper brand name" });
-
-    if (!actualPrice || actualPrice < 0)
-      return res.status(400).json({ message: "Please give a proper price" });
     if (!category)
       return res.status(400).json({ message: "Please give a proper category" });
 
     if (!variants)
       return res.status(400).json({ message: "Please give variants" });
     if (!status) return res.status(400).json({ message: "Please give status" });
-    
+
     const existingProduct = await Product.findOne({ name });
     if (existingProduct) {
       console.log(existingProduct);
@@ -250,11 +197,10 @@ exports.addProductController = async (req, res) => {
       }
       categoryId = categoryDoc._id;
     }
-    console.log(req.files);
+
     const parsedVariants =
       typeof variants === "string" ? JSON.parse(variants) : variants;
     const processedVariants = [];
-    console.log(req.files);
 
     for (let i = 0; i < parsedVariants.length; i++) {
       const variant = parsedVariants[i];
@@ -276,7 +222,6 @@ exports.addProductController = async (req, res) => {
           }
         }
       }
-      console.log("processedImages : ", processedImages);
 
       if (processedImages.length > 0) {
         processedVariants.push({
@@ -295,7 +240,6 @@ exports.addProductController = async (req, res) => {
       name,
       description,
       brand,
-      actualPrice: parseFloat(actualPrice),
       category: categoryId,
       status: status === "true",
       variants: processedVariants,
@@ -389,7 +333,7 @@ async function deleteImageFile(imageUrl) {
 exports.editProductController = async (req, res) => {
   try {
     const productId = req.params.id;
-    const { name, brand, actualPrice, category, status, variants } = req.body;
+    const { name, brand, category, status, variants } = req.body;
 
     const product = await Product.findById(productId);
     if (!product) {
@@ -518,21 +462,12 @@ exports.editProductController = async (req, res) => {
         return processedVariant;
       }),
     );
-    // const productCategory = await Category.findOne({ category });
-    // if (!productCategory) {
-    //   return res.status(400).json({
-    //     status: "error",
-    //     title: "Error",
-    //     message: "Invalid category",
-    //   });
-    // }
 
-    const updatedProduct = await Product.findByIdAndUpdate(
+    await Product.findByIdAndUpdate(
       productId,
       {
         name: lowercaseName,
         brand,
-        actualPrice,
         category: category._id,
         status: status === "true",
         variants: processedVariants,
@@ -639,7 +574,6 @@ exports.addVariantController = async (req, res) => {
     // Add variant to product
     product.variants.push(newVariant);
     await product.save();
-    console.log("New variant added");
     return res.status(200).redirect(`/admin/products`);
   } catch (error) {
     console.error("Error adding variant:", error);

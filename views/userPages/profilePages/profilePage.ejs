@@ -1,190 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>User Profile</title>
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-      rel="stylesheet"
-    />
+    <title>My Profile | Tech Gadgets</title>
     <script src="https://cdn.tailwindcss.com"></script>
-
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-  </head>
-  <body class="bg-gray-100 min-h-screen">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .gradient-bg { background: linear-gradient(to right, #7c3aed, #db2777); }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen">
     <%- include('../partials/headerPartial') %>
 
-    <div
-      class="flex flex-col md:flex-row max-w-6xl mx-auto mt-8 px-4 md:px-0 gap-6"
-    >
-      <!-- Sidebar -->
-      <div class="w-full md:w-1/4"><%- include('./partial') %></div>
-
-      <!-- Profile Container -->
-      <div
-        class="w-full md:w-3/4 bg-white rounded-xl shadow-lg p-6"
-        id="profileContainer"
-      >
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold text-gray-800 view-only">Profile</h2>
-          <button
-            id="editToggleBtn"
-            class="px-4 py-2 rounded-md border border-blue-600 text-blue-600 font-medium hover:bg-blue-600 hover:text-white transition"
-          >
-            Edit Profile
-          </button>
+    <div class="max-w-6xl mx-auto mt-10 px-4 pb-16 flex flex-col md:flex-row gap-8">
+        
+        <div class="w-full md:w-1/4 flex-shrink-0">
+            <%- include('./partial') %>
         </div>
 
-        <div class="space-y-4">
-          <!-- View Mode -->
-          <div class="view-only space-y-3">
-            <p><span class="font-semibold">Name:</span> <%= user.name %></p>
-            <p><span class="font-semibold">Email:</span> <%= user.email %></p>
-            <p>
-              <span class="font-semibold">Phone:</span> <%= user.phone || 'Not provided' %>
-            </p>
-            <p class="font-semibold">Referral Code:</p>
-            <div class="flex items-center gap-2 max-w-xs">
-              <input
-                type="text"
-                readonly
-                id="referralCode"
-                value="<%= user.referralCode %>"
-                class="w-full border border-gray-300 rounded px-3 py-1 bg-gray-100"
-              />
-              <button
-                onclick="copyReferralCode()"
-                class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-              >
-                Copy
-              </button>
-            </div>
-            <div class="mt-6">
-              <h3 class="text-xl font-semibold">Wallet Savings</h3>
-              <p class="text-2xl font-bold text-green-600">
-                ₹ <%= user.wallet.toFixed(2) %>
-              </p>
-            </div>
-          </div>
+        <div class="flex-1 min-w-0">
+            <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden" id="profileContainer">
+                
+                <div class="p-8 border-b border-slate-50 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 rounded-2xl gradient-bg flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-purple-200">
+                            <%= user.name.charAt(0).toUpperCase() %>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-black tracking-tight text-slate-900">Personal Information</h2>
+                            <p class="text-slate-400 text-sm font-medium">Manage your account details and security</p>
+                        </div>
+                    </div>
+                    <button id="editToggleBtn" class="px-6 py-2.5 rounded-xl border-2 border-indigo-600 text-indigo-600 font-bold text-sm hover:bg-indigo-600 hover:text-white transition-all active:scale-95">
+                        Edit Details
+                    </button>
+                </div>
 
-          <!-- Edit Mode -->
-          <form id="editProfileForm" class="edit-field hidden space-y-4">
-            <div>
-              <label
-                for="nameInput"
-                class="block font-medium text-gray-700 mb-1"
-                >Name</label
-              >
-              <input
-                type="text"
-                id="nameInput"
-                name="name"
-                value="<%= user.name %>"
-                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+                <div class="p-8">
+                    <div class="view-only space-y-8 animate-in fade-in duration-500">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Full Name</label>
+                                <p class="text-lg font-bold text-slate-800"><%= user.name %></p>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Email Address</label>
+                                <p class="text-lg font-bold text-slate-800"><%= user.email %></p>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Phone Number</label>
+                                <p class="text-lg font-bold text-slate-800"><%= user.phone || 'Not provided' %></p>
+                            </div>
+                            <div class="space-y-3">
+                                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Referral Code</label>
+                                <div class="flex items-center gap-2 max-w-xs group">
+                                    <input type="text" readonly id="referralCode" value="<%= user.referralCode %>" 
+                                        class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm font-mono font-bold text-indigo-600 focus:outline-none">
+                                    <button onclick="copyReferralCode()" class="p-2.5 bg-slate-900 text-white rounded-xl hover:bg-indigo-600 transition-colors shadow-lg shadow-slate-200">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-12 p-8 rounded-[2rem] bg-slate-900 text-white relative overflow-hidden shadow-2xl shadow-indigo-200">
+                            <div class="absolute top-0 right-0 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl -mr-20 -mt-20"></div>
+                            <div class="relative z-10 flex items-center justify-between">
+                                <div>
+                                    <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">Available Balance</p>
+                                    <h3 class="text-4xl font-black tracking-tight">₹ <%= user.wallet.toLocaleString('en-IN', {minimumFractionDigits: 2}) %></h3>
+                                </div>
+                                <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center text-2xl text-purple-400 backdrop-blur-md border border-white/10">
+                                    <i class="fas fa-wallet"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="editProfileForm" class="edit-field hidden space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label for="nameInput" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Full Name</label>
+                                <input type="text" id="nameInput" name="name" value="<%= user.name %>" 
+                                    class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-bold" />
+                            </div>
+                            <div class="space-y-2">
+                                <label for="phoneInput" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Phone Number</label>
+                                <input type="tel" id="phoneInput" name="phone" value="<%= user.phone || '' %>" 
+                                    class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-bold" />
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4 mt-10 pt-6 border-t border-slate-50">
+                            <button type="submit" class="px-10 py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95">
+                                Save Updates
+                            </button>
+                            <button type="button" id="cancelBtn" class="px-8 py-4 bg-slate-100 text-slate-500 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-slate-200 transition-all">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div>
-              <label
-                for="phoneInput"
-                class="block font-medium text-gray-700 mb-1"
-                >Phone</label
-              >
-              <input
-                type="tel"
-                id="phoneInput"
-                name="phone"
-                value="<%= user.phone || '' %>"
-                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div class="flex gap-2 mt-4">
-              <button
-                type="submit"
-                class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-              >
-                Save Changes
-              </button>
-              <button
-                type="button"
-                id="cancelBtn"
-                class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
         </div>
-      </div>
     </div>
 
     <%- include('../partials/footer') %>
 
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const profileContainer = document.getElementById("profileContainer");
-        const editToggleBtn = document.getElementById("editToggleBtn");
-        const cancelBtn = document.getElementById("cancelBtn");
-        const viewOnly = profileContainer.querySelector(".view-only");
-        const editField = profileContainer.querySelector(".edit-field");
+        document.addEventListener("DOMContentLoaded", function () {
+            const profileContainer = document.getElementById("profileContainer");
+            const editToggleBtn = document.getElementById("editToggleBtn");
+            const cancelBtn = document.getElementById("cancelBtn");
+            const viewOnly = profileContainer.querySelector(".view-only");
+            const editField = profileContainer.querySelector(".edit-field");
 
-        editToggleBtn.addEventListener("click", function () {
-          const isEditing = !editField.classList.contains("hidden");
-          editField.classList.toggle("hidden");
-          viewOnly.classList.toggle("hidden");
-          editToggleBtn.textContent = isEditing
-            ? "Edit Profile"
-            : "View Profile";
-        });
+            editToggleBtn.addEventListener("click", function () {
+                const isEditing = !editField.classList.contains("hidden");
+                editField.classList.toggle("hidden");
+                viewOnly.classList.toggle("hidden");
+                editToggleBtn.textContent = isEditing ? "Edit Details" : "View Details";
+                if (!isEditing) editToggleBtn.classList.add('opacity-0', 'pointer-events-none');
+            });
 
-        cancelBtn.addEventListener("click", function () {
-          editField.classList.add("hidden");
-          viewOnly.classList.remove("hidden");
-          editToggleBtn.textContent = "Edit Profile";
-        });
+            cancelBtn.addEventListener("click", function () {
+                editField.classList.add("hidden");
+                viewOnly.classList.remove("hidden");
+                editToggleBtn.textContent = "Edit Details";
+                editToggleBtn.classList.remove('opacity-0', 'pointer-events-none');
+            });
 
-        $("#editProfileForm").submit(function (e) {
-          e.preventDefault();
-          let phone = $("#phoneInput").val().trim();
-          $.ajax({
-            url: "/profile",
-            type: "PATCH",
-            contentType: "application/json",
-            data: JSON.stringify({ phone }),
-            success: function (response) {
-              if (response.status === "success") {
-                Swal.fire({ icon: "success", text: response.message }).then(
-                  () => location.reload()
-                );
-              } else {
+            $("#editProfileForm").submit(function (e) {
+                e.preventDefault();
+                let phone = $("#phoneInput").val().trim();
+                let name = $("#nameInput").val().trim();
+
                 Swal.fire({
-                  icon: "error",
-                  title: response.title || "Error",
-                  text: response.message,
+                    title: 'Updating Profile',
+                    didOpen: () => Swal.showLoading(),
+                    allowOutsideClick: false
                 });
-              }
-            },
-            error: function (xhr) {
-              let errorMessage =
-                xhr.responseJSON?.message || "An unexpected error occurred.";
-              Swal.fire({ icon: "error", title: "Oops!", text: errorMessage });
-            },
-          });
-        });
-      });
 
-      function copyReferralCode() {
-        const input = document.getElementById("referralCode");
-        input.select();
-        input.setSelectionRange(0, 99999);
-        document.execCommand("copy");
-        Swal.fire({
-          icon: "success",
-          title: "Referral Copied",
-          text: "Referral code copied to clipboard",
+                $.ajax({
+                    url: "/profile",
+                    type: "PATCH",
+                    contentType: "application/json",
+                    data: JSON.stringify({ phone, name }),
+                    success: function (response) {
+                        if (response.status === "success") {
+                            Swal.fire({ 
+                                icon: "success", 
+                                title: "Updated!",
+                                text: response.message,
+                                confirmButtonColor: '#4f46e5'
+                            }).then(() => location.reload());
+                        } else {
+                            Swal.fire({ icon: "error", title: "Update Failed", text: response.message });
+                        }
+                    },
+                    error: function (xhr) {
+                        let errorMessage = xhr.responseJSON?.message || "Internal server error.";
+                        Swal.fire({ icon: "error", title: "Oops!", text: errorMessage });
+                    },
+                });
+            });
         });
-      }
+
+        function copyReferralCode() {
+            const input = document.getElementById("referralCode");
+            input.select();
+            input.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(input.value);
+            
+            Swal.fire({
+                icon: "success",
+                title: "Code Copied!",
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
+        }
     </script>
-  </body>
+</body>
 </html>

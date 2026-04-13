@@ -1,236 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Address Management</title>
+    <title>Manage Addresses | Tech Gadgets</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-      rel="stylesheet"
-    />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  </head>
-  <body class="bg-gray-100 min-h-screen">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen">
     <%- include('../partials/headerPartial') %>
 
-    <div class="flex flex-col md:flex-row max-w-6xl mx-auto mt-8 px-4 md:px-0 gap-6">
-      <!-- Sidebar -->
-      <div class="w-full md:w-1/4">
-        <%- include('./partial') %>
-      </div>
-
-      <!-- Address Container -->
-      <div class="w-full md:w-3/4 bg-white rounded-xl shadow-lg p-6">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold text-gray-800">Your Addresses</h2>
-          <button
-            id="showAddFormBtn"
-            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-          >
-            <i class="fas fa-plus me-2"></i>Add New Address
-          </button>
+    <div class="max-w-6xl mx-auto mt-10 px-4 pb-16 flex flex-col md:flex-row gap-8">
+        
+        <div class="w-full md:w-1/4 flex-shrink-0">
+            <%- include('./partial') %>
         </div>
 
-        <!-- Add Address Form -->
-        <div
-          id="addAddressForm"
-          class="hidden bg-gray-50 border border-gray-300 rounded-lg p-6 mb-6"
-        >
-          <h4 class="text-lg font-semibold mb-4">Add New Address</h4>
-          <form id="addressForm" class="space-y-4">
-            <!-- Address Type -->
-            <div>
-              <label class="block font-medium text-gray-700 mb-1">Address Type</label>
-              <div class="flex gap-4">
-                <label class="inline-flex items-center">
-                  <input type="radio" name="type" value="Home" checked class="form-radio text-blue-600"/>
-                  <span class="ml-2">Home</span>
-                </label>
-                <label class="inline-flex items-center">
-                  <input type="radio" name="type" value="Work" class="form-radio text-green-600"/>
-                  <span class="ml-2">Work</span>
-                </label>
-                <label class="inline-flex items-center">
-                  <input type="radio" name="type" value="Other" class="form-radio text-gray-600"/>
-                  <span class="ml-2">Other</span>
-                </label>
-              </div>
+        <div class="flex-1 min-w-0">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                <div>
+                    <h2 class="text-3xl font-black tracking-tight text-slate-900">Saved Addresses</h2>
+                    <p class="text-slate-500 text-sm mt-1">Manage your delivery locations for faster checkout.</p>
+                </div>
+                <button id="showAddFormBtn" class="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-indigo-100 transition-all active:scale-95">
+                    <i class="fas fa-plus"></i> Add New Address
+                </button>
             </div>
 
-            <!-- Address Fields -->
-            <div>
-              <label for="streetAddress" class="block font-medium text-gray-700 mb-1">Street Address</label>
-              <input
-                type="text"
-                id="streetAddress"
-                name="streetAddress"
-                placeholder="Street address, P.O. box, company name"
-                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label for="city" class="block font-medium text-gray-700 mb-1">City</label>
-                <input
-                  type="text"
-                  id="city"
-                  name="city"
-                  class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label for="state" class="block font-medium text-gray-700 mb-1">State</label>
-                <input
-                  type="text"
-                  id="state"
-                  name="state"
-                  class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label for="zipCode" class="block font-medium text-gray-700 mb-1">ZIP Code</label>
-                <input
-                  type="text"
-                  id="zipCode"
-                  name="zipCode"
-                  class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label for="country" class="block font-medium text-gray-700 mb-1">Country</label>
-                <input
-                  type="text"
-                  id="country"
-                  name="country"
-                  class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-
-            <div class="flex gap-2 mt-4">
-              <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">Save Address</button>
-              <button type="button" id="cancelAddBtn" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition">Cancel</button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Address List -->
-        <div id="addressList" class="space-y-4">
-          <% if (addresses && addresses.length > 0) { %>
-            <% addresses.forEach((address, index) => { %>
-              <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 relative">
-                <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold 
-                  <% if(address.type === 'Home'){ %> bg-green-500 <% } else if(address.type === 'Work'){ %> bg-blue-500 <% } else { %> bg-gray-500 <% } %> text-white mb-2">
-                  <%= address.type %>
-                </span>
-
-                <div class="absolute top-4 right-4 flex gap-2">
-                  <a href="/profile/address/edit/<%= address._id %>" class="text-blue-600 hover:text-blue-800">
-                    <i class="fas fa-edit"></i>
-                  </a>
-                  <button class="text-red-600 hover:text-red-800 delete-address-btn" data-address-id="<%= address._id %>">
-                    <i class="fas fa-trash"></i>
-                  </button>
+            <div id="addAddressForm" class="hidden animate-in fade-in slide-in-from-top-4 duration-300 bg-white rounded-[2.5rem] border border-slate-200 shadow-xl shadow-slate-200/50 p-8 mb-10">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                        <i class="fas fa-map-location-dot"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800">Configure New Address</h3>
                 </div>
 
-                <p class="mt-6 text-gray-700">
-                  <%= address.streetAddress %><br/>
-                  <%= address.city %>, <%= address.state %> <%= address.zipCode %><br/>
-                  <%= address.country %>
-                </p>
-              </div>
-            <% }) %>
-          <% } else { %>
-            <div class="text-center text-gray-500 py-6 border border-dashed border-gray-300 rounded">
-              <p>You don't have any saved addresses. Add one above.</p>
+                <form id="addressForm" class="space-y-6">
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 ml-1">Destination Category</label>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="relative flex-1 min-w-[100px] cursor-pointer group">
+                                <input type="radio" name="type" value="Home" checked class="peer sr-only"/>
+                                <div class="p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 text-center peer-checked:border-indigo-600 peer-checked:bg-indigo-50 peer-checked:text-indigo-600 transition-all">
+                                    <i class="fas fa-house block mb-2 text-lg"></i>
+                                    <span class="text-xs font-bold uppercase tracking-widest">Home</span>
+                                </div>
+                            </label>
+                            <label class="relative flex-1 min-w-[100px] cursor-pointer group">
+                                <input type="radio" name="type" value="Work" class="peer sr-only"/>
+                                <div class="p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 text-center peer-checked:border-purple-600 peer-checked:bg-purple-50 peer-checked:text-purple-600 transition-all">
+                                    <i class="fas fa-briefcase block mb-2 text-lg"></i>
+                                    <span class="text-xs font-bold uppercase tracking-widest">Work</span>
+                                </div>
+                            </label>
+                            <label class="relative flex-1 min-w-[100px] cursor-pointer group">
+                                <input type="radio" name="type" value="Other" class="peer sr-only"/>
+                                <div class="p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 text-center peer-checked:border-slate-900 peer-checked:bg-slate-900 peer-checked:text-white transition-all">
+                                    <i class="fas fa-ellipsis block mb-2 text-lg"></i>
+                                    <span class="text-xs font-bold uppercase tracking-widest">Other</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Full Delivery Address</label>
+                            <input type="text" name="streetAddress" placeholder="Building, Street, Area..." class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-bold" />
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">City</label>
+                                <input type="text" name="city" placeholder="Mumbai" class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-bold" />
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">State / Province</label>
+                                <input type="text" name="state" placeholder="Maharashtra" class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-bold" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">ZIP / Postal Code</label>
+                                <input type="text" name="zipCode" placeholder="400001" class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-bold" />
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Country</label>
+                                <input type="text" name="country" placeholder="India" class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-bold" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4 pt-6">
+                        <button type="submit" class="flex-1 bg-indigo-600 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all">Save Location</button>
+                        <button type="button" id="cancelAddBtn" class="px-8 py-4 bg-slate-100 text-slate-500 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-slate-200 transition-all">Cancel</button>
+                    </div>
+                </form>
             </div>
-          <% } %>
+
+            <div id="addressList" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <% if (addresses && addresses.length > 0) { %>
+                    <% addresses.forEach((address) => { %>
+                    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500 relative group overflow-hidden">
+                        <div class="flex items-center justify-between mb-6">
+                            <% 
+                                const typeMap = {
+                                    'Home': 'bg-emerald-50 text-emerald-600 border-emerald-100',
+                                    'Work': 'bg-indigo-50 text-indigo-600 border-indigo-100',
+                                    'Other': 'bg-slate-100 text-slate-600 border-slate-200'
+                                }
+                            %>
+                            <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border <%= typeMap[address.type] || typeMap['Other'] %>">
+                                <%= address.type %>
+                            </span>
+                            
+                            <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <a href="/profile/address/edit/<%= address._id %>" class="w-8 h-8 rounded-lg bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 flex items-center justify-center transition-all">
+                                    <i class="fas fa-pen text-xs"></i>
+                                </a>
+                                <button class="w-8 h-8 rounded-lg bg-slate-50 text-slate-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-all delete-address-btn" data-address-id="<%= address._id %>">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <h4 class="text-sm font-bold text-slate-900 leading-relaxed"><%= address.streetAddress %></h4>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-tight italic">
+                                <%= address.city %>, <%= address.state %> • <%= address.zipCode %>
+                            </p>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest"><%= address.country %></p>
+                        </div>
+
+                        <div class="absolute -bottom-4 -right-4 w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center opacity-20 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-location-dot text-3xl text-slate-300"></i>
+                        </div>
+                    </div>
+                    <% }) %>
+                <% } else { %>
+                    <div class="col-span-full py-20 text-center bg-white rounded-[3rem] border border-slate-100 shadow-sm">
+                        <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-200 text-3xl">
+                            <i class="fas fa-map-pin"></i>
+                        </div>
+                        <h3 class="text-lg font-black text-slate-800">No Locations Saved</h3>
+                        <p class="text-slate-400 mt-2 max-w-xs mx-auto text-sm leading-relaxed">Add your shipping details now to enjoy a seamless checkout experience.</p>
+                    </div>
+                <% } %>
+            </div>
         </div>
-      </div>
     </div>
 
     <%- include('../partials/footer') %>
 
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const showAddFormBtn = document.getElementById("showAddFormBtn");
-        const addAddressForm = document.getElementById("addAddressForm");
-        const cancelAddBtn = document.getElementById("cancelAddBtn");
+        document.addEventListener("DOMContentLoaded", function () {
+            const showAddFormBtn = document.getElementById("showAddFormBtn");
+            const addAddressForm = document.getElementById("addAddressForm");
+            const cancelAddBtn = document.getElementById("cancelAddBtn");
 
-        showAddFormBtn.addEventListener("click", () => {
-          addAddressForm.classList.remove("hidden");
-        });
+            showAddFormBtn.addEventListener("click", () => {
+                addAddressForm.classList.toggle("hidden");
+                window.scrollTo({ top: addAddressForm.offsetTop - 100, behavior: 'smooth' });
+            });
 
-        cancelAddBtn.addEventListener("click", () => {
-          addAddressForm.classList.add("hidden");
-          document.getElementById("addressForm").reset();
-        });
+            cancelAddBtn.addEventListener("click", () => {
+                addAddressForm.classList.add("hidden");
+                document.getElementById("addressForm").reset();
+            });
 
-        // Form submission
-        const addressForm = document.getElementById("addressForm");
-        addressForm.addEventListener("submit", function (e) {
-          e.preventDefault();
-          const formData = Object.fromEntries(new FormData(this).entries());
+            // Submission with specialized SweetAlert
+            const addressForm = document.getElementById("addressForm");
+            addressForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+                const formData = Object.fromEntries(new FormData(this).entries());
 
-          Swal.fire({
-            title: "Saving...",
-            didOpen: () => Swal.showLoading(),
-            allowOutsideClick: false,
-          });
+                Swal.fire({
+                    title: "Syncing Address",
+                    background: "#ffffff",
+                    didOpen: () => Swal.showLoading(),
+                    allowOutsideClick: false,
+                });
 
-          fetch("/profile/address/add", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData),
-          })
-            .then((res) => res.json())
-            .then((data) => {
-              Swal.close();
-              if (data.status === "success") {
-                Swal.fire({ icon: "success", text: "Address saved successfully" })
-                  .then(() => location.reload());
-              } else {
-                Swal.fire({ icon: "error", text: data.message || "Error saving address" });
-              }
-            })
-            .catch((err) => {
-              Swal.fire({ icon: "error", text: "Something went wrong" });
-              console.error(err);
+                fetch("/profile/address/add", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(formData),
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        Swal.fire({ 
+                            icon: "success", 
+                            title: "Location Saved!",
+                            text: "Your delivery address is ready for use.",
+                            confirmButtonColor: '#4f46e5'
+                        }).then(() => location.reload());
+                    } else {
+                        Swal.fire({ icon: "error", title: "Configuration Failed", text: data.message });
+                    }
+                })
+                .catch(err => {
+                    Swal.fire({ icon: "error", title: "Connection Error", text: "Please check your network." });
+                });
+            });
+
+            // Delete logic with themed alert
+            $(document).on("click", ".delete-address-btn", function (e) {
+                const id = $(this).data("address-id");
+                Swal.fire({
+                    title: "Purge Address?",
+                    text: "This location will be permanently removed from your account.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#ef4444",
+                    confirmButtonText: "Yes, delete it",
+                    cancelButtonText: "Keep it",
+                    background: "#ffffff",
+                    customClass: {
+                        confirmButton: 'rounded-xl px-8 py-3 font-bold',
+                        cancelButton: 'rounded-xl px-8 py-3 font-bold'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/profile/address/delete/${id}`, { method: "POST" })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.status === "success") {
+                                Swal.fire({ icon: "success", title: "Purged", showConfirmButton: false, timer: 1500 })
+                                .then(() => location.reload());
+                            } else {
+                                Swal.fire({ icon: "error", text: data.message });
+                            }
+                        });
+                    }
+                });
             });
         });
-
-        // Delete address
-        $(document).on("click", ".delete-address-btn", function (e) {
-          e.preventDefault();
-          const id = $(this).data("address-id");
-          Swal.fire({
-            title: "Are you sure?",
-            text: "This address will be permanently deleted!",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Yes, delete it!",
-            cancelButtonText: "Cancel",
-          }).then((result) => {
-            if (result.isConfirmed) {
-              fetch(`/profile/address/delete/${id}`, { method: "POST" })
-                .then((res) => res.json())
-                .then((data) => {
-                  if (data.status === "success") {
-                    Swal.fire({ icon: "success", text: data.message }).then(() => location.reload());
-                  } else {
-                    Swal.fire({ icon: "error", text: data.message || "Failed to delete" });
-                  }
-                });
-            }
-          });
-        });
-      });
     </script>
-  </body>
+</body>
 </html>

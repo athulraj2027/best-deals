@@ -1,117 +1,122 @@
-<div class="w-full">
+<div class="w-full sticky top-0 z-[1000] font-['Plus_Jakarta_Sans']">
 
-<!-- TOP BAR -->
-<div class="bg-gray-900 text-white text-center py-2 text-sm font-semibold">
-  Welcome to BestDeals Online Ecommerce Store 🚀
+    <div class="bg-gradient-to-r from-purple-700 to-indigo-900 text-white text-center py-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] shadow-inner">
+        Welcome to BestDeals <span class="hidden md:inline">• Premium Tech Gadgets Store 🚀</span>
+    </div>
+
+    <nav class="bg-slate-900/95 backdrop-blur-md text-white px-6 md:px-12 py-4 flex items-center justify-between border-b border-white/10 shadow-xl">
+
+        <div class="flex items-center gap-3 group">
+            <div class="w-10 h-10 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform duration-300">
+                <i class="fas fa-bolt text-white"></i>
+            </div>
+            <h4 class="text-xl md:text-2xl font-black tracking-tighter">
+                <a href="/" class="hover:text-purple-400 transition-colors">BEST<span class="text-purple-500">DEALS</span></a>
+            </h4>
+        </div>
+
+        <div class="hidden lg:flex items-center gap-2">
+            <% if (userId) { %>
+                <a href="/shop?category=all" class="px-4 py-2 text-sm font-bold text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-all">Shop</a>
+                <a href="/wishlist" class="px-4 py-2 text-sm font-bold text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center gap-2">
+                   <i class="far fa-heart"></i> Wishlist
+                </a>
+                <a href="/cart" class="px-4 py-2 text-sm font-bold text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center gap-2">
+                   <i class="fas fa-shopping-cart"></i> Cart
+                </a>
+                <a href="/profile" class="px-4 py-2 text-sm font-bold text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center gap-2">
+                   <i class="far fa-user-circle"></i> Profile
+                </a>
+                <button class="logout-link ml-4 px-6 py-2.5 bg-white/5 border border-white/10 hover:bg-red-500/10 hover:border-red-500/50 hover:text-red-500 text-xs font-black uppercase tracking-widest rounded-xl transition-all active:scale-95">
+                    Logout
+                </button>
+            <% } else { %>
+                <a href="/signin" class="px-6 py-2.5 text-sm font-bold text-slate-300 hover:text-white transition-all">Login</a>
+                <a href="/signup" class="px-8 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-purple-500/20 active:scale-95">
+                    Join Us
+                </a>
+            <% } %>
+        </div>
+
+        <button id="mobile-menu-btn" class="lg:hidden w-10 h-10 flex items-center justify-center bg-white/5 rounded-xl border border-white/10">
+            <i class="fas fa-bars text-purple-400"></i>
+        </button>
+    </nav>
+
+    <div id="mobile-menu" class="hidden lg:hidden bg-slate-900 border-b border-white/10 px-6 py-8 space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+        <% if (userId) { %>
+            <a href="/shop?category=all" class="block text-lg font-bold text-slate-300">Shop Catalog</a>
+            <a href="/wishlist" class="block text-lg font-bold text-slate-300">My Wishlist</a>
+            <a href="/cart" class="block text-lg font-bold text-slate-300">Shopping Cart</a>
+            <a href="/profile" class="block text-lg font-bold text-slate-300 border-b border-white/5 pb-4">My Account</a>
+            <button class="logout-link w-full py-4 bg-red-500/10 text-red-500 font-black uppercase tracking-widest rounded-2xl">Logout</button>
+        <% } else { %>
+            <a href="/signin" class="block text-center py-4 text-lg font-bold text-white border border-white/10 rounded-2xl">Login</a>
+            <a href="/signup" class="block text-center py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black uppercase tracking-widest rounded-2xl">Create Account</a>
+        <% } %>
+    </div>
 </div>
 
-<!-- NAVBAR -->
-<nav class="bg-gray-900 text-white px-6 md:px-12 py-4 flex items-center justify-between shadow-lg">
-
-  <!-- LOGO -->
-  <h4 class="text-2xl font-bold tracking-wide">
-    <a href="/" class="hover:text-pink-400 transition">BestDeals</a>
-  </h4>
-
-  <!-- LINKS -->
-  <div class="flex items-center gap-4">
-
-    <% if (userId) { %>
-
-    <a href="/profile"
-      class="hover:text-pink-400 transition px-3 py-1 rounded">
-      Profile
-    </a>
-
-    <a href="/cart"
-      class="hover:text-pink-400 transition px-3 py-1 rounded">
-      Cart
-    </a>
-
-    <a href="/wishlist"
-      class="hover:text-pink-400 transition px-3 py-1 rounded">
-      Wishlist
-    </a>
-
-    <a href="/shop?category=all"
-      class="hover:text-pink-400 transition px-3 py-1 rounded">
-      Shop
-    </a>
-
-    <button
-      class="logout-link bg-pink-500 hover:bg-pink-600 text-white px-4 py-1.5 rounded-full transition shadow">
-      Logout
-    </button>
-
-    <% } else { %>
-
-    <a href="/signin"
-      class="hover:text-pink-400 transition px-3 py-1 rounded">
-      Login
-    </a>
-
-    <a href="/signup"
-      class="bg-pink-500 hover:bg-pink-600 px-4 py-1.5 rounded-full transition shadow">
-      Sign Up
-    </a>
-
-    <% } %>
-
-  </div>
-</nav>
-
-</div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-  const logoutLink = document.querySelector(".logout-link");
+    // ── MOBILE MENU TOGGLE ──
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    if(menuBtn) {
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            const icon = menuBtn.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+    }
 
-  if (logoutLink) {
-    logoutLink.addEventListener("click", function (e) {
-      e.preventDefault();
+    // ── LOGOUT LOGIC ──
+    const logoutLinks = document.querySelectorAll(".logout-link");
 
-      Swal.fire({
-        title: "Ready to leave?",
-        text: "Are you sure you want to logout?",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonColor: "#ec4899",
-        cancelButtonColor: "#6b7280",
-        confirmButtonText: "Yes, logout",
-        cancelButtonText: "Cancel",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          Swal.fire({
-            title: "Logging out...",
-            allowOutsideClick: false,
-            didOpen: () => Swal.showLoading(),
-          });
+    logoutLinks.forEach(link => {
+        link.addEventListener("click", function (e) {
+            e.preventDefault();
+            Swal.fire({
+                title: "Ready to leave?",
+                text: "Your cart and sessions are saved.",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonColor: "#7c3aed",
+                cancelButtonColor: "#1e293b",
+                confirmButtonText: "Logout Now",
+                background: "#0f172a",
+                color: "#ffffff",
+                customClass: {
+                    popup: 'rounded-[2rem] border border-white/10'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: "Signing out...",
+                        background: "#0f172a",
+                        color: "#ffffff",
+                        didOpen: () => Swal.showLoading()
+                    });
 
-          fetch("/logout", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Requested-With": "XMLHttpRequest",
-            },
-            credentials: "same-origin",
-          })
-            .then(() => {
-              Swal.fire({
-                title: "Logged Out!",
-                icon: "success",
-                timer: 1200,
-                showConfirmButton: false,
-              }).then(() => {
-                window.location.href = "/";
-              });
-            })
-            .catch(() => {
-              Swal.fire("Error", "Logout failed", "error");
+                    fetch("/logout", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-Requested-With": "XMLHttpRequest",
+                        }
+                    })
+                    .then(() => {
+                        window.location.href = "/";
+                    })
+                    .catch(() => {
+                        Swal.fire("Error", "Server connection failed", "error");
+                    });
+                }
             });
-        }
-      });
+        });
     });
-  }
 });
 </script>

@@ -91,12 +91,11 @@ exports.getEditCategoryPage = async (req, res) => {
 };
 
 exports.addCategoryController = async (req, res) => {
-  console.log("Category controller working");
   const { categoryName, status } = req.body;
-
+  console.log("req body : ", req.body);
   const categoryImage = req.file;
   if (!categoryImage) {
-    return res.status(400).json({
+    return res.status(statusCodes.BAD_REQUEST).json({
       status: "error",
       message: "Category image is required",
     });
@@ -105,20 +104,19 @@ exports.addCategoryController = async (req, res) => {
     const trimmedName = categoryName.trim();
     const isValidCategoryName = /^[a-zA-Z0-9 ]{3,}$/.test(trimmedName);
     if (!isValidCategoryName)
-      return res.status(400).json({
+      return res.status(statusCodes.BAD_REQUEST).json({
         status: "error",
         title: "error",
         message: "Improper syntax for category name",
       });
-    const lowercaseName = trimmedName.toLowerCase();
-
     const imageUrl = `images/categories/${categoryImage.filename}`;
-    // console.log(imageUrl);
 
-    const mappedStatus = status === "on" ? "listed" : "unlisted";
+    const mappedStatus = status === "listed" ? "listed" : "unlisted";
     console.log(mappedStatus);
 
-    const existingCategory = await Category.findOne({ name: lowercaseName });
+    const existingCategory = await Category.findOne({
+      name: trimmedName.toLowerCase(),
+    });
     if (existingCategory) {
       return res.status(statusCodes.BAD_REQUEST).json({
         status: "error",
@@ -127,7 +125,7 @@ exports.addCategoryController = async (req, res) => {
       });
     }
     const newCategory = new Category({
-      name: lowercaseName,
+      name: trimmedName.toLowerCase(),
       status: mappedStatus,
       imageUrl,
     });
@@ -141,7 +139,9 @@ exports.addCategoryController = async (req, res) => {
   } catch (err) {
     console.log(err);
     if (err.code === 11000) {
-      return res.status(400).json({ message: "Category already exists" });
+      return res
+        .status(trimmedName.toLowerCase())
+        .json({ message: "Category already exists" });
     }
     return res.status(statusCodes.SERVER_ERROR).json({
       status: "error",
@@ -150,8 +150,6 @@ exports.addCategoryController = async (req, res) => {
     });
   }
 };
-
-// --- Unlist Category ---
 
 exports.unlistCategory = async (req, res) => {
   try {
@@ -208,7 +206,6 @@ exports.listCategory = async (req, res) => {
 exports.editCategory = async (req, res) => {
   const categoryId = req.params.id;
   const { name, status } = req.body;
-  // console.log("edit category controller working");
   if (!name || !status) {
     return res.status(statusCodes.BAD_REQUEST).json({
       title: "Error",
@@ -227,7 +224,7 @@ exports.editCategory = async (req, res) => {
     const trimmedName = name.trim();
     const isValidCategoryName = /^[a-zA-Z0-9 ]{3,}$/.test(trimmedName);
     if (!isValidCategoryName)
-      return res.status(400).json({
+      return res.status(statusCodes.BAD_REQUEST).json({
         status: "error",
         title: "error",
         message: "Improper syntax for category name",
@@ -247,7 +244,6 @@ exports.editCategory = async (req, res) => {
     }
     const mappedStatus = status === "on" ? "listed" : "unlisted";
     category.status = mappedStatus;
-    // category.tags = tags.split(','.map())
 
     if (req.file) {
       category.imageUrl = `images/categories/${req.file.filename}`;

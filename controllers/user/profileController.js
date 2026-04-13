@@ -1,3 +1,4 @@
+const PDFDocument = require("pdfkit");
 const User = require("../../models/User");
 const Address = require("../../models/Address");
 const Order = require("../../models/Order");
@@ -427,95 +428,113 @@ exports.getOrdersPage = async (req, res) => {
 };
 
 exports.cancelOrderController = async (req, res) => {
+  console.log("req body : ", req.body);
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
-    console.log("req body : ", req.body);
     const orderId = req.params.id;
-    const order = await Order.findById(orderId);
+
+    const order = await Order.findById(orderId).session(session);
+
     if (!order) {
-      return res.status(400).json({
-        status: "error",
-        title: "Error",
-        message: "Order not found",
-      });
+      throw new Error("Order not found");
     }
 
     if (order.userId.toString() !== req.session.userId.toString()) {
       return res.status(403).json({
         status: "error",
-        title: "error",
-        message: "You are not authorized to cancel the order",
+        message: "Unauthorized",
       });
     }
 
-    if (["delivered", "cancelled"].includes(order.status)) {
-      return res.status(400).json({ message: "Order cannot be cancelled" });
+    if (order.status === "cancelled") {
+      return res.status(400).json({
+        message: "Order already cancelled",
+      });
     }
 
-    const items = order.items;
-    for (const item of items) {
-      const updatedProduct = await Product.findOneAndUpdate(
-        {
+    if (["delivered"].includes(order.status)) {
+      return res.status(400).json({
+        message: "Order cannot be cancelled",
+      });
+    }
+
+    // ✅ Bulk stock updates
+    const bulkOps = order.items.map((item) => ({
+      updateOne: {
+        filter: {
           _id: item.productId,
           "variants._id": item.variantId,
         },
-        {
-          $inc: { "variants.$.quantity": +item.quantity },
+        update: {
+          $inc: { "variants.$.quantity": item.quantity },
         },
-        { new: true },
-      );
-      if (!updatedProduct) {
-        return res.status(400).json({
-          status: "error",
-          title: "Error",
-          message: `Error updating stock for product ${item.name}`,
-        });
-      }
+      },
+    }));
 
+    await Product.bulkWrite(bulkOps, { session });
+
+    // ✅ Update item statuses
+    order.items.forEach((item) => {
       item.status = "cancelled";
       item.cancelReason = req.body.reasons;
-    }
+    });
 
-    const user = await User.findById(order.userId);
-    if (!user)
-      return res.status(400).json({
-        status: "error",
-        title: "Error",
-        message: `Couldn't find user`,
-      });
-
+    // ✅ Update order status
     order.status = "cancelled";
+    order.cancelReason = req.body.reasons;
 
-    // Refund to wallet if order was paid
+    // ✅ Refund logic
     if (order.payment_status === "paid") {
       order.payment_status = "refunded";
-      const refundAmount = order.grandTotal;
-      user.wallet += refundAmount;
 
-      const walletTransaction = {
-        type: "credit",
-        description: `Order cancellation refund for Order #${order.orderId}`,
-        amount: refundAmount,
-        date: new Date(),
-      };
-      user.walletTransactions.push(walletTransaction);
+      const refundAmount = order.grandTotal;
+
+      await User.findByIdAndUpdate(
+        order.userId,
+        {
+          $inc: { wallet: refundAmount },
+          $push: {
+            walletTransactions: {
+              type: "credit",
+              description: `Refund for Order #${order.orderId}`,
+              amount: refundAmount,
+              date: new Date(),
+            },
+          },
+        },
+        { session },
+      );
     }
 
-    await order.save();
-    await user.save();
+    if (order.coupon?.code) {
+      await Coupon.findOneAndUpdate(
+        { code: order.coupon.code },
+        { $inc: { usageCount: -1 } },
+        { session },
+      );
+    }
+
+    await order.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
 
     return res.status(200).json({
       status: "success",
-      title: "Success",
-      message:
-        "Order cancelled successfully. Stock has been restored and refund processed.",
+      message: "Order cancelled successfully",
       order,
     });
   } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+
     console.error(err);
+
     return res.status(500).json({
       status: "error",
-      title: "Error",
-      message: "Something went wrong",
+      message: err.message || "Something went wrong",
     });
   }
 };
@@ -704,7 +723,7 @@ exports.cancelItemController = async (req, res) => {
       const user = await User.findById(order.userId);
       const refundAmount = item.paidAmount;
       user.wallet += refundAmount;
-
+      console.log("item : ", item);
       const walletTransaction = {
         type: "credit",
         description: `Order cancellation refund for Order #${order.orderId} item`,
@@ -797,3 +816,192 @@ exports.returnItemController = async (req, res) => {
     });
   }
 };
+
+exports.downloadInvoiceController = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id)
+      .populate("userId")
+      .populate("addressId");
+
+    if (!order) return res.status(404).send("Order not found");
+
+    const doc = new PDFDocument({ margin: 50 });
+
+    // Stream the PDF directly to the response
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename=invoice-${order.orderId}.pdf`,
+    );
+    doc.pipe(res);
+
+    // --- 1. HEADER & LOGO ---
+    doc
+      .fillColor("#444444")
+      .fontSize(20)
+      .text("BestDeals", 50, 45)
+      .fontSize(10)
+      .text("123 Business Street, Tech City", 50, 65)
+      .text("State, Country - 560001", 50, 80)
+      .moveDown();
+
+    // --- 2. INVOICE DETAILS (Top Right) ---
+    doc
+      .fillColor("#444444")
+      .fontSize(20)
+      .text("INVOICE", 50, 45, { align: "right" })
+      .fontSize(10)
+      .text(`Invoice Number: INV-${order.orderId}`, 50, 65, { align: "right" })
+      .text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`, 50, 80, {
+        align: "right",
+      })
+      .text(`Payment Status: ${order.payment_status.toUpperCase()}`, 50, 95, {
+        align: "right",
+      })
+      .moveDown();
+
+    // Horizontal Line
+    doc.moveTo(50, 115).lineTo(550, 115).stroke();
+
+    // --- 3. BILLING & SHIPPING ---
+    const customer = order.userId;
+    const addr = order.addressId;
+
+    doc
+      .fontSize(12)
+      .font("Helvetica-Bold")
+      .text("Bill To:", 50, 130)
+      .font("Helvetica")
+      .fontSize(10)
+      .text(customer.name, 50, 145)
+      .text(customer.email, 50, 160)
+      .text(customer.phone || "", 50, 175);
+
+    doc
+      .fontSize(12)
+      .font("Helvetica-Bold")
+      .text("Shipping Address:", 300, 130)
+      .font("Helvetica")
+      .fontSize(10)
+      .text(`${addr.streetAddress}`, 300, 145)
+      .text(`${addr.city}, ${addr.state}`, 300, 160)
+      .text(`${addr.country} - ${addr.zipCode}`, 300, 175);
+
+    doc.moveDown(4);
+
+    // --- 4. ITEMS TABLE HEADER ---
+    const tableTop = 230;
+    doc.font("Helvetica-Bold");
+    generateTableRow(
+      doc,
+      tableTop,
+      "Item",
+      "Color/Size",
+      "Qty",
+      "Price",
+      "Total",
+    );
+    doc
+      .moveTo(50, tableTop + 15)
+      .lineTo(550, tableTop + 15)
+      .stroke();
+    doc.font("Helvetica");
+
+    // --- 5. ITEMS LOOP ---
+    let i = 0;
+    order.items.forEach((item) => {
+      const position = tableTop + 30 + i * 25;
+      generateTableRow(
+        doc,
+        position,
+        item.name,
+        `${item.color} / ${item.size}`,
+        item.quantity,
+        `₹${item.price}`,
+        `₹${(item.price * item.quantity).toFixed(2)}`,
+      );
+      i++;
+    });
+
+    const subtotalPosition = tableTop + 40 + i * 25;
+    doc
+      .moveTo(50, subtotalPosition - 5)
+      .lineTo(550, subtotalPosition - 5)
+      .stroke();
+
+    // --- 6. SUMMARY (TAX, DISCOUNT, TOTAL) ---
+    let currentY = subtotalPosition;
+
+    // Subtotal
+    generateSummaryRow(
+      doc,
+      currentY,
+      "Subtotal:",
+      `₹${(order.grandTotal + (order.coupon?.discountAmount || 0) - (order.tax || 0)).toFixed(2)}`,
+    );
+
+    // Tax
+    if (order.tax) {
+      currentY += 20;
+      generateSummaryRow(doc, currentY, "Tax:", `₹${order.tax.toFixed(2)}`);
+    }
+
+    // Coupon/Discount
+    if (order.coupon && order.coupon.discountAmount > 0) {
+      currentY += 20;
+      doc.fillColor("#ff0000"); // Red for discounts
+      generateSummaryRow(
+        doc,
+        currentY,
+        `Discount (${order.coupon.code}):`,
+        `-₹${order.coupon.discountAmount.toFixed(2)}`,
+      );
+      doc.fillColor("#444444");
+    }
+
+    // Grand Total
+    currentY += 25;
+    doc.font("Helvetica-Bold").fontSize(14);
+    generateSummaryRow(
+      doc,
+      currentY,
+      "Grand Total:",
+      `₹${order.grandTotal.toFixed(2)}`,
+    );
+
+    // --- 7. FOOTER ---
+    doc
+      .fontSize(10)
+      .font("Helvetica-Oblique")
+      .text("Thank you for shopping with us!", 50, 700, {
+        align: "center",
+        width: 500,
+      });
+
+    doc.end();
+  } catch (error) {
+    console.error("PDF Generation Error:", error);
+    res
+      .status(500)
+      .json({ status: "failed", message: "Error generating invoice" });
+  }
+};
+
+// --- HELPER FUNCTIONS FOR CLEANER CODE ---
+
+function generateTableRow(doc, y, item, description, qty, price, total) {
+  doc
+    .fontSize(10)
+    .text(item, 50, y, { width: 150 })
+    .text(description, 210, y)
+    .text(qty.toString(), 340, y, { width: 30, align: "right" })
+    .text(price, 400, y, { width: 70, align: "right" })
+    .text(total, 480, y, { width: 70, align: "right" });
+}
+
+function generateSummaryRow(doc, y, label, value) {
+  doc
+    .fontSize(10)
+    .text(label, 380, y, { width: 100, align: "right" })
+    .text(value, 480, y, { width: 70, align: "right" });
+}

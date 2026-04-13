@@ -1,80 +1,93 @@
-<div class="w-full max-w-xs p-4">
+<div class="w-full max-w-xs lg:max-w-[280px]">
+  <div class="bg-slate-900 rounded-[2.5rem] shadow-2xl shadow-indigo-900/20 p-6 border border-slate-800">
+    
+    <div class="hidden md:flex flex-col items-center mb-8 pb-6 border-b border-slate-800">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-purple-500/20 mb-3">
+            <%= user.name.charAt(0).toUpperCase() %>
+        </div>
+        <h4 class="text-white font-bold text-sm tracking-tight"><%= user.name %></h4>
+        <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mt-1">Customer Account</p>
+    </div>
 
-  <div class="bg-slate-900 rounded-xl shadow-lg p-4">
-
-    <!-- Mobile Toggle -->
     <button 
       id="menuToggle"
-      class="md:hidden w-full flex items-center justify-between bg-slate-800 text-white px-4 py-3 rounded-lg mb-3"
+      class="md:hidden w-full flex items-center justify-between bg-slate-800/50 text-white px-5 py-4 rounded-2xl mb-2 border border-slate-700 transition-all active:scale-95"
     >
-      <span class="font-semibold">Account Menu</span>
-      <i id="menuIcon" class="fas fa-bars"></i>
+      <span class="text-xs font-black uppercase tracking-widest">Account Menu</span>
+      <i id="menuIcon" class="fas fa-bars text-purple-400"></i>
     </button>
 
-    <!-- Menu -->
-    <ul 
-      id="sidebarMenu"
-      class="space-y-2 md:block hidden"
-    >
+    <ul id="sidebarMenu" class="space-y-2 md:block hidden animate-in fade-in slide-in-from-top-4 duration-300">
 
       <li>
         <a href="/profile" 
-           class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-200 hover:bg-blue-600 hover:text-white transition">
-          <i class="fas fa-user-circle"></i>
-          Profile
+           class="nav-link flex items-center gap-4 px-5 py-3.5 rounded-2xl text-slate-400 font-bold text-sm hover:bg-slate-800 hover:text-white transition-all group">
+          <i class="fas fa-user-circle text-lg group-hover:text-purple-500 transition-colors"></i>
+          <span>Personal Info</span>
         </a>
       </li>
 
       <li>
         <a href="/profile/address" 
-           class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-200 hover:bg-blue-600 hover:text-white transition">
-          <i class="fas fa-map-marker-alt"></i>
-          Addresses
+           class="nav-link flex items-center gap-4 px-5 py-3.5 rounded-2xl text-slate-400 font-bold text-sm hover:bg-slate-800 hover:text-white transition-all group">
+          <i class="fas fa-map-marker-alt text-lg group-hover:text-purple-500 transition-colors"></i>
+          <span>Addresses</span>
         </a>
       </li>
 
       <li>
         <a href="/profile/orders" 
-           class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-200 hover:bg-blue-600 hover:text-white transition">
-          <i class="fas fa-shopping-bag"></i>
-          Orders
+           class="nav-link flex items-center gap-4 px-5 py-3.5 rounded-2xl text-slate-400 font-bold text-sm hover:bg-slate-800 hover:text-white transition-all group">
+          <i class="fas fa-box-open text-lg group-hover:text-purple-500 transition-colors"></i>
+          <span>My Orders</span>
         </a>
       </li>
 
       <% if(!user.googleId) { %>
       <li>
         <a href="/profile/password" 
-           class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-200 hover:bg-blue-600 hover:text-white transition">
-          <i class="fas fa-key"></i>
-          Reset Password
+           class="nav-link flex items-center gap-4 px-5 py-3.5 rounded-2xl text-slate-400 font-bold text-sm hover:bg-slate-800 hover:text-white transition-all group">
+          <i class="fas fa-shield-halved text-lg group-hover:text-purple-500 transition-colors"></i>
+          <span>Security</span>
         </a>
       </li>
       <% } %>
 
       <li>
         <a href="/profile/wallet-transactions" 
-           class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-200 hover:bg-blue-600 hover:text-white transition">
-          <i class="fas fa-star"></i>
-          My Wallet
+           class="nav-link flex items-center gap-4 px-5 py-3.5 rounded-2xl text-slate-400 font-bold text-sm hover:bg-slate-800 hover:text-white transition-all group">
+          <i class="fas fa-wallet text-lg group-hover:text-purple-500 transition-colors"></i>
+          <span>My Wallet</span>
         </a>
       </li>
-
     </ul>
   </div>
 </div>
 
 <script>
+  // ── Mobile Menu Toggle ──────────────────────────────────────────────────
   const toggleBtn = document.getElementById("menuToggle");
   const menu = document.getElementById("sidebarMenu");
   const icon = document.getElementById("menuIcon");
 
   toggleBtn.addEventListener("click", () => {
     menu.classList.toggle("hidden");
+    const isHidden = menu.classList.contains("hidden");
+    icon.className = isHidden ? "fas fa-bars text-purple-400" : "fas fa-times text-pink-400";
+    toggleBtn.classList.toggle('bg-slate-800', !isHidden);
+  });
 
-    if(menu.classList.contains("hidden")){
-      icon.className = "fas fa-bars";
-    } else {
-      icon.className = "fas fa-times";
-    }
+  // ── Auto-Active State Logic ──────────────────────────────────────────────
+  // This automatically styles the link that matches the current URL
+  document.addEventListener("DOMContentLoaded", () => {
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll(".nav-link");
+
+    navLinks.forEach(link => {
+      if (link.getAttribute("href") === currentPath) {
+        link.classList.remove("text-slate-400", "hover:bg-slate-800");
+        link.classList.add("bg-gradient-to-r", "from-purple-600/20", "to-transparent", "text-purple-400", "border-l-4", "border-purple-600", "rounded-l-none");
+      }
+    });
   });
 </script>

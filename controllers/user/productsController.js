@@ -93,8 +93,6 @@ exports.getProductViewPage = async (req, res) => {
       status: true,
       _id: { $ne: product._id },
     }).limit(4);
-
-    console.log("product object sending : ", productObj);
     return res.status(statusCodes.SUCCESS).render("userPages/productPage", {
       title: product.name,
       product: productObj,
@@ -143,6 +141,11 @@ exports.addtoWishlistController = async (req, res) => {
     }
     if (!product.status) {
       return res.json({ message: "Product unavailable" });
+    }
+
+    const category = await Category.findById(product.category);
+    if (!category || category.status === "unlisted") {
+      return res.status(400).json({ message: "Product unavailable" });
     }
     const variant = product.variants.id(wishlistItem.variantId);
 
@@ -217,7 +220,7 @@ exports.addtoCartController = async (req, res) => {
       return res.json({ message: "Insufficient stock" });
     }
 
-    if (product.status === "unlisted")
+    if (!product.status)
       return res.status(400).json({ message: "Product unavailable" });
 
     const category = await Category.findById(product.category);
@@ -238,7 +241,6 @@ exports.addtoCartController = async (req, res) => {
         return res.json({ message: "Stock exceeded" });
       }
 
-      console.log("q", existingItem.quantity);
       if (existingItem.quantity >= 5)
         return res
           .status(400)

@@ -92,7 +92,7 @@ exports.getOrdersPage = async (req, res) => {
           }[item.status] || item.status,
         // ── Item-level status boolean flags ───────────────────────────────
         itemStatusFlags: {
-          isActive: item.status === "active",
+          isActive: item.status === "pending",
           isCancelled: item.status === "cancelled",
           isReturnRequested: item.status === "return_requested",
           isReturnAccepted: item.status === "return_accepted",
@@ -344,6 +344,11 @@ exports.changeStatusController = async (req, res) => {
     const order = await Order.findById(orderId);
     if (!order) return res.status(400).json({ message: "No order found" });
 
+    const permanentStatuses = ["cancelled", "returned"];
+
+    if (permanentStatuses.includes(order.status))
+      return res.status(400).json({ message: "This  order cannot be changed" });
+
     if (
       (order.status === "delivered" && status === "pending") ||
       status === "processing" ||
@@ -351,7 +356,7 @@ exports.changeStatusController = async (req, res) => {
     ) {
       return res
         .status(400)
-        .json({ message: "The order has been already delivered" });
+        .json({ message: "This  order has been already delivered" });
     }
 
     const updatedOrder = await Order.findByIdAndUpdate(

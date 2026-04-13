@@ -1,761 +1,267 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Add Coupon</title>
+    <title>Create Offer | Tech Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
     <style>
-      :root {
-        --primary-color: #4361ee;
-        --secondary-color: #3f37c9;
-        --accent-color: #4895ef;
-        --success-color: #4cc9f0;
-        --text-color: #2b2d42;
-        --bg-color: #f8f9fa;
-        --card-bg: #ffffff;
-        --border-radius: 12px;
-        --transition: all 0.3s ease;
-      }
-
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: "Segoe UI", system-ui, sans-serif;
-      }
-
-      body {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        color: var(--text-color);
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 2rem;
-      }
-
-      .container {
-        width: 100%;
-        max-width: 800px;
-        background: var(--card-bg);
-        padding: 2rem;
-        border-radius: var(--border-radius);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-      }
-
-      .header {
-        text-align: center;
-        margin-bottom: 2rem;
-      }
-
-      .header h1 {
-        font-size: 2.5rem;
-        color: var(--primary-color);
-        margin-bottom: 0.5rem;
-      }
-
-      .header p {
-        color: #6c757d;
-        font-size: 1.1rem;
-      }
-
-      .form-section {
-        background: var(--bg-color);
-        padding: 1.5rem;
-        border-radius: var(--border-radius);
-        margin-bottom: 1.5rem;
-      }
-
-      .form-section h3 {
-        color: var(--secondary-color);
-        margin-bottom: 1.5rem;
-        font-size: 1.2rem;
-      }
-
-      .form-group {
-        margin-bottom: 1.5rem;
-      }
-
-      .form-row {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-      }
-
-      .form-row .form-group {
-        flex: 1;
-        margin-bottom: 0;
-      }
-
-      label {
-        display: block;
-        margin-bottom: 0.5rem;
-        color: var(--text-color);
-        font-weight: 500;
-      }
-
-      input,
-      select,
-      textarea {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 2px solid #e9ecef;
-        border-radius: 8px;
-        font-size: 1rem;
-        transition: var(--transition);
-      }
-
-      input:focus,
-      select:focus,
-      textarea:focus {
-        border-color: var(--accent-color);
-        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
-        outline: none;
-      }
-
-      textarea {
-        min-height: 120px;
-        resize: vertical;
-      }
-
-      .submit-btn {
-        background: var(--primary-color);
-        color: white;
-        border: none;
-        padding: 1rem 2rem;
-        border-radius: 8px;
-        font-size: 1.1rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: var(--transition);
-        width: 100%;
-        margin-top: 1rem;
-      }
-
-      .submit-btn:hover {
-        background: var(--secondary-color);
-        transform: translateY(-2px);
-      }
-
-      .status-toggle {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 0.5rem;
-        background: #f8f9fa;
-        border-radius: 8px;
-      }
-
-      .status-toggle label {
-        margin: 0;
-        cursor: pointer;
-      }
-
-      .toggle-switch {
-        position: relative;
-        display: inline-block;
-        width: 60px;
-        height: 34px;
-      }
-
-      .toggle-switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-
-      .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #ccc;
-        transition: 0.4s;
-        border-radius: 34px;
-      }
-
-      .slider:before {
-        position: absolute;
-        content: "";
-        height: 26px;
-        width: 26px;
-        left: 4px;
-        bottom: 4px;
-        background-color: white;
-        transition: 0.4s;
-        border-radius: 50%;
-      }
-
-      input:checked + .slider {
-        background-color: var(--success-color);
-      }
-
-      input:checked + .slider:before {
-        transform: translateX(26px);
-      }
-
-      .error-message {
-        color: #dc3545;
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-        display: none;
-      }
-
-      .action-buttons {
-        display: flex;
-        justify-content: space-between;
-        gap: 1rem;
-        margin-top: 1rem;
-      }
-
-      .cancel-btn {
-        color: white;
-        background: red;
-        border: none;
-        border-radius: 8px;
-        padding: 1rem 2rem;
-        font-size: 1.1rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: var(--transition);
-      }
-
-      .cancel-btn:hover {
-        background: #c82333;
-        transform: translateY(-2px);
-      }
-
-      @media (max-width: 768px) {
-        .container {
-          padding: 1rem;
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        select[multiple] {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 #f8fafc;
         }
-
-        .header h1 {
-          font-size: 2rem;
-        }
-
-        .form-row {
-          flex-direction: column;
-          gap: 1.5rem;
-        }
-      }
+        select[multiple]::-webkit-scrollbar { width: 6px; }
+        select[multiple]::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
-  </head>
-  <body>
+</head>
+
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen">
     <%- include('../partials/menu') %>
-    <div class="container">
-      <div class="header">
-        <h1>Add Offer</h1>
-        <p>Create and manage your offers</p>
-      </div>
 
-      <form id="addOfferForm">
-        <div class="form-section">
-          <h3>Basic Information</h3>
-          <div class="form-group">
-            <label for="offerName">Offer name</label>
-            <input
-              type="text"
-              id="offerName"
-              name="code"
-              placeholder="Enter offer code name"
-            />
-            <div id="offerNameError" class="error-message"></div>
-          </div>
-
-          <div class="form-group">
-            <label for="description">Description</label>
-            <textarea
-              id="description"
-              name="description"
-              placeholder="Enter offer description"
-            ></textarea>
-            <div id="descriptionError" class="error-message"></div>
-          </div>
-          <div class="form-section">
-            <h3>Applicable Items</h3>
-            <div class="form-group">
-              <label for="appliedCategories">Apply to Categories</label>
-              <select
-                id="appliedCategories"
-                name="appliedCategories"
-                multiple
-                style="height: 120px"
-              >
-                <option value="">Select categories</option>
-                <% categories.forEach(function(category) { %>
-                <option value="<%= category._id %>">
-                  <%= category.name %>
-                </option>
-                <% }); %>
-              </select>
-              <div id="appliedCategoriesError" class="error-message"></div>
-              <small style="display: block; margin-top: 0.5rem; color: #6c757d">
-                Hold Ctrl (or Cmd on Mac) to select multiple categories. Leave
-                empty to apply to all categories.
-              </small>
-            </div>
-
-            <div class="form-group">
-              <label for="appliedProducts">Apply to Products</label>
-              <select
-                id="appliedProducts"
-                name="appliedProducts"
-                multiple
-                style="height: 120px"
-              >
-                <option value="">Select products</option>
-                <% products.forEach(function(product) { %>
-                <option value="<%= product._id %>"><%= product.name %></option>
-                <% }); %>
-              </select>
-              <div id="appliedProductsError" class="error-message"></div>
-              <small style="display: block; margin-top: 0.5rem; color: #6c757d">
-                Hold Ctrl (or Cmd on Mac) to select multiple products. Leave
-                empty to apply to all products.
-              </small>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="offerType">Offer Type</label>
-              <select id="offerType" name="offerType">
-                <option value="">Select offer type</option>
-                <option value="percentage">Percentage (%)</option>
-                <option value="fixed">Fixed Amount</option>
-              </select>
-              <div id="offerTypeError" class="error-message"></div>
-            </div>
-
-            <div class="form-group">
-              <label for="offerValue">Offer Value</label>
-              <input
-                type="number"
-                id="offerValue"
-                name="offerValue"
-                placeholder="Enter offer value"
-                min="0"
-                step="0.01"
-              />
-              <div id="offerValueError" class="error-message"></div>
-            </div>
-          </div>
-
-          
+    <div class="max-w-4xl mx-auto py-12 px-6">
+        <div class="mb-10 text-center">
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight italic">Campaign <span class="text-indigo-600">Architect</span></h1>
+            <p class="text-slate-500 mt-2 font-medium">Design and deploy high-converting promotional offers.</p>
         </div>
 
-        <div class="form-section">
-          <h3>Validity & Usage</h3>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="startDate">Start Date</label>
-              <input type="datetime-local" id="startDate" name="startDate" />
-              <div id="startDateError" class="error-message"></div>
+        <form id="addOfferForm" class="space-y-8">
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mb-8 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                        <i class="fas fa-bullhorn"></i>
+                    </div>
+                    Offer Identity
+                </h3>
+
+                <div class="space-y-6">
+                    <div>
+                        <label for="offerName" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Campaign Name</label>
+                        <input type="text" id="offerName" name="name" placeholder="e.g. MEGA_TECH_SALE_2026" 
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-bold tracking-wide" />
+                        <p id="offerNameError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
+
+                    <div>
+                        <label for="description" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Strategic Description</label>
+                        <textarea id="description" name="description" placeholder="Summarize the offer's impact..." rows="2"
+                                  class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-medium"></textarea>
+                        <p id="descriptionError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
+                </div>
             </div>
 
-            <div class="form-group">
-              <label for="expiryDate">Expiry Date</label>
-              <input type="datetime-local" id="expiryDate" name="expiryDate" />
-              <div id="expiryDateError" class="error-message"></div>
-            </div>
-          </div>
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mb-8 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600">
+                        <i class="fas fa-crosshairs"></i>
+                    </div>
+                    Target Alignment
+                </h3>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label>Offer Status</label>
-              <div class="status-toggle">
-                <label class="toggle-switch">
-                  <input type="checkbox" name="active" checked />
-                  <span class="slider"></span>
-                </label>
-                <span id="statusText">Active</span>
-              </div>
-            </div>
-          </div>
-        </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <label for="appliedCategories" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Focus Categories</label>
+                        <select id="appliedCategories" name="appliedCategories" multiple class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 text-xs font-bold h-36">
+                            <% categories.forEach(function(category) { %>
+                                <option value="<%= category._id %>" class="py-1"><%= category.name %></option>
+                            <% }); %>
+                        </select>
+                        <p class="text-[9px] text-slate-400 mt-3 italic uppercase tracking-tighter">Multi-select enabled via Ctrl/Cmd</p>
+                    </div>
 
-        <div class="action-buttons">
-          <button type="submit" class="submit-btn">Create Offer</button>
-          <a href="/admin/offers" class="cancel-btn">Cancel</a>
-        </div>
-      </form>
+                    <div>
+                        <label for="appliedProducts" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Specific Hardware</label>
+                        <select id="appliedProducts" name="appliedProducts" multiple class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 text-xs font-bold h-36">
+                            <% products.forEach(function(product) { %>
+                                <option value="<%= product._id %>" class="py-1"><%= product.name %></option>
+                            <% }); %>
+                        </select>
+                        <p class="text-[9px] text-slate-400 mt-3 italic uppercase tracking-tighter">Leave empty for site-wide deployment</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mb-8 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+                        <i class="fas fa-hand-holding-dollar"></i>
+                    </div>
+                    Value Proposition
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <label for="offerType" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Discount Logic</label>
+                        <select id="offerType" name="offerType" class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:border-indigo-400 appearance-none cursor-pointer text-sm font-bold">
+                            <option value="">Select Logic</option>
+                            <option value="percentage">Percentage Model (%)</option>
+                            <option value="fixed">Fixed Deduction (₹)</option>
+                        </select>
+                        <p id="offerTypeError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
+
+                    <div>
+                        <label for="offerValue" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Net Value</label>
+                        <input type="number" id="offerValue" name="offerValue" step="0.01" placeholder="0.00"
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-black" />
+                        <p id="offerValueError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mb-8 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600">
+                        <i class="fas fa-clock-rotate-left"></i>
+                    </div>
+                    Campaign Lifecycle
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div>
+                        <label for="startDate" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Live Sequence Start</label>
+                        <input type="datetime-local" id="startDate" name="startDate" 
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 text-sm font-bold" />
+                    </div>
+                    <div>
+                        <label for="expiryDate" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Automatic Termination</label>
+                        <input type="datetime-local" id="expiryDate" name="expiryDate" 
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 text-sm font-bold" />
+                        <p id="expiryDateError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between p-6 bg-slate-900 rounded-3xl border border-slate-800 shadow-xl shadow-indigo-900/10">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-white backdrop-blur-md border border-white/10">
+                            <i class="fas fa-bolt-lightning"></i>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-black uppercase tracking-widest text-slate-500">Initialization Status</span>
+                            <span id="statusText" class="text-xs font-black uppercase tracking-tighter text-emerald-400">Campaign Active</span>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="active" id="statusToggle" class="sr-only peer" checked>
+                        <div class="w-14 h-7 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-end gap-4 pt-4">
+                <a href="/admin/offers" class="w-full sm:w-auto px-10 py-4 font-bold text-slate-400 hover:text-slate-600 uppercase tracking-widest text-xs transition-all text-center">
+                    Abort Setup
+                </a>
+                <button type="submit" class="w-full sm:w-auto px-12 py-4 font-black text-white bg-indigo-600 rounded-2xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 uppercase tracking-widest text-xs">
+                    Authorize Campaign
+                </button>
+            </div>
+        </form>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-      // Set default start date to current date and time
-      document.addEventListener("DOMContentLoaded", function () {
-        const now = new Date();
-        const localDatetime = new Date(
-          now.getTime() - now.getTimezoneOffset() * 60000
-        )
-          .toISOString()
-          .slice(0, 16);
+        // Default Time Synchronization
+        document.addEventListener("DOMContentLoaded", function () {
+            const now = new Date();
+            const localStart = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            document.getElementById("startDate").value = localStart;
 
-        document.getElementById("startDate").value = localDatetime;
-
-        // Set default expiry date to 30 days from now
-        const thirtyDaysLater = new Date(
-          now.getTime() + 30 * 24 * 60 * 60 * 1000
-        );
-        const expiryLocalDatetime = new Date(
-          thirtyDaysLater.getTime() - now.getTimezoneOffset() * 60000
-        )
-          .toISOString()
-          .slice(0, 16);
-
-        document.getElementById("expiryDate").value = expiryLocalDatetime;
-      });
-
-      // Validation Rules
-      const VALIDATION_RULES = {
-        offerName: {
-          minLength: 3,
-          maxLength: 20,
-          pattern: /^[A-Za-z0-9_-]+$/,
-        },
-        description: {
-          minLength: 10,
-          maxLength: 200,
-        },
-        offerValue: {
-          max: {
-            percentage: 100,
-            fixed: 1000000, // Arbitrary high value, adjust as needed
-          },
-        },
-      };
-
-      // Helper functions
-      function showError(element, message) {
-        element.textContent = message;
-        element.style.display = "block";
-      }
-
-      function hideError(element) {
-        element.style.display = "none";
-      }
-
-      // Status toggle handling
-      const statusToggle = document.querySelector('input[name="active"]');
-      const statusText = document.getElementById("statusText");
-
-      statusToggle.addEventListener("change", function () {
-        statusText.textContent = this.checked ? "Active" : "Inactive";
-      });
-
-      // Discount type handling
-      const offerTypeSelect = document.getElementById("offerType");
-      const offerValueInput = document.getElementById("offerValue");
-
-      offerTypeSelect.addEventListener("change", function () {
-        if (this.value === "percentage") {
-          offerValueInput.setAttribute("max", "100");
-          offerValueInput.setAttribute(
-            "placeholder",
-            "Enter percentage value (0-100)"
-          );
-        } else {
-          offerValueInput.removeAttribute("max");
-          offerValueInput.setAttribute("placeholder", "Enter fixed amount");
-        }
-      });
-
-      // Validation functions
-      function validateOfferName(code) {
-        const errorElement = document.getElementById("offerNameError");
-
-        if (!code) {
-          showError(errorElement, "Offer name is required");
-          return false;
-        }
-
-        if (code.length < VALIDATION_RULES.offerName.minLength) {
-          showError(
-            errorElement,
-            `Offer name must be at least ${VALIDATION_RULES.offerName.minLength} characters`
-          );
-          return false;
-        }
-
-        if (name.length > VALIDATION_RULES.offerName.maxLength) {
-          showError(
-            errorElement,
-            `Offer name cannot exceed ${VALIDATION_RULES.offerName.maxLength} characters`
-          );
-          return false;
-        }
-
-        if (!VALIDATION_RULES.offerName.pattern.test(code)) {
-          showError(
-            errorElement,
-            "Offer name can only contain letters, numbers, hyphens, and underscores"
-          );
-          return false;
-        }
-
-        hideError(errorElement);
-        return true;
-      }
-
-      function validateDescription(description) {
-        const errorElement = document.getElementById("descriptionError");
-
-        if (!description) {
-          showError(errorElement, "Description is required");
-          return false;
-        }
-
-        if (description.length < VALIDATION_RULES.description.minLength) {
-          showError(
-            errorElement,
-            `Description must be at least ${VALIDATION_RULES.description.minLength} characters`
-          );
-          return false;
-        }
-
-        if (description.length > VALIDATION_RULES.description.maxLength) {
-          showError(
-            errorElement,
-            `Description cannot exceed ${VALIDATION_RULES.description.maxLength} characters`
-          );
-          return false;
-        }
-
-        hideError(errorElement);
-        return true;
-      }
-
-      function validateOfferType(type) {
-        const errorElement = document.getElementById("offerTypeError");
-
-        if (!type) {
-          showError(errorElement, "Please select a offer type");
-          return false;
-        }
-
-        hideError(errorElement);
-        return true;
-      }
-
-      function validateOfferValue(value, type) {
-        const errorElement = document.getElementById("offerValueError");
-
-        if (!value) {
-          showError(errorElement, "Offer value is required");
-          return false;
-        }
-
-        if (value <= 0) {
-          showError(errorElement, "Offer value must be greater than 0");
-          return false;
-        }
-
-        if (
-          type === "percentage" &&
-          value > VALIDATION_RULES.offerValue.max.percentage
-        ) {
-          showError(errorElement, "Percentage discount cannot exceed 100%");
-          return false;
-        }
-
-        hideError(errorElement);
-        return true;
-      }
-
-      function validateDates(startDate, expiryDate) {
-        const startDateError = document.getElementById("startDateError");
-        const expiryDateError = document.getElementById("expiryDateError");
-
-        if (!startDate) {
-          showError(startDateError, "Start date is required");
-          return false;
-        }
-
-        if (!expiryDate) {
-          showError(expiryDateError, "Expiry date is required");
-          return false;
-        }
-
-        const startDateTime = new Date(startDate);
-        const expiryDateTime = new Date(expiryDate);
-
-        if (expiryDateTime <= startDateTime) {
-          showError(expiryDateError, "Expiry date must be after start date");
-          return false;
-        }
-
-        hideError(startDateError);
-        hideError(expiryDateError);
-        return true;
-      }
-
-      // Real-time validation
-      document
-        .getElementById("offerName")
-        .addEventListener("input", function () {
-          validateOfferName(this.value);
+            const expiry = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+            const localExpiry = new Date(expiry.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            document.getElementById("expiryDate").value = localExpiry;
         });
 
-      document
-        .getElementById("description")
-        .addEventListener("input", function () {
-          validateDescription(this.value);
+        // Interactive UI Handlers
+        document.getElementById('statusToggle').addEventListener('change', function() {
+            const statusText = document.getElementById("statusText");
+            statusText.textContent = this.checked ? "Campaign Active" : "Campaign Offline";
+            statusText.className = `text-xs font-black uppercase tracking-tighter ${this.checked ? 'text-emerald-400' : 'text-slate-500'}`;
         });
 
-      document
-        .getElementById("offerType")
-        .addEventListener("change", function () {
-          validateOfferType(this.value);
-        });
-
-      document
-        .getElementById("offerValue")
-        .addEventListener("input", function () {
-          validateOfferValue(
-            this.value,
-            document.getElementById("offerType").value
-          );
-        });
-
-      document
-        .getElementById("startDate")
-        .addEventListener("change", function () {
-          validateDates(
-            this.value,
-            document.getElementById("expiryDate").value
-          );
-        });
-
-      document
-        .getElementById("expiryDate")
-        .addEventListener("change", function () {
-          validateDates(document.getElementById("startDate").value, this.value);
-        });
-
-      // Form submission
-      $(document).ready(function () {
-        $("#addOfferForm").on("submit", function (e) {
-          e.preventDefault();
-
-          // Validate all fields
-          const nameValid = validateOfferName($("#offerName").val());
-          const descriptionValid = validateDescription($("#description").val());
-          const offerTypeValid = validateOfferType(
-            $("#offerType").val()
-          );
-          const offerValueValid = validateOfferValue(
-            $("#offerValue").val(),
-            $("#offerType").val()
-          );
-          const datesValid = validateDates(
-            $("#startDate").val(),
-            $("#expiryDate").val()
-          );
-
-          if (
-            !nameValid ||
-            !descriptionValid ||
-            !offerTypeValid ||
-            !offerValueValid ||
-            !datesValid
-          ) {
-            return;
-          }
-
-          // Show loading state
-          Swal.fire({
-            title: "Adding Offer...",
-            text: "Please wait while we process your request",
-            allowOutsideClick: false,
-            showConfirmButton: false,
-            willOpen: () => {
-              Swal.showLoading();
-            },
-          });
-
-          const formData = new FormData(this);
-          const jsonData = {};
-
-          // Convert FormData to JSON object
-          for (const [key, value] of formData.entries()) {
-            if (key === "active") {
-              jsonData[key] = value === "on";
-            
+        document.getElementById("offerType").addEventListener("change", function () {
+            const valInput = document.getElementById("offerValue");
+            if (this.value === "percentage") {
+                valInput.setAttribute("max", "100");
+                valInput.placeholder = "Enter percentage (Max 100%)";
             } else {
-              jsonData[key] = value;
+                valInput.removeAttribute("max");
+                valInput.placeholder = "Enter fixed deduction (₹)";
             }
-          }
-
-          $.ajax({
-            url: "/admin/offers/add",
-            type: "POST",
-            data: JSON.stringify(jsonData),
-            contentType: "application/json",
-            success: function (response) {
-              if (response.status === "success") {
-                Swal.fire({
-                  icon: "success",
-                  title: "Success!",
-                  text: "Offer added successfully",
-                  showConfirmButton: true,
-                }).then((result) => {
-                  if (result.isConfirmed) {
-                    window.location.href = "/admin/offers";
-                  }
-                });
-              } else {
-                Swal.fire({
-                  icon: "error",
-                  title: "Failed!",
-                  text: response.message || "Failed to add offer",
-                  showConfirmButton: true,
-                });
-              }
-            },
-            error: function (xhr, status, error) {
-              console.error("AJAX Error:", status, error);
-              console.log("Response:", xhr.responseJSON);
-
-              let errorMessage =
-                "An unexpected error occurred. Please try again.";
-
-              switch (xhr.status) {
-                case 400:
-                  if (xhr.responseJSON?.error === "DUPLICATE_COUPON") {
-                    errorMessage = "A offer with this name already exists.";
-                  } else {
-                    errorMessage = "Invalid data. Please check your inputs.";
-                  }
-                  break;
-                case 401:
-                  errorMessage = "Please login to continue.";
-                  break;
-                case 403:
-                  errorMessage = "You don't have permission to add offers.";
-                  break;
-                case 500:
-                  errorMessage = "Server error. Please try again later.";
-                  break;
-              }
-
-              if (xhr.responseJSON && xhr.responseJSON.message) {
-                errorMessage = xhr.responseJSON.message;
-              }
-
-              Swal.fire({
-                icon: "error",
-                title: "Error!",
-                text: errorMessage,
-                showConfirmButton: true,
-              });
-            },
-          });
         });
-      });
+
+        // Validation Logic
+        const showError = (id, msg) => {
+            $(`#${id}Error`).text(msg).removeClass('hidden').addClass('animate-bounce');
+        };
+
+        const validate = () => {
+            $('.text-red-500').addClass('hidden');
+            let valid = true;
+
+            const name = $('#offerName').val().trim();
+            const type = $('#offerType').val();
+            const val = parseFloat($('#offerValue').val());
+            const start = new Date($('#startDate').val());
+            const end = new Date($('#expiryDate').val());
+
+            if (name.length < 3) { showError('offerName', 'Campaign name too short'); valid = false; }
+            if (!type) { showError('offerType', 'Select a discount model'); valid = false; }
+            if (isNaN(val) || val <= 0) { showError('offerValue', 'Enter a valid positive value'); valid = false; }
+            if (type === 'percentage' && val > 100) { showError('offerValue', 'Limit: 100%'); valid = false; }
+            if (end <= start) { showError('expiryDate', 'Campaign must have a duration'); valid = false; }
+
+            return valid;
+        };
+
+        // Form Transmission
+        $("#addOfferForm").on("submit", function (e) {
+            e.preventDefault();
+            if (!validate()) return;
+
+            Swal.fire({
+                title: "Deploying Campaign...",
+                background: "#ffffff",
+                didOpen: () => Swal.showLoading(),
+                allowOutsideClick: false,
+            });
+
+            const formData = new FormData(this);
+            const jsonData = {};
+            
+            // Map form fields to JSON
+            formData.forEach((value, key) => {
+                if (key === 'appliedCategories' || key === 'appliedProducts') {
+                    if (!jsonData[key]) jsonData[key] = [];
+                    if (value) jsonData[key].push(value);
+                } else if (key === 'active') {
+                    jsonData[key] = true;
+                } else {
+                    jsonData[key] = value;
+                }
+            });
+            if (!jsonData.active) jsonData.active = false;
+
+            $.ajax({
+                url: "/admin/offers/add",
+                type: "POST",
+                data: JSON.stringify(jsonData),
+                contentType: "application/json",
+                success: function (res) {
+                    if (res.status === "success") {
+                        Swal.fire({ icon: "success", title: "Live!", text: "Campaign deployed successfully", confirmButtonColor: "#4f46e5" })
+                        .then(() => window.location.href = "/admin/offers");
+                    } else {
+                        Swal.fire("Failed", res.message, "error");
+                    }
+                },
+                error: (xhr) => Swal.fire("Deployment Error", xhr.responseJSON?.message || "Sync failed", "error")
+            });
+        });
     </script>
-  </body>
+</body>
 </html>

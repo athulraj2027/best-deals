@@ -1,656 +1,233 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Edit Coupon</title>
+    <title>Edit Offer | Tech Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
     <style>
-      :root {
-        --primary-color: #4361ee;
-        --secondary-color: #3f37c9;
-        --accent-color: #4895ef;
-        --success-color: #4cc9f0;
-        --danger-color: #dc3545;
-        --text-color: #2b2d42;
-        --bg-color: #f8f9fa;
-        --card-bg: #ffffff;
-        --border-radius: 12px;
-        --transition: all 0.3s ease;
-      }
-
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: "Segoe UI", system-ui, sans-serif;
-      }
-
-      body {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        color: var(--text-color);
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 2rem;
-      }
-
-      .container {
-        width: 100%;
-        max-width: 900px;
-        background: var(--card-bg);
-        padding: 2rem;
-        border-radius: var(--border-radius);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-        margin-top: 2rem;
-        margin-bottom: 2rem;
-      }
-
-      .header {
-        text-align: center;
-        margin-bottom: 2rem;
-      }
-
-      .header h1 {
-        font-size: 2.5rem;
-        color: var(--primary-color);
-        margin-bottom: 0.5rem;
-      }
-
-      .header p {
-        color: #6c757d;
-        font-size: 1.1rem;
-      }
-
-      .form-section {
-        background: var(--bg-color);
-        padding: 1.5rem;
-        border-radius: var(--border-radius);
-        margin-bottom: 1.5rem;
-      }
-
-      .form-section h3 {
-        color: var(--secondary-color);
-        margin-bottom: 1.5rem;
-        font-size: 1.2rem;
-      }
-
-      .form-group {
-        margin-bottom: 1.5rem;
-      }
-
-      label {
-        display: block;
-        margin-bottom: 0.5rem;
-        color: var(--text-color);
-        font-weight: 500;
-      }
-
-      input,
-      select,
-      textarea {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 2px solid #e9ecef;
-        border-radius: 8px;
-        font-size: 1rem;
-        transition: var(--transition);
-      }
-
-      input:focus,
-      select:focus,
-      textarea:focus {
-        border-color: var(--accent-color);
-        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
-        outline: none;
-      }
-
-      .status-toggle {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 0.5rem;
-        background: #f8f9fa;
-        border-radius: 8px;
-      }
-
-      .status-toggle label {
-        margin: 0;
-        cursor: pointer;
-      }
-
-      .toggle-switch {
-        position: relative;
-        display: inline-block;
-        width: 60px;
-        height: 34px;
-      }
-
-      .toggle-switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-
-      .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #ccc;
-        transition: 0.4s;
-        border-radius: 34px;
-      }
-
-      .slider:before {
-        position: absolute;
-        content: "";
-        height: 26px;
-        width: 26px;
-        left: 4px;
-        bottom: 4px;
-        background-color: white;
-        transition: 0.4s;
-        border-radius: 50%;
-      }
-
-      input:checked + .slider {
-        background-color: var(--success-color);
-      }
-
-      input:checked + .slider:before {
-        transform: translateX(26px);
-      }
-
-      .row {
-        display: flex;
-        flex-wrap: wrap;
-        margin: -0.5rem;
-      }
-
-      .col {
-        flex: 1;
-        padding: 0.5rem;
-        min-width: 200px;
-      }
-
-      .submit-btn {
-        background: var(--primary-color);
-        color: white;
-        border: none;
-        padding: 1rem 2rem;
-        border-radius: 8px;
-        font-size: 1.1rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: var(--transition);
-        width: 100%;
-        margin-top: 1rem;
-      }
-
-      .submit-btn:hover {
-        background: var(--secondary-color);
-        transform: translateY(-2px);
-      }
-
-      .cancel-btn {
-        background: var(--danger-color);
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        font-size: 1.1rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: var(--transition);
-        width: 100%;
-        margin-top: 1rem;
-        max-width: 150px;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-      }
-
-      .cancel-btn:hover {
-        background: #c82333;
-        transform: translateY(-2px);
-      }
-
-      .error-message {
-        color: var(--danger-color);
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-        display: none;
-      }
-
-      .status-badge {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
-        border-radius: 50px;
-        font-size: 0.85rem;
-        font-weight: 500;
-        margin-left: 1rem;
-      }
-      
-      .status-active {
-        background-color: rgba(25, 135, 84, 0.1);
-        color: #198754;
-      }
-      
-      .status-expired {
-        background-color: rgba(220, 53, 69, 0.1);
-        color: #dc3545;
-      }
-      
-      .status-upcoming {
-        background-color: rgba(13, 110, 253, 0.1);
-        color: #0d6efd;
-      }
-      
-      .status-inactive {
-        background-color: rgba(108, 117, 125, 0.1);
-        color: #6c757d;
-      }
-
-      .usage-stats {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1rem;
-        padding: 0.75rem;
-        background-color: rgba(72, 149, 239, 0.1);
-        border-radius: 8px;
-      }
-      
-      .usage-stat {
-        flex: 1;
-        text-align: center;
-      }
-      
-      .usage-value {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: var(--primary-color);
-        margin-bottom: 0.25rem;
-      }
-      
-      .usage-label {
-        font-size: 0.875rem;
-        color: #6c757d;
-      }
-
-      .help-text {
-        font-size: 0.875rem;
-        color: #6c757d;
-        margin-top: 0.25rem;
-      }
-
-      @media (max-width: 768px) {
-        .container {
-          padding: 1rem;
-        }
-
-        .header h1 {
-          font-size: 2rem;
-        }
-
-        .col {
-          flex: 100%;
-        }
-      }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .status-badge { @apply inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border; }
     </style>
-  </head>
-  <body>
+</head>
+
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen">
     <%- include('../partials/menu') %>
-    <div class="container">
-      <div class="header">
-        <h1>Edit Offer</h1>
-        <p>Update your offer details and settings</p>
-      </div>
 
-      <form id="editOfferForm" action="/admin/offers/edit/<%= offer._id %>" method="PUT">
-        <div class="form-section">
-          <h3>Basic Information</h3>
-          <div class="row">
-            <div class="col">
-              <div class="form-group">
-                <label for="code">Offer Name</label>
-                <input
-                  type="text"
-                  id="code"
-                  name="code"
-                  placeholder="Enter offer name"
-                  value="<%= offer.name %>"
-                  
-                />
-                <div id="codeError" class="error-message"></div>
-                <div class="help-text">Offer name will be automatically converted to uppercase</div>
-              </div>
-            </div>
-            <div class="col">
-              <div class="form-group">
-                <label for="offerType">Offer Type</label>
-                <select id="offerType" name="offerType" >
-                  <option value="percentage" <%= offer.offerType === 'percentage' ? 'selected' : '' %>>Percentage</option>
-                  <option value="fixed" <%= offer.offerType === 'fixed' ? 'selected' : '' %>>Fixed Amount</option>
-                </select>
-                <div id="offerTypeError" class="error-message"></div>
-              </div>
-            </div>
-          </div>
+    <div class="max-w-4xl mx-auto py-12 px-6">
+        <div class="mb-10 text-center">
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight italic">Edit Campaign <span class="text-indigo-600">Parameters</span></h1>
+            <p class="text-slate-500 mt-2 font-medium">Modify existing offer logic and validity settings.</p>
+        </div>
 
-          <div class="row">
-            <div class="col">
-              <div class="form-group">
-                <label for="offerValue">Offer Value</label>
-                <input
-                  type="number"
-                  id="offerValue"
-                  name="offerValue"
-                  placeholder="Enter offer value"
-                  value="<%= offer.offerValue %>"
-                  
-                />
-                <div id="offerValueError" class="error-message"></div>
-                <div class="help-text" id="offerValueHelp">
-                  <%= offer.offerType === 'percentage' ? 'Enter percentage value (e.g. 10 for 10% off)' : 'Enter fixed amount in dollars' %>
+        <form id="editOfferForm" class="space-y-8">
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mb-8 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                        <i class="fas fa-pen-nib"></i>
+                    </div>
+                    Campaign Details
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+                    <div class="form-group">
+                        <label for="code" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Offer Name</label>
+                        <input type="text" id="code" name="code" value="<%= offer.name %>" placeholder="Enter campaign name"
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-bold uppercase tracking-widest" />
+                        <p id="codeError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="offerType" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Discount Model</label>
+                        <select id="offerType" name="offerType" class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:border-indigo-400 appearance-none cursor-pointer text-sm font-bold">
+                            <option value="percentage" <%= offer.offerType === 'percentage' ? 'selected' : '' %>>Percentage (%)</option>
+                            <option value="fixed" <%= offer.offerType === 'fixed' ? 'selected' : '' %>>Fixed Amount (₹)</option>
+                        </select>
+                        <p id="offerTypeError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
                 </div>
-              </div>
-            </div>
-            
-          </div>
 
-          <div class="form-group">
-            <label for="description">Description</label>
-            <textarea
-              id="description"
-              name="description"
-              placeholder="Enter offer description"
-              rows="3"
-              
-            ><%= offer.description %></textarea>
-            <div id="descriptionError" class="error-message"></div>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <h3>Validity Period</h3>
-          <div class="row">
-            <div class="col">
-              <div class="form-group">
-                <label for="startDate">Start Date</label>
-                <input
-                  type="datetime-local"
-                  id="startDate"
-                  name="startDate"
-                  value="<%= new Date(offer.startDate).toISOString().slice(0, 16) %>"
-                  
-                />
-                <div id="startDateError" class="error-message"></div>
-              </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="form-group">
+                        <label for="offerValue" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Offer Value</label>
+                        <input type="number" id="offerValue" name="offerValue" value="<%= offer.offerValue %>" step="0.01"
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-black" />
+                        <p id="offerValueError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                        <div class="text-[10px] text-slate-400 mt-2 italic font-medium ml-1" id="offerValueHelp">
+                            <%= offer.offerType === 'percentage' ? 'Value as percentage (e.g., 10 for 10% off)' : 'Direct currency deduction amount' %>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Marketing Description</label>
+                        <textarea id="description" name="description" rows="1" class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-medium"><%= offer.description %></textarea>
+                        <p id="descriptionError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
+                </div>
             </div>
-            <div class="col">
-              <div class="form-group">
-                <label for="expiryDate">Expiry Date</label>
-                <input
-                  type="datetime-local"
-                  id="expiryDate"
-                  name="expiryDate"
-                  value="<%= new Date(offer.expiryDate).toISOString().slice(0, 16) %>"
-                  
-                />
-                <div id="expiryDateError" class="error-message"></div>
-              </div>
-            </div>
-          </div>
 
-          <div class="form-group">
-            <label>Offer Status</label>
-            <div class="status-toggle">
-              <label class="toggle-switch">
-                <input type="checkbox" name="active" id="statusToggle" <%= offer.active ? 'checked' : '' %> />
-                <span class="slider"></span>
-              </label>
-              <span id="statusText"><%= offer.active ? 'Active' : 'Inactive' %></span>
-              
-              <!-- Display calculated status badge -->
-              <span class="status-badge status-<%= offer.status %>">
-                <%= offer.status.charAt(0).toUpperCase() + offer.status.slice(1) %>
-              </span>
-            </div>
-          </div>
-        </div>
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mb-8 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    Active Window
+                </h3>
 
-       
-        
-        <button type="submit" class="submit-btn">Update Offer</button>
-      </form>
-      <form action="/admin/offers" method="get">
-        <button type="submit" class="cancel-btn">Cancel</button>
-      </form>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div class="form-group">
+                        <label for="startDate" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Activation Date</label>
+                        <input type="datetime-local" id="startDate" name="startDate" value="<%= new Date(offer.startDate).toISOString().slice(0, 16) %>"
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 text-sm font-bold" />
+                        <p id="startDateError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
+                    <div class="form-group">
+                        <label for="expiryDate" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Termination Date</label>
+                        <input type="datetime-local" id="expiryDate" name="expiryDate" value="<%= new Date(offer.expiryDate).toISOString().slice(0, 16) %>"
+                               class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 text-sm font-bold" />
+                        <p id="expiryDateError" class="text-red-500 text-[10px] mt-2 hidden font-bold"></p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between p-6 bg-slate-900 rounded-3xl border border-slate-800 shadow-xl shadow-indigo-900/10 gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-white backdrop-blur-md border border-white/10">
+                            <i class="fas fa-signal"></i>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-black uppercase tracking-widest text-slate-500">Live Status Override</span>
+                            <span id="statusText" class="text-xs font-black uppercase tracking-tighter <%= offer.active ? 'text-emerald-400' : 'text-slate-400' %>">
+                                <%= offer.active ? 'Campaign Online' : 'Campaign Offline' %>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-6">
+                        <% 
+                            const statusColorMap = {
+                                active: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+                                expired: 'bg-red-500/10 text-red-400 border-red-500/20',
+                                upcoming: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+                                inactive: 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+                            };
+                        %>
+                        <div class="px-4 py-2 rounded-xl border <%= statusColorMap[offer.status] %> text-[10px] font-black uppercase tracking-widest">
+                            Current: <%= offer.status %>
+                        </div>
+                        
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="active" id="statusToggle" class="sr-only peer" <%= offer.active ? 'checked' : '' %> />
+                            <div class="w-14 h-7 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-end gap-4 pt-4">
+                <a href="/admin/offers" class="w-full sm:w-auto px-10 py-4 font-bold text-slate-400 hover:text-slate-600 uppercase tracking-widest text-xs transition-all text-center">
+                    Discard Changes
+                </a>
+                <button type="submit" class="w-full sm:w-auto px-12 py-4 font-black text-white bg-indigo-600 rounded-2xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 uppercase tracking-widest text-xs">
+                    Apply Updates
+                </button>
+            </div>
+        </form>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-      // Validation Rules Constants
-     // Validation Rules Constants
-const VALIDATION_RULES = {
-  code: {
-    minLength: 3,
-    maxLength: 15,
-    pattern: /^[A-Z0-9_-]+$/
-  },
-  description: {
-    minLength: 5,
-    maxLength: 200
-  },
-  offerValue: {
-    percentage: {
-      min: 1,
-      max: 100
-    },
-    fixed: {
-      min: 0.01
-    }
-  },
+        const VALIDATION_RULES = {
+            code: { minLength: 3, maxLength: 15, pattern: /^[A-Z0-9_-]+$/ },
+            description: { minLength: 5, maxLength: 200 },
+            offerValue: { percentage: { min: 1, max: 100 }, fixed: { min: 0.01 } }
+        };
 
-};
+        const statusToggle = document.getElementById("statusToggle");
+        const statusText = document.getElementById("statusText");
 
-// Status toggle handling
-const statusToggle = document.getElementById("statusToggle");
-const statusText = document.getElementById("statusText");
+        statusToggle.addEventListener("change", function () {
+            statusText.textContent = this.checked ? "Campaign Online" : "Campaign Offline";
+            statusText.className = `text-xs font-black uppercase tracking-tighter ${this.checked ? 'text-emerald-400' : 'text-slate-500'}`;
+        });
 
-statusToggle.addEventListener("change", function () {
-  statusText.textContent = this.checked ? "Active" : "Inactive";
-  this.value = this.checked ? "true" : "false";
-});
+        const offerType = document.getElementById("offerType");
+        const offerValueHelp = document.getElementById("offerValueHelp");
 
-// Discount type change handler
-const offerType = document.getElementById("offerType");
-const offerValueHelp = document.getElementById("offerValueHelp");
+        offerType.addEventListener("change", function() {
+            offerValueHelp.textContent = this.value === "percentage" 
+                ? "Value as percentage (e.g., 10 for 10% off)" 
+                : "Direct currency deduction amount";
+        });
 
-offerType.addEventListener("change", function() {
-  if (this.value === "percentage") {
-    offerValueHelp.textContent = "Enter percentage value (e.g. 10 for 10% off)";
-  } else {
-    offerValueHelp.textContent = "Enter fixed amount in dollars";
-  }
-});
+        $("#editOfferForm").on("submit", function(e) {
+            e.preventDefault();
+            
+            const codeInput = $('#code');
+            const codeVal = codeInput.val().toUpperCase().trim();
+            codeInput.val(codeVal);
 
-// Form validation
-const editOfferForm = document.getElementById('editOfferForm');
+            let isValid = true;
+            $('.text-red-500').addClass('hidden');
 
-editOfferForm.addEventListener('submit', function(e) {
-  // Prevent default form submission
-  e.preventDefault();
-  
-  let isValid = true;
-  
-  // Validate coupon code
-  const codeInput = document.getElementById('code');
-  const codeError = document.getElementById('codeError');
-  const codeRules = VALIDATION_RULES.code;
-  
-  // Convert code to uppercase
-  codeInput.value = codeInput.value.toUpperCase().trim();
-  
-  if (codeInput.value.length < codeRules.minLength) {
-    codeError.textContent = `Offer name must be at least ${codeRules.minLength} characters.`;
-    codeError.style.display = 'block';
-    isValid = false;
-  } else if (codeInput.value.length > codeRules.maxLength) {
-    codeError.textContent = `Offer name must not exceed ${codeRules.maxLength} characters.`;
-    codeError.style.display = 'block';
-    isValid = false;
-  } else if (!codeRules.pattern.test(codeInput.value)) {
-    codeError.textContent = `Offer name can only contain uppercase letters, numbers, hyphens and underscores.`;
-    codeError.style.display = 'block';
-    isValid = false;
-  } else {
-    codeError.style.display = 'none';
-  }
-  
-  // Validate description
-  const descriptionInput = document.getElementById('description');
-  const descriptionError = document.getElementById('descriptionError');
-  const descriptionRules = VALIDATION_RULES.description;
-  
-  if (descriptionInput.value.length < descriptionRules.minLength) {
-    descriptionError.textContent = `Description must be at least ${descriptionRules.minLength} characters.`;
-    descriptionError.style.display = 'block';
-    isValid = false;
-  } else if (descriptionInput.value.length > descriptionRules.maxLength) {
-    descriptionError.textContent = `Description must not exceed ${descriptionRules.maxLength} characters.`;
-    descriptionError.style.display = 'block';
-    isValid = false;
-  } else {
-    descriptionError.style.display = 'none';
-  }
-  
-  // Validate discount value
-  const offerValueInput = document.getElementById('offerValue');
-  const offerValueError = document.getElementById('offerValueError');
-  const offerTypeValue = offerType.value;
-  const offerValueRules = VALIDATION_RULES.offerValue[offerTypeValue];
-  
-  if (offerTypeValue === 'percentage') {
-    if (parseFloat(offerValueInput.value) < offerValueRules.min) {
-      offerValueError.textContent = `Percentage offer must be at least ${offerValueRules.min}%.`;
-      offerValueError.style.display = 'block';
-      isValid = false;
-    } else if (parseFloat(offerValueInput.value) > offerValueRules.max) {
-      offerValueError.textContent = `Percentage offer must not exceed ${offerValueRules.max}%.`;
-      offerValueError.style.display = 'block';
-      isValid = false;
-    } else {
-      offerValueError.style.display = 'none';
-    }
-  } else {
-    if (parseFloat(offerValueInput.value) < offerValueRules.min) {
-      offerValueError.textContent = `Fixed offer must be at least ${offerValueRules.min}.`;
-      offerValueError.style.display = 'block';
-      isValid = false;
-    } else {
-      offerValueError.style.display = 'none';
-    }
-  }
-  
-  // Validate dates
-  const startDateInput = document.getElementById('startDate');
-  const expiryDateInput = document.getElementById('expiryDate');
-  const startDateError = document.getElementById('startDateError');
-  const expiryDateError = document.getElementById('expiryDateError');
-  
-  const startDate = new Date(startDateInput.value);
-  const expiryDate = new Date(expiryDateInput.value);
-  
-  if (expiryDate <= startDate) {
-    expiryDateError.textContent = 'Expiry date must be after start date.';
-    expiryDateError.style.display = 'block';
-    isValid = false;
-  } else {
-    expiryDateError.style.display = 'none';
-  }
-  
-  if (!isValid) {
-    // Scroll to the first error
-    const firstError = document.querySelector('.error-message[style="display: block;"]');
-    if (firstError) {
-      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    
-    Swal.fire({
-      icon: 'error',
-      title: 'Validation Error',
-      text: 'Please check the form for errors.',
-    });
-  } else {
-    // Show loading state
-    Swal.fire({
-      title: 'Updating offer',
-      text: 'Please wait while we update your offer...',
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-    
-    // Create FormData object
-    const formData = new FormData(editOfferForm);
-    const formObject = {};
+            // Validations
+            if (codeVal.length < VALIDATION_RULES.code.minLength) {
+                $('#codeError').text(`Min ${VALIDATION_RULES.code.minLength} characters`).removeClass('hidden');
+                isValid = false;
+            }
+            
+            const offerVal = parseFloat($('#offerValue').val());
+            if (offerType.value === 'percentage' && (offerVal < 1 || offerVal > 100)) {
+                $('#offerValueError').text('Must be between 1-100%').removeClass('hidden');
+                isValid = false;
+            }
 
-formData.forEach((value, key) => {
-  formObject[key] = value;
-});
+            const start = new Date($('#startDate').val());
+            const end = new Date($('#expiryDate').val());
+            if (end <= start) {
+                $('#expiryDateError').text('Expiry must be after activation').removeClass('hidden');
+                isValid = false;
+            }
 
-formObject.active = statusToggle.checked;
+            if (!isValid) {
+                return Swal.fire({ icon: 'error', title: 'Data Invalid', text: 'Please correct the highlighted fields.' });
+            }
 
-    
-    fetch('/admin/offers/edit/<%= offer._id %>', {
-      method: 'PUT', headers: {
-    'Content-Type': 'application/json'
-  },
-      body: JSON.stringify(formObject)
-    })
-    .then(data=>data.json())
-    .then(data => {
-      if(data.status==='success'){
-        Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: data.message || 'Offer updated successfully',
-        confirmButtonText: 'OK'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.href = '/admin/offers';
-        }
-      });
-      }
-      else{
-        Swal.fire({
-        icon: 'error',
-        title: 'Error!',
-        text: data.message || 'Offer updation failed',
-        confirmButtonText: 'OK'
-      }
-        )}
-      
-    })
-    .catch(error => {
-      // Handle error
-      console.error('Error:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to update offer. Please try again later.'
-      });
-    });
-  }
-});
+            Swal.fire({
+                title: 'Synchronizing...',
+                background: '#ffffff',
+                didOpen: () => Swal.showLoading(),
+                allowOutsideClick: false
+            });
 
-      
+            const formData = {
+                code: codeVal,
+                offerType: offerType.value,
+                offerValue: offerVal,
+                description: $('#description').val().trim(),
+                startDate: $('#startDate').val(),
+                expiryDate: $('#expiryDate').val(),
+                active: statusToggle.checked
+            };
+
+            fetch('/admin/offers/edit/<%= offer._id %>', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success'){
+                    Swal.fire({ icon: 'success', title: 'Updated', text: data.message, confirmButtonColor: '#4f46e5' })
+                    .then(() => window.location.href = '/admin/offers');
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Update Failed', text: data.message });
+                }
+            })
+            .catch(() => Swal.fire({ icon: 'error', title: 'Network Error', text: 'Server connection failed.' }));
+        });
     </script>
-  </body>
+</body>
 </html>

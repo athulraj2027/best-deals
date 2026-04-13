@@ -4,320 +4,117 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"/>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <title>Shop | BestDeals</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>Shop | Tech Gadgets</title>
   <style>
-    :root {
-      --ink: #0f0f10;
-      --surface: #f5f4f1;
-      --card: #ffffff;
-      --accent: #2563eb;
-      --accent-light: #eff6ff;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --radius: 14px;
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
+    .gradient-bg { background: linear-gradient(to right, #7c3aed, #db2777); }
+    .gradient-text { background: linear-gradient(to right, #7c3aed, #db2777); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    
+    /* Custom Slider Styling */
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%;
+      background: #7c3aed; cursor: pointer; box-shadow: 0 0 10px rgba(124, 58, 237, 0.3);
     }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Manrope', sans-serif; background: var(--surface); color: var(--ink); }
-    h1, h2, h3, .syne { font-family: 'Syne', sans-serif; }
-
-    /* Header band */
-    .page-header {
-      background: var(--ink);
-      padding: 28px 24px 24px;
-      border-radius: 0 0 24px 24px;
-      margin-bottom: 32px;
-    }
-    .page-header h1 { color: #fff; font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
-    .page-header p { color: #9ca3af; font-size: 0.85rem; margin-top: 4px; }
-
-    /* Layout */
-    .shop-layout { max-width: 1320px; margin: 0 auto; padding: 0 20px 60px; display: grid; grid-template-columns: 280px 1fr; gap: 28px; }
-    @media (max-width: 900px) { .shop-layout { grid-template-columns: 1fr; } }
-
-    /* Filter panel */
-    .filter-panel {
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 24px;
-      border: 1px solid var(--border);
-      height: fit-content;
-      position: sticky;
-      top: 20px;
-    }
-    .filter-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .filter-clear {
-      font-family: 'Manrope', sans-serif;
-      font-size: 0.8rem;
-      font-weight: 500;
-      color: var(--muted);
-      cursor: pointer;
-      text-decoration: none;
-      padding: 3px 8px;
-      border-radius: 6px;
-      transition: all 0.2s;
-    }
-    .filter-clear:hover { background: #fef2f2; color: #dc2626; }
-
-    .filter-section { margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid var(--border); }
-    .filter-section:last-of-type { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-    .filter-label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 12px; }
-
-    /* Search */
-    .search-wrap { position: relative; }
-    .search-wrap i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 0.85rem; }
-    .search-input {
-      width: 100%; padding: 10px 12px 10px 36px;
-      border: 1.5px solid var(--border); border-radius: 10px;
-      font-family: 'Manrope', sans-serif; font-size: 0.9rem;
-      transition: border-color 0.2s;
-      outline: none;
-    }
-    .search-input:focus { border-color: var(--accent); }
-
-    /* Category chips */
-    .chips { display: flex; flex-wrap: wrap; gap: 7px; }
-    .chip {
-      padding: 6px 13px; border-radius: 30px;
-      border: 1.5px solid var(--border);
-      font-size: 0.82rem; font-weight: 600;
-      cursor: pointer; transition: all 0.18s;
-      background: #fff; color: #374151;
-      user-select: none;
-    }
-    .chip:hover { border-color: var(--accent); color: var(--accent); }
-    .chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-
-    /* Price slider */
-    .slider-wrap { padding: 4px 0; }
-    input[type="range"] {
-      -webkit-appearance: none; width: 100%; height: 4px;
-      border-radius: 4px; background: var(--border); outline: none;
-    }
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 18px; height: 18px;
-      border-radius: 50%; background: var(--accent);
-      cursor: pointer; box-shadow: 0 2px 6px rgba(37,99,235,0.35);
-    }
-    .price-display { display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.85rem; }
-    .price-val { font-weight: 700; color: var(--accent); }
-
-    /* Sort select */
-    .sort-select {
-      width: 100%; padding: 10px 14px; border-radius: 10px;
-      border: 1.5px solid var(--border);
-      font-family: 'Manrope', sans-serif; font-size: 0.9rem;
-      font-weight: 500; outline: none; cursor: pointer;
-      background: #fff; transition: border-color 0.2s;
-    }
-    .sort-select:focus { border-color: var(--accent); }
-
-    /* Apply button */
-    .btn-apply {
-      width: 100%; padding: 12px;
-      background: var(--accent); color: #fff;
-      border: none; border-radius: 10px;
-      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem;
-      cursor: pointer; transition: all 0.2s;
-      margin-top: 6px;
-    }
-    .btn-apply:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(37,99,235,0.35); }
-
-    /* Toolbar */
-    .toolbar {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 20px; flex-wrap: wrap; gap: 10px;
-    }
-    .result-count { font-size: 0.88rem; color: var(--muted); font-weight: 500; }
-    .result-count strong { color: var(--ink); }
-    .active-filters { display: flex; flex-wrap: wrap; gap: 6px; }
-    .filter-tag {
-      display: inline-flex; align-items: center; gap: 5px;
-      background: var(--accent-light); color: var(--accent);
-      border-radius: 30px; padding: 4px 10px; font-size: 0.78rem; font-weight: 600;
-    }
-    .filter-tag button { background: none; border: none; cursor: pointer; color: var(--accent); padding: 0; line-height: 1; font-size: 0.85rem; }
-
-    /* Loading overlay */
-    #loading-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(255,255,255,0.7); backdrop-filter: blur(3px);
-      z-index: 999; align-items: center; justify-content: center;
-    }
-    #loading-overlay.active { display: flex; }
-    .spinner {
-      width: 42px; height: 42px; border: 4px solid var(--border);
-      border-top-color: var(--accent); border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Product grid */
-    #product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 22px; }
-
-    .product-card {
-      background: var(--card); border-radius: var(--radius);
-      border: 1px solid var(--border); overflow: hidden;
-      transition: transform 0.25s, box-shadow 0.25s;
-      animation: fadeUp 0.35s ease both;
-    }
-    .product-card:hover { transform: translateY(-5px); box-shadow: 0 12px 32px rgba(0,0,0,0.1); }
-    @keyframes fadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
-
-    .card-img-wrap { position: relative; height: 200px; overflow: hidden; background: #f9f9f9; }
-    .card-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
-    .product-card:hover .card-img-wrap img { transform: scale(1.06); }
-
-    .offer-badge {
-      position: absolute; top: 10px; left: 10px;
-      background: #dc2626; color: #fff;
-      font-size: 0.7rem; font-weight: 700;
-      padding: 3px 8px; border-radius: 20px;
-    }
-
-    .card-body { padding: 16px; }
-    .card-name {
-      font-family: 'Syne', sans-serif; font-weight: 700;
-      font-size: 0.95rem; white-space: nowrap; overflow: hidden;
-      text-overflow: ellipsis; margin-bottom: 6px;
-    }
-    .card-brand { font-size: 0.78rem; color: var(--muted); margin-bottom: 10px; }
-
-    .card-price-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 14px; }
-    .price-main { font-size: 1.25rem; font-weight: 800; color: var(--accent); }
-    .price-original { font-size: 0.85rem; color: var(--muted); text-decoration: line-through; }
-
-    .stars { color: #f59e0b; font-size: 0.75rem; margin-bottom: 12px; }
-
-    .btn-view {
-      display: block; text-align: center;
-      background: var(--ink); color: #fff;
-      padding: 10px; border-radius: 9px;
-      font-weight: 700; font-size: 0.85rem;
-      font-family: 'Syne', sans-serif;
-      text-decoration: none; transition: all 0.2s;
-    }
-    .btn-view:hover { background: var(--accent); }
-
-    /* Empty state */
-    .empty-state { grid-column: 1/-1; text-align: center; padding: 60px 20px; }
-    .empty-state i { font-size: 3.5rem; color: var(--border); margin-bottom: 16px; }
-    .empty-state p { color: var(--muted); font-size: 1.05rem; }
-
-    /* Pagination */
-    #pagination { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 36px; flex-wrap: wrap; }
-    .pg-btn {
-      padding: 8px 14px; border-radius: 9px;
-      background: var(--card); border: 1.5px solid var(--border);
-      font-weight: 600; font-size: 0.88rem;
-      cursor: pointer; transition: all 0.18s; color: var(--ink);
-      text-decoration: none;
-    }
-    .pg-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .pg-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .pg-btn.disabled { opacity: 0.4; pointer-events: none; }
   </style>
 </head>
-<body>
+
+<body class="bg-slate-50 text-slate-900 selection:bg-purple-100 selection:text-purple-700">
 
 <%- include('./partials/headerPartial') %>
 
-<!-- Loading Overlay -->
-<div id="loading-overlay">
-  <div class="spinner"></div>
-</div>
-
-<!-- Page Header -->
-<div class="page-header">
-  <div style="max-width:1320px; margin:0 auto; padding:0 20px;">
-    <h1>Shop All Products</h1>
-    <p>Discover the best deals, filtered just for you</p>
+<div id="loading-overlay" class="hidden fixed inset-0 z-[999] bg-white/60 backdrop-blur-sm flex items-center justify-center transition-opacity duration-300">
+  <div class="flex flex-col items-center">
+    <div class="w-12 h-12 border-4 border-slate-200 border-t-purple-600 rounded-full animate-spin"></div>
+    <p class="mt-4 text-sm font-bold text-slate-600 tracking-widest uppercase animate-pulse">Updating catalog...</p>
   </div>
 </div>
 
-<div class="shop-layout">
+<header class="relative bg-slate-900 pt-16 pb-24 overflow-hidden">
+  <div class="absolute top-0 right-0 w-96 h-96 bg-purple-600/20 rounded-full blur-[100px] -mr-40 -mt-40"></div>
+  <div class="relative max-w-[1400px] mx-auto px-6 text-center lg:text-left">
+    <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight">Browse <span class="gradient-text">Premium Tech</span></h1>
+    <p class="text-slate-400 mt-3 max-w-xl mx-auto lg:mx-0">Find the perfect gear for your setup with our advanced filters and exclusive deals.</p>
+  </div>
+</header>
 
-  <!-- ── FILTER PANEL ── -->
-  <aside class="filter-panel">
-    <div class="filter-title">
-      <span>Filters</span>
-      <a href="/shop" class="filter-clear"><i class="fas fa-times mr-1"></i>Clear all</a>
-    </div>
+<div class="max-w-[1400px] mx-auto px-6 -mt-12 mb-20 relative z-10">
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
-    <!-- Search -->
-    <div class="filter-section">
-      <div class="filter-label">Search</div>
-      <div class="search-wrap">
-        <i class="fas fa-search"></i>
-        <input type="text" id="f-search" class="search-input" placeholder="Product, brand..."
-          value="<%= filters?.search || '' %>">
-      </div>
-    </div>
-
-    <!-- Category -->
-    <div class="filter-section">
-      <div class="filter-label">Category</div>
-      <div class="chips" id="category-chips">
-        <span class="chip" data-value="">All</span>
-        <% categories.forEach(c => { %>
-          <span class="chip" data-value="<%= c.name %>"><%= c.name %></span>
-        <% }) %>
-      </div>
-    </div>
-
-    <!-- Price Range -->
-    <div class="filter-section">
-      <div class="filter-label">Max Price</div>
-      <div class="slider-wrap">
-        <input type="range" id="f-price" min="0" max="2000" step="50" value="<%= filters?.maxPrice || 2000 %>">
-        <div class="price-display">
-          <span class="text-gray-400" style="font-size:0.8rem;">₹0</span>
-          <span>Up to <span class="price-val" id="price-display-val">₹<%= filters?.maxPrice || 2000 %></span></span>
+    <aside class="lg:col-span-1">
+      <div class="glass p-8  shadow-xl shadow-slate-200/60 sticky top-6 border border-black">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-xl font-extrabold tracking-tight">Filters</h2>
+          <a href="/shop" class="text-xs font-bold text-slate-400 hover:text-red-500  transition-colors uppercase tracking-widest">Clear All</a>
         </div>
+
+        <div class="mb-8">
+          <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Keyword</label>
+          <div class="relative group">
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-purple-600 transition-colors"></i>
+            <input type="text" id="f-search" placeholder="Mouse, Keyboard..." 
+              class="w-full pl-11 pr-4 py-3.5 bg-white rounded-2xl border border-slate-100 outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all text-sm font-medium shadow-sm">
+          </div>
+        </div>
+
+        <div class="mb-8">
+          <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Categories</label>
+          <div class="flex flex-wrap gap-2" id="category-chips">
+            <button class="chip group px-4 py-2 rounded-xl border border-slate-100 bg-white text-black text-xs font-bold transition-all hover:border-purple-600 active" data-value="">
+              All Items
+            </button>
+            <% categories.forEach(c => { %>
+              <button class="chip px-4 py-2 rounded-xl border border-slate-100 bg-white text-xs font-bold transition-all hover:border-purple-600" data-value="<%= c.name %>">
+                <%= c.name %>
+              </button>
+            <% }) %>
+          </div>
+        </div>
+
+        <div class="mb-8">
+          <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Max Budget</label>
+          <input type="range" id="f-price" min="0" max="20000" step="500" value="<%= filters?.maxPrice || 20000 %>" 
+            class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600">
+          <div class="flex justify-between mt-3 text-[11px] font-black text-slate-500">
+            <span>₹0</span>
+            <span class="text-purple-600 bg-purple-50 px-2 py-1 rounded">UP TO ₹<span id="price-display-val"><%= filters?.maxPrice || '20,000' %></span></span>
+          </div>
+        </div>
+
+        <div class="mb-10">
+          <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Sort Results</label>
+          <select id="f-sort" class="w-full px-4 py-3.5 bg-white rounded-2xl border border-slate-100 outline-none focus:ring-2 focus:ring-purple-600/20 text-sm font-bold appearance-none cursor-pointer">
+            <option value="">Recommended</option>
+            <option value="price-asc">Cheapest First</option>
+            <option value="price-desc">Premium First</option>
+            <option value="newest">New Arrivals</option>
+          </select>
+        </div>
+
+        <button onclick="applyFilters()" class="w-full  text-white py-4 bg-gray-600 rounded-2xl font-black text-sm shadow-lg  hover:scale-[1.02] hover:shadow-purple-500/40 transition-all active:scale-95">
+          Apply Selection
+        </button>
       </div>
-    </div>
+    </aside>
 
-    <!-- Sort -->
-    <div class="filter-section">
-      <div class="filter-label">Sort By</div>
-      <select id="f-sort" class="sort-select">
-        <option value="">Recommended</option>
-        <option value="price-asc">Price: Low to High</option>
-        <option value="price-desc">Price: High to Low</option>
-        <option value="newest">Newest First</option>
-        <option value="name-asc">Name A–Z</option>
-      </select>
-    </div>
+    <main class="lg:col-span-3">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div class="text-sm font-bold text-slate-500" id="result-count">
+          Initializing...
+        </div>
+        <div class="flex flex-wrap gap-2" id="active-filters">
+          </div>
+      </div>
 
-    <button class="btn-apply" onclick="applyFilters()">
-      <i class="fas fa-sliders-h mr-2"></i>Apply Filters
-    </button>
-  </aside>
+      <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 min-h-[400px]">
+        </div>
 
-  <!-- ── PRODUCTS PANEL ── -->
-  <main>
-    <!-- Toolbar -->
-    <div class="toolbar">
-      <div class="result-count" id="result-count">Loading…</div>
-      <div class="active-filters" id="active-filters"></div>
-    </div>
-
-    <!-- Grid -->
-    <div id="product-grid"></div>
-
-    <!-- Pagination -->
-    <div id="pagination"></div>
-  </main>
+      <nav id="pagination" class="flex justify-center items-center gap-2 mt-16">
+        </nav>
+    </main>
+  </div>
 </div>
 
 <%- include('./partials/footer') %>
@@ -327,167 +124,150 @@
   const state = {
     search:   '<%= (filters?.search || "").replace(/'/g, "\\'") %>',
     category: '<%= (filters?.category || "").replace(/'/g, "\\'") %>',
-    maxPrice: <%= filters?.maxPrice || 2000 %>,
+    maxPrice: <%= filters?.maxPrice || 20000 %>,
     sort:     '<%= filters?.sort || "" %>',
     page:     1,
   };
 
-  // ─── Init UI from state ──────────────────────────────────────────────────────
+  // ─── DOM Elements ───────────────────────────────────────────────────────────
+  const els = {
+    grid: document.getElementById('product-grid'),
+    priceVal: document.getElementById('price-display-val'),
+    overlay: document.getElementById('loading-overlay'),
+    count: document.getElementById('result-count'),
+    activeTags: document.getElementById('active-filters')
+  };
+
+  // ─── Init UI ────────────────────────────────────────────────────────────────
   function initUI() {
-    // Search
     document.getElementById('f-search').value = state.search;
-
-    // Category chips
-    document.querySelectorAll('#category-chips .chip').forEach(chip => {
-      const v = chip.dataset.value;
-      chip.classList.toggle('active', v === state.category);
-    });
-
-    // Price
     document.getElementById('f-price').value = state.maxPrice;
-    document.getElementById('price-display-val').textContent = '₹' + state.maxPrice;
+    els.priceVal.textContent = Number(state.maxPrice).toLocaleString('en-IN');
+    document.getElementById('f-sort').value = state.sort;
 
-    // Sort
-    const sortEl = document.getElementById('f-sort');
-    sortEl.value = state.sort;
+    document.querySelectorAll('.chip').forEach(btn => {
+      const active = btn.dataset.value === state.category;
+      btn.classList.toggle('bg-slate-900', active);
+      btn.classList.toggle('text-black', active);
+      btn.classList.toggle('border-slate-900', active);
+    });
   }
 
-  // ─── Fetch products via AJAX ─────────────────────────────────────────────────
+  // ─── API Fetch ──────────────────────────────────────────────────────────────
   async function fetchProducts() {
-    const overlay = document.getElementById('loading-overlay');
-    overlay.classList.add('active');
-
-    const params = new URLSearchParams({
-      search:   state.search,
-      category: state.category,
-      maxPrice: state.maxPrice,
-      sort:     state.sort,
-      page:     state.page,
-      limit:    9,
-      ajax:     'true',
-    });
+    els.overlay.classList.remove('hidden');
+    
+    const params = new URLSearchParams({ ...state, ajax: 'true', limit: 9 });
 
     try {
       const res = await fetch('/shop?' + params.toString(), {
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
       });
       const data = await res.json();
-      renderProducts(data.products, data.currentPage, data.totalPages, data.totalProducts);
+      renderProducts(data);
     } catch (err) {
-      console.error('Fetch error:', err);
-      document.getElementById('product-grid').innerHTML = `
-        <div class="empty-state">
-          <i class="fas fa-exclamation-circle"></i>
-          <p>Failed to load products. Please try again.</p>
-        </div>`;
+      console.error(err);
+      els.grid.innerHTML = `<div class="col-span-full py-20 text-center font-bold text-red-400">Error connecting to server.</div>`;
     } finally {
-      overlay.classList.remove('active');
+      els.overlay.classList.add('hidden');
     }
   }
 
-  // ─── Render ──────────────────────────────────────────────────────────────────
-  function renderProducts(products, currentPage, totalPages, totalProducts) {
-    // Result count
-    document.getElementById('result-count').innerHTML =
-      `Showing <strong>${products.length}</strong> of <strong>${totalProducts}</strong> products`;
+  // ─── Renderers ──────────────────────────────────────────────────────────────
+  function renderProducts({ products, totalProducts, currentPage, totalPages }) {
+    els.count.innerHTML = `Showing <span class="text-white">${products.length}</span> of <span class="text-white">${totalProducts}</span> Items`;
+    
+    renderTags();
 
-    // Active filter tags
-    renderActiveTags();
-
-    // Product grid
-    const grid = document.getElementById('product-grid');
     if (!products.length) {
-      grid.innerHTML = `
-        <div class="empty-state">
-          <i class="fas fa-box-open"></i>
-          <p>No products match your filters.</p>
+      els.grid.innerHTML = `
+        <div class="col-span-full py-20 text-center flex flex-col items-center">
+          <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300 text-3xl">
+             <i class="fas fa-search"></i>
+          </div>
+          <p class="font-extrabold text-slate-800">No matches found</p>
+          <p class="text-sm text-slate-500">Try adjusting your filters or search term.</p>
         </div>`;
-    } else {
-      grid.innerHTML = products.map((p, i) => {
-        const img = p.variants?.[0]?.images?.[0]?.url || 'https://via.placeholder.com/300';
-        const price = p.displayPrice ?? p.actualPrice;
-        const origPrice = p.originalPrice && p.originalPrice !== price ? p.originalPrice : null;
-        const offer = p.bestOffer;
-        const badge = offer
-          ? (offer.discount_type === 'percentage' ? offer.discount_value + '% OFF' : 'DEAL')
-          : '';
-
-        return `
-          <div class="product-card" style="animation-delay:${i * 0.04}s">
-            <div class="card-img-wrap">
-              <img src="${img}" alt="${p.name}" loading="lazy">
-              ${badge ? `<span class="offer-badge">${badge}</span>` : ''}
-            </div>
-            <div class="card-body">
-              <div class="card-name">${p.name}</div>
-              <div class="card-brand"><i class="fas fa-industry mr-1"></i>${p.brand || ''}</div>
-              <div class="card-price-row">
-                <span class="price-main">₹ ${Number(price).toFixed(2)}</span>
-                ${origPrice ? `<span class="price-original">₹ ${Number(origPrice).toFixed(2)}</span>` : ''}
-              </div>
-              <div class="stars">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star-half-alt"></i>
-                <i class="far fa-star"></i>
-              </div>
-              <a href="/product/${p._id}" class="btn-view">View Product</a>
-            </div>
-          </div>`;
-      }).join('');
+      return;
     }
 
-    // Pagination
+    els.grid.innerHTML = products.map((p, i) => {
+      const price = p.variants?.[0]?.price || 0;
+      const img = p.variants?.[0]?.images?.[0]?.url || '/img/placeholder.jpg';
+      const isHot = p.best_offer ? true : false;
+
+      return `
+        <div class="group bg-white rounded-[2rem] p-4 border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-purple-200/40 transition-all duration-500 flex flex-col animate-fade-in">
+          <div class="relative aspect-square rounded-[1.5rem] overflow-hidden bg-slate-50 mb-5">
+            ${isHot ? `<div class="absolute top-4 left-4 z-10 gradient-bg text-white text-[9px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest shadow-lg">Sale</div>` : ''}
+            <img src="${img}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700" />
+            <a href="/product/${p._id}" class="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-colors"></a>
+          </div>
+          <div class="px-2 pb-2">
+            <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 block">${p.brand || 'Tech'}</span>
+            <h3 class="font-extrabold text-slate-800 line-clamp-1 mb-4 group-hover:text-purple-600 transition-colors">${p.name}</h3>
+            <div class="flex items-center justify-between border-t border-slate-50 pt-4">
+              <div>
+                <p class="text-[10px] text-slate-400 font-bold line-through">₹${(price * 1.2).toFixed(0)}</p>
+                <p class="text-lg font-black text-slate-900">₹${price.toLocaleString('en-IN')}</p>
+              </div>
+              <a href="/product/${p._id}" class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center hover:gradient-bg transition-all shadow-lg shadow-slate-200">
+                <i class="fas fa-arrow-right text-xs"></i>
+              </a>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
     renderPagination(currentPage, totalPages);
   }
 
-  function renderActiveTags() {
-    const wrap = document.getElementById('active-filters');
-    wrap.innerHTML = '';
-    if (state.search) addTag(wrap, `"${state.search}"`, () => { state.search=''; document.getElementById('f-search').value=''; applyFilters(); });
-    if (state.category) addTag(wrap, state.category, () => { state.category=''; initUI(); applyFilters(); });
-    if (state.maxPrice < 2000) addTag(wrap, `≤ ₹${state.maxPrice}`, () => { state.maxPrice=2000; document.getElementById('f-price').value=2000; document.getElementById('price-display-val').textContent='₹2000'; applyFilters(); });
-    if (state.sort) {
-      const labels = { 'price-asc':'Price ↑','price-desc':'Price ↓','newest':'Newest','name-asc':'A–Z' };
-      addTag(wrap, labels[state.sort]||state.sort, () => { state.sort=''; document.getElementById('f-sort').value=''; applyFilters(); });
-    }
+  function renderTags() {
+    els.activeTags.innerHTML = '';
+    const addTag = (label, onRemove) => {
+      const tag = document.createElement('div');
+      tag.className = 'flex items-center gap-2 px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-[11px] font-black uppercase tracking-wider';
+      tag.innerHTML = `${label} <i class="fas fa-times cursor-pointer hover:text-pink-600 transition-colors"></i>`;
+      tag.querySelector('i').onclick = onRemove;
+      els.activeTags.appendChild(tag);
+    };
+
+    if (state.search) addTag(`"${state.search}"`, () => { state.search=''; applyFilters(); });
+    if (state.category) addTag(state.category, () => { state.category=''; applyFilters(); });
+    if (state.maxPrice < 20000) addTag(`Under ₹${state.maxPrice}`, () => { state.maxPrice=20000; applyFilters(); });
   }
 
-  function addTag(wrap, label, onRemove) {
-    const tag = document.createElement('span');
-    tag.className = 'filter-tag';
-    tag.innerHTML = `${label} <button onclick="(${onRemove.toString()})()">&times;</button>`;
-    wrap.appendChild(tag);
-  }
-
-  function renderPagination(currentPage, totalPages) {
+  function renderPagination(cur, total) {
     const pg = document.getElementById('pagination');
-    if (totalPages <= 1) { pg.innerHTML = ''; return; }
-
+    if (total <= 1) { pg.innerHTML = ''; return; }
+    
     let html = '';
-    html += `<button class="pg-btn${currentPage===1?' disabled':''}" onclick="goPage(${currentPage-1})">‹ Prev</button>`;
-    for (let i = 1; i <= totalPages; i++) {
-      if (totalPages > 7 && Math.abs(i - currentPage) > 2 && i !== 1 && i !== totalPages) {
-        if (i === 2 || i === totalPages - 1) html += `<span style="padding:0 4px;color:#9ca3af;">…</span>`;
-        continue;
-      }
-      html += `<button class="pg-btn${i===currentPage?' active':''}" onclick="goPage(${i})">${i}</button>`;
+    const btnClass = "w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-all border border-slate-100 ";
+    
+    html += `<button class="${btnClass} ${cur === 1 ? 'opacity-30 pointer-events-none' : 'bg-white hover:border-purple-600'}" onclick="goPage(${cur-1})"><i class="fas fa-chevron-left"></i></button>`;
+    
+    for (let i = 1; i <= total; i++) {
+        if (i === cur) html += `<button class="${btnClass} gradient-bg text-white shadow-lg shadow-purple-200">${i}</button>`;
+        else html += `<button class="${btnClass} bg-white hover:border-purple-600" onclick="goPage(${i})">${i}</button>`;
     }
-    html += `<button class="pg-btn${currentPage===totalPages?' disabled':''}" onclick="goPage(${currentPage+1})">Next ›</button>`;
+
+    html += `<button class="${btnClass} ${cur === total ? 'opacity-30 pointer-events-none' : 'bg-white hover:border-purple-600'}" onclick="goPage(${cur+1})"><i class="fas fa-chevron-right"></i></button>`;
     pg.innerHTML = html;
   }
 
-  // ─── Actions ─────────────────────────────────────────────────────────────────
+  // ─── Actions ───────────────────────────────────────────────────────────────
   function applyFilters() {
-    state.search   = document.getElementById('f-search').value.trim();
+    state.search = document.getElementById('f-search').value.trim();
     state.maxPrice = parseInt(document.getElementById('f-price').value);
-    state.sort     = document.getElementById('f-sort').value;
-    state.page     = 1;
+    state.sort = document.getElementById('f-sort').value;
+    state.page = 1;
+    
+    initUI();
     fetchProducts();
-    // Update browser URL without reload
-    const params = new URLSearchParams({ search: state.search, category: state.category, maxPrice: state.maxPrice, sort: state.sort, page: state.page });
-    history.replaceState({}, '', '/shop?' + params.toString());
+    
+    const url = new URL(window.location);
+    Object.keys(state).forEach(k => url.searchParams.set(k, state[k]));
+    history.replaceState({}, '', url);
   }
 
   function goPage(p) {
@@ -496,31 +276,25 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // ─── Category chip click ──────────────────────────────────────────────────────
-  document.querySelectorAll('#category-chips .chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      document.querySelectorAll('#category-chips .chip').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
+  // ─── Listeners ─────────────────────────────────────────────────────────────
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.onclick = () => {
       state.category = chip.dataset.value;
-    });
+      applyFilters();
+    };
   });
 
-  // ─── Price slider live update ─────────────────────────────────────────────────
-  document.getElementById('f-price').addEventListener('input', function () {
-    document.getElementById('price-display-val').textContent = '₹' + this.value;
-  });
+  document.getElementById('f-price').oninput = function() {
+    els.priceVal.textContent = Number(this.value).toLocaleString('en-IN');
+  };
 
-  // ─── Search: trigger on Enter ─────────────────────────────────────────────────
-  document.getElementById('f-search').addEventListener('keydown', e => {
-    if (e.key === 'Enter') applyFilters();
-  });
+  document.getElementById('f-search').onkeydown = e => e.key === 'Enter' && applyFilters();
+  document.getElementById('f-sort').onchange = applyFilters;
 
-  // ─── Sort: auto-apply on change ───────────────────────────────────────────────
-  document.getElementById('f-sort').addEventListener('change', applyFilters);
-
-  // ─── Initial load ─────────────────────────────────────────────────────────────
+  // ─── Initial Load ──────────────────────────────────────────────────────────
   initUI();
   fetchProducts();
+
 </script>
 
 </body>

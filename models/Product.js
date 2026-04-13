@@ -38,34 +38,10 @@ const productSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    best_offer: {
-      type: {
-        offer_id: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Offer",
-        },
-        name: { type: String, default: undefined },
-        discount_type: {
-          type: String,
-          enum: ["percentage", "fixed"],
-        },
-        discount_value: Number,
-        discounted_price: Number,
-        savings: Number,
-        valid_until: Date,
-      },
-      default: undefined, // <-- This makes it undefined by default
-    },
-
     brand: {
       type: String,
       required: true,
       trim: true,
-    },
-    actualPrice: {
-      type: Number,
-      required: true,
-      min: 0,
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
@@ -81,28 +57,10 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: true, // Product is available in stock
     },
-    onSale: {
-      type: Boolean,
-      default: false, // Product is on sale/special deal
-    },
-    avgRating: {
-      type: Number,
-      default: 0, // Average product rating
-      min: 0,
-      max: 5,
-    },
-    popularity: {
-      type: Number,
-      default: 0, // Metric for product popularity (could be view count or purchase count)
-    },
-    featured: {
-      type: Boolean,
-      default: false, // Featured products appear first in default sort
-    },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields automatically
-  }
+  },
 );
 
 // Create indexes for better search performance

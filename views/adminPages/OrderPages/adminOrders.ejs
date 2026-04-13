@@ -1,758 +1,367 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Orders — Admin</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order Management | Tech Admin</title>
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-  <link rel="stylesheet" href="/adminCSS/partials/menu.css"/>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .main-content { margin-left: 250px; }
+        @media(max-width: 768px) { .main-content { margin-left: 0; } }
 
-  <style>
-    :root {
-      --brand:       #f57c00;
-      --brand-dark:  #e65100;
-      --brand-light: #fff9f0;
-      --ink:         #1a1a2e;
-      --muted:       #6b7280;
-      --border:      #e5e7eb;
-      --success:     #16a34a;
-      --danger:      #dc2626;
-      --sidebar-w:   250px;
-      --sidebar-col: 70px;
-    }
-    *, *::before, *::after { box-sizing: border-box; }
-    body { font-family: 'Manrope', sans-serif; background: #f4f5f7; color: var(--ink); overflow-x: hidden; }
-    .syne { font-family: 'Syne', sans-serif; }
+        /* Modal specific scrollbar */
+        .modal-box::-webkit-scrollbar { width: 6px; }
+        .modal-box::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
-    .main-wrap    { display: flex; min-height: 100vh; }
-    .main-content { flex: 1; padding: 28px 24px; margin-left: var(--sidebar-w); transition: margin-left .3s; }
-    @media(max-width:768px) { .main-content { margin-left: var(--sidebar-col); } }
-    @media(max-width:576px) { .main-content { margin-left: 0; } }
-
-    /* Stat cards */
-    .stat-card { background:#fff; border-radius:14px; padding:18px 20px; border:1px solid var(--border); box-shadow:0 2px 8px rgba(0,0,0,.04); transition:transform .2s,box-shadow .2s; }
-    .stat-card:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,.08); }
-    .stat-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:.9rem; }
-
-    /* Filter bar */
-    .filter-bar { background:#fff; border-radius:12px; padding:14px 18px; border:1px solid var(--border); box-shadow:0 1px 4px rgba(0,0,0,.04); }
-    .filter-bar .form-select { border-radius:9px; border:1.5px solid var(--border); font-size:.85rem; font-family:'Manrope',sans-serif; }
-    .filter-bar .form-select:focus { border-color:var(--brand); box-shadow:0 0 0 3px rgba(245,124,0,.15); }
-
-    /* Table */
-    .table-card { background:#fff; border-radius:14px; border:1px solid var(--border); box-shadow:0 2px 10px rgba(0,0,0,.05); overflow:hidden; }
-    .table-scroll { max-height:65vh; overflow-y:auto; }
-    .table-scroll::-webkit-scrollbar { width:6px; }
-    .table-scroll::-webkit-scrollbar-thumb { background:var(--brand); border-radius:4px; }
-    .tbl { width:100%; border-collapse:collapse; }
-    .tbl thead th { position:sticky; top:0; z-index:2; background:var(--ink); color:#fff; padding:13px 16px; font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; white-space:nowrap; font-family:'Syne',sans-serif; }
-    .tbl tbody tr { border-bottom:1px solid var(--border); transition:background .15s; cursor:pointer; }
-    .tbl tbody tr:last-child { border-bottom:none; }
-    .tbl tbody tr:hover { background:#fffbf5; }
-    .tbl tbody td { padding:13px 16px; font-size:.85rem; vertical-align:middle; }
-
-    /* Order-level status badges */
-    .badge-status { display:inline-flex; align-items:center; gap:5px; padding:4px 11px; border-radius:20px; font-size:.72rem; font-weight:700; white-space:nowrap; }
-    .badge-status::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; opacity:.75; }
-    .bs-pending          { background:#fef3c7; color:#92400e; }
-    .bs-processing       { background:#e0f2fe; color:#075985; }
-    .bs-paid             { background:#dcfce7; color:#14532d; }
-    .bs-delivered        { background:#dcfce7; color:#14532d; }
-    .bs-cancelled        { background:#fee2e2; color:#7f1d1d; }
-    .bs-return-requested { background:#ffedd5; color:#7c2d12; }
-    .bs-return-accepted  { background:#d1fae5; color:#065f46; }
-    .bs-returned         { background:#f3f4f6; color:#374151; }
-    .bs-default          { background:#f3f4f6; color:#374151; }
-
-    /* Item-level status badges */
-    .badge-item-status { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:20px; font-size:.68rem; font-weight:700; white-space:nowrap; }
-    .bis-active           { background:#dcfce7; color:#14532d; }
-    .bis-cancelled        { background:#fee2e2; color:#7f1d1d; }
-    .bis-return_requested { background:#ffedd5; color:#9a3412; border:1.5px solid #fed7aa; }
-    .bis-return_accepted  { background:#d1fae5; color:#065f46; }
-    .bis-returned         { background:#f3f4f6; color:#374151; }
-
-    .badge-pay { display:inline-flex; align-items:center; gap:5px; padding:4px 11px; border-radius:20px; font-size:.72rem; font-weight:700; }
-    .bp-pending  { background:#fef3c7; color:#92400e; }
-    .bp-paid     { background:#dcfce7; color:#14532d; }
-    .bp-refunded { background:#e0f2fe; color:#075985; }
-    .bp-failed   { background:#fee2e2; color:#7f1d1d; }
-
-    /* Modal */
-    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(10,10,20,.55); backdrop-filter:blur(5px); z-index:1050; align-items:center; justify-content:center; padding:20px; }
-    .modal-overlay.open { display:flex; }
-    .modal-box { background:#fff; border-radius:20px; width:100%; max-width:760px; max-height:92vh; overflow-y:auto; box-shadow:0 28px 70px rgba(0,0,0,.22); animation:modalPop .28s cubic-bezier(.34,1.56,.64,1) both; }
-    @keyframes modalPop { from{opacity:0;transform:scale(.93) translateY(18px)} to{opacity:1;transform:scale(1) translateY(0)} }
-    .modal-head { display:flex; justify-content:space-between; align-items:flex-start; padding:22px 26px 18px; border-bottom:1px solid var(--border); position:sticky; top:0; background:#fff; z-index:1; border-radius:20px 20px 0 0; }
-    .modal-ttl  { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:800; }
-    .modal-sub  { font-size:.78rem; color:var(--muted); margin-top:3px; font-family:monospace; }
-    .modal-close { width:32px; height:32px; border-radius:50%; border:none; background:#f3f4f6; color:var(--muted); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:.9rem; transition:all .18s; flex-shrink:0; }
-    .modal-close:hover { background:#fee2e2; color:var(--danger); }
-    .modal-body-wrap { padding:22px 26px 26px; }
-
-    .sec-title { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:12px; margin-top:22px; }
-    .sec-title:first-child { margin-top:0; }
-
-    .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    @media(max-width:480px) { .info-grid { grid-template-columns:1fr; } }
-    .info-block { background:#f9fafb; border-radius:11px; padding:11px 14px; }
-    .info-lbl { font-size:.7rem; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.04em; margin-bottom:3px; }
-    .info-val { font-size:.88rem; font-weight:700; color:var(--ink); }
-
-    .addr-block { background:#f9fafb; border-radius:11px; padding:14px 16px; font-size:.86rem; line-height:1.75; color:var(--ink); }
-    .addr-type-chip { display:inline-block; font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; padding:2px 8px; border-radius:20px; margin-bottom:7px; color:#fff; background:var(--ink); }
-    .addr-type-chip.other { background:#059669; }
-    .addr-type-chip.home  { background:#2563eb; }
-    .addr-type-chip.work  { background:#7c3aed; }
-
-    /* Item rows */
-    .item-row { display:flex; align-items:flex-start; gap:12px; padding:14px 0; border-bottom:1px solid var(--border); }
-    .item-row:last-child { border-bottom:none; }
-    .item-img { width:60px; height:60px; border-radius:10px; object-fit:cover; flex-shrink:0; border:1px solid var(--border); }
-    .item-info { flex:1; min-width:0; }
-    .item-name { font-weight:700; font-size:.88rem; margin-bottom:5px; }
-    .item-chips { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:7px; }
-    .chip { background:#f3f4f6; border:1px solid var(--border); color:var(--muted); font-size:.7rem; font-weight:600; padding:2px 8px; border-radius:20px; }
-    .item-right { display:flex; flex-direction:column; align-items:flex-end; gap:8px; flex-shrink:0; }
-    .item-total { font-family:'Syne',sans-serif; font-weight:800; font-size:.95rem; }
-
-    /* Accept Return button */
-    .btn-accept-return {
-      display:inline-flex; align-items:center; gap:5px;
-      padding:5px 12px; border-radius:8px; border:none; cursor:pointer;
-      font-size:.72rem; font-weight:700; font-family:'Manrope',sans-serif;
-      background:#d1fae5; color:#065f46;
-      border:1.5px solid #6ee7b7;
-      transition:all .18s; white-space:nowrap;
-    }
-    .btn-accept-return:hover { background:#065f46; color:#fff; border-color:#065f46; }
-
-    /* Price table */
-    .price-tbl { width:100%; }
-    .price-tbl tr td { padding:7px 0; font-size:.86rem; }
-    .price-tbl tr td:last-child { text-align:right; font-weight:600; }
-    .price-tbl .lbl { color:var(--muted); }
-    .price-tbl .saving td { color:var(--success); font-weight:700; }
-    .price-tbl .grand td { font-family:'Syne',sans-serif; font-weight:800; font-size:1.05rem; color:var(--ink); border-top:2px solid var(--ink); padding-top:12px; }
-    .coupon-chip { display:inline-flex; align-items:center; gap:4px; background:#fef9c3; border:1.5px dashed #fbbf24; color:#92400e; border-radius:7px; padding:2px 9px; font-size:.72rem; font-weight:700; }
-
-    .rpay-block { background:linear-gradient(135deg,#0f172a,#1e293b); border-radius:12px; padding:16px 18px; color:#e2e8f0; }
-    .rpay-row { display:flex; justify-content:space-between; align-items:center; font-size:.8rem; padding:6px 0; border-bottom:1px solid rgba(255,255,255,.07); }
-    .rpay-row:last-child { border-bottom:none; }
-    .rpay-lbl { color:#94a3b8; }
-    .rpay-val { font-family:monospace; font-weight:700; color:#e2e8f0; word-break:break-all; text-align:right; max-width:60%; }
-
-    .coupon-block { background:#fefce8; border:1.5px dashed #fbbf24; border-radius:11px; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
-
-    .btn-update { padding:6px 12px; background:var(--brand); color:#fff; border:none; border-radius:8px; font-size:.78rem; font-weight:700; cursor:pointer; transition:background .18s; white-space:nowrap; }
-    .btn-update:hover { background:var(--brand-dark); }
-
-    .empty-row td { padding:60px 20px !important; text-align:center; color:var(--muted); }
-
-    /* Return requested highlight */
-    .item-row.has-return-request { background:#fffbf5; border-radius:10px; padding:14px 10px; border:1.5px solid #fed7aa; margin-bottom:4px; }
-  </style>
+        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(15, 23, 42, 0.6); backdrop-filter:blur(8px); z-index:1050; align-items:center; justify-content:center; padding:20px; }
+        .modal-overlay.open { display:flex; }
+        .modal-box { background:#fff; border-radius:32px; width:100%; max-width:850px; max-height:92vh; overflow-y:auto; box-shadow:0 28px 70px rgba(0,0,0,.2); animation:modalPop .3s cubic-bezier(.34,1.56,.64,1) both; }
+        @keyframes modalPop { from{opacity:0;transform:scale(.95) translateY(20px)} to{opacity:1;transform:scale(1) translateY(0)} }
+    </style>
 </head>
-<body>
-<div class="main-wrap">
-  <%- include('../partials/menu') %>
 
-  <div class="main-content">
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen">
+<div class="flex">
+    <%- include('../partials/menu') %>
 
-    <!-- Page header -->
-    <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
-      <div>
-        <h1 class="syne text-2xl font-extrabold" style="color:var(--ink);">Orders</h1>
-        <p class="text-sm mt-1" style="color:var(--muted);">
-          <% if (orders && orders.length > 0) { %>
-            <%= orders.length %> order<%= orders.length !== 1 ? 's' : '' %> found
-          <% } else { %>No orders yet<% } %>
-        </p>
-      </div>
+    <div class="main-content w-full p-6 md:p-10">
+
+        <div class="mb-8">
+            <h1 class="text-3xl font-extrabold tracking-tight">Order Management</h1>
+            <p class="text-slate-500 text-sm mt-1">Review customer transactions and manage fulfillment status.</p>
+        </div>
+
+        <% if (stats) { %>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
+                <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-xs mb-3">
+                    <i class="fas fa-list"></i>
+                </div>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total</p>
+                <h4 class="text-xl font-extrabold"><%= stats.total %></h4>
+            </div>
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 text-amber-600">
+                <div class="w-10 h-10 bg-amber-50 rounded-2xl flex items-center justify-center text-xs mb-3">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pending</p>
+                <h4 class="text-xl font-extrabold"><%= stats.pending %></h4>
+            </div>
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 text-emerald-600">
+                <div class="w-10 h-10 bg-emerald-50 rounded-2xl flex items-center justify-center text-xs mb-3">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Delivered</p>
+                <h4 class="text-xl font-extrabold"><%= stats.delivered %></h4>
+            </div>
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 text-red-600">
+                <div class="w-10 h-10 bg-red-50 rounded-2xl flex items-center justify-center text-xs mb-3">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cancelled</p>
+                <h4 class="text-xl font-extrabold"><%= stats.cancelled %></h4>
+            </div>
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 text-blue-600">
+                <div class="w-10 h-10 bg-blue-50 rounded-2xl flex items-center justify-center text-xs mb-3">
+                    <i class="fas fa-undo"></i>
+                </div>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Returns</p>
+                <h4 class="text-xl font-extrabold text-blue-600"><%= stats.returnRequested %></h4>
+            </div>
+            <div class="bg-slate-900 p-5 rounded-3xl shadow-sm border border-slate-800 text-white">
+                <div class="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center text-xs mb-3">
+                    <i class="fas fa-indian-rupee-sign"></i>
+                </div>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Revenue</p>
+                <h4 class="text-lg font-extrabold">₹<%= stats.totalRevenue.toLocaleString('en-IN') %></h4>
+            </div>
+        </div>
+        <% } %>
+
+        <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-200 mb-8 flex flex-col lg:flex-row gap-4 items-center">
+            <form action="/admin/orders" method="GET" class="flex items-center gap-3 flex-1 w-full">
+                <div class="relative flex-1 group">
+                    <i class="fas fa-filter absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors"></i>
+                    <select name="status" onchange="this.form.submit()" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-4 focus:ring-indigo-50 transition-all appearance-none cursor-pointer">
+                        <option value="" <%- !selectedStatus ? 'selected' : '' %>>Filter: All Order Status</option>
+                        <option value="pending" <%- selectedStatus==='pending' ? 'selected':'' %>>Pending</option>
+                        <option value="delivered" <%- selectedStatus==='delivered' ? 'selected':'' %>>Delivered</option>
+                        <option value="cancelled" <%- selectedStatus==='cancelled' ? 'selected':'' %>>Cancelled</option>
+                        <option value="return requested" <%- selectedStatus==='return requested' ? 'selected':'' %>>Return Requested</option>
+                    </select>
+                </div>
+            </form>
+
+            <form action="/admin/orders" method="GET" class="flex items-center gap-3 flex-1 w-full">
+                <div class="relative flex-1 group">
+                    <i class="fas fa-sort absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors"></i>
+                    <select name="sort" onchange="this.form.submit()" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-4 focus:ring-indigo-50 transition-all appearance-none cursor-pointer">
+                        <option value="" <%- !selectedSort ? 'selected':'' %>>Sort: Default Date</option>
+                        <option value="desc" <%- selectedSort==='desc' ? 'selected':'' %>>Newest First</option>
+                        <option value="asc" <%- selectedSort==='asc' ? 'selected':'' %>>Oldest First</option>
+                    </select>
+                </div>
+                <a href="/admin/orders" class="text-xs font-bold text-slate-400 hover:text-red-500 px-2 transition-colors">Reset</a>
+            </form>
+        </div>
+
+        <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200">
+                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Order & ID</th>
+                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Customer</th>
+                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Total Price</th>
+                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Order Status</th>
+                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Payment</th>
+                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <% if (orders && orders.length > 0) { %>
+                            <% orders.forEach((order, idx) => { %>
+                            <tr onclick="openModal('<%= order._id %>')" class="hover:bg-slate-50/50 cursor-pointer transition-colors group">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-xs font-bold text-slate-300">#<%= idx + 1 %></span>
+                                        <span class="text-xs font-mono font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg"><%= order.orderId ? order.orderId.slice(-8).toUpperCase() : 'NO-ID' %></span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm font-bold text-slate-800"><%= order.customer.name %></div>
+                                    <div class="text-[10px] text-slate-400 font-medium uppercase"><%= order.customer.email %></div>
+                                </td>
+                                <td class="px-6 py-4 text-sm font-black text-slate-900">
+                                    ₹<%= order.priceBreakdown.grandTotal.toLocaleString('en-IN') %>
+                                </td>
+                                <td class="px-6 py-4">
+                                  <%
+    const items = order.items || [];
+
+    let derivedStatus = order.status;
+
+    if (items.some(item => item.status === "return_requested")) {
+        derivedStatus = "return_requested";
+    } else if (items.every(item => item.status === "returned")) {
+        derivedStatus = "returned";
+    } else if (items.some(item => item.status === "cancelled")) {
+        derivedStatus = "cancelled";
+    }
+
+
+    const statusColors = {
+    'pending': 'bg-amber-50 text-amber-600',
+    'processing': 'bg-blue-50 text-blue-600',
+    'delivered': 'bg-emerald-50 text-emerald-600',
+    'cancelled': 'bg-red-50 text-red-600',
+    'returned': 'bg-slate-100 text-slate-600',
+    'return_requested': 'bg-purple-50 text-purple-600'
+}
+
+    const statusLabels = {
+        pending: "Pending",
+        processing: "Processing",
+        delivered: "Delivered",
+        cancelled: "Cancelled",
+        returned: "Returned",
+        return_requested: "Return Requested"
+    };
+%>
+
+<span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-current opacity-80 
+    <%= statusColors[derivedStatus] || 'bg-slate-50 text-slate-500' %>">
+    <%= statusLabels[derivedStatus] || derivedStatus %>
+</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="text-xs font-bold text-slate-600"><%= order.payment.methodLabel %></span>
+                                </td>
+                                <td class="px-6 py-4 text-xs font-semibold text-slate-400 whitespace-nowrap">
+                                    <%= order.orderDateFmt %>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="6" class="px-6 py-20 text-center text-slate-400 font-bold uppercase tracking-widest text-xs italic">No orders found matching your filters</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-
-    <!-- Stats row -->
-    <% if (stats) { %>
-    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
-      <div class="stat-card">
-        <div class="flex items-center gap-3">
-          <div class="stat-icon" style="background:#f0f9ff;color:#0284c7;"><i class="fas fa-list-alt"></i></div>
-          <div>
-            <div class="text-xs font-bold uppercase tracking-wide" style="color:var(--muted);">Total</div>
-            <div class="syne text-xl font-extrabold"><%= stats.total %></div>
-          </div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="flex items-center gap-3">
-          <div class="stat-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-clock"></i></div>
-          <div>
-            <div class="text-xs font-bold uppercase tracking-wide" style="color:var(--muted);">Pending</div>
-            <div class="syne text-xl font-extrabold"><%= stats.pending %></div>
-          </div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="flex items-center gap-3">
-          <div class="stat-icon" style="background:#dcfce7;color:#16a34a;"><i class="fas fa-check-circle"></i></div>
-          <div>
-            <div class="text-xs font-bold uppercase tracking-wide" style="color:var(--muted);">Delivered</div>
-            <div class="syne text-xl font-extrabold"><%= stats.delivered %></div>
-          </div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="flex items-center gap-3">
-          <div class="stat-icon" style="background:#fee2e2;color:#dc2626;"><i class="fas fa-times-circle"></i></div>
-          <div>
-            <div class="text-xs font-bold uppercase tracking-wide" style="color:var(--muted);">Cancelled</div>
-            <div class="syne text-xl font-extrabold"><%= stats.cancelled %></div>
-          </div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="flex items-center gap-3">
-          <div class="stat-icon" style="background:#ffedd5;color:#ea580c;"><i class="fas fa-undo"></i></div>
-          <div>
-            <div class="text-xs font-bold uppercase tracking-wide" style="color:var(--muted);">Returns</div>
-            <div class="syne text-xl font-extrabold"><%= stats.returnRequested %></div>
-          </div>
-        </div>
-      </div>
-      <div class="stat-card" style="background:var(--ink);">
-        <div class="flex items-center gap-3">
-          <div class="stat-icon" style="background:rgba(255,255,255,.1);color:#4ade80;"><i class="fas fa-indian-rupee-sign"></i></div>
-          <div>
-            <div class="text-xs font-bold uppercase tracking-wide" style="color:#9ca3af;">Revenue</div>
-            <div class="syne text-lg font-extrabold" style="color:#fff;">₹<%= stats.totalRevenue.toLocaleString('en-IN') %></div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <% } %>
-
-    <!-- Filter bar -->
-    <div class="filter-bar mb-5 flex flex-wrap gap-3 items-center">
-      <form action="/admin/orders" method="GET" class="flex items-center gap-2 flex-1 min-w-[180px]">
-        <i class="fas fa-filter text-sm" style="color:var(--muted);"></i>
-        <select name="status" class="form-select text-sm" onchange="this.form.submit()">
-          <option value="" <%- !selectedStatus ? 'selected' : '' %>>All Statuses</option>
-          <option value="pending"           <%- selectedStatus==='pending'           ? 'selected':'' %>>Pending</option>
-          <option value="processing"        <%- selectedStatus==='processing'        ? 'selected':'' %>>Processing</option>
-          <option value="paid"              <%- selectedStatus==='paid'              ? 'selected':'' %>>Paid</option>
-          <option value="delivered"         <%- selectedStatus==='delivered'         ? 'selected':'' %>>Delivered</option>
-          <option value="cancelled"         <%- selectedStatus==='cancelled'         ? 'selected':'' %>>Cancelled</option>
-          <option value="return requested"  <%- selectedStatus==='return requested'  ? 'selected':'' %>>Return Requested</option>
-          <option value="return accepted"   <%- selectedStatus==='return accepted'   ? 'selected':'' %>>Return Accepted</option>
-          <option value="returned"          <%- selectedStatus==='returned'          ? 'selected':'' %>>Returned</option>
-        </select>
-      </form>
-      <form action="/admin/orders" method="GET" class="flex items-center gap-2 flex-1 min-w-[160px]">
-        <i class="fas fa-sort text-sm" style="color:var(--muted);"></i>
-        <select name="sort" class="form-select text-sm" onchange="this.form.submit()">
-          <option value=""     <%- !selectedSort        ? 'selected':'' %>>Sort by Date</option>
-          <option value="desc" <%- selectedSort==='desc' ? 'selected':'' %>>Newest First</option>
-          <option value="asc"  <%- selectedSort==='asc'  ? 'selected':'' %>>Oldest First</option>
-        </select>
-      </form>
-    </div>
-
-    <!-- Orders table -->
-    <div class="table-card">
-      <div class="table-scroll">
-        <table class="tbl">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Order ID</th>
-              <th>Customer</th>
-              <th>Items</th>
-              <th>Total</th>
-              <th>Payment</th>
-              <th>Status</th>
-              <th>Pay Status</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% if (orders && orders.length > 0) { %>
-              <%
-                const statusCssMap = {
-                  'pending':          'bs-pending',
-                  'processing':       'bs-processing',
-                  'paid':             'bs-paid',
-                  'delivered':        'bs-delivered',
-                  'cancelled':        'bs-cancelled',
-                  'return requested': 'bs-return-requested',
-                  'return accepted':  'bs-return-accepted',
-                  'returned':         'bs-returned',
-                };
-                const payCssMap = {
-                  'pending':  'bp-pending',
-                  'paid':     'bp-paid',
-                  'refunded': 'bp-refunded',
-                  'failed':   'bp-failed',
-                };
-              %>
-              <% orders.forEach((order, idx) => { %>
-              <tr onclick="openModal('<%= order._id %>')" title="Click to view details">
-                <td class="text-center font-bold text-sm" style="color:var(--muted);"><%= idx + 1 %></td>
-                <td>
-                  <div class="font-bold text-xs" style="color:var(--brand);font-family:monospace;">
-                    <%= order.orderId ? order.orderId.slice(-12) : order._id.toString().slice(-8).toUpperCase() %>
-                  </div>
-                </td>
-                <td>
-                  <div class="font-semibold text-sm"><%= order.customer.name %></div>
-                  <div class="text-xs" style="color:var(--muted);"><%= order.customer.email || '' %></div>
-                </td>
-                <td class="text-center">
-                  <span class="chip"><%= order.totalItems %> item<%= order.totalItems !== 1 ? 's' : '' %></span>
-                </td>
-                <td>
-                  <div class="syne font-extrabold text-sm">₹<%= order.priceBreakdown.grandTotal.toFixed(2) %></div>
-                  <% if (order.priceBreakdown.couponCode) { %>
-                  <div class="text-xs mt-1" style="color:var(--success);">
-                    <i class="fas fa-tag" style="font-size:.65rem;"></i> −₹<%= order.priceBreakdown.couponDiscount.toFixed(2) %>
-                  </div>
-                  <% } %>
-                </td>
-                <td>
-                  <div class="text-sm font-semibold"><%= order.payment.methodLabel %></div>
-                </td>
-                <td>
-                  <span class="badge-status <%= statusCssMap[order.status] || 'bs-default' %>">
-                    <%= order.statusLabel %>
-                  </span>
-                </td>
-                <td>
-                  <span class="badge-pay <%= payCssMap[order.payment_status] || 'bp-pending' %>">
-                    <%= order.payment.statusLabel %>
-                  </span>
-                </td>
-                <td class="text-sm" style="color:var(--muted);white-space:nowrap;"><%= order.orderDateFmt %></td>
-              </tr>
-              <% }) %>
-            <% } else { %>
-              <tr class="empty-row"><td colspan="9"><i class="fas fa-inbox text-4xl block mb-3" style="color:var(--border);"></i>No orders found</td></tr>
-            <% } %>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-  </div>
 </div>
 
-<!-- ══ ORDER DETAIL MODALS ══ -->
 <% if (orders && orders.length > 0) { %>
-  <% orders.forEach(order => {
-    const pb = order.priceBreakdown;
-    const sa = order.shippingAddress;
-    const py = order.payment;
-    const cu = order.customer;
+    <% orders.forEach(order => { %>
+    <div class="modal-overlay" id="modal-<%= order._id %>">
+        <div class="modal-box">
+            <div class="flex justify-between items-start p-8 border-b border-slate-100 bg-slate-50/50">
+                <div>
+                    <h3 class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                        <i class="fas fa-box-open text-indigo-600"></i> Order Snapshot
+                    </h3>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Order Ref: <%= order.orderId %></p>
+                </div>
+                <button onclick="closeModal('<%= order._id %>')" class="w-10 h-10 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-red-500 flex items-center justify-center transition-all shadow-sm">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
 
-    const itemStatusCssMap = {
-      'active':           'bis-active',
-      'cancelled':        'bis-cancelled',
-      'return_requested': 'bis-return_requested',
-      'return_accepted':  'bis-return_accepted',
-      'returned':         'bis-returned',
-    };
-  %>
-  <div class="modal-overlay" id="modal-<%= order._id %>">
-    <div class="modal-box">
+            <div class="p-8 space-y-10">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-4">
+                        <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">Customer Details</label>
+                        <div class="bg-slate-50 p-6 rounded-3xl border border-slate-100">
+                            <h4 class="font-bold text-slate-800 text-sm"><%= order.customer.name %></h4>
+                            <p class="text-xs text-slate-500 mt-1"><%= order.customer.email %></p>
+                            <p class="text-xs text-slate-500"><%= order.customer.phone || 'No phone provided' %></p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">Shipping To</label>
+                        <div class="bg-slate-50 p-6 rounded-3xl border border-slate-100 text-xs text-slate-600 leading-relaxed">
+                            <span class="inline-block bg-slate-900 text-white px-2 py-0.5 rounded-md text-[9px] font-black uppercase mb-2 tracking-widest"><%= order.shippingAddress.type %></span>
+                            <p class="font-bold text-slate-800"><%= order.shippingAddress.name %></p>
+                            <p><%= order.shippingAddress.fullAddress %></p>
+                        </div>
+                    </div>
+                </div>
 
-      <!-- Header -->
-      <div class="modal-head">
-        <div>
-          <div class="modal-ttl">
-            <i class="fas fa-receipt mr-2" style="color:var(--brand);"></i>Order Details
-          </div>
-          <div class="modal-sub"><%= order.orderId || order._id.toString() %></div>
-        </div>
-        <button class="modal-close" onclick="closeModal('<%= order._id %>')">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-
-      <div class="modal-body-wrap">
-
-        <!-- Status strip -->
-        <div class="flex flex-wrap gap-3 items-center mb-5 p-3 rounded-xl" style="background:#f9fafb;border:1px solid var(--border);">
-          <span class="badge-status <%= ({
-            pending:'bs-pending', processing:'bs-processing', paid:'bs-paid',
-            delivered:'bs-delivered', cancelled:'bs-cancelled',
-            'return requested':'bs-return-requested',
-            'return accepted':'bs-return-accepted', returned:'bs-returned'
-          })[order.status] || 'bs-default' %>">
-            <%= order.statusLabel %>
-          </span>
-          <span class="badge-pay <%= ({pending:'bp-pending',paid:'bp-paid',refunded:'bp-refunded',failed:'bp-failed'})[order.payment_status] || 'bp-pending' %>">
-            <%= py.statusLabel %>
-          </span>
-          <span class="text-xs ml-auto" style="color:var(--muted);">
-            <i class="fas fa-calendar mr-1"></i><%= order.orderDateFmt %>
-          </span>
-        </div>
-
-        <!-- Order Info -->
-        <div class="sec-title">Order Info</div>
-        <div class="info-grid">
-          <div class="info-block">
-            <div class="info-lbl">Order ID</div>
-            <div class="info-val" style="font-family:monospace;font-size:.78rem;word-break:break-all;"><%= order.orderId %></div>
-          </div>
-          <div class="info-block">
-            <div class="info-lbl">Payment Method</div>
-            <div class="info-val"><%= py.methodLabel %></div>
-          </div>
-          <div class="info-block">
-            <div class="info-lbl">Order Date</div>
-            <div class="info-val" style="font-size:.82rem;"><%= order.orderDateFmt %></div>
-          </div>
-          <div class="info-block">
-            <div class="info-lbl">Total Items</div>
-            <div class="info-val"><%= order.totalItems %> item<%= order.totalItems !== 1 ? 's' : '' %></div>
-          </div>
-        </div>
-
-        <!-- Customer -->
-        <div class="sec-title">Customer</div>
-        <div class="info-grid">
-          <div class="info-block">
-            <div class="info-lbl">Name</div>
-            <div class="info-val"><%= cu.name %></div>
-          </div>
-          <div class="info-block">
-            <div class="info-lbl">Email</div>
-            <div class="info-val" style="font-size:.8rem;"><%= cu.email || '—' %></div>
-          </div>
-          <% if (cu.phone) { %>
-          <div class="info-block">
-            <div class="info-lbl">Phone</div>
-            <div class="info-val"><%= cu.phone %></div>
-          </div>
-          <% } %>
-        </div>
-
-        <!-- Shipping Address -->
-        <div class="sec-title">Shipping Address</div>
-        <div class="addr-block">
-          <% if (sa.type) { %>
-            <span class="addr-type-chip <%= sa.type.toLowerCase() %>"><%= sa.type %></span>
-          <% } %>
-          <% if (sa.name) { %><div style="font-weight:700;margin-bottom:3px;"><%= sa.name %></div><% } %>
-          <div style="color:var(--muted);font-size:.85rem;">
-            <% if (sa.phoneNumber) { %><div><i class="fas fa-phone" style="width:16px;color:var(--success);"></i> <%= sa.phoneNumber %></div><% } %>
-            <div><i class="fas fa-map-pin" style="width:16px;color:#9ca3af;"></i> <%= sa.fullAddress %></div>
-          </div>
-        </div>
-
-        <!-- Items -->
-        <div class="sec-title">
-          Items Ordered (<%= order.totalItems %>)
-          <% const hasReturnRequests = order.items && order.items.some(i => i.status === 'return_requested'); %>
-          <% if (hasReturnRequests) { %>
-            <span style="background:#ffedd5;color:#9a3412;border:1.5px solid #fed7aa;padding:2px 8px;border-radius:20px;font-size:.65rem;margin-left:8px;">
-              <i class="fas fa-exclamation-triangle" style="font-size:.6rem;"></i> Return Requested
-            </span>
-          <% } %>
-        </div>
-
-        <% if (order.items && order.items.length > 0) { %>
-          <% order.items.forEach(item => { %>
-          <div class="item-row <%= item.status === 'return_requested' ? 'has-return-request' : '' %>">
-            <img src="<%= item.productImage || item.image %>" alt="<%= item.name %>"
-              class="item-img" onerror="this.src='https://placehold.co/60x60/f3f4f6/9ca3af?text=IMG'">
-            <div class="item-info">
-              <div class="item-name"><%= item.productName || item.name %></div>
-              <div class="item-chips">
-                <% if (item.color) { %><span class="chip">🎨 <%= item.color %></span><% } %>
-                <% if (item.size)  { %><span class="chip">📏 <%= item.size %></span><% } %>
-                <span class="chip">× <%= item.quantity %></span>
-                <span class="chip" style="background:#fff7ed;border-color:#fed7aa;color:#c2410c;">₹<%= item.price.toFixed(2) %> each</span>
-              </div>
-              <!-- Item status badge -->
-              <span class="badge-item-status <%= itemStatusCssMap[item.status] || 'bis-active' %>">
-                <% if (item.status === 'return_requested') { %><i class="fas fa-undo" style="font-size:.6rem;"></i><% } %>
-                <%= item.itemStatusLabel || item.status %>
-              </span>
-              <!-- Change Item Status -->
-<div class="mt-2 flex items-center gap-2">
-  <select
-    class="form-select text-xs"
-    style="border-radius:6px; padding:3px 8px;"
-    onchange="changeItemStatus('<%= order._id %>', '<%= item._id %>', this.value, '<%= (item.productName || item.name || '').replace(/'/g, '&#39;') %>')"
+                <div class="space-y-4">
+                    <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 italic">Cart Inventory</label>
+                    <div class="divide-y divide-slate-100 border-y border-slate-100">
+                        <% order.items.forEach(item => { %>
+                        <div class="py-5 flex items-center gap-4 group">
+                            <div class="w-16 h-16 rounded-2xl overflow-hidden border border-slate-200 flex-shrink-0">
+                                <img src="<%= item.productImage || item.image %>" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100'">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h5 class="text-sm font-bold text-slate-800 truncate"><%= item.productName || item.name %></h5>
+                                <div class="flex gap-2 mt-1">
+                                    <span class="text-[10px] font-black bg-slate-100 px-2 py-0.5 rounded text-slate-500"><%= item.color %></span>
+                                    <span class="text-[10px] font-black bg-slate-100 px-2 py-0.5 rounded text-slate-500 uppercase"><%= item.size %></span>
+                                    <span class="text-[10px] font-black text-indigo-600">Qty: <%= item.quantity %></span>
+                                </div>
+                               <div class="mt-2">
+  <select 
+    onchange="changeItemStatus('<%= order._id %>', '<%= item._id %>', this.value, '<%= (item.productName || item.name || '').replace(/'/g, '&#39;') %>')" 
+    class="text-[10px] font-black uppercase tracking-widest bg-white border border-slate-200 rounded-lg px-2 py-1 outline-none focus:border-indigo-400"
   >
-    <option value="">Change Status</option>
-    <option value="active" <%= item.status==='active'?'selected':'' %>>Active</option>
+    <option value="pending" <%= item.status==='pending'?'selected':'' %>>Pending</option>
+    <option value="delivered" <%= item.status==='delivered'?'selected':'' %>>Delivered</option>
     <option value="cancelled" <%= item.status==='cancelled'?'selected':'' %>>Cancelled</option>
     <option value="return_requested" <%= item.status==='return_requested'?'selected':'' %>>Return Requested</option>
     <option value="return_accepted" <%= item.status==='return_accepted'?'selected':'' %>>Return Accepted</option>
     <option value="returned" <%= item.status==='returned'?'selected':'' %>>Returned</option>
   </select>
 </div>
-              <!-- Return reason (if any) -->
-              <% if (item.returnReason) { %>
-              <div class="mt-2 text-xs p-2 rounded-lg" style="background:#fff7ed;color:#92400e;border:1px solid #fed7aa;">
-                <i class="fas fa-comment-alt" style="font-size:.65rem;"></i>
-                <strong>Reason:</strong> <%= item.returnReason %>
-              </div>
-              <% } %>
+                            </div>
+                            <div class="text-right flex-shrink-0">
+                                <p class="text-sm font-black text-slate-900">₹<%= (item.price * item.quantity).toLocaleString('en-IN') %></p>
+                            </div>
+                        </div>
+                        <% }) %>
+                    </div>
+                </div>
+
+                <div class="bg-indigo-600 rounded-[2rem] p-8 text-white flex justify-between items-center shadow-xl shadow-indigo-200">
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">Settlement Total</p>
+                        <h2 class="text-3xl font-black tracking-tight">₹<%= order.priceBreakdown.grandTotal.toLocaleString('en-IN') %></h2>
+                    </div>
+                    <div class="text-right">
+                        <div class="inline-block bg-white/10 px-4 py-2 rounded-2xl border border-white/20 text-xs font-bold">
+                            <%= order.payment.methodLabel %> · <%= order.payment.statusLabel %>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-slate-100">
+                    <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-4">Master Status Control</label>
+                    <form action="/admin/orders/update-status/<%= order._id %>" class="flex gap-3">
+                        <select name="status" class="flex-1 px-5 py-4 bg-slate-100 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-indigo-50 appearance-none cursor-pointer">
+                            <option value="pending" <%- order.status==='pending' ? 'selected':'' %>>Pending</option>
+                            <option value="processing" <%- order.status==='processing' ? 'selected':'' %>>Processing</option>
+                            <option value="delivered" <%- order.status==='delivered' ? 'selected':'' %>>Delivered</option>
+                            <option value="cancelled" <%- order.status==='cancelled' ? 'selected':'' %>>Cancelled</option>
+                        </select>
+                        <button type="button" class="update-btn px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-indigo-100 transition-all">Update</button>
+                    </form>
+                </div>
             </div>
-            <div class="item-right">
-              <!-- <div class="item-total">₹<%= item.lineTotal.toFixed(2) %></div> -->
-              <!-- Accept Return button — shown only when item status is return_requested -->
-              <!-- <% if (item.status === 'return_requested') { %> -->
-              <!-- <% const safeItemName = (item.productName || item.name || '').replace(/'/g, '&#39;'); %> -->
-              <!-- <button -->
-                <!-- class="btn-accept-return" -->
-                <!-- onclick="event.stopPropagation(); acceptItemReturn('<%= order._id %>', '<%= item._id %>', '<%= safeItemName %>')" -->
-                <!-- title="Accept return for this item"> -->
-                <!-- <i class="fas fa-check-circle" style="font-size:.7rem;"></i> Accept Return -->
-              <!-- </button> -->
-              <!-- <% } %> -->
-            </div>
-          </div>
-          <% }) %>
-        <% } %>
-
-        <!-- Price breakdown -->
-        <div class="sec-title">Price Breakdown</div>
-        <div style="background:#f9fafb;border-radius:12px;padding:16px 18px;">
-          <table class="price-tbl">
-            <tr>
-              <td class="lbl">Subtotal (<%= order.totalItems %> items)</td>
-              <td>₹<%= pb.itemSubtotal.toFixed(2) %></td>
-            </tr>
-            <tr>
-              <td class="lbl">Shipping</td>
-              <td style="color:var(--success);font-weight:700;">Free</td>
-            </tr>
-            <% if (pb.tax > 0) { %>
-            <tr>
-              <td class="lbl">Tax</td>
-              <td>₹<%= pb.tax.toFixed(2) %></td>
-            </tr>
-            <% } %>
-            <% if (pb.couponDiscount > 0) { %>
-            <tr class="saving">
-              <td>
-                <i class="fas fa-tag" style="margin-right:4px;font-size:.75rem;"></i>Coupon
-                <span class="coupon-chip ml-2"><%= pb.couponCode %></span>
-              </td>
-              <td>−₹<%= pb.couponDiscount.toFixed(2) %></td>
-            </tr>
-            <% } %>
-            <tr class="grand">
-              <td>Grand Total</td>
-              <td>₹<%= pb.grandTotal.toFixed(2) %></td>
-            </tr>
-          </table>
         </div>
-
-        <!-- Coupon banner -->
-        <% if (pb.couponCode) { %>
-        <div class="coupon-block mt-3">
-          <div>
-            <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#92400e;margin-bottom:2px;">Coupon Applied</div>
-            <span class="coupon-chip text-sm"><i class="fas fa-tag" style="font-size:.7rem;"></i> <%= pb.couponCode %></span>
-          </div>
-          <div style="font-family:'Syne',sans-serif;font-weight:800;color:var(--success);font-size:1rem;">
-            −₹<%= pb.couponDiscount.toFixed(2) %>
-          </div>
-        </div>
-        <% } %>
-
-        <!-- Razorpay details -->
-        <% if (py.razorpay && py.razorpay.paymentId) { %>
-        <div class="sec-title">Razorpay Transaction</div>
-        <div class="rpay-block">
-          <div style="font-size:.66rem;font-weight:700;letter-spacing:.1em;color:#64748b;text-transform:uppercase;margin-bottom:10px;">Secure Payment Details</div>
-          <div class="rpay-row"><span class="rpay-lbl">Payment ID</span><span class="rpay-val"><%= py.razorpay.paymentId %></span></div>
-          <% if (py.razorpay.orderId) { %><div class="rpay-row"><span class="rpay-lbl">Razorpay Order</span><span class="rpay-val"><%= py.razorpay.orderId %></span></div><% } %>
-          <div class="rpay-row">
-            <span class="rpay-lbl">Amount</span>
-            <span class="rpay-val" style="color:#4ade80;font-family:'Manrope',sans-serif;">
-              ₹<%= py.razorpay.amountINR ? py.razorpay.amountINR.toFixed(2) : '—' %>
-              <span style="color:#475569;font-size:.7rem;"> (<%= py.razorpay.currency %>)</span>
-            </span>
-          </div>
-          <% if (py.razorpay.paymentDateFmt) { %>
-          <div class="rpay-row"><span class="rpay-lbl">Paid On</span><span class="rpay-val" style="font-family:'Manrope',sans-serif;"><%= py.razorpay.paymentDateFmt %></span></div>
-          <% } %>
-        </div>
-        <% } %>
-
-        <!-- Update order status -->
-        <div class="sec-title">Update Order Status</div>
-        <form action="/admin/orders/update-status/<%= order._id %>" method="POST"
-          class="update-status-form flex gap-3 flex-wrap items-center"
-          style="background:#f9fafb;border-radius:12px;padding:14px 16px;border:1px solid var(--border);">
-          <select name="status" class="form-select text-sm flex-1" style="min-width:160px;border-radius:9px;">
-            <option value="pending"          <%- order.status==='pending'          ? 'selected':'' %>>Pending</option>
-            <option value="processing"       <%- order.status==='processing'       ? 'selected':'' %>>Processing</option>
-            <option value="paid"             <%- order.status==='paid'             ? 'selected':'' %>>Paid</option>
-            <option value="delivered"        <%- order.status==='delivered'        ? 'selected':'' %>>Delivered</option>
-            <option value="cancelled"        <%- order.status==='cancelled'        ? 'selected':'' %>>Cancelled</option>
-            <option value="return_requested" <%- order.status==='return_requested' ? 'selected':'' %>>Return Requested</option>
-            <option value="return_accepted"  <%- order.status==='return_accepted'  ? 'selected':'' %>>Return Accepted</option>
-            <option value="returned"         <%- order.status==='returned'         ? 'selected':'' %>>Returned</option>
-          </select>
-          <button type="button" class="btn-update update-btn" style="padding:8px 20px;">
-            <i class="fas fa-check mr-1"></i> Update
-          </button>
-        </form>
-
-      </div>
     </div>
-  </div>
-  <% }) %>
+    <% }) %>
 <% } %>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-// Modal helpers
-function openModal(id) {
-  const el = document.getElementById('modal-' + id);
-  if (el) { el.classList.add('open'); document.body.style.overflow = 'hidden'; }
-}
-function closeModal(id) {
-  const el = document.getElementById('modal-' + id);
-  if (el) { el.classList.remove('open'); document.body.style.overflow = ''; }
-}
-document.querySelectorAll('.modal-overlay').forEach(el => {
-  el.addEventListener('click', function(e) {
-    if (e.target === this) { this.classList.remove('open'); document.body.style.overflow = ''; }
-  });
-});
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    document.querySelectorAll('.modal-overlay.open').forEach(m => {
-      m.classList.remove('open'); document.body.style.overflow = '';
-    });
-  }
-});
+    function openModal(id) {
+        document.getElementById('modal-' + id).classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeModal(id) {
+        document.getElementById('modal-' + id).classList.remove('open');
+        document.body.style.overflow = '';
+    }
 
-// Order-level status update
-document.querySelectorAll('.update-btn').forEach(btn => {
-  btn.addEventListener('click', function () {
-    const form      = this.closest('form');
-    const select    = form.querySelector('select[name="status"]');
-    const newStatus = select.value;
-    const action    = form.action;
-
-    Swal.fire({
-      title: 'Update Status',
-      html: `Change order status to <strong>${newStatus}</strong>?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, update',
-      cancelButtonText: 'Cancel',
-      confirmButtonColor: '#f57c00',
-      cancelButtonColor: '#6b7280',
-    }).then(result => {
-      if (!result.isConfirmed) return;
-      Swal.fire({ title: 'Updating…', allowOutsideClick: false, didOpen: () => Swal.showLoading(), showConfirmButton: false });
-      $.ajax({
-        url: action, type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({ status: newStatus }),
-        success: () => {
-          Swal.fire({ title: 'Updated!', text: 'Order status changed.', icon: 'success', timer: 1800, showConfirmButton: false })
-            .then(() => window.location.reload());
-        },
-        error: () => Swal.fire({ title: 'Error', text: 'Failed to update status.', icon: 'error' })
-      });
-    });
-  });
-});
-
-// Item-level accept return
-function acceptItemReturn(orderId, itemId, itemName) {
-  Swal.fire({
-    title: 'Accept Return?',
-    html: `Accept the return request for <strong>${itemName}</strong>?`,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, Accept',
-    cancelButtonText: 'Cancel',
-    confirmButtonColor: '#065f46',
-    cancelButtonColor: '#6b7280',
-  }).then(result => {
-    if (!result.isConfirmed) return;
-    Swal.fire({ title: 'Processing…', allowOutsideClick: false, didOpen: () => Swal.showLoading(), showConfirmButton: false });
-    $.ajax({
-      url: `/admin/orders/${orderId}/items/${itemId}/accept-return`,
-      type: 'POST',
-      contentType: 'application/json',
-      success: () => {
-        Swal.fire({ title: 'Return Accepted!', text: 'Item return has been accepted.', icon: 'success', timer: 1800, showConfirmButton: false })
-          .then(() => window.location.reload());
-      },
-      error: (xhr) => {
-        const msg = xhr.responseJSON?.message || 'Failed to accept return.';
-        Swal.fire({ title: 'Error', text: msg, icon: 'error' });
-      }
-    });
-  });
-}
-
-function changeItemStatus(orderId, itemId, status, itemName) {
-  if (!status) return;
-
-  Swal.fire({
-    title: "Change Item Status",
-    html: `Update <strong>${itemName}</strong> to <strong>${status}</strong>?`,
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonText: "Yes, update",
-    cancelButtonText: "Cancel",
-    confirmButtonColor: "#f57c00",
-    cancelButtonColor: "#6b7280",
-  }).then((result) => {
-    if (!result.isConfirmed) return;
-
-    Swal.fire({
-      title: "Updating…",
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading(),
-      showConfirmButton: false,
-    });
-
-    $.ajax({
-      url: `/admin/orders/${orderId}/items/${itemId}/change-status`,
-      type: "POST",
-      contentType: "application/json",
-      data: JSON.stringify({ status }),
-      success: () => {
-        Swal.fire({
-          title: "Updated!",
-          text: "Item status updated successfully.",
-          icon: "success",
-          timer: 1500,
-          showConfirmButton: false,
-        }).then(() => window.location.reload());
-      },
-      error: (xhr) => {
-        const msg = xhr.responseJSON?.message || "Failed to update item status.";
-        Swal.fire({
-          title: "Error",
-          text: msg,
-          icon: "error",
+    // Master Status logic
+    document.querySelectorAll('.update-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const form = this.closest('form');
+            const newStatus = form.querySelector('select').value;
+            Swal.fire({
+                title: 'Confirm Update',
+                text: `Change master order status to ${newStatus}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#4f46e5',
+                confirmButtonText: 'Yes, update'
+            }).then(res => {
+                if (res.isConfirmed) {
+                    $.ajax({
+                        url: form.action,
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ status: newStatus }),
+                        success: () => Swal.fire("Updated", "Order status changed.", "success").then(() => window.location.reload()),
+                        error: () => Swal.fire("Error", "Action failed.", "error")
+                    });
+                }
+            });
         });
-      },
     });
-  });
-}
+
+    // Item-level logic
+    function changeItemStatus(orderId, itemId, status, itemName) {
+        if (!status) return;
+        Swal.fire({
+            title: "Update Item?",
+            html: `Change <strong>${itemName}</strong> to ${status}?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#4f46e5"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/admin/orders/${orderId}/items/${itemId}/change-status`,
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({ status }),
+                    success: () => Swal.fire("Success", "Item updated.", "success").then(() => window.location.reload()),
+                    error: () => Swal.fire("Error", "Request failed.", "error")
+                });
+            }
+        });
+    }
 </script>
 </body>
 </html>

@@ -1,200 +1,181 @@
-<!-- edit-address.ejs -->
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Edit Address</title>
+    <title>Edit Address | Tech Gadgets</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-      rel="stylesheet"
-    />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  </head>
-  <body class="bg-gray-100 min-h-screen">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen">
     <%- include('../partials/headerPartial') %>
 
-    <div class="flex flex-col md:flex-row max-w-6xl mx-auto mt-8 px-4 md:px-0 gap-6">
-      <!-- Sidebar -->
-      <div class="w-full md:w-1/4">
-        <%- include('./partial') %>
-      </div>
+    <div class="max-w-6xl mx-auto mt-10 px-4 pb-16 flex flex-col md:flex-row gap-8">
+        
+        <div class="w-full md:w-1/4 flex-shrink-0">
+            <%- include('./partial') %>
+        </div>
 
-      <!-- Edit Address Container -->
-      <div class="w-full md:w-3/4 bg-white rounded-xl shadow-lg p-6">
-        <h2 class="text-2xl font-bold text-gray-800 mb-2">Edit Address</h2>
-        <p class="text-gray-600 mb-6">Update your address information below</p>
+        <div class="flex-1 min-w-0">
+            <div class="bg-white rounded-[2.5rem] border border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+                
+                <div class="p-8 border-b border-slate-50 bg-slate-50/30 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-100">
+                            <i class="fas fa-map-location-dot text-lg"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-black tracking-tight text-slate-900">Edit Address</h2>
+                            <p class="text-slate-400 text-sm font-medium">Update your delivery coordinates</p>
+                        </div>
+                    </div>
+                    <a href="/profile/address" class="text-xs font-bold text-slate-400 hover:text-indigo-600 transition-colors uppercase tracking-widest">
+                        <i class="fas fa-arrow-left mr-1"></i> Back
+                    </a>
+                </div>
 
-        <form id="editAddressForm" class="space-y-4">
-          <!-- Address Type -->
-          <div>
-            <label class="block font-medium text-gray-700 mb-2">Address Type</label>
-            <div class="flex gap-4">
-              <label class="inline-flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="type"
-                  value="Home"
-                  class="form-radio text-blue-600"
-                  <% if(!address.type || address.type === "Home"){ %>checked<% } %>
-                />
-                <span>Home</span>
-              </label>
-              <label class="inline-flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="type"
-                  value="Work"
-                  class="form-radio text-green-600"
-                  <% if(address.type === "Work"){ %>checked<% } %>
-                />
-                <span>Work</span>
-              </label>
-              <label class="inline-flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="type"
-                  value="Other"
-                  class="form-radio text-gray-600"
-                  <% if(address.type === "Other"){ %>checked<% } %>
-                />
-                <span>Other</span>
-              </label>
+                <form id="editAddressForm" class="p-8 space-y-8">
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 ml-1">Destination Category</label>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="relative flex-1 min-w-[100px] cursor-pointer group">
+                                <input type="radio" name="type" value="Home" class="peer sr-only" <% if(!address.type || address.type === "Home"){ %>checked<% } %>/>
+                                <div class="p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 text-center peer-checked:border-indigo-600 peer-checked:bg-indigo-50 peer-checked:text-indigo-600 transition-all">
+                                    <i class="fas fa-house block mb-2 text-lg"></i>
+                                    <span class="text-xs font-bold uppercase tracking-widest">Home</span>
+                                </div>
+                            </label>
+                            <label class="relative flex-1 min-w-[100px] cursor-pointer group">
+                                <input type="radio" name="type" value="Work" class="peer sr-only" <% if(address.type === "Work"){ %>checked<% } %>/>
+                                <div class="p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 text-center peer-checked:border-purple-600 peer-checked:bg-purple-50 peer-checked:text-purple-600 transition-all">
+                                    <i class="fas fa-briefcase block mb-2 text-lg"></i>
+                                    <span class="text-xs font-bold uppercase tracking-widest">Work</span>
+                                </div>
+                            </label>
+                            <label class="relative flex-1 min-w-[100px] cursor-pointer group">
+                                <input type="radio" name="type" value="Other" class="peer sr-only" <% if(address.type === "Other"){ %>checked<% } %>/>
+                                <div class="p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 text-center peer-checked:border-slate-900 peer-checked:bg-slate-900 peer-checked:text-white transition-all">
+                                    <i class="fas fa-ellipsis block mb-2 text-lg"></i>
+                                    <span class="text-xs font-bold uppercase tracking-widest">Other</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div>
+                            <label for="streetAddress" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Street Address</label>
+                            <input type="text" id="streetAddress" name="streetAddress" value="<%= address.streetAddress %>" 
+                                class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-bold" />
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="city" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">City</label>
+                                <input type="text" id="city" name="city" value="<%= address.city %>" 
+                                    class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-bold" />
+                            </div>
+                            <div>
+                                <label for="state" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">State</label>
+                                <input type="text" id="state" name="state" value="<%= address.state %>" 
+                                    class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-bold" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="zipCode" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">ZIP Code</label>
+                                <input type="text" id="zipCode" name="zipCode" value="<%= address.zipCode %>" 
+                                    class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-bold" />
+                            </div>
+                            <div>
+                                <label for="country" class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Country</label>
+                                <input type="text" id="country" name="country" value="<%= address.country %>" 
+                                    class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all text-sm font-bold" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4 pt-8 border-t border-slate-50">
+                        <button type="submit" class="flex-1 bg-indigo-600 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95">
+                            Update Location
+                        </button>
+                        <a href="/profile/address" class="px-8 py-4 bg-slate-100 text-slate-500 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-slate-200 transition-all text-center">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
             </div>
-          </div>
-
-          <!-- Street Address -->
-          <div>
-            <label for="streetAddress" class="block font-medium text-gray-700 mb-1">
-              Street Address <span class="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              id="streetAddress"
-              name="streetAddress"
-              value="<%= address.streetAddress %>"
-              class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <!-- City & State -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label for="city" class="block font-medium text-gray-700 mb-1">
-                City <span class="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="city"
-                name="city"
-                value="<%= address.city %>"
-                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label for="state" class="block font-medium text-gray-700 mb-1">
-                State <span class="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="state"
-                name="state"
-                value="<%= address.state %>"
-                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          <!-- ZIP & Country -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label for="zipCode" class="block font-medium text-gray-700 mb-1">
-                ZIP Code <span class="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="zipCode"
-                name="zipCode"
-                value="<%= address.zipCode %>"
-                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label for="country" class="block font-medium text-gray-700 mb-1">
-                Country <span class="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="country"
-                name="country"
-                value="<%= address.country %>"
-                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          <!-- Buttons -->
-          <div class="flex gap-4 mt-4">
-            <a href="/profile/address" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 transition">
-              Cancel
-            </a>
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-              Update Address
-            </button>
-          </div>
-        </form>
-      </div>
+        </div>
     </div>
 
     <%- include('../partials/footer') %>
 
     <script>
-      $(document).ready(function () {
-        $("#editAddressForm").on("submit", function (e) {
-          e.preventDefault();
-          const formData = {
-            type: $("input[name='type']:checked").val(),
-            streetAddress: $("#streetAddress").val(),
-            city: $("#city").val(),
-            state: $("#state").val(),
-            zipCode: $("#zipCode").val(),
-            country: $("#country").val(),
-          };
+        $(document).ready(function () {
+            $("#editAddressForm").on("submit", function (e) {
+                e.preventDefault();
+                
+                const formData = {
+                    type: $("input[name='type']:checked").val(),
+                    streetAddress: $("#streetAddress").val().trim(),
+                    city: $("#city").val().trim(),
+                    state: $("#state").val().trim(),
+                    zipCode: $("#zipCode").val().trim(),
+                    country: $("#country").val().trim(),
+                };
 
-          $.ajax({
-            type: "POST",
-            url: "/profile/address/edit/<%= address._id %>",
-            data: formData,
-            dataType: "json",
-            success: function (response) {
-              if (response.status === "success") {
+                // Basic validation
+                if (!formData.streetAddress || !formData.city || !formData.zipCode) {
+                    return Swal.fire({ icon: 'warning', title: 'Missing Info', text: 'Please fill in all required fields.' });
+                }
+
                 Swal.fire({
-                  icon: "success",
-                  title: response.title,
-                  text: response.message,
-                }).then(() => {
-                  window.location.href = "/profile/address";
+                    title: "Updating...",
+                    didOpen: () => Swal.showLoading(),
+                    allowOutsideClick: false,
                 });
-              } else {
-                Swal.fire({
-                  icon: "error",
-                  title: response.title,
-                  text: response.message,
+
+                $.ajax({
+                    type: "POST",
+                    url: "/profile/address/edit/<%= address._id %>",
+                    data: formData,
+                    dataType: "json",
+                    success: function (response) {
+                        if (response.status === "success") {
+                            Swal.fire({
+                                icon: "success",
+                                title: "Address Sync Complete",
+                                text: "Your location has been updated successfully.",
+                                confirmButtonColor: '#4f46e5'
+                            }).then(() => {
+                                window.location.href = "/profile/address";
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Update Failed",
+                                text: response.message,
+                            });
+                        }
+                    },
+                    error: function (xhr) {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Connection Error",
+                            text: xhr.responseJSON?.message || "Something went wrong on the server.",
+                        });
+                    },
                 });
-              }
-            },
-            error: function (xhr) {
-              Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: xhr.responseJSON?.message || "Something went wrong",
-              });
-            },
-          });
+            });
         });
-      });
     </script>
-  </body>
+</body>
 </html>

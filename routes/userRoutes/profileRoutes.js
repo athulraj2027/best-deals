@@ -14,6 +14,7 @@ router
   .route("/orders/cancel/:id")
   .post(profileController.cancelOrderController);
 
+router.get("/orders/invoice/:id", profileController.downloadInvoiceController);
 router
   .route("/")
   .get(userGuestMiddleware, profileController.getUserProfilePage)

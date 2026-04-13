@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Coupon = require("../../models/Coupon");
 const Category = require("../../models/Category");
 const Product = require("../../models/Product");
+const statusCodes = require("../../services/statusCodes");
 
 exports.getCouponsPage = async (req, res) => {
   try {
@@ -119,6 +120,7 @@ exports.addCouponController = async (req, res) => {
       discountType,
       discountValue,
       minPurchase,
+      maxPurchase,
       startDate,
       expiryDate,
       usageLimit,
@@ -130,19 +132,24 @@ exports.addCouponController = async (req, res) => {
     const cleanArray = (arr) => (Array.isArray(arr) ? arr.filter(Boolean) : []);
 
     if (discountType === "percentage" && discountValue > 100) {
-      return res.status(400).json({
+      return res.status(statusCodes.BAD_REQUEST).json({
         message: "Percentage cannot exceed 100",
       });
     }
 
     if (discountValue > minPurchase)
       return res
+        .status(statusCodes.BAD_REQUEST)
+        .json({ message: "Discount value must be less than minimum purchase" });
+
+    if (minPurchase > maxPurchase)
+      return res
         .status(400)
         .json({ message: "Discount value must be less than minimum purchase" });
-        
+
     const existingCoupon = await Coupon.findOne({ code: code.toUpperCase() });
     if (existingCoupon) {
-      return res.status(409).json({
+      return res.status(statusCodes.FORBIDDEN).json({
         status: "error",
         title: "Error",
         message: "Coupon code already exists",
@@ -175,14 +182,14 @@ exports.addCouponController = async (req, res) => {
 
     await newCoupon.save();
 
-    res.status(201).json({
+    return res.status(statusCodes.SUCCESS).json({
       status: "success",
       title: "Success",
       message: "Coupon created successfully",
     });
   } catch (error) {
     console.error("Error creating coupon:", error);
-    res.status(500).json({
+    res.status(statusCodes.SERVER_ERROR).json({
       success: false,
       message: "Failed to create coupon",
       error: error.message,
@@ -193,15 +200,15 @@ exports.addCouponController = async (req, res) => {
 exports.getEditCouponPage = async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).send("Invalid ID");
+      return res.status(statusCodes.BAD_REQUEST).send("Invalid ID");
     }
     const coupon = await Coupon.findOne({ _id: req.params.id });
     return res
-      .status(200)
+      .status(statusCodes.SUCCESS)
       .render("adminPages/CouponPages/adminEditCoupon", { coupon });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({
+    return res.status(statusCodes.SERVER_ERROR).json({
       status: "error",
       title: "Error",
       message: "Something went wrong",
@@ -237,6 +244,7 @@ exports.editCouponController = async (req, res) => {
 
     const parsedStartDate = new Date(startDate);
     const parsedExpiryDate = new Date(expiryDate);
+    
     if (parsedStartDate >= parsedExpiryDate) {
       return res.status(400).json({
         message: "Expiry date must be after start date",
