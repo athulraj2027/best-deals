@@ -254,6 +254,7 @@
     class="text-[10px] font-black uppercase tracking-widest bg-white border border-slate-200 rounded-lg px-2 py-1 outline-none focus:border-indigo-400"
   >
     <option value="pending" <%= item.status==='pending'?'selected':'' %>>Pending</option>
+    <option value="processing" <%= item.status==='processing'?'selected':'' %>>Processing</option>
     <option value="delivered" <%= item.status==='delivered'?'selected':'' %>>Delivered</option>
     <option value="cancelled" <%= item.status==='cancelled'?'selected':'' %>>Cancelled</option>
     <option value="return_requested" <%= item.status==='return_requested'?'selected':'' %>>Return Requested</option>

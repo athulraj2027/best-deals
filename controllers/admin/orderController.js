@@ -564,7 +564,7 @@ exports.changeItemStatus = async (req, res) => {
     if (status === "returned") {
       item.returnedAt = new Date();
       const user = await User.findById(order.userId);
-      user.wallet += item.paidAmount.toFixed(2);
+       user.wallet += Number(item.paidAmount);
       user.walletTransactions.push({
         type: "credit",
         amount: item.paidAmount,

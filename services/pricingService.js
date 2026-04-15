@@ -8,86 +8,70 @@ async function calculateCartTotal(
   paymentMethod,
 ) {
   let subtotal = 0;
-  let offerDiscount = 0;
   let couponDiscount = 0;
   let walletDeduction = 0;
-  let totalRealPrice = 0;
   const items = [];
 
-  // 1️⃣ Calculate subtotal
+  // 1️⃣ Initial Subtotal
   for (let item of cart.items) {
-    const price = Number(item.price);
-    const quantity = Number(item.quantity);
-
-    const itemSubtotal = price * quantity;
-
+    const itemSubtotal = Number(item.price) * Number(item.quantity);
     subtotal += itemSubtotal;
-    totalRealPrice += itemSubtotal;
-
     items.push({
       cartItem: item,
       itemSubtotal,
+      couponShare: 0,
+      taxShare: 0,
+      walletShare: 0,
     });
   }
 
-  let total = subtotal;
-
-  // 2️⃣ Apply coupon
+  // 2️⃣ Coupon Calculation
   if (cart.appliedCoupon) {
     const coupon = await Coupon.findById(cart.appliedCoupon);
-
     if (coupon) {
-      if (coupon.discountType === "fixed") {
-        couponDiscount = coupon.discountValue;
-      } else if (coupon.discountType === "percentage") {
-        couponDiscount = (coupon.discountValue / 100) * total;
-      }
-
-      total = Math.max(0, total - couponDiscount);
+      couponDiscount =
+        coupon.discountType === "fixed"
+          ? coupon.discountValue
+          : (coupon.discountValue / 100) * subtotal;
     }
   }
 
-  // 3️⃣ Distribute coupon discount across items
-  for (let item of items) {
+  // 3️⃣ Tax Calculation (on discounted subtotal)
+  const taxableAmount = subtotal - couponDiscount;
+  const tax = taxableAmount * 0.1; // 10% Tax
+  const grandTotalBeforeWallet = taxableAmount + tax;
+
+  // 4️⃣ Wallet Logic
+  if (useWallet || paymentMethod === "wallet") {
+    walletDeduction = Math.min(user.wallet, grandTotalBeforeWallet);
+  }
+
+  const finalTotal = grandTotalBeforeWallet - walletDeduction;
+
+  // 5️⃣ Distribute values across items
+  items.forEach((item) => {
     const ratio = item.itemSubtotal / subtotal;
+
     item.couponShare = couponDiscount * ratio;
-  }
+    item.taxShare = (item.itemSubtotal - item.couponShare) * 0.1;
+    item.walletShare = walletDeduction * ratio;
 
-  if ((useWallet && user.wallet > 0) || paymentMethod === "wallet") {
-    walletDeduction = Math.min(user.wallet, total);
-    total -= walletDeduction;
-    user.wallet -= walletDeduction;
-    user.walletTransactions.push({
-      type: "debit",
-      amount: walletDeduction,
-      description: `Used for order `,
-    });
+    // paidAmount = (Item Price - Coupon + Tax) - Wallet
+    // If you want to see what the user actually paid via COD/Razorpay:
+    item.paidAmount =
+      item.itemSubtotal - item.couponShare + item.taxShare - item.walletShare;
 
-    await user.save();
-  }
-
-  const tax = totalRealPrice * 0.1;
-  total += tax;
-
-  for (let item of items) {
-    const afterCoupon = item.itemSubtotal - item.couponShare;
-
-    const ratio = afterCoupon / (subtotal - couponDiscount || 1);
-    const walletShare = walletDeduction * ratio;
-    const taxShare = tax * ratio;
-
-    item.paidAmount = afterCoupon + taxShare;
-  }
+    // Safety check: ensure no negative values and fix decimals
+    item.paidAmount = Math.max(0, parseFloat(item.paidAmount.toFixed(2)));
+  });
 
   return {
-    subtotal,
-    offerDiscount,
-    couponDiscount,
-    walletDeduction,
-    tax,
-    finalTotal: total,
+    subtotal: parseFloat(subtotal.toFixed(2)),
+    couponDiscount: parseFloat(couponDiscount.toFixed(2)),
+    tax: parseFloat(tax.toFixed(2)),
+    walletDeduction: parseFloat(walletDeduction.toFixed(2)),
+    finalTotal: parseFloat(finalTotal.toFixed(2)),
     items,
   };
 }
-
 module.exports = { calculateCartTotal };
