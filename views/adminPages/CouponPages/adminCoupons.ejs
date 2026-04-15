@@ -98,90 +98,111 @@
                             <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        <% if(coupons.length > 0){ %>
-                            <% coupons.forEach((coupon, index)=>{ %>
-                            <% 
-                                let statusStyles = 'bg-slate-100 text-slate-500 border-slate-200';
-                                let statusText = 'Inactive';
+                  <tbody class="divide-y divide-slate-100">
+    <% if(coupons.length > 0){ %>
+        <% 
+            // Internal Helper: Ensures the date is parsed correctly
+            function parseIST(dateString) {
+                if (!dateString) return new Date();
+                const dStr = dateString.toString();
+                if (!dStr.includes("Z") && !dStr.includes("+")) {
+                    return new Date(dStr + "+05:30");
+                }
+                return new Date(dStr);
+            }
+        %>
+        <% coupons.forEach((coupon, index)=>{ %>
+            <% 
+                // 1. Parse the date using your IST logic
+                const localExpiry = parseIST(coupon.expiryDate);
+                const now = new Date();
 
-                                if(coupon.active){
-                                    const now = new Date();
-                                    const expiry = new Date(coupon.expiryDate);
-                                    if(now > expiry){
-                                        statusStyles = 'bg-red-50 text-red-600 border-red-100';
-                                        statusText = 'Expired';
-                                    } else {
-                                        statusStyles = 'bg-emerald-50 text-emerald-600 border-emerald-100';
-                                        statusText = 'Active';
-                                    }
-                                }
-                            %>
-                            <tr class="hover:bg-slate-50/50 transition-colors group">
-                                <td class="px-6 py-5 text-center text-xs font-bold text-slate-300"><%= index+1 %></td>
-                                
-                                <td class="px-6 py-5">
-                                    <div class="flex flex-col">
-                                        <span class="coupon-tag w-fit mb-1"><%= coupon.code %></span>
-                                        <span class="text-[10px] text-slate-400 font-bold uppercase truncate max-w-[150px]"><%= coupon.description %></span>
-                                    </div>
-                                </td>
+                // 2. Determine Status Styles
+                let statusStyles = 'bg-slate-100 text-slate-500 border-slate-200';
+                let statusText = 'Inactive';
 
-                                <td class="px-6 py-5">
-                                    <span class="text-sm font-black text-slate-900">
-                                        <%= coupon.discountType === 'percentage' ? coupon.discountValue + '%' : '₹' + coupon.discountValue.toLocaleString('en-IN') %>
-                                    </span>
-                                </td>
+                if(coupon.active){
+                    if(now > localExpiry){
+                        statusStyles = 'bg-red-50 text-red-600 border-red-100';
+                        statusText = 'Expired';
+                    } else {
+                        statusStyles = 'bg-emerald-50 text-emerald-600 border-emerald-100';
+                        statusText = 'Active';
+                    }
+                }
+            %>
+            <tr class="hover:bg-slate-50/50 transition-colors group">
+                <td class="px-6 py-5 text-center text-xs font-bold text-slate-300"><%= index+1 %></td>
+                
+                <td class="px-6 py-5">
+                    <div class="flex flex-col">
+                        <span class="coupon-tag w-fit mb-1"><%= coupon.code %></span>
+                        <span class="text-[10px] text-slate-400 font-bold uppercase truncate max-w-[150px]"><%= coupon.description %></span>
+                    </div>
+                </td>
 
-                                <td class="px-6 py-5">
-                                    <span class="text-[11px] font-bold text-slate-500 italic">Min: ₹<%= coupon.minPurchase.toLocaleString('en-IN') %></span>
-                                </td>
+                <td class="px-6 py-5">
+                    <span class="text-sm font-black text-slate-900">
+                        <%= coupon.discountType === 'percentage' ? coupon.discountValue + '%' : '₹' + coupon.discountValue.toLocaleString('en-IN') %>
+                    </span>
+                </td>
 
-                                <td class="px-6 py-5">
-                                    <div class="flex flex-col">
-                                        <span class="text-xs font-bold text-slate-700"><%= new Date(coupon.expiryDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) %></span>
-                                        <span class="text-[10px] text-slate-400 font-medium"><%= new Date(coupon.expiryDate).getFullYear() %></span>
-                                    </div>
-                                </td>
+                <td class="px-6 py-5">
+                    <span class="text-[11px] font-bold text-slate-500 italic">Min: ₹<%= coupon.minPurchase.toLocaleString('en-IN') %></span>
+                </td>
 
-                                <td class="px-6 py-5">
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border <%= statusStyles %>">
-                                        <%= statusText %>
-                                    </span>
-                                </td>
+                <td class="px-6 py-5">
+                    <div class="flex flex-col">
+                        <span class="text-xs font-bold text-slate-700">
+                            <%= localExpiry.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) %>
+                        </span>
+                        <span class="text-[10px] text-slate-400 font-medium">
+                            <%= localExpiry.getFullYear() %> 
+                            <span class="text-[8px] opacity-60 uppercase ml-1">
+                                <%= localExpiry.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) %>
+                            </span>
+                        </span>
+                    </div>
+                </td>
 
-                                <td class="px-6 py-5 text-right">
-                                    <div class="flex items-center justify-end gap-1">
-                                        <a href="/admin/coupons/edit/<%= coupon._id %>" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all" title="Edit">
-                                            <i class="fas fa-edit text-xs"></i>
-                                        </a>
+                <td class="px-6 py-5">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border <%= statusStyles %>">
+                        <%= statusText %>
+                    </span>
+                </td>
 
-                                        <% if(coupon.active){ %>
-                                            <form action="/admin/coupons/deactivate/<%= coupon._id %>" method="POST" class="inline">
-                                                <button type="submit" class="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all" title="Deactivate">
-                                                    <i class="fas fa-toggle-on text-xs"></i>
-                                                </button>
-                                            </form>
-                                        <% } else { %>
-                                            <form action="/admin/coupons/activate/<%= coupon._id %>" method="POST" class="inline">
-                                                <button type="submit" class="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all" title="Activate">
-                                                    <i class="fas fa-toggle-off text-xs"></i>
-                                                </button>
-                                            </form>
-                                        <% } %>
-                                    </div>
-                                </td>
-                            </tr>
-                            <% }) %>
+                <td class="px-6 py-5 text-right">
+                    <div class="flex items-center justify-end gap-1">
+                        <a href="/admin/coupons/edit/<%= coupon._id %>" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all" title="Edit">
+                            <i class="fas fa-edit text-xs"></i>
+                        </a>
+
+                        <% if(coupon.active){ %>
+                            <form action="/admin/coupons/deactivate/<%= coupon._id %>" method="POST" class="inline">
+                                <button type="submit" class="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all" title="Deactivate">
+                                    <i class="fas fa-toggle-on text-xs"></i>
+                                </button>
+                            </form>
                         <% } else { %>
-                            <tr>
-                                <td colspan="7" class="px-6 py-20 text-center">
-                                    <i class="fas fa-ticket-alt text-4xl text-slate-200 mb-4"></i>
-                                    <p class="text-slate-400 font-bold uppercase tracking-widest text-xs">No coupons found</p>
-                                </td>
-                            </tr>
+                            <form action="/admin/coupons/activate/<%= coupon._id %>" method="POST" class="inline">
+                                <button type="submit" class="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all" title="Activate">
+                                    <i class="fas fa-toggle-off text-xs"></i>
+                                </button>
+                            </form>
                         <% } %>
-                    </tbody>
+                    </div>
+                </td>
+            </tr>
+        <% }) %>
+    <% } else { %>
+        <tr>
+            <td colspan="7" class="px-6 py-20 text-center">
+                <i class="fas fa-ticket-alt text-4xl text-slate-200 mb-4"></i>
+                <p class="text-slate-400 font-bold uppercase tracking-widest text-xs">No coupons found</p>
+            </td>
+        </tr>
+    <% } %>
+</tbody>
                 </table>
             </div>
         </div>

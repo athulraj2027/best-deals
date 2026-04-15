@@ -6,6 +6,14 @@ const {
   updateOfferStatuses,
 } = require("../../services/offers/determineBestOffer");
 
+function parseIST(dateString) {
+  // Append IST offset if not present
+  if (!dateString.includes("Z") && !dateString.includes("+")) {
+    return new Date(dateString + "+05:30");
+  }
+  return new Date(dateString);
+}
+
 exports.getOffersPage = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -118,7 +126,7 @@ exports.addOfferController = async (req, res) => {
   console.log(req.body);
   try {
     const {
-       name,
+      name,
       description,
       offerType,
       offerValue,
@@ -140,11 +148,12 @@ exports.addOfferController = async (req, res) => {
     }
 
     const currentDate = new Date();
-    const parsedStartDate = startDate ? new Date(startDate) : currentDate;
+    const parsedStartDate = startDate ? parseIST(startDate) : new Date();
+
     if (!expiryDate || isNaN(new Date(expiryDate))) {
       return res.status(400).json({ message: "Invalid expiry date" });
     }
-    const parsedExpiryDate = new Date(expiryDate);
+    const parsedExpiryDate = parseIST(expiryDate);
 
     if (parsedExpiryDate <= parsedStartDate) {
       return res.status(400).json({

@@ -4,6 +4,14 @@ const Category = require("../../models/Category");
 const Product = require("../../models/Product");
 const statusCodes = require("../../services/statusCodes");
 
+function parseIST(dateString) {
+  // Append IST offset if not present
+  if (!dateString.includes("Z") && !dateString.includes("+")) {
+    return new Date(dateString + "+05:30");
+  }
+  return new Date(dateString);
+}
+
 exports.getCouponsPage = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -156,9 +164,12 @@ exports.addCouponController = async (req, res) => {
       });
     }
 
-    const currentDate = new Date();
-    const parsedStartDate = startDate ? new Date(startDate) : currentDate;
-    const parsedExpiryDate = new Date(expiryDate);
+    const parsedStartDate = startDate ? parseIST(startDate) : new Date();
+
+    if (!expiryDate || isNaN(new Date(expiryDate))) {
+      return res.status(400).json({ message: "Invalid expiry date" });
+    }
+    const parsedExpiryDate = parseIST(expiryDate);
 
     if (parsedStartDate >= parsedExpiryDate) {
       return res.status(400).json({
@@ -242,9 +253,9 @@ exports.editCouponController = async (req, res) => {
       });
     }
 
-    const parsedStartDate = new Date(startDate);
-    const parsedExpiryDate = new Date(expiryDate);
-    
+    const parsedStartDate = startDate ? parseIST(startDate) : new Date();
+    const parsedExpiryDate = parseIST(expiryDate);
+
     if (parsedStartDate >= parsedExpiryDate) {
       return res.status(400).json({
         message: "Expiry date must be after start date",
