@@ -336,7 +336,13 @@
                         contentType: 'application/json',
                         data: JSON.stringify({ status: newStatus }),
                         success: () => Swal.fire("Updated", "Order status changed.", "success").then(() => window.location.reload()),
-                        error: () => Swal.fire("Error", "Action failed.", "error")
+                        error: (err) => {
+                            console.log(err);
+                            let msg = err.responseJSON
+                ? err.responseJSON.message
+                : "Server error. Please try again later.";
+              Swal.fire("Error", msg, "error");
+                            }
                     });
                 }
             });
@@ -360,7 +366,13 @@
                     contentType: "application/json",
                     data: JSON.stringify({ status }),
                     success: () => Swal.fire("Success", "Item updated.", "success").then(() => window.location.reload()),
-                    error: () => Swal.fire("Error", "Request failed.", "error")
+                    error: (err) =>{
+                         console.log(err);
+                         let msg = err.responseJSON
+                ? err.responseJSON.message
+                : "Server error. Please try again later.";
+              Swal.fire("Error", msg, "error");
+                         }
                 });
             }
         });
