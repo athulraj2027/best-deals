@@ -1,194 +1,307 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <title>Sign Up | BestDeals</title>
-</head>
-
-<body class="bg-white  min-h-screen">
-
-<!-- HEADER -->
-<%- include('./partials/headerPartial')%>
-
-<!-- MAIN -->
-<div class="flex items-center justify-center min-h-screen px-4">
-
-  <div class="bg-white/95 backdrop-blur-md shadow-2xl rounded-2xl w-full max-w-md p-8">
-
-    <h2 class="text-3xl font-bold text-center mb-6 text-gray-800">
-      Create Account 🚀
-    </h2>
-
-    <form id="signupForm" action="/signup" method="post" class="space-y-4">
-
-      <% if (error) { %>
-      <div class="bg-red-100 text-red-700 p-3 rounded-md text-sm">
-        <%= error %>
-      </div>
-      <% } %>
-
-      <!-- Name -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Full Name
-        </label>
-        <input type="text" name="name" id="name"
-          placeholder="John Doe"
-          class="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-indigo-500 outline-none">
-        <small id="nameError" class="text-red-500 text-xs"></small>
-      </div>
-
-      <!-- Email -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Email Address
-        </label>
-        <input type="email" name="email" id="email"
-          placeholder="you@example.com"
-          class="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-indigo-500 outline-none">
-        <small id="emailError" class="text-red-500 text-xs"></small>
-      </div>
-
-      <!-- Password -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Password
-        </label>
-        <input type="password" name="password" id="password"
-          placeholder="********"
-          class="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-indigo-500 outline-none">
-        <small id="passwordError" class="text-red-500 text-xs"></small>
-      </div>
-
-      <!-- Confirm Password -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Confirm Password
-        </label>
-        <input type="password" name="confirmPassword" id="confirm-password"
-          placeholder="********"
-          class="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-indigo-500 outline-none">
-        <small id="confirmPasswordError" class="text-red-500 text-xs"></small>
-      </div>
-
-      <!-- Referral -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Referral Code (optional)
-        </label>
-        <input type="text" name="referral" id="referral-code"
-          placeholder="ABC123"
-          class="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-indigo-500 outline-none">
-      </div>
-
-      <!-- Button -->
-      <button type="submit"
-        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg transition">
-        Sign Up
-      </button>
-
-      <!-- Login -->
-      <p class="text-center text-sm mt-4">
-        Already have an account?
-        <a href="/signin" class="text-indigo-600 font-medium hover:underline">
-          Sign In
-        </a>
-      </p>
-
-    </form>
-
-    <!-- Google -->
-    <a href="/auth/google"
-      class="mt-6 flex items-center justify-center gap-3 border rounded-lg py-2 hover:bg-gray-100 transition">
-
-      <img src="https://img.icons8.com/color/24/google-logo.png" />
-      <span class="font-medium text-gray-700">Sign in with Google</span>
-    </a>
-
-  </div>
-
-</div>
-
-<!-- FOOTER -->
-<%- include('./partials/footer')%>
-
-<!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<script>
-$(document).ready(function () {
-
-  const form = $("#signupForm");
-
-  form.on("submit", function (e) {
-    e.preventDefault();
-
-    const name = $("#name").val();
-    const email = $("#email").val();
-    const password = $("#password").val();
-    const confirmPassword = $("#confirm-password").val();
-    const referralCode = $("#referral-code").val();
-
-    $(".error-message").text("");
-
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
-
-
-     if (!name || !email || !password |!confirmPassword) {
-      Swal.fire({
-        title: "Error",
-        text: "All fields are required!",
-        icon: "error"
-      });
-      return;
-    }
-
-    if (!passwordRegex.test(password)) {
-      Swal.fire({
-        title: "Error",
-        text: "Password must be strong!",
-        icon: "error"
-      });
-      return;
-    }
-
-    $.ajax({
-      url: "/signup",
-      type: "POST",
-      contentType: "application/json",
-      data: JSON.stringify({
-        name,
-        email,
-        password,
-        confirmPassword,
-        referralCode
-      }),
-
-      success: function (res) {
-        if (res.status === "success") {
-          Swal.fire("Success", res.message, "success")
-            .then(() => window.location.href = "/verify-otp");
-        } else {
-          Swal.fire("Error", res.message, "error");
-        }
-      },
-
-      error: function (err) {
-        Swal.fire("Error",err.message || "Something went wrong", "error");
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
       }
-    });
+      .glass {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+      .qty-btn:active {
+        transform: scale(0.9);
+      }
+    </style>
+    <title>Sign Up | BestDeals</title>
+    <style>
+      /* Styling to ensure error messages don't jump layout too much */
+      .error-text {
+        min-height: 1.25rem;
+      }
+      input.border-red-500 {
+        border-color: #ef4444;
+      }
+    </style>
+  </head>
 
-  });
+  <body class="bg-gray-50 min-h-screen">
+    <%- include('./partials/headerPartial')%>
 
-});
-</script>
+    <div class="flex items-center justify-center min-h-screen px-4 py-12">
+      <div class="bg-white shadow-2xl rounded-2xl w-full max-w-md p-8">
+        <h2 class="text-3xl font-bold text-center mb-6 text-gray-800">
+          Create Account
+        </h2>
 
-</body>
+        <form id="signupForm" class="space-y-2">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Full Name</label
+            >
+            <input
+              type="text"
+              name="name"
+              id="name"
+              placeholder="John Doe"
+              class="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+            />
+            <div
+              id="nameError"
+              class="text-red-500 text-xs mt-1 error-text"
+            ></div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Email Address</label
+            >
+            <input
+              type="email"
+              name="email"
+              id="email"
+              placeholder="you@example.com"
+              class="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+            />
+            <div
+              id="emailError"
+              class="text-red-500 text-xs mt-1 error-text"
+            ></div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Password</label
+            >
+            <input
+              type="password"
+              name="password"
+              id="password"
+              placeholder="********"
+              class="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+            />
+            <div
+              id="passwordError"
+              class="text-red-500 text-xs mt-1 error-text"
+            ></div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Confirm Password</label
+            >
+            <input
+              type="password"
+              name="confirmPassword"
+              id="confirm-password"
+              placeholder="********"
+              class="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+            />
+            <div
+              id="confirmPasswordError"
+              class="text-red-500 text-xs mt-1 error-text"
+            ></div>
+          </div>
+
+          <div class="pb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Referral Code (optional)</label
+            >
+            <input
+              type="text"
+              name="referral"
+              id="referral-code"
+              placeholder="ABC123"
+              class="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-indigo-500 outline-none"
+            />
+          </div>
+
+          <button
+            type="submit"
+            id="submitBtn"
+            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg transition-all active:scale-95"
+          >
+            Sign Up
+          </button>
+
+          <p class="text-center text-sm mt-4">
+            Already have an account?
+            <a
+              href="/signin"
+              class="text-indigo-600 font-medium hover:underline"
+              >Sign In</a
+            >
+          </p>
+        </form>
+
+        <div class="relative my-6">
+          <div class="absolute inset-0 flex items-center">
+            <span class="w-full border-t"></span>
+          </div>
+          <div class="relative flex justify-center text-xs uppercase">
+            <span class="bg-white px-2 text-gray-500">Or continue with</span>
+          </div>
+        </div>
+
+        <a
+          href="/auth/google"
+          class="flex items-center justify-center gap-3 border rounded-lg py-2 hover:bg-gray-50 transition"
+        >
+          <img
+            src="https://img.icons8.com/color/24/google-logo.png"
+            alt="Google"
+          />
+          <span class="font-medium text-gray-700">Sign in with Google</span>
+        </a>
+      </div>
+    </div>
+
+    <%- include('./partials/footer')%>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+      $(document).ready(function () {
+        const form = $("#signupForm");
+
+        form.on("submit", function (e) {
+          e.preventDefault();
+
+          // Reset errors
+          $(".error-text").text("");
+          $("input").removeClass("border-red-500");
+
+          const name = $("#name").val().trim();
+          const email = $("#email").val().trim();
+          const password = $("#password").val();
+          const confirmPassword = $("#confirm-password").val();
+          const referralCode = $("#referral-code").val().trim();
+
+          let isValid = true;
+
+          // 1. Name Validation
+          if (!name) {
+            $("#nameError").text("Full Name is required");
+            $("#name").addClass("border-red-500");
+            isValid = false;
+          } else if (name.length < 3) {
+            $("#nameError").text("Name must be at least 3 characters");
+            $("#name").addClass("border-red-500");
+            isValid = false;
+          }
+
+          // 2. Email Validation
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!email) {
+            $("#emailError").text("Email is required");
+            $("#email").addClass("border-red-500");
+            isValid = false;
+          } else if (!emailRegex.test(email)) {
+            $("#emailError").text("Please enter a valid email address");
+            $("#email").addClass("border-red-500");
+            isValid = false;
+          }
+
+          // 3. Password Validation
+          // Strong password: min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
+          const passwordRegex =
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+          if (!password) {
+            $("#passwordError").text("Password is required");
+            $("#password").addClass("border-red-500");
+            isValid = false;
+          } else if (!passwordRegex.test(password)) {
+            $("#passwordError").text(
+              "Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char",
+            );
+            $("#password").addClass("border-red-500");
+            isValid = false;
+          }
+
+          // 4. Confirm Password Validation
+          if (!confirmPassword) {
+            $("#confirmPasswordError").text("Please confirm your password");
+            $("#confirm-password").addClass("border-red-500");
+            isValid = false;
+          } else if (password !== confirmPassword) {
+            $("#confirmPasswordError").text("Passwords do not match");
+            $("#confirm-password").addClass("border-red-500");
+            isValid = false;
+          }
+
+          if (!isValid) return;
+
+          // Disable button to prevent double submit
+          const submitBtn = $("#submitBtn");
+          submitBtn
+            .prop("disabled", true)
+            .addClass("opacity-50")
+            .text("Processing...");
+
+          $.ajax({
+            url: "/signup",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+              name,
+              email,
+              password,
+              confirmPassword,
+              referralCode,
+            }),
+            success: function (res) {
+              if (res.status === "success") {
+                Swal.fire({
+                  title: "Success!",
+                  text:
+                    res.message ||
+                    "Account created. Redirecting to OTP verification...",
+                  icon: "success",
+                  timer: 2000,
+                  showConfirmButton: false,
+                }).then(() => {
+                  window.location.href = "/verify-otp";
+                });
+              } else {
+                Swal.fire("Registration Failed", res.message, "warning");
+                submitBtn
+                  .prop("disabled", false)
+                  .removeClass("opacity-50")
+                  .text("Sign Up");
+              }
+            },
+            error: function (err) {
+              submitBtn
+                .prop("disabled", false)
+                .removeClass("opacity-50")
+                .text("Sign Up");
+              let msg = err.responseJSON
+                ? err.responseJSON.message
+                : "Server error. Please try again later.";
+              Swal.fire("Error", msg, "error");
+            },
+          });
+        });
+
+        // Real-time error removal when user starts typing
+        $("input").on("input", function () {
+          $(this).removeClass("border-red-500");
+          $(this).nextAll(".error-text").first().text("");
+        });
+      });
+    </script>
+  </body>
 </html>

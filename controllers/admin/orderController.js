@@ -536,6 +536,10 @@ exports.changeItemStatus = async (req, res) => {
 
   try {
     if (!status) return res.status(400).json({ message: "Status is required" });
+    const order = await Order.findById(orderId);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+    const item = order.items.id(itemId);
+    if (!item) return res.status(404).json({ message: "Item not found" });
 
     // 4. Allowed transitions (IMPORTANT)
     const allowedTransitions = {
@@ -553,10 +557,6 @@ exports.changeItemStatus = async (req, res) => {
         message: `Invalid status transition from ${item.status} to ${status}`,
       });
     }
-    const order = await Order.findById(orderId);
-    if (!order) return res.status(404).json({ message: "Order not found" });
-    const item = order.items.id(itemId);
-    if (!item) return res.status(404).json({ message: "Item not found" });
 
     item.status = status;
 

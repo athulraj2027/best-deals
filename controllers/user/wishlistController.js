@@ -234,16 +234,24 @@ exports.addAllToCartController = async (req, res) => {
     }
     console.log(wishlist.items);
     wishlist.items.forEach((item) => {
-      cart.items.push({
-        productId: item.productId,
-        variantId: item.variantId,
-        name: item.name,
-        color: item.color,
-        size: item.size,
-        price: item.price,
-        quantity: 1, // REQUIRED
-        image: item.image,
-      });
+      const exists = cart.items.some(
+        (cartItem) =>
+          cartItem.productId.toString() === item.productId.toString() &&
+          cartItem.variantId.toString() === item.variantId.toString(),
+      );
+
+      if (!exists) {
+        cart.items.push({
+          productId: item.productId,
+          variantId: item.variantId,
+          name: item.name,
+          color: item.color,
+          size: item.size,
+          price: item.price,
+          quantity: 1,
+          image: item.image,
+        });
+      }
     });
     wishlist.items = [];
 
