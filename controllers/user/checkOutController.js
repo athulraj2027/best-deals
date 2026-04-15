@@ -173,6 +173,7 @@ exports.checkoutController = async (req, res) => {
     }
 
     for (let item of cart.items) {
+      console.log("item : ", item);
       const product = await Product.findById(item.productId);
       if (!product) throw new Error("No product found ");
       const variant = product.variants.id(item.variantId);
