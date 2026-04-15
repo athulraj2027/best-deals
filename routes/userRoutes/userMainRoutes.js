@@ -228,7 +228,7 @@ router.get("/thank-you", userGuestMiddleware, async (req, res) => {
     };
 
     // ── Render ────────────────────────────────────────────────────────────────
-    return res.render("userPages/thankYouPage", {
+    return res.render("userPages/thankyouPage", {
       order, // raw order doc (for anything not covered below)
       orderMeta, // status, dates, counts
       itemsSummary, // enriched items array

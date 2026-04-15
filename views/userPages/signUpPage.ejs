@@ -180,8 +180,8 @@ $(document).ready(function () {
         }
       },
 
-      error: function () {
-        Swal.fire("Error", "Something went wrong", "error");
+      error: function (err) {
+        Swal.fire("Error",err.message || "Something went wrong", "error");
       }
     });
 

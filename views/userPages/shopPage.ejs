@@ -13,11 +13,16 @@
     .gradient-bg { background: linear-gradient(to right, #7c3aed, #db2777); }
     .gradient-text { background: linear-gradient(to right, #7c3aed, #db2777); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     
-    /* Custom Slider Styling */
     input[type=range]::-webkit-slider-thumb {
       -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%;
       background: #7c3aed; cursor: pointer; box-shadow: 0 0 10px rgba(124, 58, 237, 0.3);
     }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in { animation: fadeIn 0.5s ease forwards; }
   </style>
 </head>
 
@@ -44,10 +49,10 @@
   <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
     <aside class="lg:col-span-1">
-      <div class="glass p-8  shadow-xl shadow-slate-200/60 sticky top-6 border border-black">
+      <div class="glass p-8 shadow-xl shadow-slate-200/60 sticky top-6 border border-slate-200 rounded-[2.5rem]">
         <div class="flex items-center justify-between mb-8">
           <h2 class="text-xl font-extrabold tracking-tight">Filters</h2>
-          <a href="/shop" class="text-xs font-bold text-slate-400 hover:text-red-500  transition-colors uppercase tracking-widest">Clear All</a>
+          <a href="/shop" class="text-xs font-bold text-slate-400 hover:text-red-500 transition-colors uppercase tracking-widest">Clear All</a>
         </div>
 
         <div class="mb-8">
@@ -62,7 +67,7 @@
         <div class="mb-8">
           <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Categories</label>
           <div class="flex flex-wrap gap-2" id="category-chips">
-            <button class="chip group px-4 py-2 rounded-xl border border-slate-100 bg-white text-black text-xs font-bold transition-all hover:border-purple-600 active" data-value="">
+            <button class="chip px-4 py-2 rounded-xl border border-slate-100 bg-white text-xs font-bold transition-all hover:border-purple-600" data-value="">
               All Items
             </button>
             <% categories.forEach(c => { %>
@@ -93,7 +98,7 @@
           </select>
         </div>
 
-        <button onclick="applyFilters()" class="w-full  text-white py-4 bg-gray-600 rounded-2xl font-black text-sm shadow-lg  hover:scale-[1.02] hover:shadow-purple-500/40 transition-all active:scale-95">
+        <button onclick="applyFilters()" class="w-full text-white py-4 bg-slate-900 rounded-2xl font-black text-sm shadow-lg hover:scale-[1.02] hover:bg-purple-600 transition-all active:scale-95">
           Apply Selection
         </button>
       </div>
@@ -104,15 +109,12 @@
         <div class="text-sm font-bold text-slate-500" id="result-count">
           Initializing...
         </div>
-        <div class="flex flex-wrap gap-2" id="active-filters">
-          </div>
+        <div class="flex flex-wrap gap-2" id="active-filters"></div>
       </div>
 
-      <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 min-h-[400px]">
-        </div>
+      <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 min-h-[400px]"></div>
 
-      <nav id="pagination" class="flex justify-center items-center gap-2 mt-16">
-        </nav>
+      <nav id="pagination" class="flex justify-center items-center gap-2 mt-16"></nav>
     </main>
   </div>
 </div>
@@ -120,16 +122,14 @@
 <%- include('./partials/footer') %>
 
 <script>
-  // ─── State ──────────────────────────────────────────────────────────────────
   const state = {
-    search:   '<%= (filters?.search || "").replace(/'/g, "\\'") %>',
-    category: '<%= (filters?.category || "").replace(/'/g, "\\'") %>',
+    search:   '<%= (filters?.search || "").replace(/'/g, "\\\'") %>',
+    category: '<%= (filters?.category || "").replace(/'/g, "\\\'") %>',
     maxPrice: <%= filters?.maxPrice || 20000 %>,
     sort:     '<%= filters?.sort || "" %>',
     page:     1,
   };
 
-  // ─── DOM Elements ───────────────────────────────────────────────────────────
   const els = {
     grid: document.getElementById('product-grid'),
     priceVal: document.getElementById('price-display-val'),
@@ -138,7 +138,6 @@
     activeTags: document.getElementById('active-filters')
   };
 
-  // ─── Init UI ────────────────────────────────────────────────────────────────
   function initUI() {
     document.getElementById('f-search').value = state.search;
     document.getElementById('f-price').value = state.maxPrice;
@@ -148,15 +147,14 @@
     document.querySelectorAll('.chip').forEach(btn => {
       const active = btn.dataset.value === state.category;
       btn.classList.toggle('bg-slate-900', active);
-      btn.classList.toggle('text-black', active);
+      btn.classList.toggle('text-white', active);
       btn.classList.toggle('border-slate-900', active);
+      btn.classList.toggle('text-black', !active);
     });
   }
 
-  // ─── API Fetch ──────────────────────────────────────────────────────────────
   async function fetchProducts() {
     els.overlay.classList.remove('hidden');
-    
     const params = new URLSearchParams({ ...state, ajax: 'true', limit: 9 });
 
     try {
@@ -173,10 +171,8 @@
     }
   }
 
-  // ─── Renderers ──────────────────────────────────────────────────────────────
   function renderProducts({ products, totalProducts, currentPage, totalPages }) {
-    els.count.innerHTML = `Showing <span class="text-white">${products.length}</span> of <span class="text-white">${totalProducts}</span> Items`;
-    
+    els.count.innerHTML = `Showing <span class="text-slate-900">${products.length}</span> of <span class="text-slate-900">${totalProducts}</span> Items`;
     renderTags();
 
     if (!products.length) {
@@ -191,15 +187,20 @@
       return;
     }
 
-    els.grid.innerHTML = products.map((p, i) => {
-      const price = p.variants?.[0]?.price || 0;
+    els.grid.innerHTML = products.map((p) => {
+      // FIX: Use displayPrice for the main price and originalPrice for the crossed-out one
+      const currentPrice = p.displayPrice || (p.variants?.[0]?.price) || 0;
+      const originalPrice = p.originalPrice || (p.variants?.[0]?.price * 1.2);
       const img = p.variants?.[0]?.images?.[0]?.url || '/img/placeholder.jpg';
-      const isHot = p.best_offer ? true : false;
+      const hasOffer = p.bestOffer && p.bestOffer.discount_value > 0;
 
       return `
         <div class="group bg-white rounded-[2rem] p-4 border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-purple-200/40 transition-all duration-500 flex flex-col animate-fade-in">
           <div class="relative aspect-square rounded-[1.5rem] overflow-hidden bg-slate-50 mb-5">
-            ${isHot ? `<div class="absolute top-4 left-4 z-10 gradient-bg text-white text-[9px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest shadow-lg">Sale</div>` : ''}
+            ${hasOffer ? `
+              <div class="absolute top-4 left-4 z-10 gradient-bg text-white text-[9px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest shadow-lg">
+                ${p.bestOffer.discount_value}% OFF
+              </div>` : ''}
             <img src="${img}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700" />
             <a href="/product/${p._id}" class="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-colors"></a>
           </div>
@@ -208,8 +209,8 @@
             <h3 class="font-extrabold text-slate-800 line-clamp-1 mb-4 group-hover:text-purple-600 transition-colors">${p.name}</h3>
             <div class="flex items-center justify-between border-t border-slate-50 pt-4">
               <div>
-                <p class="text-[10px] text-slate-400 font-bold line-through">₹${(price * 1.2).toFixed(0)}</p>
-                <p class="text-lg font-black text-slate-900">₹${price.toLocaleString('en-IN')}</p>
+                ${hasOffer ? `<p class="text-[10px] text-slate-400 font-bold line-through">₹${originalPrice.toLocaleString('en-IN')}</p>` : ''}
+                <p class="text-lg font-black text-slate-900">₹${currentPrice.toLocaleString('en-IN')}</p>
               </div>
               <a href="/product/${p._id}" class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center hover:gradient-bg transition-all shadow-lg shadow-slate-200">
                 <i class="fas fa-arrow-right text-xs"></i>
@@ -255,7 +256,6 @@
     pg.innerHTML = html;
   }
 
-  // ─── Actions ───────────────────────────────────────────────────────────────
   function applyFilters() {
     state.search = document.getElementById('f-search').value.trim();
     state.maxPrice = parseInt(document.getElementById('f-price').value);
@@ -276,7 +276,6 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // ─── Listeners ─────────────────────────────────────────────────────────────
   document.querySelectorAll('.chip').forEach(chip => {
     chip.onclick = () => {
       state.category = chip.dataset.value;
@@ -291,10 +290,8 @@
   document.getElementById('f-search').onkeydown = e => e.key === 'Enter' && applyFilters();
   document.getElementById('f-sort').onchange = applyFilters;
 
-  // ─── Initial Load ──────────────────────────────────────────────────────────
   initUI();
   fetchProducts();
-
 </script>
 
 </body>
