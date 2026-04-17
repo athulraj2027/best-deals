@@ -341,138 +341,76 @@ exports.editProductController = async (req, res) => {
 
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(statusCodes.NOT_FOUND).json({
-        title: "Error",
-        message: "Product not found",
-      });
+      return res
+        .status(404)
+        .json({ status: "error", message: "Product not found" });
     }
 
-    const nameRegex = /^[a-zA-Z0-9][a-zA-Z0-9\s&.,'-]{2,99}$/;
+    // 1. Basic Validation
     const trimmedName = name.trim();
-    const lowercaseName = trimmedName.toLowerCase();
-    const isNameValid = nameRegex.test(lowercaseName);
-    if (!isNameValid)
-      return res.status(400).json({
-        status: "error",
-        title: "Error",
-        message: "Name syntax invalid",
-      });
+    if (trimmedName.length < 3) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "Name too short" });
+    }
 
+    // 2. Process Variants & Images
     const processedVariants = await Promise.all(
       variants.map(async (variant, variantIndex) => {
-        // Basic variant properties
-        const processedVariant = {
+        const newVariantData = {
           color: variant.color,
           size: variant.size,
-          price: variant.price,
-          quantity: variant.quantity,
+          price: parseFloat(variant.price),
+          quantity: parseInt(variant.quantity),
           images: [],
         };
 
-        // Get current images for this variant
-        const currentVariantImages =
-          product.variants[variantIndex]?.images || [];
+        for (let i = 0; i < 3; i++) {
+          const fileFieldName = `variants[${variantIndex}][replaceImage][${i}]`;
 
-        // 1. Process existing images (tracked in hidden inputs)
-        if (variant.existingImages) {
-          // Convert existingImages to array if it's not already
-          const existingImages = Array.isArray(variant.existingImages)
-            ? Object.values(variant.existingImages)
-            : [variant.existingImages];
+          // 1. Convert req.files to a flat array if it's an object (from upload.fields)
+          const filesArray = Array.isArray(req.files)
+            ? req.files
+            : Object.values(req.files).flat();
 
-          // Add each existing image that's being kept
-          existingImages.forEach((img) => {
-            if (img && img.url) {
-              processedVariant.images.push({
-                url: img.url,
-                position: parseInt(img.position || 0),
-              });
-            }
-          });
-        }
+          // 2. Look for the specific file field
+          const file = filesArray.find((f) => f.fieldname === fileFieldName);
 
-        // 2. Process deleted images
-        if (variant.deletedImages) {
-          const deletedImages = Array.isArray(variant.deletedImages)
-            ? variant.deletedImages
-            : [variant.deletedImages];
-
-          // Delete image files for removed images
-          for (const imageUrl of deletedImages) {
-            await deleteImageFile(imageUrl);
-          }
-
-          // Filter out deleted images from current ones
-          const deletedImageSet = new Set(deletedImages);
-          currentVariantImages.forEach((img) => {
-            if (
-              !deletedImageSet.has(img.url) &&
-              !processedVariant.images.some(
-                (existing) => existing.url === img.url,
-              )
-            ) {
-              processedVariant.images.push(img);
-            }
-          });
-        }
-
-        // 3. Process replacement images
-        for (let position = 0; position < 3; position++) {
-          const fileFieldName = `variants[${variantIndex}][replaceImage][${position}]`;
-
-          if (req.files && req.files[fileFieldName]) {
-            const file = req.files[fileFieldName][0]; // Get the uploaded file
-
-            // Generate the new image URL
+          if (file) {
             const newImageUrl = `/images/products/${file.filename}`;
 
-            // Check if we're replacing an existing image
-            const replacePosition =
-              variant.replaceImagePosition &&
-              variant.replaceImagePosition[position]
-                ? parseInt(variant.replaceImagePosition[position])
-                : position;
-
-            // Find and remove the image being replaced at this position
-            const replacedImageIndex = processedVariant.images.findIndex(
-              (img) => img.position === replacePosition,
-            );
-
-            if (replacedImageIndex !== -1) {
-              // Delete the old image file
-              await deleteImageFile(
-                processedVariant.images[replacedImageIndex].url,
-              );
-              // Replace with new image
-              processedVariant.images[replacedImageIndex] = {
-                url: newImageUrl,
-                position: replacePosition,
-              };
-            } else {
-              // Add as new image
-              processedVariant.images.push({
-                url: newImageUrl,
-                position: replacePosition,
-              });
+            // Delete the OLD physical image file if it exists
+            const existingImg =
+              variant.existingImages && variant.existingImages[i];
+            if (existingImg && existingImg.url) {
+              await deleteImageFile(existingImg.url);
             }
+
+            newVariantData.images.push({ url: newImageUrl, position: i });
+          } else if (
+            variant.existingImages &&
+            variant.existingImages[i] &&
+            variant.existingImages[i].url
+          ) {
+            // Keep the existing image if no new file is uploaded for this slot
+            newVariantData.images.push({
+              url: variant.existingImages[i].url,
+              position: i,
+            });
           }
         }
 
-        // Ensure we have at most 3 images, sorted by position
-        processedVariant.images = processedVariant.images
-          .sort((a, b) => (a.position || 0) - (b.position || 0))
-          .slice(0, 3);
-
-        return processedVariant;
+        return newVariantData;
       }),
     );
 
+    // 3. Update Database
     await Product.findByIdAndUpdate(
       productId,
       {
-        name: lowercaseName,
+        name: trimmedName.toLowerCase(),
         brand,
-        category: category._id,
+        category, // Ensure this is an ID
         status: status === "true",
         variants: processedVariants,
       },
@@ -481,13 +419,12 @@ exports.editProductController = async (req, res) => {
 
     return res.status(200).json({
       status: "success",
-      title: "Success",
       message: "Product updated successfully",
     });
   } catch (err) {
     console.error("Error updating product:", err);
-    return res.status(statusCodes.SERVER_ERROR).json({
-      title: "Error",
+    return res.status(500).json({
+      status: "error",
       message: "An error occurred while updating the product",
     });
   }
@@ -558,6 +495,16 @@ exports.addVariantController = async (req, res) => {
     console.log(productId);
     if (!product) {
       return res.redirect("/products?error=Product not found");
+    }
+
+    const existingVariant = product.variants.find(
+      (variant) =>
+        variant.color.toLowerCase() === color.toLowerCase() &&
+        variant.size.toLowerCase() === size.toLowerCase(),
+    );
+
+    if (existingVariant) {
+      return res.status(400).json({ message: "Variant already exists" });
     }
 
     // Process uploaded images

@@ -14,10 +14,6 @@
         .main-content { margin-left: 250px; }
         @media(max-width: 768px) { .main-content { margin-left: 0; } }
 
-        /* Modal specific scrollbar */
-        .modal-box::-webkit-scrollbar { width: 6px; }
-        .modal-box::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
         .modal-overlay { display:none; position:fixed; inset:0; background:rgba(15, 23, 42, 0.6); backdrop-filter:blur(8px); z-index:1050; align-items:center; justify-content:center; padding:20px; }
         .modal-overlay.open { display:flex; }
         .modal-box { background:#fff; border-radius:32px; width:100%; max-width:850px; max-height:92vh; overflow-y:auto; box-shadow:0 28px 70px rgba(0,0,0,.2); animation:modalPop .3s cubic-bezier(.34,1.56,.64,1) both; }
@@ -30,7 +26,6 @@
     <%- include('../partials/menu') %>
 
     <div class="main-content w-full p-6 md:p-10">
-
         <div class="mb-8">
             <h1 class="text-3xl font-extrabold tracking-tight">Order Management</h1>
             <p class="text-slate-500 text-sm mt-1">Review customer transactions and manage fulfillment status.</p>
@@ -38,45 +33,33 @@
 
         <% if (stats) { %>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-            <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
-                <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-xs mb-3">
-                    <i class="fas fa-list"></i>
-                </div>
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total</p>
-                <h4 class="text-xl font-extrabold"><%= stats.total %></h4>
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 text-slate-400">
+                <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-xs mb-3"><i class="fas fa-list"></i></div>
+                <p class="text-[10px] font-black uppercase tracking-widest">Total</p>
+                <h4 class="text-xl font-extrabold text-slate-800"><%= stats.total %></h4>
             </div>
             <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 text-amber-600">
-                <div class="w-10 h-10 bg-amber-50 rounded-2xl flex items-center justify-center text-xs mb-3">
-                    <i class="fas fa-clock"></i>
-                </div>
+                <div class="w-10 h-10 bg-amber-50 rounded-2xl flex items-center justify-center text-xs mb-3"><i class="fas fa-clock"></i></div>
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pending</p>
                 <h4 class="text-xl font-extrabold"><%= stats.pending %></h4>
             </div>
             <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 text-emerald-600">
-                <div class="w-10 h-10 bg-emerald-50 rounded-2xl flex items-center justify-center text-xs mb-3">
-                    <i class="fas fa-check-circle"></i>
-                </div>
+                <div class="w-10 h-10 bg-emerald-50 rounded-2xl flex items-center justify-center text-xs mb-3"><i class="fas fa-check-circle"></i></div>
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Delivered</p>
                 <h4 class="text-xl font-extrabold"><%= stats.delivered %></h4>
             </div>
             <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 text-red-600">
-                <div class="w-10 h-10 bg-red-50 rounded-2xl flex items-center justify-center text-xs mb-3">
-                    <i class="fas fa-times-circle"></i>
-                </div>
+                <div class="w-10 h-10 bg-red-50 rounded-2xl flex items-center justify-center text-xs mb-3"><i class="fas fa-times-circle"></i></div>
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cancelled</p>
                 <h4 class="text-xl font-extrabold"><%= stats.cancelled %></h4>
             </div>
             <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 text-blue-600">
-                <div class="w-10 h-10 bg-blue-50 rounded-2xl flex items-center justify-center text-xs mb-3">
-                    <i class="fas fa-undo"></i>
-                </div>
+                <div class="w-10 h-10 bg-blue-50 rounded-2xl flex items-center justify-center text-xs mb-3"><i class="fas fa-undo"></i></div>
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Returns</p>
-                <h4 class="text-xl font-extrabold text-blue-600"><%= stats.returnRequested %></h4>
+                <h4 class="text-xl font-extrabold"><%= stats.returnRequested %></h4>
             </div>
             <div class="bg-slate-900 p-5 rounded-3xl shadow-sm border border-slate-800 text-white">
-                <div class="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center text-xs mb-3">
-                    <i class="fas fa-indian-rupee-sign"></i>
-                </div>
+                <div class="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center text-xs mb-3"><i class="fas fa-indian-rupee-sign"></i></div>
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Revenue</p>
                 <h4 class="text-lg font-extrabold">₹<%= stats.totalRevenue.toLocaleString('en-IN') %></h4>
             </div>
@@ -86,27 +69,23 @@
         <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-200 mb-8 flex flex-col lg:flex-row gap-4 items-center">
             <form action="/admin/orders" method="GET" class="flex items-center gap-3 flex-1 w-full">
                 <div class="relative flex-1 group">
-                    <i class="fas fa-filter absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors"></i>
-                    <select name="status" onchange="this.form.submit()" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-4 focus:ring-indigo-50 transition-all appearance-none cursor-pointer">
-                        <option value="" <%- !selectedStatus ? 'selected' : '' %>>Filter: All Order Status</option>
+                    <i class="fas fa-filter absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <select name="status" onchange="this.form.submit()" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold appearance-none cursor-pointer outline-none focus:ring-2 focus:ring-indigo-500/20">
+                        <option value="" <%- !selectedStatus ? 'selected' : '' %>>Filter: All Status</option>
                         <option value="pending" <%- selectedStatus==='pending' ? 'selected':'' %>>Pending</option>
                         <option value="delivered" <%- selectedStatus==='delivered' ? 'selected':'' %>>Delivered</option>
                         <option value="cancelled" <%- selectedStatus==='cancelled' ? 'selected':'' %>>Cancelled</option>
-                        <option value="return requested" <%- selectedStatus==='return requested' ? 'selected':'' %>>Return Requested</option>
                     </select>
                 </div>
             </form>
-
             <form action="/admin/orders" method="GET" class="flex items-center gap-3 flex-1 w-full">
                 <div class="relative flex-1 group">
-                    <i class="fas fa-sort absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors"></i>
-                    <select name="sort" onchange="this.form.submit()" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-4 focus:ring-indigo-50 transition-all appearance-none cursor-pointer">
-                        <option value="" <%- !selectedSort ? 'selected':'' %>>Sort: Default Date</option>
+                    <i class="fas fa-sort absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <select name="sort" onchange="this.form.submit()" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold appearance-none cursor-pointer outline-none focus:ring-2 focus:ring-indigo-500/20">
                         <option value="desc" <%- selectedSort==='desc' ? 'selected':'' %>>Newest First</option>
                         <option value="asc" <%- selectedSort==='asc' ? 'selected':'' %>>Oldest First</option>
                     </select>
                 </div>
-                <a href="/admin/orders" class="text-xs font-bold text-slate-400 hover:text-red-500 px-2 transition-colors">Reset</a>
             </form>
         </div>
 
@@ -115,10 +94,10 @@
                 <table class="w-full text-left">
                     <thead>
                         <tr class="bg-slate-50 border-b border-slate-200">
-                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Order & ID</th>
+                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Order ID</th>
                             <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Customer</th>
-                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Total Price</th>
-                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Order Status</th>
+                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Total</th>
+                            <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Status</th>
                             <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Payment</th>
                             <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400">Date</th>
                         </tr>
@@ -128,67 +107,35 @@
                             <% orders.forEach((order, idx) => { %>
                             <tr onclick="openModal('<%= order._id %>')" class="hover:bg-slate-50/50 cursor-pointer transition-colors group">
                                 <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <span class="text-xs font-bold text-slate-300">#<%= idx + 1 %></span>
-                                        <span class="text-xs font-mono font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg"><%= order.orderId ? order.orderId.slice(-8).toUpperCase() : 'NO-ID' %></span>
-                                    </div>
+                                    <span class="text-xs font-mono font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg">#<%= order.orderId ? order.orderId.slice(-8).toUpperCase() : 'NO-ID' %></span>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm font-bold text-slate-800"><%= order.customer.name %></div>
-                                    <div class="text-[10px] text-slate-400 font-medium uppercase"><%= order.customer.email %></div>
+                                    <div class="text-[10px] text-slate-400 uppercase"><%= order.customer.email %></div>
                                 </td>
-                                <td class="px-6 py-4 text-sm font-black text-slate-900">
-                                    ₹<%= order.priceBreakdown.grandTotal.toLocaleString('en-IN') %>
-                                </td>
+                                <td class="px-6 py-4 text-sm font-black text-slate-900">₹<%= order.priceBreakdown.grandTotal.toLocaleString('en-IN') %></td>
                                 <td class="px-6 py-4">
-                                  <%
-    const items = order.items || [];
-
-    let derivedStatus = order.status;
-
-    if (items.some(item => item.status === "return_requested")) {
-        derivedStatus = "return_requested";
-    } else if (items.every(item => item.status === "returned")) {
-        derivedStatus = "returned";
-    } else if (items.some(item => item.status === "cancelled")) {
-        derivedStatus = "cancelled";
-    }
-
-
-    const statusColors = {
-    'pending': 'bg-amber-50 text-amber-600',
-    'processing': 'bg-blue-50 text-blue-600',
-    'delivered': 'bg-emerald-50 text-emerald-600',
-    'cancelled': 'bg-red-50 text-red-600',
-    'returned': 'bg-slate-100 text-slate-600',
-    'return_requested': 'bg-purple-50 text-purple-600'
-}
-
-    const statusLabels = {
-        pending: "Pending",
-        processing: "Processing",
-        delivered: "Delivered",
-        cancelled: "Cancelled",
-        returned: "Returned",
-        return_requested: "Return Requested"
-    };
-%>
-
-<span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-current opacity-80 
-    <%= statusColors[derivedStatus] || 'bg-slate-50 text-slate-500' %>">
-    <%= statusLabels[derivedStatus] || derivedStatus %>
-</span>
+                                    <% 
+                                        const statusColors = { 
+                                            pending: 'bg-amber-50 text-amber-600', 
+                                            processing: 'bg-blue-50 text-blue-600', 
+                                            delivered: 'bg-emerald-50 text-emerald-600', 
+                                            cancelled: 'bg-red-50 text-red-600', 
+                                            returned: 'bg-slate-100 text-slate-600', 
+                                            return_requested: 'bg-purple-50 text-purple-600',
+                                            return_accepted: 'bg-indigo-50 text-indigo-600'
+                                        };
+                                    %>
+                                    <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-current opacity-80 <%= statusColors[order.status] || 'bg-slate-50 text-slate-500' %>">
+                                        <%= order.statusLabel %>
+                                    </span>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <span class="text-xs font-bold text-slate-600"><%= order.payment.methodLabel %></span>
-                                </td>
-                                <td class="px-6 py-4 text-xs font-semibold text-slate-400 whitespace-nowrap">
-                                    <%= order.orderDateFmt %>
-                                </td>
+                                <td class="px-6 py-4 text-xs font-bold text-slate-600"><%= order.payment.methodLabel %></td>
+                                <td class="px-6 py-4 text-xs font-semibold text-slate-400"><%= order.orderDateFmt %></td>
                             </tr>
                             <% }) %>
                         <% } else { %>
-                            <tr><td colspan="6" class="px-6 py-20 text-center text-slate-400 font-bold uppercase tracking-widest text-xs italic">No orders found matching your filters</td></tr>
+                            <tr><td colspan="6" class="px-6 py-20 text-center text-slate-400 text-xs italic">No orders found matching your filters</td></tr>
                         <% } %>
                     </tbody>
                 </table>
@@ -203,9 +150,7 @@
         <div class="modal-box">
             <div class="flex justify-between items-start p-8 border-b border-slate-100 bg-slate-50/50">
                 <div>
-                    <h3 class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-                        <i class="fas fa-box-open text-indigo-600"></i> Order Snapshot
-                    </h3>
+                    <h3 class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2"><i class="fas fa-box-open text-indigo-600"></i> Order Snapshot</h3>
                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Order Ref: <%= order.orderId %></p>
                 </div>
                 <button onclick="closeModal('<%= order._id %>')" class="w-10 h-10 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-red-500 flex items-center justify-center transition-all shadow-sm">
@@ -214,9 +159,9 @@
             </div>
 
             <div class="p-8 space-y-10">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="grid md:grid-cols-2 gap-8">
                     <div class="space-y-4">
-                        <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">Customer Details</label>
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-indigo-400">Customer Details</label>
                         <div class="bg-slate-50 p-6 rounded-3xl border border-slate-100">
                             <h4 class="font-bold text-slate-800 text-sm"><%= order.customer.name %></h4>
                             <p class="text-xs text-slate-500 mt-1"><%= order.customer.email %></p>
@@ -224,79 +169,50 @@
                         </div>
                     </div>
                     <div class="space-y-4">
-                        <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">Shipping To</label>
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-indigo-400">Shipping To</label>
                         <div class="bg-slate-50 p-6 rounded-3xl border border-slate-100 text-xs text-slate-600 leading-relaxed">
-                            <span class="inline-block bg-slate-900 text-white px-2 py-0.5 rounded-md text-[9px] font-black uppercase mb-2 tracking-widest"><%= order.shippingAddress.type %></span>
-                            <p class="font-bold text-slate-800"><%= order.shippingAddress.name %></p>
+                            <p class="font-bold text-slate-800 mb-1"><%= order.shippingAddress.name %></p>
                             <p><%= order.shippingAddress.fullAddress %></p>
                         </div>
                     </div>
                 </div>
 
                 <div class="space-y-4">
-                    <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 italic">Cart Inventory</label>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-indigo-400">Cart Inventory</label>
                     <div class="divide-y divide-slate-100 border-y border-slate-100">
                         <% order.items.forEach(item => { %>
                         <div class="py-5 flex items-center gap-4 group">
                             <div class="w-16 h-16 rounded-2xl overflow-hidden border border-slate-200 flex-shrink-0">
-                                <img src="<%= item.productImage || item.image %>" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100'">
+                                <img src="<%= item.productImage %>" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100'">
                             </div>
                             <div class="flex-1 min-w-0">
-                                <h5 class="text-sm font-bold text-slate-800 truncate"><%= item.productName || item.name %></h5>
+                                <h5 class="text-sm font-bold text-slate-800 truncate"><%= item.productName %></h5>
                                 <div class="flex gap-2 mt-1">
-                                    <span class="text-[10px] font-black bg-slate-100 px-2 py-0.5 rounded text-slate-500"><%= item.color %></span>
                                     <span class="text-[10px] font-black bg-slate-100 px-2 py-0.5 rounded text-slate-500 uppercase"><%= item.size %></span>
                                     <span class="text-[10px] font-black text-indigo-600">Qty: <%= item.quantity %></span>
                                 </div>
-                               <div class="mt-2">
-  <select 
-    onchange="changeItemStatus('<%= order._id %>', '<%= item._id %>', this.value, '<%= (item.productName || item.name || '').replace(/'/g, '&#39;') %>')" 
-    class="text-[10px] font-black uppercase tracking-widest bg-white border border-slate-200 rounded-lg px-2 py-1 outline-none focus:border-indigo-400"
-  >
-    <option value="pending" <%= item.status==='pending'?'selected':'' %>>Pending</option>
-    <option value="processing" <%= item.status==='processing'?'selected':'' %>>Processing</option>
-    <option value="delivered" <%= item.status==='delivered'?'selected':'' %>>Delivered</option>
-    <option value="cancelled" <%= item.status==='cancelled'?'selected':'' %>>Cancelled</option>
-    <option value="return_requested" <%= item.status==='return_requested'?'selected':'' %>>Return Requested</option>
-    <option value="return_accepted" <%= item.status==='return_accepted'?'selected':'' %>>Return Accepted</option>
-    <option value="returned" <%= item.status==='returned'?'selected':'' %>>Returned</option>
-  </select>
-</div>
+
+                                <div class="mt-2 item-status-container" 
+                                     data-current-status="<%= item.status %>"
+                                     data-order-id="<%= order._id %>"
+                                     data-item-id="<%= item._id %>"
+                                     data-item-name="<%= (item.productName || '').replace(/'/g, '&#39;') %>">
+                                </div>
                             </div>
-                            <div class="text-right flex-shrink-0">
-                                <p class="text-sm font-black text-slate-900">₹<%= (item.price * item.quantity).toLocaleString('en-IN') %></p>
+                            <div class="text-right">
+                                <p class="text-sm font-black text-slate-900">₹<%= item.lineTotal.toLocaleString('en-IN') %></p>
                             </div>
                         </div>
                         <% }) %>
                     </div>
                 </div>
 
-                <div class="bg-indigo-600 rounded-[2rem] p-8 text-white flex justify-between items-center shadow-xl shadow-indigo-200">
-                    <div>
-                        <p class="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">Settlement Total</p>
-                        <h2 class="text-3xl font-black tracking-tight">₹<%= order.priceBreakdown.grandTotal.toLocaleString('en-IN') %></h2>
-                    </div>
-                    <div class="text-right">
-                        <div class="inline-block bg-white/10 px-4 py-2 rounded-2xl border border-white/20 text-xs font-bold">
-                            <%= order.payment.methodLabel %> · <%= order.payment.statusLabel %>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="pt-6 border-t border-slate-100">
-                    <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-4">Master Status Control</label>
-                    <form action="/admin/orders/update-status/<%= order._id %>" class="flex gap-3">
-                        <select name="status" class="flex-1 px-5 py-4 bg-slate-100 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-indigo-50 appearance-none cursor-pointer">
-                            <option value="pending" <%- order.status==='pending' ? 'selected':'' %>>Pending</option>
-                            <option value="processing" <%- order.status==='processing' ? 'selected':'' %>>Processing</option>
-                            <option value="delivered" <%- order.status==='delivered' ? 'selected':'' %>>Delivered</option>
-                            <option value="cancelled" <%- order.status==='cancelled' ? 'selected':'' %>>Cancelled</option>
-                              <option value="return_requested" <%= order.status==='return_requested'?'selected':'' %>>Return Requested</option>
-    <option value="return_accepted" <%= order.status==='return_accepted'?'selected':'' %>>Return Accepted</option>
-    <option value="returned" <%= order.status==='returned'?'selected':'' %>>Returned</option>
-                        </select>
-                        <button type="button" class="update-btn px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-indigo-100 transition-all">Update</button>
-                    </form>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-4">Master Status Control</label>
+                    <div class="master-status-container flex gap-3" 
+                         data-current-status="<%= order.status %>"
+                         data-order-id="<%= order._id %>">
+                    </div>
                 </div>
             </div>
         </div>
@@ -308,54 +224,112 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    function openModal(id) {
-        document.getElementById('modal-' + id).classList.add('open');
-        document.body.style.overflow = 'hidden';
-    }
-    function closeModal(id) {
-        document.getElementById('modal-' + id).classList.remove('open');
-        document.body.style.overflow = '';
-    }
+    // ── Transition Rules (Sync with Backend) ───────────────────────────────
+    
+    // As per your update: Only returns are allowed at item level
+    const itemTransitions = {
+        pending: [],
+        processing: [],
+        delivered: [],
+        return_requested: ["return_accepted"],
+        return_accepted: ["returned"],
+        returned: [],
+        cancelled: []
+    };
 
-    // Master Status logic
-    document.querySelectorAll('.update-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const form = this.closest('form');
-            const newStatus = form.querySelector('select').value;
-            Swal.fire({
-                title: 'Confirm Update',
-                text: `Change master order status to ${newStatus}?`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#4f46e5',
-                confirmButtonText: 'Yes, update'
-            }).then(res => {
-                if (res.isConfirmed) {
-                    $.ajax({
-                        url: form.action,
-                        type: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify({ status: newStatus }),
-                        success: () => Swal.fire("Updated", "Order status changed.", "success").then(() => window.location.reload()),
-                        error: (err) => {
-                            console.log(err);
-                            let msg = err.responseJSON
-                ? err.responseJSON.message
-                : "Server error. Please try again later.";
-              Swal.fire("Error", msg, "error");
-                            }
-                    });
-                }
-            });
+    // Master order transitions (Usually sequential)
+    const masterTransitions = {
+        pending: ["processing"],
+        processing: ["delivered"],
+        delivered: [],
+        return_requested: ["return_accepted"],
+        return_accepted: ["returned"],
+        cancelled: [],
+        returned: []
+    };
+
+    const labelMap = {
+        pending: "Pending",
+        processing: "Processing",
+        delivered: "Delivered",
+        cancelled: "Cancelled",
+        return_requested: "Return Requested",
+        return_accepted: "Return Accepted",
+        returned: "Returned"
+    };
+
+    // ── UI Injection Logic ───────────────────────────────────────────────
+
+    function renderControls() {
+        // 1. Item Controls
+        document.querySelectorAll('.item-status-container').forEach(container => {
+            const current = container.dataset.currentStatus;
+            const orderId = container.dataset.orderId;
+            const itemId = container.dataset.itemId;
+            const itemName = container.dataset.itemName;
+            const allowed = itemTransitions[current] || [];
+
+            if (allowed.length > 0) {
+                let html = `<select onchange="changeItemStatus('${orderId}', '${itemId}', this.value, '${itemName}')" class="text-[10px] font-black uppercase tracking-widest bg-white border border-slate-200 rounded-lg px-2 py-1 outline-none">`;
+                html += `<option value="" disabled selected>${labelMap[current]}</option>`;
+                allowed.forEach(status => {
+                    html += `<option value="${status}">${labelMap[status]}</option>`;
+                });
+                html += `</select>`;
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = `<span class="text-[9px] font-bold uppercase tracking-widest text-slate-400 bg-slate-100 px-2 py-1 rounded">${labelMap[current]}</span>`;
+            }
         });
-    });
 
-    // Item-level logic
+        // 2. Master Controls
+        document.querySelectorAll('.master-status-container').forEach(container => {
+            const current = container.dataset.currentStatus;
+            const orderId = container.dataset.orderId;
+            const allowed = masterTransitions[current] || [];
+
+            if (allowed.length > 0) {
+                let html = `<select class="flex-1 px-5 py-4 bg-slate-100 border-none rounded-2xl text-sm font-bold appearance-none outline-none">`;
+                allowed.forEach(status => {
+                    html += `<option value="${status}">${labelMap[status]}</option>`;
+                });
+                html += `</select>`;
+                html += `<button type="button" onclick="updateMasterStatus('${orderId}', this)" class="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-indigo-100 transition-all">Update</button>`;
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = `<div class="w-full p-4 bg-slate-50 border border-dashed border-slate-200 rounded-2xl text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Order is ${labelMap[current]} (Final State)</div>`;
+            }
+        });
+    }
+
+    // ── API Functions ────────────────────────────────────────────────────
+
+    function updateMasterStatus(orderId, btn) {
+        const newStatus = btn.previousElementSibling.value;
+        Swal.fire({
+            title: 'Update Order Status?',
+            text: `Confirming updation to ${labelMap[newStatus]}`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#4f46e5',
+        }).then(res => {
+            if (res.isConfirmed) {
+                $.ajax({
+                    url: `/admin/orders/update-status/${orderId}`,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ status: newStatus }),
+                    success: () => Swal.fire("Success", "Master status updated", "success").then(() => window.location.reload()),
+                    error: (err) => Swal.fire("Error", err.responseJSON?.message || "Server Error", "error")
+                });
+            }
+        });
+    }
+
     function changeItemStatus(orderId, itemId, status, itemName) {
-        if (!status) return;
         Swal.fire({
             title: "Update Item?",
-            html: `Change <strong>${itemName}</strong> to ${status}?`,
+            html: `Change <strong>${itemName}</strong> to <strong>${labelMap[status]}</strong>?`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#4f46e5"
@@ -366,18 +340,24 @@
                     type: "POST",
                     contentType: "application/json",
                     data: JSON.stringify({ status }),
-                    success: () => Swal.fire("Success", "Item updated.", "success").then(() => window.location.reload()),
-                    error: (err) =>{
-                         console.log(err);
-                         let msg = err.responseJSON
-                ? err.responseJSON.message
-                : "Server error. Please try again later.";
-              Swal.fire("Error", msg, "error");
-                         }
+                    success: () => Swal.fire("Success", "Item updated", "success").then(() => window.location.reload()),
+                    error: (err) => Swal.fire("Error", err.responseJSON?.message || "Server Error", "error")
                 });
             }
         });
     }
+
+    // ── Helper functions ─────────────────────────────────────────────────
+    function openModal(id) {
+        document.getElementById('modal-' + id).classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeModal(id) {
+        document.getElementById('modal-' + id).classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    document.addEventListener('DOMContentLoaded', renderControls);
 </script>
 </body>
 </html>

@@ -478,7 +478,7 @@
         <!-- Price breakdown + Place Order -->
         <div class="card">
           <div class="card-body">
-            <div class="summary-row"><span class="label">Subtotal</span><span>₹<%= cart.subtotal %></span></div>
+            <div class="summary-row"><span class="label">Subtotal</span><span>₹<%= cart.subtotal.toFixed(2)%></span></div>
             <div class="summary-row"><span class="label">Shipping</span><span style="color:var(--success);">Free</span></div>
             <div class="summary-row"><span class="label">Tax</span><span>₹<%= cart.tax.toFixed(2)%></span></div>
             <div id="couponDiscountRow" class="summary-row" style="display:none;color:var(--success);">
