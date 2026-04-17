@@ -68,21 +68,16 @@ exports.addAddressController = async (req, res) => {
 
   const { type, streetAddress, city, state, zipCode, country } = req.body;
   try {
-    console.log(type, streetAddress, city, state, zipCode, country);
     if (!type || !streetAddress || !city || !state || !zipCode || !country) {
-      console.log("every field is not available");
       return res.status(400).json({
         status: "error",
         title: "Error",
         message: "Please fill all the fields",
       });
     }
-    console.log("all fields are there ");
     if (type === "Home") {
       const homeAddress = await Address.findOne({ userId, type: "Home" });
       if (homeAddress) {
-        console.log("there is already a home address");
-
         return res.status(400).json({
           status: "error",
           title: "Error",
@@ -415,9 +410,6 @@ exports.getOrdersPage = async (req, res) => {
         message: "Couldn't find your orders",
       });
     }
-
-    orders.forEach((order) => console.log("items ; ", order.items));
-
     return res
       .status(200)
       .render("userPages/profilePages/orderPage", { orders, user });
@@ -428,7 +420,6 @@ exports.getOrdersPage = async (req, res) => {
 };
 
 exports.cancelOrderController = async (req, res) => {
-  console.log("req body : ", req.body);
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -571,15 +562,10 @@ exports.getWalletTransactionsPage = async (req, res) => {
   try {
     const user = await User.findById(req.session.userId);
     if (!user) {
-      return res.status(400).json({
-        status: "error",
-        title: "Error",
-        message: "User not found",
-      });
+      return res.status(400).redirect("/");
     }
     const transactions = user.walletTransactions;
     const walletBalance = user.wallet;
-    console.log("Transactions : ", transactions);
     return res.status(200).render("userPages/profilePages/transactionsPage", {
       transactions,
       user,

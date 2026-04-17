@@ -372,9 +372,6 @@ exports.changeStatusController = async (req, res) => {
     }
 
     order.status = newStatus;
-    order.items.forEach((item) => {
-      item.status = newStatus;
-    });
 
     if (
       newStatus === "delivered" &&
@@ -420,38 +417,52 @@ exports.changeStatusController = async (req, res) => {
     }
 
     if (newStatus === "returned") {
-      order.items.forEach(async (item) => {
-        const product = await Product.findById(item.productId);
-        const variant = product.variants.find(
-          (v) => v._id.toString() === item.variantId.toString(),
-        );
-        if (!variant)
-          return res.status(400).json({ message: "Variant not found" });
-        variant.quantity += item.quantity;
+      let refundAmount = 0;
 
-        await product.save();
-      });
-    }
-    if (newStatus === "returned" && order.payment_status === "paid") {
-      await User.updateOne(
-        { _id: order.userId },
-        {
-          $inc: { wallet: order.grandTotal },
-          $push: {
-            walletTransactions: {
-              type: "credit",
-              amount: order.grandTotal,
-              description: `Refund for returned order #${order.orderId}`,
-              date: new Date(),
+      for (const item of order.items) {
+        if (!["cancelled", "returned"].includes(item.status)) {
+          const product = await Product.findById(item.productId).session(
+            session,
+          );
+
+          const variant = product.variants.find(
+            (v) => v._id.toString() === item.variantId.toString(),
+          );
+
+          if (!variant) throw new Error("Variant not found");
+
+          variant.quantity += item.quantity;
+          refundAmount += item.paidAmount;
+
+          await product.save({ session });
+        }
+      }
+
+      if (order.payment_status === "paid") {
+        await User.updateOne(
+          { _id: order.userId },
+          {
+            $inc: { wallet: refundAmount },
+            $push: {
+              walletTransactions: {
+                type: "credit",
+                amount: refundAmount,
+                description: `Refund for returned order #${order.orderId}`,
+                date: new Date(),
+              },
             },
           },
-        },
-        { session },
-      );
+          { session },
+        );
 
-      order.payment_status = "refunded";
+        order.payment_status = "refunded";
+      }
     }
 
+    order.items.forEach((item) => {
+      if (!["cancelled", "returned"].includes(item.status))
+        item.status = newStatus;
+    });
     await order.save({ session });
 
     await session.commitTransaction();
@@ -543,8 +554,8 @@ exports.changeItemStatus = async (req, res) => {
 
     // 4. Allowed transitions (IMPORTANT)
     const allowedTransitions = {
-      pending: ["processing"],
-      processing: ["delivered"],
+      pending: [],
+      processing: [],
       delivered: [],
       return_requested: ["return_accepted"],
       return_accepted: ["returned"],
@@ -564,7 +575,7 @@ exports.changeItemStatus = async (req, res) => {
     if (status === "returned") {
       item.returnedAt = new Date();
       const user = await User.findById(order.userId);
-       user.wallet += Number(item.paidAmount);
+      user.wallet += Number(item.paidAmount);
       user.walletTransactions.push({
         type: "credit",
         amount: item.paidAmount,
@@ -589,10 +600,6 @@ exports.changeItemStatus = async (req, res) => {
     if (statuses.every((s) => s === "returned")) {
       order.status = "returned";
       order.payment_status = "refunded"; // optional
-    } else if (statuses.some((s) => s === "return_requested")) {
-      order.status = "return_requested";
-    } else if (statuses.some((s) => s === "return_accepted")) {
-      order.status = "return_accepted";
     }
 
     await order.save();
