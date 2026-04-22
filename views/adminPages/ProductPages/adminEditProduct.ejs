@@ -73,6 +73,7 @@
                 
                 <% product.variants.forEach((variant, vIdx) => { %>
                 <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-200">
+                    <input type="hidden" name="variants[<%= vIdx %>][_id]" value="<%= variant._id %>">
                     <div class="flex items-center justify-between mb-6">
                         <span class="px-3 py-1 bg-indigo-50 text-indigo-600 text-[10px] font-black rounded-lg uppercase">Variant #<%= vIdx + 1 %></span>
                     </div>

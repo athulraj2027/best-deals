@@ -16,6 +16,7 @@
         .cropper-view-box, .cropper-face { border-radius: 8px; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .input-error { border-color: #ef4444 !important; }
     </style>
 </head>
 
@@ -33,7 +34,7 @@
             </a>
         </div>
 
-        <form id="addProductForm" class="space-y-8">
+        <form id="addProductForm" class="space-y-8" novalidate>
             <section class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
                 <div class="flex items-center gap-3 mb-8">
                     <div class="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
@@ -45,34 +46,31 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="md:col-span-2">
                         <label class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Asset Designation (Name)</label>
-                        <input type="text" name="name" required class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-bold" placeholder="e.g. RTX 5090 Super Edition" />
+                        <input type="text" name="name" id="name" class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-bold" placeholder="e.g. RTX 5090 Super Edition" />
+                        <p id="nameError" class="text-red-500 text-[10px] mt-2 hidden font-bold uppercase tracking-tighter"></p>
                     </div>
 
                     <div class="md:col-span-2">
                         <label class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Hardware Summary</label>
-                        <textarea name="description" rows="3" required class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-medium" placeholder="Technical documentation..."></textarea>
+                        <textarea name="description" id="description" rows="3" class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-medium" placeholder="Technical documentation..."></textarea>
+                        <p id="descriptionError" class="text-red-500 text-[10px] mt-2 hidden font-bold uppercase tracking-tighter"></p>
                     </div>
 
                     <div>
                         <label class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Manufacturer (Brand)</label>
-                        <input type="text" name="brand" required class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-bold" placeholder="e.g. ASUS" />
+                        <input type="text" name="brand" id="brand" class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-bold" placeholder="e.g. ASUS" />
+                        <p id="brandError" class="text-red-500 text-[10px] mt-2 hidden font-bold uppercase tracking-tighter"></p>
                     </div>
 
                     <div>
                         <label class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Sector (Category)</label>
-                        <select name="category" required class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-bold appearance-none cursor-pointer">
+                        <select name="category" id="category" class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-bold appearance-none cursor-pointer">
                             <option value="">Select Sector</option>
                             <% categories.forEach(category => { %>
                                 <option value="<%= category.name %>"><%= category.name %></option>
                             <% }) %>
                         </select>
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Live Status</label>
-                        <select name="status" required class="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-bold appearance-none cursor-pointer">
-                            <option value="true">Sync Online (Listed)</option>
-                            <option value="false">Stay Local (Unlisted)</option>
-                        </select>
+                        <p id="categoryError" class="text-red-500 text-[10px] mt-2 hidden font-bold uppercase tracking-tighter"></p>
                     </div>
                 </div>
             </section>
@@ -91,6 +89,7 @@
                 </div>
 
                 <div id="variants" class="space-y-10"></div>
+                <p id="variantsError" class="text-red-500 text-[10px] mt-4 hidden font-bold text-center uppercase"></p>
             </section>
 
             <div class="flex items-center justify-end gap-4 pt-6">
@@ -158,11 +157,11 @@
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Unit Price (₹)</label>
-                        <input type="number" name="variants[${variantCount}][price]" step="0.01" class="w-full px-4 py-3.5 rounded-xl border border-slate-100 bg-white outline-none focus:ring-2 focus:ring-indigo-400 text-sm font-bold" placeholder="0.00" />
+                        <input type="number" name="variants[${variantCount}][price]" step="0.01" class="variant-price w-full px-4 py-3.5 rounded-xl border border-slate-100 bg-white outline-none focus:ring-2 focus:ring-indigo-400 text-sm font-bold" placeholder="0.00" />
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Stock Quota</label>
-                        <input type="number" name="variants[${variantCount}][quantity]" class="w-full px-4 py-3.5 rounded-xl border border-slate-100 bg-white outline-none focus:ring-2 focus:ring-indigo-400 text-sm font-bold" placeholder="0" />
+                        <input type="number" name="variants[${variantCount}][quantity]" class="variant-quantity w-full px-4 py-3.5 rounded-xl border border-slate-100 bg-white outline-none focus:ring-2 focus:ring-indigo-400 text-sm font-bold" placeholder="0" />
                     </div>
                 </div>
 
@@ -172,7 +171,7 @@
                             <label class="block text-[9px] font-black text-slate-300 uppercase tracking-widest mb-4">${imgIdx === 0 ? 'Primary Interface' : 'Detail View ' + imgIdx}</label>
                             
                             <div class="aspect-square w-full rounded-2xl border-2 border-dashed border-slate-100 bg-slate-50/50 flex flex-col items-center justify-center overflow-hidden relative transition-all group-hover/img:border-indigo-200">
-                                <img src="" id="preview-${variantCount}-${imgIdx}" class="hidden w-full h-full object-cover z-10" />
+                                <img src="" id="preview-${variantCount}-${imgIdx}" class="variant-preview hidden w-full h-full object-cover z-10" />
                                 <div id="placeholder-${variantCount}-${imgIdx}" class="flex flex-col items-center gap-3 text-slate-300 transition-all group-hover/img:text-indigo-400">
                                     <i class="fas fa-cloud-upload-alt text-2xl"></i>
                                     <span class="text-[9px] font-black uppercase tracking-tighter">Add Photo</span>
@@ -196,6 +195,11 @@
         }
 
         function removeVariant(index) {
+            const currentVariants = document.querySelectorAll('.variant-card');
+            if (currentVariants.length <= 1) {
+                return Swal.fire("Action Blocked", "At least one variant iteration is required for deployment.", "warning");
+            }
+            
             Swal.fire({
                 title: "De-initialize Build?",
                 text: "Removing this variant will purge all associated image buffers.",
@@ -257,29 +261,90 @@
             document.getElementById(`input-${vIdx}-${iIdx}`).value = "";
         }
 
-        // 🚀 FORM SUBMISSION LOGIC (CLEAN)
+        // --- VALIDATION HELPERS (Like Coupon Page) ---
+        function showError(id, msg) {
+            const errorElement = $(`#${id}Error`);
+            const inputElement = $(`#${id}`);
+            errorElement.text(msg).fadeIn();
+            inputElement.addClass('input-error');
+        }
+
+        function hideError(id) {
+            $(`#${id}Error`).hide();
+            $(`#${id}`).removeClass('input-error');
+        }
+
+        // --- MASTER FORM SUBMISSION ---
         $("#addProductForm").submit(async function(e) {
             e.preventDefault();
-            Swal.fire({ title: 'Deploying Asset...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+            
+            // Reset Errors
+            $(".text-red-500").hide();
+            $("input, select, textarea").removeClass('input-error');
+
+            // 1. Core Field Validation
+            let isValid = true;
+            const name = $("#name").val().trim();
+            const desc = $("#description").val().trim();
+            const brand = $("#brand").val().trim();
+            const category = $("#category").val();
+
+            if (!name || name.length < 3) { showError("name", "Designation requires min 3 characters"); isValid = false; }
+            if (!desc || desc.length < 10) { showError("description", "Documentation must be at least 10 characters"); isValid = false; }
+            if (!brand) { showError("brand", "Manufacturer identity is required"); isValid = false; }
+            if (!category) { showError("category", "Target sector must be selected"); isValid = false; }
+
+            // 2. Variant Validation
+            const variantCards = document.querySelectorAll('.variant-card');
+            if (variantCards.length === 0) {
+                $("#variantsError").text("At least one hardware iteration is required").show();
+                isValid = false;
+            }
+
+            variantCards.forEach(card => {
+                const price = $(card).find('.variant-price').val();
+                const qty = $(card).find('.variant-quantity').val();
+                const previews = $(card).find('.variant-preview:not(.hidden)');
+
+                if (!price || parseFloat(price) <= 0) {
+                    $(card).find('.variant-price').addClass('input-error');
+                    isValid = false;
+                }
+                if (!qty || parseInt(qty) < 0) {
+                    $(card).find('.variant-quantity').addClass('input-error');
+                    isValid = false;
+                }
+                if (previews.length === 0) {
+                    Swal.fire("Incomplete Build", "Each variant must have at least one image asset.", "warning");
+                    isValid = false;
+                }
+            });
+
+            if (!isValid) return;
+
+            // --- DEPLOYMENT PROCESS ---
+            Swal.fire({ 
+                title: 'Deploying Asset...', 
+                html: 'Compiling technical shaders and image buffers',
+                didOpen: () => Swal.showLoading(), 
+                allowOutsideClick: false 
+            });
 
             const formData = new FormData(this);
             
-            // 🚨 THE FIX: Remove automatic file entries to prevent duplication (3 images becoming 6)
+            // Clean duplicate image keys
             const keys = Array.from(formData.keys());
             keys.forEach(key => { if(key.includes('[images][]')) formData.delete(key); });
 
-            // 📸 PROCESS CROPPED PREVIEWS
+            // Process Image DataURLs to Blobs
             const imgPreviews = document.querySelectorAll('img[id^="preview-"]');
             for (let img of imgPreviews) {
-                // Only process visible, valid images
                 if (img.src && img.src.startsWith('data:') && !img.classList.contains('hidden')) {
                     const res = await fetch(img.src);
                     const blob = await res.blob();
-                    
                     const inputId = img.id.replace('preview-', 'input-');
                     const fieldName = document.getElementById(inputId).name;
-                    
-                    formData.append(fieldName, blob, `variant_asset_${Date.now()}.jpg`);
+                    formData.append(fieldName, blob, `asset_frame_${Date.now()}.jpg`);
                 }
             }
 
@@ -290,10 +355,16 @@
                 processData: false,
                 contentType: false,
                 success: (res) => {
-                    if (res.success) Swal.fire("Asset Finalized", "Hardware listing is now live.", "success").then(() => window.location.href = "/admin/products");
-                    else Swal.fire("Failed", res.message, "error");
+                    if (res.success) {
+                        Swal.fire("Asset Finalized", "Hardware listing is now live.", "success")
+                            .then(() => window.location.href = "/admin/products");
+                    } else {
+                        Swal.fire("Deployment Failed", res.message, "error");
+                    }
                 },
-                error: (xhr) => Swal.fire("Fatal Error", xhr.responseJSON?.message || "Cloud connection failure.", "error")
+                error: (xhr) => {
+                    Swal.fire("Fatal Error", xhr.responseJSON?.message || "Cloud connection failure.", "error");
+                }
             });
         });
     </script>

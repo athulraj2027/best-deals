@@ -337,29 +337,95 @@ async function deleteImageFile(imageUrl) {
 exports.editProductController = async (req, res) => {
   try {
     const productId = req.params.id;
-    const { name, brand, category, status, variants } = req.body;
+    const { name, brand, category, description, status, variants } = req.body;
 
     const product = await Product.findById(productId);
     if (!product) {
-      return res
-        .status(404)
-        .json({ status: "error", message: "Product not found" });
+      return res.status(404).json({
+        status: "error",
+        message: "Product not found",
+      });
     }
 
-    // 1. Basic Validation
-    const trimmedName = name.trim();
-    if (trimmedName.length < 3) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "Name too short" });
+    const trimmedName = name?.trim();
+    if (!trimmedName || trimmedName.length < 3) {
+      return res.status(400).json({
+        status: "error",
+        message: "Product name must be at least 3 characters",
+      });
     }
 
-    // 2. Process Variants & Images
+    if (!Array.isArray(variants) || variants.length === 0) {
+      return res.status(400).json({
+        status: "error",
+        message: "At least one variant is required",
+      });
+    }
+
+    const normalize = (str) => str?.trim().toLowerCase();
+
+    // 3. Build map of existing variants to check for conflicts
+    const existingMap = new Map();
+    product.variants.forEach((v) => {
+      const key = `${normalize(v.color)}-${normalize(v.size)}`;
+      existingMap.set(key, v._id.toString());
+    });
+
+    // 4. Validate incoming variants for duplicates
+    const seenInRequest = new Set();
+
+    for (let v of variants) {
+      const color = normalize(v.color);
+      const size = normalize(v.size);
+      const key = `${color}-${size}`;
+
+      if (!color || !size) {
+        return res.status(400).json({
+          status: "error",
+          message: "Color and size are required for all variants",
+        });
+      }
+
+      if (parseFloat(v.price) <= 0 || parseInt(v.quantity) < 0) {
+        return res.status(400).json({
+          status: "error",
+          message: "Invalid price or quantity detected",
+        });
+      }
+
+      // Check: Is there a duplicate color/size combo in the current request?
+      if (seenInRequest.has(key)) {
+        return res.status(400).json({
+          status: "error",
+          message: `Duplicate variant entries in form: ${v.color} - ${v.size}`,
+        });
+      }
+      seenInRequest.add(key);
+
+      // Check: Does this combo belong to a DIFFERENT variant in the database?
+      if (existingMap.has(key)) {
+        const existingId = existingMap.get(key);
+        // If the incoming variant has no ID (new) OR ID doesn't match the owner of that key (conflict)
+        if (!v._id || v._id.toString() !== existingId) {
+          return res.status(400).json({
+            status: "error",
+            message: `A variant with ${v.color}/${v.size} already exists in the catalog.`,
+          });
+        }
+      }
+    }
+
+    // 5. Process variants + images
+    const filesArray = Array.isArray(req.files)
+      ? req.files
+      : Object.values(req.files || {}).flat();
+
     const processedVariants = await Promise.all(
       variants.map(async (variant, variantIndex) => {
         const newVariantData = {
-          color: variant.color,
-          size: variant.size,
+          _id: variant._id || new mongoose.Types.ObjectId(),
+          color: variant.color.trim(),
+          size: variant.size.trim(),
           price: parseFloat(variant.price),
           quantity: parseInt(variant.quantity),
           images: [],
@@ -367,65 +433,58 @@ exports.editProductController = async (req, res) => {
 
         for (let i = 0; i < 3; i++) {
           const fileFieldName = `variants[${variantIndex}][replaceImage][${i}]`;
-
-          // 1. Convert req.files to a flat array if it's an object (from upload.fields)
-          const filesArray = Array.isArray(req.files)
-            ? req.files
-            : Object.values(req.files).flat();
-
-          // 2. Look for the specific file field
           const file = filesArray.find((f) => f.fieldname === fileFieldName);
 
           if (file) {
             const newImageUrl = `/images/products/${file.filename}`;
 
-            // Delete the OLD physical image file if it exists
-            const existingImg =
-              variant.existingImages && variant.existingImages[i];
-            if (existingImg && existingImg.url) {
+            // Clean up old image if replacing
+            const existingImg = variant.existingImages && variant.existingImages[i];
+            if (existingImg?.url) {
               await deleteImageFile(existingImg.url);
             }
 
-            newVariantData.images.push({ url: newImageUrl, position: i });
-          } else if (
-            variant.existingImages &&
-            variant.existingImages[i] &&
-            variant.existingImages[i].url
-          ) {
-            // Keep the existing image if no new file is uploaded for this slot
+            newVariantData.images.push({
+              url: newImageUrl,
+              order: i, // Matches schema 'order'
+            });
+          } else if (variant.existingImages && variant.existingImages[i]?.url) {
+            // Retain old image if no new file is uploaded
             newVariantData.images.push({
               url: variant.existingImages[i].url,
-              position: i,
+              order: i,
             });
           }
         }
-
         return newVariantData;
-      }),
+      })
     );
 
-    // 3. Update Database
-    await Product.findByIdAndUpdate(
+    // 6. Update Product
+    const updatedProduct = await Product.findByIdAndUpdate(
       productId,
       {
-        name: trimmedName.toLowerCase(),
-        brand,
-        category, // Ensure this is an ID
-        status: status === "true",
+        name: trimmedName,
+        brand: brand.trim(),
+        category,
+        description: description.trim(),
+        status: status === "true" || status === true,
         variants: processedVariants,
       },
-      { new: true },
+      { new: true, runValidators: true }
     );
 
     return res.status(200).json({
       status: "success",
       message: "Product updated successfully",
+      product: updatedProduct,
     });
+
   } catch (err) {
-    console.error("Error updating product:", err);
+    console.error("Update Error:", err);
     return res.status(500).json({
       status: "error",
-      message: "An error occurred while updating the product",
+      message: "An internal error occurred while updating the product",
     });
   }
 };
