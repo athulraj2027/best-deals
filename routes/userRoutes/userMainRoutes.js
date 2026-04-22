@@ -5,6 +5,7 @@ const Order = require("../../models/Order");
 const User = require("../../models/User");
 const Product = require("../../models/Product");
 const Cart = require("../../models/Cart");
+const Coupon = require("../../models/Coupon");
 
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID;
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
@@ -315,7 +316,7 @@ router.post("/order/create-razorpay", async (req, res) => {
 
     const userId = req.user?._id || req.session?.userId;
 
-     const user = await User.findById(userId);
+    const user = await User.findById(userId);
 
     // Validate required fields
     if (!addressId) {
@@ -353,7 +354,6 @@ router.post("/order/create-razorpay", async (req, res) => {
     }
 
     for (let item of cart.items) {
-    
       const product = await Product.findById(item.productId);
       if (!product) throw new Error("No product found ");
       const variant = product.variants.id(item.variantId);

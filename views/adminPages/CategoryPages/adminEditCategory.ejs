@@ -74,9 +74,7 @@
 
                     <div id="previewWrapper" class="mt-6 relative <%= category.imageUrl ? '' : 'hidden' %>">
                         <img id="imagePreview" src="/<%= category.imageUrl %>" class="max-w-[250px] rounded-xl shadow-md border border-gray-200 object-cover aspect-square" />
-                        <button type="button" id="removeImageBtn" class="absolute -top-3 -right-3 bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600 shadow-lg transition-transform hover:scale-110">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </button>
+                       
                         <button type="button" id="cropBtn" class="w-full mt-3 py-2 text-xs font-bold text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
                             Refine Crop
                         </button>
