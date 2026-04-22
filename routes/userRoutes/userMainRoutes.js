@@ -26,6 +26,7 @@ const checkBlockedUserMiddleware = require("../../middlewares/checkBlockedUserMi
 const Razorpay = require("razorpay");
 const userGuestMiddleware = require("../../middlewares/userGuestMiddleware");
 const { generateOrderId } = require("../../config/generate-order");
+const { calculateCartTotal } = require("../../services/pricingService");
 
 router.use((req, res, next) => {
   res.locals.userId = req.session.userId || null;
@@ -309,20 +310,22 @@ const razorpay = new Razorpay({
 
 router.post("/order/create-razorpay", async (req, res) => {
   try {
-    const { cartId, amount, addressId } = req.body;
-    console.log(req);
+    const { addressId, walletUsed, couponCode } = req.body;
+    console.log("body for RZ creation : ", req.body);
+
     const userId = req.user?._id || req.session?.userId;
-    console.log("user id :  ", userId);
+
+     const user = await User.findById(userId);
 
     // Validate required fields
-    if (!cartId || !amount || !addressId) {
+    if (!addressId) {
       return res.status(400).json({
         status: "error",
         message: "Missing required fields: cartId, amount, or addressId",
       });
     }
 
-    const cart = await Cart.findById(cartId);
+    const cart = await Cart.findOne({ userId }).populate("items.productId");
     if (!cart) {
       return res.status(404).json({
         status: "error",
@@ -330,13 +333,75 @@ router.post("/order/create-razorpay", async (req, res) => {
       });
     }
 
+    if (couponCode) {
+      coupon = await Coupon.findOne({ code: couponCode });
+
+      if (coupon) {
+        if (!coupon.active || coupon.expiryDate < new Date()) {
+          throw new Error("Coupon expired");
+        }
+        cart.appliedCoupon = coupon._id;
+        await cart.save();
+      }
+
+      if (cart.subtotal < coupon.minPurchase) {
+        return res.json({
+          success: false,
+          message: "Minimum purchase not met",
+        });
+      }
+    }
+
+    for (let item of cart.items) {
+    
+      const product = await Product.findById(item.productId);
+      if (!product) throw new Error("No product found ");
+      const variant = product.variants.id(item.variantId);
+
+      if (!variant || variant.quantity < item.quantity) {
+        throw new Error(`${item.name} is out of stock`);
+      }
+
+      variant.quantity -= item.quantity;
+      await product.save();
+    }
+
+    // Calculate pricing
+    const pricing = await calculateCartTotal(
+      cart,
+      user,
+      walletUsed,
+      "razorpay",
+    );
+
+    console.log("pricing : ", pricing);
+    // Deduct wallet
+
+    if (pricing.finalTotal > 1000 && paymentMethod === "cod")
+      return res
+        .status(400)
+        .json({ message: "The order cannot be done with cash on delivery" });
+
+    const orderItems = pricing.items.map((item) => ({
+      productId: item.cartItem.productId._id,
+      variantId: item.cartItem.variantId,
+      name: item.cartItem.name,
+      color: item.cartItem.color,
+      size: item.cartItem.size,
+      price: item.cartItem.price,
+      quantity: item.cartItem.quantity,
+      image: item.cartItem.image,
+      paidAmount: item.paidAmount,
+      payment_status: "pending",
+    }));
+
     const options = {
-      amount: amount * 100, // Converting to paise
+      amount: pricing.finalTotal * 100, // Converting to paise
       currency: "INR",
       receipt: `order_${Date.now()}`,
       payment_capture: 1,
       notes: {
-        cartId: cartId,
+        cartId: cart._id,
         userId: userId?.toString(),
         addressId: addressId,
       },
@@ -352,7 +417,7 @@ router.post("/order/create-razorpay", async (req, res) => {
     const pendingOrder = new Order({
       orderId,
       userId,
-      items: cartItems,
+      items: orderItems,
       addressId,
       paymentMethod: "razorpay",
       payment_status: "pending",
@@ -367,7 +432,6 @@ router.post("/order/create-razorpay", async (req, res) => {
     });
 
     await pendingOrder.save();
-    const order = await Order.find({ userId: userId });
 
     return res.status(200).json({
       status: "success",
@@ -440,6 +504,7 @@ router.post("/verify-payment", async (req, res) => {
     // Update product inventory
     for (const item of order.items) {
       try {
+        item.payment_status = "paid";
         // Find product and update the variant quantity
         await Product.updateOne(
           { _id: item.productId, "variants._id": item.variantId },
