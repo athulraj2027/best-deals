@@ -213,6 +213,7 @@ exports.checkoutController = async (req, res) => {
       quantity: item.cartItem.quantity,
       image: item.cartItem.image,
       paidAmount: item.paidAmount,
+      payment_status: paymentMethod === "cod" ? "pending" : "pending",
     }));
 
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
@@ -243,8 +244,12 @@ exports.checkoutController = async (req, res) => {
 
       try {
         user.wallet -= pricing.walletDeduction;
+        user.walletTransactions.push({
+          type: "debit",
+          amount: pricing.walletDeduction,
+          description: `Paid for order id ${order.orderId} `,
+        });
         await user.save({ session });
-
         await order.save({ session });
 
         await session.commitTransaction();
@@ -256,6 +261,9 @@ exports.checkoutController = async (req, res) => {
     // Wallet-only payment
     if (pricing.finalTotal === 0) {
       order.payment_status = "paid";
+      order.items.forEach((item) => {
+        item.payment_status = "paid";
+      });
     }
 
     await order.save();

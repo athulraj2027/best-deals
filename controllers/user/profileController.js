@@ -705,10 +705,11 @@ exports.cancelItemController = async (req, res) => {
     item.cancelReason = req.body.reasons;
 
     // refund logic if prepaid
-    if (order.payment_status === "paid") {
+    if (item.payment_status === "paid") {
       const user = await User.findById(order.userId);
       const refundAmount = item.paidAmount;
       user.wallet += refundAmount;
+      item.payment_status = "refunded";
       const walletTransaction = {
         type: "credit",
         description: `Order cancellation refund for Order #${order.orderId} item`,
@@ -810,29 +811,43 @@ exports.downloadInvoiceController = async (req, res) => {
 
     if (!order) return res.status(404).send("Order not found");
 
+    // 🔥 Fetch variant original prices
+    const productIds = new Set();
+    order.items.forEach((item) => {
+      productIds.add(item.productId.toString());
+    });
+
+    const products = await Product.find({
+      _id: { $in: Array.from(productIds) },
+    });
+
+    const variantMap = {};
+    products.forEach((product) => {
+      product.variants.forEach((variant) => {
+        variantMap[variant._id.toString()] = variant.price;
+      });
+    });
+
     const doc = new PDFDocument({ margin: 50 });
 
-    // Stream the PDF directly to the response
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
       `inline; filename=invoice-${order.orderId}.pdf`,
     );
+
     doc.pipe(res);
 
-    // --- 1. HEADER & LOGO ---
+    // --- HEADER ---
     doc
       .fillColor("#444444")
       .fontSize(20)
       .text("BestDeals", 50, 45)
       .fontSize(10)
       .text("123 Business Street, Tech City", 50, 65)
-      .text("State, Country - 560001", 50, 80)
-      .moveDown();
+      .text("State, Country - 560001", 50, 80);
 
-    // --- 2. INVOICE DETAILS (Top Right) ---
     doc
-      .fillColor("#444444")
       .fontSize(20)
       .text("INVOICE", 50, 45, { align: "right" })
       .fontSize(10)
@@ -842,13 +857,11 @@ exports.downloadInvoiceController = async (req, res) => {
       })
       .text(`Payment Status: ${order.payment_status.toUpperCase()}`, 50, 95, {
         align: "right",
-      })
-      .moveDown();
+      });
 
-    // Horizontal Line
     doc.moveTo(50, 115).lineTo(550, 115).stroke();
 
-    // --- 3. BILLING & SHIPPING ---
+    // --- CUSTOMER ---
     const customer = order.userId;
     const addr = order.addressId;
 
@@ -872,58 +885,107 @@ exports.downloadInvoiceController = async (req, res) => {
       .text(`${addr.city}, ${addr.state}`, 300, 160)
       .text(`${addr.country} - ${addr.zipCode}`, 300, 175);
 
-    doc.moveDown(4);
-
-    // --- 4. ITEMS TABLE HEADER ---
+    // --- TABLE HEADER ---
     const tableTop = 230;
     doc.font("Helvetica-Bold");
+
     generateTableRow(
       doc,
       tableTop,
       "Item",
-      "Color/Size",
+      "Variant",
       "Qty",
+      "MRP",
       "Price",
+      "Discount",
       "Total",
     );
+
     doc
       .moveTo(50, tableTop + 15)
       .lineTo(550, tableTop + 15)
       .stroke();
     doc.font("Helvetica");
 
-    // --- 5. ITEMS LOOP ---
+    // --- ITEMS ---
     let i = 0;
+    let subtotalMRP = 0;
+    let totalPaid = 0;
+
+    const invalidStatuses = ["cancelled", "returned"];
+
     order.items.forEach((item) => {
+      if (invalidStatuses.includes(item.status)) return;
+
       const position = tableTop + 30 + i * 25;
+
+      const originalPrice = variantMap[item.variantId.toString()] || item.price;
+
+      const itemMRP = originalPrice * item.quantity;
+      const itemPaid = item.paidAmount ?? item.price * item.quantity;
+      const itemDiscount = Math.max(0, itemMRP - itemPaid);
+
+      subtotalMRP += itemMRP;
+      totalPaid += itemPaid;
+
       generateTableRow(
         doc,
         position,
         item.name,
-        `${item.color} / ${item.size}`,
+        `${item.color}/${item.size}`,
         item.quantity,
+        `₹${originalPrice}`,
         `₹${item.price}`,
-        `₹${(item.price * item.quantity).toFixed(2)}`,
+        itemDiscount > 0 ? `₹${itemDiscount.toFixed(2)}` : "-",
+        `₹${itemPaid.toFixed(2)}`,
       );
+
       i++;
     });
 
-    const subtotalPosition = tableTop + 40 + i * 25;
+    const summaryStart = tableTop + 40 + i * 25;
     doc
-      .moveTo(50, subtotalPosition - 5)
-      .lineTo(550, subtotalPosition - 5)
+      .moveTo(50, summaryStart - 5)
+      .lineTo(550, summaryStart - 5)
       .stroke();
 
-    // --- 6. SUMMARY (TAX, DISCOUNT, TOTAL) ---
-    let currentY = subtotalPosition;
+    // --- SUMMARY ---
+    let currentY = summaryStart;
 
-    // Subtotal
+    // Subtotal (MRP)
     generateSummaryRow(
       doc,
       currentY,
-      "Subtotal:",
-      `₹${(order.grandTotal + (order.coupon?.discountAmount || 0) - (order.tax || 0)).toFixed(2)}`,
+      "Subtotal (MRP):",
+      `₹${subtotalMRP.toFixed(2)}`,
     );
+
+    // Product discount
+    const productDiscount = subtotalMRP - totalPaid;
+    if (productDiscount > 0) {
+      currentY += 20;
+      doc.fillColor("#ff0000");
+      generateSummaryRow(
+        doc,
+        currentY,
+        "Product Discount:",
+        `-₹${productDiscount.toFixed(2)}`,
+      );
+      doc.fillColor("#444444");
+    }
+
+    // Coupon (display only, not double counted)
+    if (order.coupon?.discountAmount > 0) {
+      currentY += 20;
+      doc.fillColor("#ff0000");
+      generateSummaryRow(
+        doc,
+        currentY,
+        `Coupon (${order.coupon.code}):`,
+        `-₹${order.coupon.discountAmount.toFixed(2)}`,
+      );
+      doc.fillColor("#444444");
+    }
 
     // Tax
     if (order.tax) {
@@ -931,20 +993,7 @@ exports.downloadInvoiceController = async (req, res) => {
       generateSummaryRow(doc, currentY, "Tax:", `₹${order.tax.toFixed(2)}`);
     }
 
-    // Coupon/Discount
-    if (order.coupon && order.coupon.discountAmount > 0) {
-      currentY += 20;
-      doc.fillColor("#ff0000"); // Red for discounts
-      generateSummaryRow(
-        doc,
-        currentY,
-        `Discount (${order.coupon.code}):`,
-        `-₹${order.coupon.discountAmount.toFixed(2)}`,
-      );
-      doc.fillColor("#444444");
-    }
-
-    // Grand Total
+    // Grand total
     currentY += 25;
     doc.font("Helvetica-Bold").fontSize(14);
     generateSummaryRow(
@@ -954,7 +1003,7 @@ exports.downloadInvoiceController = async (req, res) => {
       `₹${order.grandTotal.toFixed(2)}`,
     );
 
-    // --- 7. FOOTER ---
+    // --- FOOTER ---
     doc
       .fontSize(10)
       .font("Helvetica-Oblique")
@@ -966,9 +1015,10 @@ exports.downloadInvoiceController = async (req, res) => {
     doc.end();
   } catch (error) {
     console.error("PDF Generation Error:", error);
-    res
-      .status(500)
-      .json({ status: "failed", message: "Error generating invoice" });
+    res.status(500).json({
+      status: "failed",
+      message: "Error generating invoice",
+    });
   }
 };
 

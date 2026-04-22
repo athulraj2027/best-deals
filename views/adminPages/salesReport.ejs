@@ -5,11 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Advanced Sales Analytics | Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
         .hide-input { display: none !important; }
+        input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; }
+        input.input-error { border-color: #ef4444 !important; box-shadow: 0 0 0 3px rgba(239,68,68,0.15); }
+        select.input-error { border-color: #ef4444 !important; box-shadow: 0 0 0 3px rgba(239,68,68,0.15); }
     </style>
 </head>
 
@@ -18,19 +22,22 @@
         <%- include('./partials/menu') %>
 
         <main class="ml-[250px] p-8 w-full min-h-screen">
+
+            <!-- Page Header -->
             <div class="flex justify-between items-center mb-8">
                 <div>
                     <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Sales Report</h1>
                     <p class="text-slate-500 mt-1">Detailed overview of your store's financial performance.</p>
                 </div>
                 <div class="flex gap-3">
-                    <button onclick="document.getElementById('report-section').scrollIntoView({behavior: 'smooth'})" 
+                    <button onclick="document.getElementById('report-section').scrollIntoView({behavior: 'smooth'})"
                         class="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold shadow-sm hover:bg-slate-50 transition-all">
-                        Filter Data
+                        Generate Report
                     </button>
                 </div>
             </div>
 
+            <!-- KPI Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                     <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mb-4">
@@ -65,11 +72,12 @@
                 </div>
             </div>
 
+            <!-- Revenue Chart + Best Sellers -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                 <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="font-bold text-slate-800 text-lg">Revenue Trend</h3>
-                        <span class="text-xs font-semibold bg-slate-100 px-2 py-1 rounded text-slate-500">Auto-calculated</span>
+                        <span class="text-xs font-semibold bg-slate-100 px-2 py-1 rounded text-slate-500">Last 30 Days</span>
                     </div>
                     <div class="h-[300px]">
                         <canvas id="salesChart"></canvas>
@@ -79,7 +87,7 @@
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                     <h3 class="font-bold text-slate-800 text-lg mb-6">Best Sellers</h3>
                     <div class="space-y-4">
-                        <% 
+                        <%
                         let products = typeof topProducts === 'string' ? JSON.parse(topProducts) : topProducts;
                         products.slice(0, 5).forEach((p, index) => { %>
                             <div class="flex items-center justify-between group">
@@ -99,6 +107,7 @@
                 </div>
             </div>
 
+            <!-- Recent Transactions -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-8">
                 <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                     <h3 class="font-bold text-slate-800">Recent Transactions</h3>
@@ -122,7 +131,7 @@
                                         <p class="text-sm font-semibold text-slate-700"><%= o.userId?.name || "Guest Customer" %></p>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <% 
+                                        <%
                                             const statusColors = {
                                                 'delivered': 'bg-green-100 text-green-700',
                                                 'pending': 'bg-amber-100 text-amber-700',
@@ -144,16 +153,22 @@
                 </div>
             </div>
 
-            <div id="report-section" class="bg-white rounded-2xl shadow-lg border border-indigo-100 p-8 max-w-2xl mx-auto">
+            <!-- Generate Report Section -->
+            <div id="report-section" class="bg-white rounded-2xl shadow-lg border border-indigo-100 p-8 max-w-2xl mx-auto mb-12">
                 <div class="text-center mb-8">
+                    <div class="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    </div>
                     <h3 class="text-xl font-bold text-slate-900">Generate Report</h3>
-                    <p class="text-slate-500 text-sm">Download your sales data in PDF or Excel format.</p>
+                    <p class="text-slate-500 text-sm mt-1">Download your sales data in PDF or Excel format.</p>
                 </div>
 
-                <form action="/admin/sales-report/download" method="get" id="reportForm" class="space-y-6">
+                <form action="/admin/sales-report/download" method="get" id="reportForm" class="space-y-6" novalidate>
+
+                    <!-- Reporting Period -->
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-2">Reporting Period</label>
-                        <select name="type" id="report-type" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none">
+                        <select name="type" id="report-type" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none font-medium text-slate-700">
                             <option value="daily">Daily Report</option>
                             <option value="weekly">Weekly Report</option>
                             <option value="monthly">Monthly Report</option>
@@ -162,58 +177,104 @@
                         </select>
                     </div>
 
+                    <!-- Date Inputs -->
                     <div id="input-container" class="space-y-4">
+
+                        <!-- Daily -->
                         <div id="daily-input" class="date-group">
-                            <input type="date" name="date" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl" />
+                            <label class="text-[11px] text-slate-400 font-bold uppercase ml-1 mb-1 block">Select Date</label>
+                            <input type="date" name="date" id="daily-date"
+                                class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none transition-all" />
+                            <p class="text-[11px] text-slate-400 mt-1 ml-1">Cannot select a future date.</p>
                         </div>
+
+                        <!-- Weekly -->
                         <div id="weekly-input" class="date-group hide-input">
-                            <label class="text-[10px] text-slate-400 font-bold uppercase ml-1">Select Starting Date</label>
-                            <input type="date" name="start_date" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl" />
+                            <label class="text-[11px] text-slate-400 font-bold uppercase ml-1 mb-1 block">Week Starting Date</label>
+                            <input type="date" name="start_date" id="weekly-date"
+                                class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none transition-all" />
+                            <p class="text-[11px] text-slate-400 mt-1 ml-1">Report will cover 7 days from this date. Cannot be in the future.</p>
                         </div>
-                        <div id="monthly-input" class="date-group hide-input grid grid-cols-2 gap-4">
-                            <input type="number" name="year" placeholder="Year (2026)" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl" />
-                            <select name="month" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl">
-                                <% ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].forEach((m, i) => { %>
-                                    <option value="<%= i+1 %>"><%= m %></option>
-                                <% }) %>
-                            </select>
+
+                        <!-- Monthly -->
+                        <div id="monthly-input" class="date-group hide-input">
+                            <label class="text-[11px] text-slate-400 font-bold uppercase ml-1 mb-2 block">Select Month & Year</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <input type="number" name="year" id="month-year"
+                                        placeholder="Year"
+                                        class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none transition-all"
+                                        autocomplete="off" />
+                                </div>
+                                <div>
+                                    <select name="month" id="month-select" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none transition-all">
+                                        <% ['January','February','March','April','May','June','July','August','September','October','November','December'].forEach((m, i) => { %>
+                                            <option value="<%= i+1 %>"><%= m %></option>
+                                        <% }) %>
+                                    </select>
+                                </div>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-1 ml-1" id="monthly-hint"></p>
                         </div>
+
+                        <!-- Yearly -->
                         <div id="yearly-input" class="date-group hide-input">
-                            <input type="number" name="year" placeholder="Year" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl" />
+                            <label class="text-[11px] text-slate-400 font-bold uppercase ml-1 mb-1 block">Select Year</label>
+                            <input type="number" name="year" id="year-only"
+                                placeholder="Year"
+                                class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none transition-all"
+                                autocomplete="off" />
+                            <p class="text-[11px] text-slate-400 mt-1 ml-1" id="yearly-hint"></p>
                         </div>
-                        <div id="custom-input" class="date-group hide-input grid grid-cols-2 gap-4">
-                            <input type="date" name="start_date" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl" />
-                            <input type="date" name="end_date" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl" />
+
+                        <!-- Custom -->
+                        <div id="custom-input" class="date-group hide-input">
+                            <label class="text-[11px] text-slate-400 font-bold uppercase ml-1 mb-2 block">Date Range</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-[11px] text-slate-500 font-semibold mb-1 block ml-1">From</label>
+                                    <input type="date" name="start_date" id="custom-start"
+                                        class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none transition-all" />
+                                </div>
+                                <div>
+                                    <label class="text-[11px] text-slate-500 font-semibold mb-1 block ml-1">To</label>
+                                    <input type="date" name="end_date" id="custom-end"
+                                        class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none transition-all" />
+                                </div>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-1 ml-1">Both dates must be today or earlier.</p>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <!-- Format + Submit -->
+                    <div class="grid grid-cols-2 gap-4 pt-2">
                         <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-2">Format</label>
-                            <select name="download" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-600">
-                                <!-- <option value="">Web View</option> -->
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Download Format</label>
+                            <select name="download" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-600 focus:ring-2 focus:ring-indigo-400 outline-none transition-all">
                                 <option value="pdf">PDF Document</option>
                                 <option value="excel">Excel Spreadsheet</option>
                             </select>
                         </div>
                         <div class="flex items-end">
-                            <button type="submit" id="generateBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-200 transition-all active:scale-[0.98]">
+                            <button type="submit" id="generateBtn"
+                                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-200 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                                 Generate
                             </button>
                         </div>
                     </div>
                 </form>
             </div>
+
         </main>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // --- CHART LOGIC ---
+        // ─── Chart Setup ──────────────────────────────────────────────
         const salesData = <%- dailySales %>;
         const labels = Object.keys(salesData);
         const revenue = labels.map(d => salesData[d].revenue);
-
         const ctx = document.getElementById('salesChart').getContext('2d');
         const gradient = ctx.createLinearGradient(0, 0, 0, 400);
         gradient.addColorStop(0, 'rgba(79, 70, 229, 0.2)');
@@ -231,10 +292,9 @@
                     fill: true,
                     backgroundColor: gradient,
                     tension: 0.4,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#4f46e5',
-                    pointBorderWidth: 2
+                    pointBackgroundColor: '#4f46e5',
+                    pointRadius: 3,
+                    pointHoverRadius: 6
                 }]
             },
             options: {
@@ -248,63 +308,243 @@
             }
         });
 
-        // --- FORM LOGIC (From Merged Request) ---
+        // ─── Validation Constants ─────────────────────────────────────
+        const MIN_YEAR = 2020;
+        const today = new Date();
+        const todayStr = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth() + 1; // 1-based
+
+        // ─── Set max on all date pickers to today (blocks future dates in picker UI) ──
+        document.getElementById('daily-date').setAttribute('max', todayStr);
+        document.getElementById('weekly-date').setAttribute('max', todayStr);
+        document.getElementById('custom-start').setAttribute('max', todayStr);
+        document.getElementById('custom-end').setAttribute('max', todayStr);
+
+        // Set min dates to prevent selecting before business started
+        const minDateStr = `${MIN_YEAR}-01-01`;
+        document.getElementById('daily-date').setAttribute('min', minDateStr);
+        document.getElementById('weekly-date').setAttribute('min', minDateStr);
+        document.getElementById('custom-start').setAttribute('min', minDateStr);
+        document.getElementById('custom-end').setAttribute('min', minDateStr);
+
+        // Set year input constraints
+        ['month-year', 'year-only'].forEach(id => {
+            const el = document.getElementById(id);
+            el.setAttribute('min', MIN_YEAR);
+            el.setAttribute('max', currentYear);
+            el.setAttribute('placeholder', `${MIN_YEAR}–${currentYear}`);
+        });
+
+        // Update hints with actual allowed range
+        document.getElementById('monthly-hint').textContent =
+            `Allowed range: January ${MIN_YEAR} – ${today.toLocaleString('default', {month: 'long'})} ${currentYear}`;
+        document.getElementById('yearly-hint').textContent =
+            `Allowed range: ${MIN_YEAR} – ${currentYear}`;
+
+        // ─── Type Toggle ──────────────────────────────────────────────
         const typeSelect = document.getElementById('report-type');
         const groups = document.querySelectorAll('.date-group');
-        const button = document.getElementById('generateBtn');
-
-        const inputs = {
-            daily: document.querySelector("#daily-input input"),
-            weekly: document.querySelector("#weekly-input input"),
-            monthlyYear: document.querySelector("#monthly-input input[name='year']"),
-            monthlyMonth: document.querySelector("#monthly-input select[name='month']"),
-            yearly: document.querySelector("#yearly-input input"),
-            customStart: document.querySelector("#custom-input input[name='start_date']"),
-            customEnd: document.querySelector("#custom-input input[name='end_date']"),
-        };
-
-        function hideAll() {
-            groups.forEach(g => g.classList.add("hide-input"));
-        }
-
-        function validate() {
-            let type = typeSelect.value;
-            let valid = false;
-
-            if (type === "daily") valid = !!inputs.daily.value;
-            if (type === "weekly") valid = !!inputs.weekly.value;
-            if (type === "monthly") valid = (inputs.monthlyYear.value && inputs.monthlyMonth.value);
-            if (type === "yearly") valid = !!inputs.yearly.value;
-            if (type === "custom") {
-                const start = inputs.customStart.value;
-                const end = inputs.customEnd.value;
-                valid = start && end && new Date(start) <= new Date(end);
-            }
-
-            button.disabled = !valid;
-            button.classList.toggle("opacity-50", !valid);
-            button.classList.toggle("cursor-not-allowed", !valid);
-        }
 
         function handleTypeChange() {
             const type = typeSelect.value;
-            hideAll();
-
-            if (type === "daily") document.getElementById("daily-input").classList.remove("hide-input");
-            if (type === "weekly") document.getElementById("weekly-input").classList.remove("hide-input");
-            if (type === "monthly") document.getElementById("monthly-input").classList.remove("hide-input");
-            if (type === "yearly") document.getElementById("yearly-input").classList.remove("hide-input");
-            if (type === "custom") document.getElementById("custom-input").classList.remove("hide-input");
-
-            validate();
+            groups.forEach(g => g.classList.add('hide-input'));
+            document.getElementById(`${type}-input`).classList.remove('hide-input');
+            clearAllErrors();
         }
 
-        typeSelect.addEventListener("change", handleTypeChange);
-        document.querySelectorAll("input, select").forEach(el => {
-            el.addEventListener("input", validate);
+        typeSelect.addEventListener('change', handleTypeChange);
+
+        // ─── Error Helpers ────────────────────────────────────────────
+        function setError(el) {
+            el.classList.add('input-error');
+        }
+        function clearError(el) {
+            el.classList.remove('input-error');
+        }
+        function clearAllErrors() {
+            document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+        }
+
+        // Clear error on input change
+        document.querySelectorAll('input, select').forEach(el => {
+            el.addEventListener('input', () => clearError(el));
+            el.addEventListener('change', () => clearError(el));
         });
 
-        // INIT
+        // ─── Custom end date auto-adjusts min when start changes ──────
+        document.getElementById('custom-start').addEventListener('change', function() {
+            const startVal = this.value;
+            if (startVal) {
+                document.getElementById('custom-end').setAttribute('min', startVal);
+            }
+        });
+
+        // ─── Core Validation ──────────────────────────────────────────
+        function validate() {
+            const type = typeSelect.value;
+
+            const isValidYear = (val) => {
+                const y = parseInt(val, 10);
+                return !isNaN(y) && y >= MIN_YEAR && y <= currentYear;
+            };
+
+            const isDateInRange = (dateStr) => {
+                if (!dateStr) return false;
+                const d = new Date(dateStr);
+                const minDate = new Date(`${MIN_YEAR}-01-01`);
+                const maxDate = new Date(todayStr);
+                return d >= minDate && d <= maxDate;
+            };
+
+            const isFutureDate = (dateStr) => {
+                return new Date(dateStr) > today;
+            };
+
+            if (type === 'daily') {
+                const el = document.getElementById('daily-date');
+                const val = el.value;
+                if (!val) {
+                    setError(el);
+                    return { valid: false, msg: 'Please select a date.' };
+                }
+                if (isFutureDate(val)) {
+                    setError(el);
+                    return { valid: false, msg: 'You cannot generate a report for a future date.' };
+                }
+                if (!isDateInRange(val)) {
+                    setError(el);
+                    return { valid: false, msg: `Date must be between 01 Jan ${MIN_YEAR} and today.` };
+                }
+            }
+
+            else if (type === 'weekly') {
+                const el = document.getElementById('weekly-date');
+                const val = el.value;
+                if (!val) {
+                    setError(el);
+                    return { valid: false, msg: 'Please select a week starting date.' };
+                }
+                if (isFutureDate(val)) {
+                    setError(el);
+                    return { valid: false, msg: 'The starting date cannot be in the future.' };
+                }
+                if (!isDateInRange(val)) {
+                    setError(el);
+                    return { valid: false, msg: `Starting date must be between 01 Jan ${MIN_YEAR} and today.` };
+                }
+            }
+
+            else if (type === 'monthly') {
+                const yearEl = document.getElementById('month-year');
+                const monthEl = document.getElementById('month-select');
+                const yearVal = yearEl.value.trim();
+                const monthVal = parseInt(monthEl.value, 10);
+
+                if (!yearVal) {
+                    setError(yearEl);
+                    return { valid: false, msg: 'Please enter a year.' };
+                }
+                if (!isValidYear(yearVal)) {
+                    setError(yearEl);
+                    return { valid: false, msg: `Year must be between ${MIN_YEAR} and ${currentYear}.` };
+                }
+                // Block future month of current year
+                const selectedYear = parseInt(yearVal, 10);
+                if (selectedYear === currentYear && monthVal > currentMonth) {
+                    setError(monthEl);
+                    return {
+                        valid: false,
+                        msg: `Cannot generate report for a future month. Current month: ${today.toLocaleString('default', {month: 'long'})} ${currentYear}.`
+                    };
+                }
+            }
+
+            else if (type === 'yearly') {
+                const el = document.getElementById('year-only');
+                const val = el.value.trim();
+                if (!val) {
+                    setError(el);
+                    return { valid: false, msg: 'Please enter a year.' };
+                }
+                if (!isValidYear(val)) {
+                    setError(el);
+                    return { valid: false, msg: `Year must be between ${MIN_YEAR} and ${currentYear}. You entered: ${val}.` };
+                }
+            }
+
+            else if (type === 'custom') {
+                const startEl = document.getElementById('custom-start');
+                const endEl = document.getElementById('custom-end');
+                const startVal = startEl.value;
+                const endVal = endEl.value;
+
+                if (!startVal) {
+                    setError(startEl);
+                    return { valid: false, msg: 'Please select a start date.' };
+                }
+                if (!endVal) {
+                    setError(endEl);
+                    return { valid: false, msg: 'Please select an end date.' };
+                }
+                if (!isDateInRange(startVal)) {
+                    setError(startEl);
+                    return { valid: false, msg: `Start date must be between 01 Jan ${MIN_YEAR} and today.` };
+                }
+                if (!isDateInRange(endVal)) {
+                    setError(endEl);
+                    return { valid: false, msg: `End date must be between 01 Jan ${MIN_YEAR} and today.` };
+                }
+                if (new Date(startVal) > new Date(endVal)) {
+                    setError(startEl); setError(endEl);
+                    return { valid: false, msg: 'Start date must be before or equal to end date.' };
+                }
+                // Warn if range is extremely large (> 5 years)
+                const diffDays = (new Date(endVal) - new Date(startVal)) / (1000 * 60 * 60 * 24);
+                if (diffDays > 1825) {
+                    return {
+                        valid: false,
+                        msg: `Selected range is ${Math.round(diffDays / 365)} years. Maximum allowed custom range is 5 years.`
+                    };
+                }
+            }
+
+            return { valid: true };
+        }
+
+        // ─── Form Submit ──────────────────────────────────────────────
+        document.getElementById('reportForm').addEventListener('submit', function(e) {
+            clearAllErrors();
+            const result = validate();
+
+            if (!result.valid) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Check Your Input',
+                    text: result.msg,
+                    confirmButtonColor: '#4f46e5',
+                    confirmButtonText: 'Fix It',
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        title: 'text-lg font-bold',
+                    }
+                });
+                return false;
+            }
+
+            Swal.fire({
+                title: 'Generating Report',
+                html: 'Prepared your file.Please check out',
+                allowOutsideClick: true,
+                allowEscapeKey: true,
+              
+            });
+        });
+
+        // ─── Init ─────────────────────────────────────────────────────
         handleTypeChange();
     </script>
 </body>

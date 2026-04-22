@@ -938,7 +938,7 @@
 
                     <div class="modal-item-price">₹<%= lineTotal %></div>
 
-                    <% if(item.status === "pending" && order.status !== 'delivered') { %>
+                    <% if(["pending",'processing'].includes(item.status) && order.status !== 'delivered') { %>
                       <button
                         class="cancel-item-btn meta-chip"
                         style="background:var(--danger-bg);color:var(--danger);cursor:pointer;border:none;"
