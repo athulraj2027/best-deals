@@ -362,6 +362,31 @@ router.post("/order/create-razorpay", async (req, res) => {
         throw new Error(`${item.name} is out of stock`);
       }
 
+      let currentPrice = variant.price;
+
+      // Logic: Find active offers for this product or category
+      // (Assuming you have a helper to find the best offer)
+      const activeOffer = await Offer.findOne({
+        $or: [
+          { appliedProducts: product._id },
+          { appliedCategories: product.category },
+        ],
+        status: "active",
+        expiryDate: { $gte: new Date() },
+      }).sort({ offerValue: -1 }); // Get the highest discount
+
+      if (activeOffer) {
+        if (activeOffer.offerType === "percentage") {
+          currentPrice -= (currentPrice * activeOffer.offerValue) / 100;
+        } else {
+          currentPrice -= activeOffer.offerValue;
+        }
+      }
+
+      // Important: Update the cart item price to the VERIFIED price
+      item.price = Math.max(0, currentPrice);
+      verifiedSubtotal += item.price * item.quantity;
+
       variant.quantity -= item.quantity;
       await product.save();
     }
